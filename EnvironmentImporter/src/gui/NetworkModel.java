@@ -3,7 +3,6 @@ package gui;
 import database.Database;
 import edu.uci.ics.jung.algorithms.layout.KKLayout;
 import edu.uci.ics.jung.algorithms.layout.Layout;
-import edu.uci.ics.jung.algorithms.layout.SpringLayout2;
 import edu.uci.ics.jung.graph.DirectedSparseMultigraph;
 import edu.uci.ics.jung.graph.Graph;
 import edu.uci.ics.jung.graph.UndirectedSparseGraph;
@@ -31,13 +30,15 @@ public class NetworkModel extends MainPanel {
      * @author Dr. Greg M. Bernstein
      */
 
-    Graph<ModelArea, ModelEdge> completeGraph;
-    Graph<ModelArea, ModelEdge> currentGraph;
+    Graph<ModelObject, ModelEdge> completeGraph;
+    Graph<ModelObject, ModelEdge> currentGraph;
     HashMap<Integer, ModelArea> idAreaMapping;
     private Document document;
     private static NetworkModel instance;
     HashMap<ModelArea, Integer> areaFloorMapping;
     private String currentDisplay;
+    HashMap<Integer, ModelGroup> areaIdGroupMapping;
+
 
     /**
      * Creates a new instance of SimpleGraphView
@@ -57,37 +58,65 @@ public class NetworkModel extends MainPanel {
     public void setDocument(Document current) {
         this.document = current;
         ModelFile file = document.getModelFile();
-        completeGraph = new UndirectedSparseGraph<ModelArea, ModelEdge>();
+        completeGraph = new UndirectedSparseGraph<ModelObject, ModelEdge>();
         idAreaMapping = new HashMap<Integer, ModelArea>();
         areaFloorMapping = new HashMap<ModelArea, Integer>();
+        areaIdGroupMapping = new HashMap<Integer, ModelGroup>();
 
         for (ModelFloor floor : file.getFloors()) {
-            for (ModelArea area : floor.getRooms()) {
+            for (ModelGroup group : floor.getGroups()) {
+                for (Integer areaId : group.getAreaIds()) {
+                    this.areaIdGroupMapping.put(areaId, group);
+                }
+            }
 
-                completeGraph.addVertex(area);
+            for (ModelArea area : floor.getRooms()) {
                 idAreaMapping.put(area.getId(), area);
                 areaFloorMapping.put(area, floor.getId());
+
+                this.addNewVertex(completeGraph, area);
             }
             for (ModelArea area : floor.getStaircases()) {
-                completeGraph.addVertex(area);
                 idAreaMapping.put(area.getId(), area);
                 areaFloorMapping.put(area, floor.getId());
+
+                this.addNewVertex(completeGraph, area);
+
             }
         }
         for (ModelFloor floor : file.getFloors()) {
             for (ModelLink link : floor.getLinks()) {
-                completeGraph.addEdge(new ModelEdge(), idAreaMapping.get(link.getConnectingAreas().get(0)), idAreaMapping.get(link.getConnectingAreas().get(1)));
+                this.addNewEdge(completeGraph,
+                        idAreaMapping.get(link.getConnectingAreas().get(0)),
+                        idAreaMapping.get(link.getConnectingAreas().get(1)));
             }
         }
         for (ModelStaircaseGroup group : file.getStaircaseGroups()) {
             ArrayList<Integer> staircases = new ArrayList<Integer>();
             staircases.addAll(group.getStaircaseIds());
-            completeGraph.addEdge(new ModelEdge(), idAreaMapping.get(staircases.get(0)), idAreaMapping.get(staircases.get(1)));
+
+            int areaId0 = staircases.get(0);
+            int areaId1 = staircases.get(1);
+            this.addNewEdge(completeGraph,
+                    idAreaMapping.get(areaId0),
+                    idAreaMapping.get(areaId1)
+            );
+
         }
         currentDisplay = "default";
         currentGraph = completeGraph;
 
         initializePanel();
+    }
+
+    private void addNewVertex(Graph<ModelObject, ModelEdge> graph, ModelArea area) {
+        if (areaIdGroupMapping.containsKey(area.getId())) {
+            ModelGroup group = areaIdGroupMapping.get(area.getId());
+            if (!completeGraph.containsVertex(group))
+                completeGraph.addVertex(areaIdGroupMapping.get(area.getId()));
+        } else {
+            completeGraph.addVertex(area);
+        }
     }
 
     public void setDisplay(String dataName) {
@@ -101,77 +130,145 @@ public class NetworkModel extends MainPanel {
         initializePanel();
     }
 
-    private Graph<ModelArea, ModelEdge> getDirectedTreeFromPoint(ArrayList<Point3d> pathPoints) {
-        Graph result = new DirectedSparseMultigraph<ModelArea, ModelEdge>();
-        ModelArea prevArea = null;
-        Point3d prevPoint = null;
+    private Graph<ModelObject, ModelEdge> getDirectedTreeFromPoint(ArrayList<Point3d> pathPoints) {
+        Graph result = new DirectedSparseMultigraph<ModelObject, ModelEdge>();
+        ModelObject prevVertex = null;
+
         for (Point3d point : pathPoints) {
             int x = (int) Math.round(point.x);
             int y = (int) Math.round(point.y);
             int floor = (int) Math.round(point.z);
-            ModelArea area = findAreaOfLocation(x, y, floor, prevArea);
-            if (area != null) {
-                if (prevArea != null && !prevArea.equals(area)) {
-                    result.addVertex(area);
-                    result.addEdge(new ModelEdge(), prevArea, area);
-                    prevArea = area;
+            ModelObject vertex = findVertexOfLocation(x, y, floor, prevVertex);
+            if (vertex != null) {
+                if(prevVertex==null){
+                    System.out.println(vertex);
+                }
+                if (prevVertex != null && !prevVertex.equals(vertex)) {
+
+                    if (!result.containsVertex(vertex))
+                        result.addVertex(vertex);
+
+                    result.addEdge(new ModelEdge(), prevVertex, vertex);
+
+                    prevVertex = vertex;
                 } else {
-                    prevArea = area;
-//                    result.addVertex(area);
+                    if (!result.containsVertex(vertex))
+                        result.addVertex(vertex);
+                    prevVertex = vertex;
                 }
             }
-            prevPoint = new Point3d(x,y,floor);
+
         }
         return result;
     }
 
-    private ModelArea findAreaOfLocation(int x, int y, int floor, ModelArea prevArea) {
-        if (prevArea == null) {
+    private void addNewEdge(Graph result, ModelArea area0, ModelArea area1) {
+        int areaId0 = area0.getId();
+        int areaId1 = area1.getId();
+        ModelGroup group0 = null, group1 = null;
+
+        group0 = this.areaIdGroupMapping.get(areaId0);
+
+
+        group1 = this.areaIdGroupMapping.get(areaId1);
+
+        if (group0 == null && group1 == null) {
+            result.addEdge(new ModelEdge(), area0, area1);
+        } else if (group1 == null) {
+            result.addEdge(new ModelEdge(), group0, area1);
+        } else if (group0 == null) {
+            result.addEdge(new ModelEdge(), area0, group1);
+        } else {
+            if (!group0.equals(group1)) {
+                result.addEdge(new ModelEdge(), group0, group1);
+            }
+        }
+    }
+
+    private ModelObject findVertexOfLocation(int x, int y, int floor, ModelObject prevVertex) {
+
+
+        if (prevVertex == null) {
             return findFromScratch(x, y, floor); // search in all locations on that floor
 
         }
-        if (inPrevArea(x, y, floor, prevArea)) {
-            return prevArea;  // if in previous area return that itself
+        if (inPrevArea(x, y, floor, prevVertex)) {
+            return prevVertex;  // if in previous area return that itself
         } else {
-            ModelArea newArea = findInNeighbouringAreas(x, y,floor, prevArea);
-            if(newArea == null){
-                ModelArea area = findFromScratch(x,y,floor);
-                if (area!=null){
-                    System.out.println("Area "+area+" not a neighbour of "+ prevArea);
-//                    System.out.println(completeGraph.getNeighbors(prevArea));
+            ModelObject newVertex = findInNeighbouringVertices(x, y, floor, prevVertex);
+            if (newVertex == null) {
+                ModelObject area = findFromScratch(x, y, floor);
+                if (area != null) {
+                    System.out.println("Area " + area + " not a neighbour of " + prevVertex);
+                    System.out.println(completeGraph.getNeighbors(prevVertex));
                 }
             }
-            return newArea; // returns null if nothing found (i.e. between areas)
+            return newVertex; // returns null if nothing found (i.e. between areas)
         }
 
 
     }
 
-    private ModelArea findInNeighbouringAreas(int x, int y,int floor,  ModelArea prevArea) {
+    private ModelObject findInNeighbouringVertices(int x, int y, int floor, ModelObject prevVertex) {
 
-        for (ModelArea area : completeGraph.getNeighbors(prevArea)) {
-            if (floor == areaFloorMapping.get(area)&& isInArea(area, x, y)) {
-                return area;
+        for (ModelObject room : completeGraph.getNeighbors(prevVertex)) {
+            if (room instanceof ModelGroup) {
+                ModelGroup group = (ModelGroup) room;
+                for (Integer roomId : group.getAreaIds()) {
+                    ModelArea area = this.idAreaMapping.get(roomId);
+                    if (floor == areaFloorMapping.get(area) && isInArea(area, x, y)) {
+                        if (!areaIdGroupMapping.containsKey(area.getId())) {
+                            return area;
+                        } else {
+                            return areaIdGroupMapping.get(area.getId());
+                        }
+                    }
+                }
+            } else if (floor == areaFloorMapping.get((ModelArea) room) && isInArea((ModelArea) room, x, y)) {
+                return room;
             }
         }
         return null;
     }
 
-    private boolean inPrevArea(int x, int y, int floor, ModelArea prevArea) {
-        return (this.areaFloorMapping.get(prevArea) == floor) && isInArea(prevArea, x, y);
+    private boolean inPrevArea(int x, int y, int floor, ModelObject prevVertex) {
+        if (prevVertex instanceof ModelArea) {
+            ModelArea prevArea = (ModelArea) prevVertex;
+            return (this.areaFloorMapping.get(prevArea) == floor) && isInArea(prevArea, x, y);
+        } else {
+            ModelGroup group = (ModelGroup) prevVertex;
+            for (Integer areaId : group.getAreaIds()) {
+                ModelArea area = idAreaMapping.get(areaId);
+
+                if ((this.areaFloorMapping.get(area) == floor) && isInArea(area, x, y)){
+                    return true;
+                }
+
+            }
+            return false;
+        }
+
 
     }
 
-    private ModelArea findFromScratch(int x, int y, int floor) {
+    private ModelObject findFromScratch(int x, int y, int floor) {
         ModelFloor floorObject = document.getFloor(floor);
         for (ModelArea area : floorObject.getRooms()) {
             if (isInArea(area, x, y)) {
-                return area;
+                if (!areaIdGroupMapping.containsKey(area.getId())) {
+                    return area;
+                } else {
+                    return areaIdGroupMapping.get(area.getId());
+                }
             }
         }
         for (ModelArea area : floorObject.getStaircases()) {
             if (isInArea(area, x, y)) {
-                return area;
+                if (!areaIdGroupMapping.containsKey(area.getId())) {
+                    return area;
+                } else {
+                    return areaIdGroupMapping.get(area.getId());
+                }
             }
         }
 
@@ -192,9 +289,9 @@ public class NetworkModel extends MainPanel {
 
     private void initializePanel() {
         this.removeAll();
-        Layout<ModelArea, ModelEdge> layout = new SpringLayout2<ModelArea, ModelEdge>(this.currentGraph);
+        Layout<ModelObject, ModelEdge> layout = new KKLayout<ModelObject, ModelEdge>(this.currentGraph);
         layout.setSize(new Dimension(1600, 900));
-        BasicVisualizationServer<ModelArea, ModelEdge> vv = new BasicVisualizationServer<ModelArea, ModelEdge>(layout);
+        BasicVisualizationServer<ModelObject, ModelEdge> vv = new BasicVisualizationServer<ModelObject, ModelEdge>(layout);
         vv.setPreferredSize(new Dimension(1600, 900));
         // Setup up a new vertex to paint transformer...
 //        Transformer<Integer, Paint> vertexPaint = new Transformer<Integer, Paint>() {

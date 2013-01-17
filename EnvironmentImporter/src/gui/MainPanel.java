@@ -1,5 +1,10 @@
 package gui;
 
+import edu.uci.ics.jung.graph.Graph;
+import modelcomponents.ModelArea;
+import modelcomponents.ModelEdge;
+import modelcomponents.ModelObject;
+
 import javax.swing.*;
 
 /**
@@ -13,6 +18,7 @@ public abstract class MainPanel extends JPanel {
 
 
     public abstract void setDocument(Document current);
+
 
 
 }

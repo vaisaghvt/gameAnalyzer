@@ -1,5 +1,6 @@
 package modelcomponents;
 
+import javax.swing.tree.MutableTreeNode;
 import java.util.Collection;
 import java.util.HashSet;
 
@@ -15,12 +16,15 @@ public class ModelFloor implements ModelObject {
     private Collection<ModelLink> links;
     private Collection<ModelStaircase> staircases;
     private int id;
+    private Collection<ModelGroup> groups;
 
-    public ModelFloor(int id, Collection<ModelRoom> rooms, Collection<ModelLink> links, Collection<ModelStaircase> staircases) {
+    public ModelFloor(int id, Collection<ModelRoom> rooms, Collection<ModelLink> links, Collection<ModelStaircase> staircases, Collection<ModelGroup> groups) {
         this.id = id;
         this.rooms = rooms;
         this.links = links;
         this.staircases = staircases;
+        this.groups = groups;
+
 
     }
 
@@ -28,6 +32,7 @@ public class ModelFloor implements ModelObject {
         this.rooms = new HashSet<ModelRoom>();
         this.links = new HashSet<ModelLink>();
         this.staircases = new HashSet<ModelStaircase>();
+        this.groups = new HashSet<ModelGroup>();
     }
 
     public Collection<ModelRoom> getRooms() {
@@ -75,5 +80,9 @@ public class ModelFloor implements ModelObject {
         result = 31 * result + staircases.hashCode();
         result = 31 * result + id;
         return result;
+    }
+
+    public Collection<ModelGroup> getGroups() {
+        return this.groups;
     }
 }

@@ -23,6 +23,8 @@ public class Document {
     private Integer hoveringOverRoomId = null;
     private Integer hoveringOverStaircaseId = null;
     private HashSet<ModelArea> selectedObjects;
+    private ModelGroup currentGroup;
+
 
     public Document(String filename, String name, String path, int numberOfFloors) throws Exception {
         this.scenarioFile = new File(filename);
@@ -448,7 +450,7 @@ public class Document {
     public HashSet<ModelArea> selectObject(Integer x, Integer y, boolean ctrlDown) {
         hoveringOverRoomId = null;
         if (ctrlDown == false) {
-            System.out.println("Not controlled!!");
+//            System.out.println("Not controlled!!");
             selectedObjects.clear();
         }
         if (currentFloor != null) {
@@ -470,6 +472,7 @@ public class Document {
                 int mxy = (int) Math.max(area.getCorner0().getY(), area.getCorner1().getY());
 
                 if (x >= mnx && x <= mxx && y >= mny && y <= mxy) {
+
                     this.selectedObjects.add(area);
                     return selectedObjects;
                 }
@@ -481,6 +484,7 @@ public class Document {
                 int mxy = (int) Math.max(staircase.getCorner0().getY(), staircase.getCorner1().getY());
 
                 if (x >= mnx && x <= mxx && y >= mny && y <= mxy) {
+
                     this.selectedObjects.add(staircase);
                     return selectedObjects;
                 }
@@ -490,13 +494,6 @@ public class Document {
         return selectedObjects;
     }
 
-    public void unselectObjects() {
-        this.selectedObjects.clear();
-    }
-
-    public Collection<ModelFloor> getFloors() {
-        return content.getFloors();
-    }
 
     public ModelFile getModelFile() {
         return this.content;
@@ -504,11 +501,88 @@ public class Document {
 
     public void renameSelected(String newName) {
         assert selected() != null;
-        if (selectedObjects.size() ==1) {
+        if (selectedObjects.size() == 1) {
             if (newName != null && !newName.isEmpty()) {
                 this.selectedObjects.iterator().next().setName(newName);
                 hasUnsavedChanges = true;
             }
         }
+    }
+
+    public boolean isGroupCreatePossible() {
+        if (selected() != null && selected().size() > 1) {
+            for (ModelArea area : selected()) {
+                if (area instanceof ModelLink) {
+                    return false;    // No links in groups
+                }
+                for (ModelGroup group : currentFloor.getGroups()) {
+                    if (group.getAreaIds().contains(area.getId())) {
+                        return false;   // No area can be part of groups
+                    }
+                }
+            }
+            return true;
+        }
+        return false;
+    }
+
+    public boolean isGroupRemovePossible() {
+
+        currentGroup = null;
+        if (selected() != null && !selected().isEmpty()) {
+
+
+            for (ModelGroup group : currentFloor.getGroups()) {
+
+
+                for (ModelArea area : selected()) {
+                    if (area instanceof ModelLink) {
+                        return false;    // No links in groups
+                    }
+                    if (group.getAreaIds().contains(area.getId())) {
+                        if (currentGroup == null) {
+                            currentGroup = group;
+                            break;
+                        } else {
+                            currentGroup = null;
+                            return false;
+                        }
+
+                    }
+                }
+            }
+            return currentGroup != null;
+
+
+        }
+        return false;
+    }
+
+    public void createGroup(String name) {
+        if (name != null && !name.isEmpty()) {
+            int id = nextObjectId++;
+            Collection<Integer> areaIds = new HashSet<Integer>();
+            for (ModelArea area : selected()) {
+                if (!(area instanceof ModelLink))
+                    areaIds.add(area.getId());
+
+            }
+            ModelGroup group = new ModelGroup(id, name, areaIds);
+            currentFloor.getGroups().add(group);
+            currentGroup = null;
+            hasUnsavedChanges = true;
+
+        }else{
+            System.out.println("Group creation failed");
+        }
+
+
+
+    }
+
+    public void removeGroup() {
+        currentFloor.getGroups().remove(currentGroup);
+        currentGroup = null;
+        hasUnsavedChanges = true;
     }
 }

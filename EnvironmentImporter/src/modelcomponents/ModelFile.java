@@ -21,6 +21,7 @@ public class ModelFile {
     private HashSet<ModelStaircaseGroup> staircaseGroups;
     private final String headerText = "<?xml version=\"1.0\" encoding=\"UTF-8\" standalone=\"yes\"?>\n";
 
+
     public ModelFile(String name, String path) {
         this.name = name;
         this.path = path;
@@ -100,24 +101,58 @@ public class ModelFile {
         Collection<ModelRoom> rooms = new HashSet<ModelRoom>();
         Collection<ModelLink> links = new HashSet<ModelLink>();
         Collection<ModelStaircase> staircases = new HashSet<ModelStaircase>();
+        Collection<ModelGroup> groups = new HashSet<ModelGroup>();
+
         while (sc.hasNext()) {
             String nextTag = sc.nextLine().trim();
             String tagName = getTagName(nextTag);
             if (isEndingTag(nextTag) && tagName.equals("floor")) {
-                return new ModelFloor(id, rooms, links, staircases);
+                return new ModelFloor(id, rooms, links, staircases, groups);
             } else if (tagName.equals("room")) {
                 rooms.add(getRoomInfo(sc));
             } else if (tagName.equals("link")) {
                 links.add(getLinkInfo(sc));
             } else if (tagName.equals("staircase")) {
                 staircases.add(getStaircaseInfo(sc));
-            } else {
+            } else if (tagName.equals("group")){
+                groups.add(getGroupInfo(sc));
+            } else{
                 assert false;
             }
         }
         assert false;
         return null;
 
+    }
+
+    private ModelGroup getGroupInfo(Scanner sc) {
+        String tag = sc.nextLine().trim();
+        int id = getIdFromIdTag(tag);
+
+        tag = sc.nextLine().trim();
+
+        String tagName = getTagName(tag);
+        String name= "";
+        if("name".equals(tagName)){
+
+            name = valueOfTag("name", tag);
+            tag = sc.nextLine().trim();
+        }
+        Collection<Integer> areaIds = new HashSet<Integer>();
+
+
+        while(!(isEndingTag(tag) && getTagName(tag).equals("group"))){
+            tagName = getTagName(tag);
+            assert tagName.equals("areaId");
+            int areaId = Integer.parseInt(valueOfTag("areaId", tag));
+            areaIds.add(areaId);
+
+            tag = sc.nextLine().trim();
+        }
+
+        ModelGroup group = new ModelGroup(id,name, areaIds);
+
+        return group;
     }
 
     private ModelStaircase getStaircaseInfo(Scanner sc) {
@@ -274,14 +309,7 @@ public class ModelFile {
     }
 
     private String removeAngularBrackets(String st) {
-//        String result = st.substring(1, st.length() - 1);
-//        if (result.charAt(result.length() - 1) == '/') {
-//            return result.substring(0, result.length() - 1);
-//        } else if (result.charAt(0) == '/') {
-//            return result.substring(1, result.length());
-//        } else {
-//            return result;
-//        }
+
         return st.replaceAll("</"," ").replaceAll("<"," ").replaceAll("/>","").replaceAll(">"," ").trim();
     }
 
@@ -388,8 +416,34 @@ public class ModelFile {
             result.append(writeRooms(floor, 2));
             result.append(writeLinks(floor, 2));
             result.append(writeStaircases(floor, 2));
+            result.append(writeGroups(floor, 2));
             result.append("\t");
             result.append(endTag("floor"));
+        }
+        return result.toString();
+    }
+
+    private String writeGroups(ModelFloor floor, int level) {
+        StringBuilder result = new StringBuilder();
+
+        for (ModelGroup group: floor.getGroups()) {
+            for (int i = 0; i < level; i++) {
+                result.append("\t");
+            }
+            result.append(startTag("group", null, false)).append("\n");
+            result.append(writeId(level + 1, group.getId()));
+            if(group.getName()!=null && !group.getName().isEmpty())
+                result.append(writeName(level + 1, group.getName()));
+
+
+            for (Integer id : group.getAreaIds()) {
+                result.append(writeTag(level + 1, "areaId", id.toString(), null));
+            }
+
+            for (int i = 0; i < level; i++) {
+                result.append("\t");
+            }
+            result.append(endTag("group"));
         }
         return result.toString();
     }
