@@ -13,6 +13,7 @@ public abstract class ModelArea implements ModelObject {
     Point corner0;
     Point corner1;
     int id;
+    String name;
 
     public ModelArea(int id, Point corner0, Point corner1) {
         this.id = id;
@@ -36,12 +37,12 @@ public abstract class ModelArea implements ModelObject {
         return corner1;
     }
 
-    public void setCorner0(Point p0) {
-        this.corner0 = p0;
+    public String getName() {
+        return name;
     }
 
-    public void setCorner1(Point p1) {
-        this.corner1 = p1;
+    public void setName(String name) {
+        this.name = name;
     }
 
     @Override
@@ -64,5 +65,13 @@ public abstract class ModelArea implements ModelObject {
         result = 31 * result + corner1.hashCode();
         result = 31 * result + id;
         return result;
+    }
+
+    @Override
+    public String toString() {
+        if(name ==null ||name.isEmpty())
+            return id + "";
+        else
+            return name;
     }
 }

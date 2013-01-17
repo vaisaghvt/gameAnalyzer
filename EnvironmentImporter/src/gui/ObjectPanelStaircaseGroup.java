@@ -1,3 +1,5 @@
+package gui;
+
 import modelcomponents.ModelFloor;
 import modelcomponents.ModelStaircase;
 import modelcomponents.ModelStaircaseGroup;

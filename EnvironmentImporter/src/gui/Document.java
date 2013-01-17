@@ -1,3 +1,5 @@
+package gui;
+
 import modelcomponents.*;
 
 import java.awt.*;
@@ -6,7 +8,7 @@ import java.io.PrintStream;
 import java.util.*;
 
 
-class Document {
+public class Document {
     private int nextObjectId = 0;
     private File scenarioFile = null;
 
@@ -20,7 +22,7 @@ class Document {
 
     private Integer hoveringOverRoomId = null;
     private Integer hoveringOverStaircaseId = null;
-    private ModelArea selectedObject;
+    private HashSet<ModelArea> selectedObjects;
 
     public Document(String filename, String name, String path, int numberOfFloors) throws Exception {
         this.scenarioFile = new File(filename);
@@ -32,16 +34,17 @@ class Document {
         }
 
         currentFloor = content.getFloors().get(0);
+        selectedObjects = new HashSet<ModelArea>();
         this.save();
     }
 
     public Document(File file) throws Exception {
         this.scenarioFile = file;
         this.content = new ModelFile(file);
-
+        selectedObjects = new HashSet<ModelArea>();
         HashSet<ModelObject> objects = new HashSet<ModelObject>();
-        for (int i = 0; i < content.getFloors().size(); ++i) {
-            ModelFloor floor = content.getFloors().get(i);
+        for (ModelFloor floor : content.getFloors()) {
+
             objects.add(floor);
 
             //set as current floor (if not already set)
@@ -108,6 +111,11 @@ class Document {
 
 
         }
+        for (ModelStaircaseGroup group : content.getStaircaseGroups()) {
+            objects.add(group);
+            //TODO : check staircase group validity
+        }
+
 
         //update next object id...
         for (ModelObject obj : objects) {
@@ -307,17 +315,18 @@ class Document {
 
                 for (ModelArea area : currentFloor.getRooms()) {
 
-                    if ((selected() != null && selected().equals(area))) {
-                        this.drawArea(g, area, Color.RED);
+                    if ((selected() != null && selected().contains(area))) {
+                        this.drawArea(g, area, Color.RED, true);
+
                     } else if (hoveringOverRoomId != null && hoveringOverRoomId == area.getId()) {
-                        this.drawArea(g, area, Color.GREEN);
+                        this.drawArea(g, area, Color.GREEN, false);
                     } else {
-                        this.drawArea(g, area, Color.BLUE);
+                        this.drawArea(g, area, Color.BLUE, false);
                     }
                 }
 
                 for (ModelArea link : currentFloor.getLinks()) {
-                    if ((selected() != null && selected().equals(link))) {
+                    if ((selected() != null && selected().contains(link))) {
                         this.fillArea(g, link, Color.RED);
                         g.setColor(Color.RED);
                     } else {
@@ -330,12 +339,12 @@ class Document {
 
 
                 for (ModelArea area : currentFloor.getStaircases()) {
-                    if ((selected() != null && selected().equals(area))) {
-                        this.drawArea(g, area, Color.RED);
+                    if ((selected() != null && selected().contains(area))) {
+                        this.drawArea(g, area, Color.RED, true);
                     } else if (hoveringOverStaircaseId != null && hoveringOverStaircaseId == area.getId()) {
-                        this.drawArea(g, area, Color.GREEN);
+                        this.drawArea(g, area, Color.GREEN, false);
                     } else {
-                        this.drawArea(g, area, Color.MAGENTA);
+                        this.drawArea(g, area, Color.MAGENTA, false);
                     }
                 }
 
@@ -349,7 +358,7 @@ class Document {
         return null;
     }
 
-    private void drawArea(Graphics g, ModelArea area, Color color) {
+    private void drawArea(Graphics g, ModelArea area, Color color, boolean drawLabel) {
         int mnx = (int) Math.min(area.getCorner0().getX(), area.getCorner1().getX());
         int mny = (int) Math.min(area.getCorner0().getY(), area.getCorner1().getY());
         int mxx = (int) Math.max(area.getCorner0().getX(), area.getCorner1().getX());
@@ -360,7 +369,11 @@ class Document {
         g.setColor(color);
         g.drawRect(drawingCorner0.x, drawingCorner0.y,
                 drawingCorner1.x - drawingCorner0.x, drawingCorner1.y - drawingCorner0.y);
-//        g.drawString(label, mnx + 4, mxy - 4);
+        if (drawLabel) {
+//            completeGraph.setColor(Color.BLACK);
+            g.drawString(area.toString(), (drawingCorner0.x + drawingCorner1.x) / 2, (drawingCorner0.y + drawingCorner1.y) / 2);
+//            System.out.println("Here");
+        }
     }
 
     private void fillArea(Graphics g, ModelArea area, Color color) {
@@ -375,8 +388,8 @@ class Document {
         g.fillRect(drawingCorner0.x, drawingCorner0.y,
                 drawingCorner1.x - drawingCorner0.x, drawingCorner1.y - drawingCorner0.y);
 
-//        g.setColor(Color.BLACK);
-//        g.drawString(label, mnx + 4, mxy - 4);
+//        completeGraph.setColor(Color.BLACK);
+//        completeGraph.drawString(label, mnx + 4, mxy - 4);
     }
 
     public void save() throws Exception {
@@ -416,22 +429,28 @@ class Document {
         return currentFloor.getId();
     }
 
-    public ModelArea selected() {
-        return this.selectedObject;
+    public Collection<ModelArea> selected() {
+        return this.selectedObjects;
     }
 
     public void removeSelected() {
-        if (selectedObject != null) {
-            currentFloor.getRooms().remove(selectedObject);
-            currentFloor.getStaircases().remove(selectedObject);
-            currentFloor.getLinks().remove(selectedObject);
-            selectedObject = null;
+        if (selectedObjects != null && !selectedObjects.isEmpty()) {
+            for (ModelArea selectedObject : selectedObjects) {
+                currentFloor.getRooms().remove(selectedObject);
+                currentFloor.getStaircases().remove(selectedObject);
+                currentFloor.getLinks().remove(selectedObject);
+            }
+            selectedObjects.clear();
+            hasUnsavedChanges = true;
         }
     }
 
-    public ModelArea selectObject(Integer x, Integer y) {
+    public HashSet<ModelArea> selectObject(Integer x, Integer y, boolean ctrlDown) {
         hoveringOverRoomId = null;
-
+        if (ctrlDown == false) {
+            System.out.println("Not controlled!!");
+            selectedObjects.clear();
+        }
         if (currentFloor != null) {
             for (ModelLink link : currentFloor.getLinks()) {
                 int mnx = (int) Math.min(link.getCorner0().getX(), link.getCorner1().getX());
@@ -440,8 +459,8 @@ class Document {
                 int mxy = (int) Math.max(link.getCorner0().getY(), link.getCorner1().getY());
 
                 if (x >= mnx && x <= mxx && y >= mny && y <= mxy) {
-                    this.selectedObject = link;
-                    return selectedObject;
+                    this.selectedObjects.add(link);
+                    return selectedObjects;
                 }
             }
             for (ModelRoom area : currentFloor.getRooms()) {
@@ -451,8 +470,8 @@ class Document {
                 int mxy = (int) Math.max(area.getCorner0().getY(), area.getCorner1().getY());
 
                 if (x >= mnx && x <= mxx && y >= mny && y <= mxy) {
-                    this.selectedObject = area;
-                    return selectedObject;
+                    this.selectedObjects.add(area);
+                    return selectedObjects;
                 }
             }
             for (ModelStaircase staircase : currentFloor.getStaircases()) {
@@ -462,16 +481,34 @@ class Document {
                 int mxy = (int) Math.max(staircase.getCorner0().getY(), staircase.getCorner1().getY());
 
                 if (x >= mnx && x <= mxx && y >= mny && y <= mxy) {
-                    this.selectedObject = staircase;
-                    return selectedObject;
+                    this.selectedObjects.add(staircase);
+                    return selectedObjects;
                 }
             }
         }
 
-        return null;
+        return selectedObjects;
     }
 
-    public void unselectObject() {
-        this.selectedObject = null;
+    public void unselectObjects() {
+        this.selectedObjects.clear();
+    }
+
+    public Collection<ModelFloor> getFloors() {
+        return content.getFloors();
+    }
+
+    public ModelFile getModelFile() {
+        return this.content;
+    }
+
+    public void renameSelected(String newName) {
+        assert selected() != null;
+        if (selectedObjects.size() ==1) {
+            if (newName != null && !newName.isEmpty()) {
+                this.selectedObjects.iterator().next().setName(newName);
+                hasUnsavedChanges = true;
+            }
+        }
     }
 }

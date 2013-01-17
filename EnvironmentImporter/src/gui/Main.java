@@ -1,9 +1,14 @@
+package gui;
+
+import database.Database;
+
 import javax.swing.*;
 import javax.swing.event.ChangeEvent;
 import javax.swing.event.ChangeListener;
 import java.awt.*;
 import java.awt.event.*;
 import java.io.File;
+import java.util.Collection;
 import java.util.HashSet;
 import java.util.Set;
 
@@ -38,8 +43,9 @@ public class Main extends JFrame implements ActionListener, MouseListener, Mouse
     private static final int MAX_ZOOM = 10;
     private static final int DEFAULT_ZOOM = 5;
     private final SliderMenuItem miZoom = new SliderMenuItem("Zoom", MIN_ZOOM, MAX_ZOOM, DEFAULT_ZOOM);
+    private final JMenu mViewDataFor = new JMenu("Choose dataname...");
 
-    private MapImagePanel imagePanel = null;
+    private MainPanel mainPanel = null;
     private JScrollPane scrollPane = null;
 
     private final JPopupMenu popupMenu = new JPopupMenu();
@@ -51,7 +57,8 @@ public class Main extends JFrame implements ActionListener, MouseListener, Mouse
     private final JMenuItem miAddStaircase = new JMenuItem("Add Staircase");
     private final JMenuItem miEditStaircaseGroup = new JMenuItem("Edit Staircase Group...");
     private final JMenuItem miRemoveSelection = new JMenuItem("Remove Selected Object");
-    private Set<JMenuItem> floorItems = null;
+    private final JMenuItem miRenameArea = new JMenuItem("Rename Area");
+    private Set<JRadioButtonMenuItem> floorItems = null;
 
     //	private Integer buttonPressed = null;
     private Integer buttonReleased = null;
@@ -70,13 +77,15 @@ public class Main extends JFrame implements ActionListener, MouseListener, Mouse
 
     private Integer hoveringOverRoomId = null;
     private Integer hoveringOverStaircaseId = null;
+    private Set<JRadioButtonMenuItem> dataNameItems = null;
+    private boolean leftCtrlPressed = false;
 
     private Main() {
         this.setDefaultCloseOperation(WindowConstants.EXIT_ON_CLOSE);
 
-        imagePanel = new MapImagePanel();
-        imagePanel.addMouseListener(this);
-        imagePanel.addMouseMotionListener(this);
+        this.mainPanel = MapImagePanel.instance();
+        this.mainPanel.addMouseListener(this);
+        this.mainPanel.addMouseMotionListener(this);
 
         this.createMainMenu();
         this.createContextMenu();
@@ -84,9 +93,9 @@ public class Main extends JFrame implements ActionListener, MouseListener, Mouse
 
         this.getContentPane().setLayout(new BorderLayout());
 
-        scrollPane = new JScrollPane(imagePanel);
 
-        this.getContentPane().add(scrollPane, BorderLayout.CENTER);
+        this.getContentPane().add(mainPanel, BorderLayout.CENTER);
+
 
         this.setSize(800, 600);
     }
@@ -98,19 +107,22 @@ public class Main extends JFrame implements ActionListener, MouseListener, Mouse
             miSave.setEnabled(true);
             miClose.setEnabled(true);
             mView.setEnabled(true);
+            mViewDataFor.setEnabled(false);
 
-            imagePanel.setDocument(current);
-            imagePanel.revalidate();
+            mainPanel.setDocument(current);
+
+            mainPanel.revalidate();
         } else {
             this.setTitle(APPLICATION_TITLE);
             miSave.setEnabled(false);
             miClose.setEnabled(false);
             mView.setEnabled(false);
 
-            imagePanel.setDocument(null);
-            imagePanel.setPreferredSize(new Dimension(0, 0));
-            imagePanel.revalidate();
-            imagePanel.repaint();
+            mainPanel.setDocument(null);
+
+            mainPanel.setPreferredSize(new Dimension(0, 0));
+            mainPanel.revalidate();
+            mainPanel.repaint();
         }
     }
 
@@ -148,6 +160,9 @@ public class Main extends JFrame implements ActionListener, MouseListener, Mouse
         mView.addSeparator();
         mView.add(this.miZoom);
 
+        mView.addSeparator();
+        mView.add(this.mViewDataFor);
+
 
         miNew.addActionListener(this);
         miOpen.addActionListener(this);
@@ -177,6 +192,7 @@ public class Main extends JFrame implements ActionListener, MouseListener, Mouse
         popupMenu.add(miAddStaircase);
         popupMenu.add(miEditStaircaseGroup);
         popupMenu.add(miRemoveSelection);
+        popupMenu.add(miRenameArea);
 
         miAddRoom.addActionListener(this);
         miAddLink.addActionListener(this);
@@ -184,7 +200,7 @@ public class Main extends JFrame implements ActionListener, MouseListener, Mouse
         miAddStaircase.addActionListener(this);
         miEditStaircaseGroup.addActionListener(this);
         miRemoveSelection.addActionListener(this);
-
+        miRenameArea.addActionListener(this);
 
 //		popupMenu.addMouseListener(this);
     }
@@ -200,8 +216,12 @@ public class Main extends JFrame implements ActionListener, MouseListener, Mouse
             miAddRoom.setEnabled(false);
             miAddLink.setEnabled(false);
             miAddStaircase.setEnabled(false);
-            if (current.selected() != null) {
+            if (current.selected() != null && !current.selected().isEmpty()) {
                 miRemoveSelection.setEnabled(true);
+                miRenameArea.setEnabled(true);
+            }
+            if(current.selected().size()>1){
+                miRenameArea.setEnabled(false);
             }
             if (this.hoveringOverStaircaseId != null) miEditStaircaseGroup.setEnabled(true);
         } else {
@@ -209,24 +229,26 @@ public class Main extends JFrame implements ActionListener, MouseListener, Mouse
             miAddLink.setEnabled(true);
             miAddStaircase.setEnabled(true);
             miRemoveSelection.setEnabled(false);
+            miRenameArea.setEnabled(false);
         }
-
-
 
 
         //update the floors
         mSwitchToFloor.removeAll();
         floorItems = null;
-
+        ButtonGroup group = new ButtonGroup();
         if (Database.getInstance().getNumberOfFloors() > 0) {
-            floorItems = new HashSet<JMenuItem>();
+            floorItems = new HashSet<JRadioButtonMenuItem>();
             for (int i = 0; i < current.numberOfFloors(); ++i) {
-                JMenuItem item = new JMenuItem("Floor #" + i);
+                JRadioButtonMenuItem item = new JRadioButtonMenuItem("Floor #" + i);
                 item.addActionListener(this);
                 mSwitchToFloor.add(item);
+
                 floorItems.add(item);
+                group.add(item);
             }
             mSwitchToFloor.setEnabled(true);
+
         } else {
             mSwitchToFloor.setEnabled(false);
         }
@@ -352,8 +374,8 @@ public class Main extends JFrame implements ActionListener, MouseListener, Mouse
     }
 
     void invalidateImagePanel() {
-        imagePanel.repaint();
-        imagePanel.revalidate();
+        mainPanel.repaint();
+        mainPanel.revalidate();
     }
 
 
@@ -380,37 +402,52 @@ public class Main extends JFrame implements ActionListener, MouseListener, Mouse
         } else if (event.getSource() == miNetworkView) {
             if (miNetworkView.isSelected()) {
                 assert miNetworkView.isSelected() && !miRoomView.isSelected();
-                imagePanel.setToNetworkView();
-                invalidateImagePanel();
-                miViewImage.setEnabled(false);
-                miViewRooms.setEnabled(false);
+                if (!(mainPanel instanceof NetworkModel) && current != null) {
+                    changePanel("network");
+
+
+                }
+
 
             }
 
         } else if (event.getSource() == miRoomView) {
             if (miRoomView.isSelected()) {
-                assert miNetworkView.isSelected() && !miRoomView.isSelected();
-                imagePanel.setToRoomView();
-                invalidateImagePanel();
-                miViewImage.setEnabled(true);
-                miViewRooms.setEnabled(true);
+
+                assert !miNetworkView.isSelected() && miRoomView.isSelected();
+                if (!(mainPanel instanceof MapImagePanel) && current != null) {
+                    changePanel("map");
+
+                }
             }
         } else if (event.getSource() == miViewImage) {
+            assert mainPanel instanceof MapImagePanel;
             if (miViewImage.isSelected()) {
-                imagePanel.enableImageView();
+                ((MapImagePanel) mainPanel).enableImageView();
             } else {
-                imagePanel.disableImageView();
+                ((MapImagePanel) mainPanel).disableImageView();
             }
             invalidateImagePanel();
         } else if (event.getSource() == miViewRooms) {
+            assert mainPanel instanceof MapImagePanel;
             if (miViewRooms.isSelected()) {
-                imagePanel.enableRoomView();
+                ((MapImagePanel) mainPanel).enableRoomView();
 
             } else {
-                imagePanel.disableRoomView();
+                ((MapImagePanel) mainPanel).disableRoomView();
             }
             invalidateImagePanel();
-        }else {
+        } else if (dataNameItems != null && dataNameItems.contains(event.getSource())) {
+            JMenuItem item = (JMenuItem) event.getSource();
+
+
+            ((NetworkModel) mainPanel).setDisplay(item.getText());
+
+
+            this.invalidateImagePanel();
+
+        } else {
+            assert mainPanel instanceof MapImagePanel;
             Point actualPoint = MapImagePanel.convertToActualCoordinate(new Point(drawnX1, drawnY1), current.getCurrentFloor());
             actualX1 = actualPoint.x;
             actualY1 = actualPoint.y;
@@ -437,6 +474,17 @@ public class Main extends JFrame implements ActionListener, MouseListener, Mouse
                 current.removeSelected();
                 unsetMouseSelection();
                 this.invalidateImagePanel();
+            } else if (event.getSource() == miRenameArea) {
+                if (current.selected() != null && !current.selected().isEmpty() && current.selected().size()==1) {
+                    String newName = JOptionPane.showInternalInputDialog(
+                            this.getContentPane(),
+                            "New name for room?",
+                            "Rename " + current.selected().iterator().next().getName(),
+                            JOptionPane.QUESTION_MESSAGE);
+                    current.renameSelected(newName);
+                    unsetMouseSelection();
+                    this.invalidateImagePanel();
+                }
             } else if (floorItems != null && floorItems.contains(event.getSource())) {
                 JMenuItem item = (JMenuItem) event.getSource();
                 String t1 = item.getText();
@@ -445,13 +493,69 @@ public class Main extends JFrame implements ActionListener, MouseListener, Mouse
                 if (current != null) {
                     current.selectFloor(idx);
                 }
-                imagePanel.selectFloor(idx);
+                ((MapImagePanel) mainPanel).selectFloor(idx);
                 unsetMouseSelection();
 
                 this.invalidateImagePanel();
 
             }
         }
+    }
+
+    private void changePanel(String type) {
+
+        this.getContentPane().remove(mainPanel);
+        if (type.equals("network")) {
+            mainPanel = NetworkModel.instance();
+            mainPanel.setDocument(current);
+            invalidateImagePanel();
+            miViewImage.setEnabled(false);
+            miViewRooms.setEnabled(false);
+            miZoom.setEnabled(false);
+
+            //update the floors
+            mViewDataFor.removeAll();
+
+
+            dataNameItems = null;
+
+
+            ButtonGroup radioGroup = new ButtonGroup();
+            dataNameItems = new HashSet<JRadioButtonMenuItem>();
+            JRadioButtonMenuItem item = new JRadioButtonMenuItem("default");
+            dataNameItems.add(item);
+            item.addActionListener(this);
+            mViewDataFor.add(item);
+            dataNameItems.add(item);
+            radioGroup.add(item);
+            item.setSelected(true);
+
+            Collection<String> dataNames = Database.getInstance().getDataNames();
+
+            for (String dataName : dataNames) {
+                item = new JRadioButtonMenuItem(dataName);
+                item.addActionListener(this);
+                mViewDataFor.add(item);
+                dataNameItems.add(item);
+                radioGroup.add(item);
+            }
+            mViewDataFor.setEnabled(true);
+
+
+        } else if (type.equals("map")) {
+            mainPanel = MapImagePanel.instance();
+            mainPanel.setDocument(current);
+            invalidateImagePanel();
+            miViewImage.setEnabled(true);
+            miViewRooms.setEnabled(true);
+            miZoom.setEnabled(true);
+            mViewDataFor.setEnabled(false);
+        } else {
+        }
+        this.getContentPane().add(mainPanel, BorderLayout.CENTER);
+        mainPanel.revalidate();
+        mainPanel.repaint();
+
     }
 
 
@@ -509,19 +613,21 @@ public class Main extends JFrame implements ActionListener, MouseListener, Mouse
 //			buttonPressed = null;
             buttonReleased = event.getButton();
 
+
             if (drawnX2.equals(drawnX1) && drawnY1.equals(drawnY2)) {
-                current.selectObject(actualX1, actualY1);
+
+                if(this.leftCtrlPressed){
+                    current.selectObject(actualX1, actualY1, event.isControlDown());
+                }
+                current.unselectObjects();
+                current.selectObject(actualX1, actualY1, event.isControlDown());
             }
 
             //right button?
-//            if (buttonReleased == 3) {
+            if (buttonReleased == 3) {
 
                 this.showPopupMenu(event);
-//            } else if (buttonReleased == 1) {
-////                current.unselectObject();
-//                unsetMouseSelection();
-//
-//            }
+            }
 
         }
 
@@ -530,17 +636,18 @@ public class Main extends JFrame implements ActionListener, MouseListener, Mouse
 
 
     void unsetMouseSelection() {
-        imagePanel.unsetSelection();
-        imagePanel.repaint();
+        assert mainPanel instanceof MapImagePanel;
+        ((MapImagePanel) mainPanel).unsetSelection();
+        mainPanel.repaint();
     }
 
     public void mouseDragged(MouseEvent event) {
-        if (current != null) {
+        if (current != null && mainPanel instanceof MapImagePanel) {
             drawnX2 = event.getX();
             drawnY2 = event.getY();
 
             //no, draw the selection frame...
-            imagePanel.setSelection(drawnX1, drawnY1, drawnX2, drawnY2);
+            ((MapImagePanel) mainPanel).setSelection(drawnX1, drawnY1, drawnX2, drawnY2);
             this.invalidateImagePanel();
         }
     }
@@ -577,4 +684,6 @@ public class Main extends JFrame implements ActionListener, MouseListener, Mouse
 
 
     }
+
+
 }

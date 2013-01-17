@@ -1,9 +1,10 @@
+package database;
+
+import javax.vecmath.Point3d;
 import java.awt.*;
 import java.sql.*;
-import java.util.ArrayList;
-import java.util.HashMap;
+import java.util.*;
 import java.util.List;
-import java.util.Map;
 
 /**
  * Created with IntelliJ IDEA.
@@ -46,6 +47,7 @@ public class Database {
     private ArrayList<Integer> floorHeights = new ArrayList<Integer>();
     private ArrayList<Integer> floorMinXs = new ArrayList<Integer>();
     private ArrayList<Integer> floorMinYs = new ArrayList<Integer>();
+    private Collection<String> dataNames;
 
 
     public Database() throws ClassNotFoundException, DBConnectFail {
@@ -100,6 +102,35 @@ public class Database {
             this.floorMinXs.add(minX);
             this.floorMinYs.add(minY);
         }
+    }
+
+    public ArrayList<Point3d> getMovementOfPlayer(String dataName) {
+
+        String positionQuery = "SELECT time, x, y, z " +
+                "FROM mc_statistician.IdPlayerMapping as idp, mc_statistician.playerlocationforanalysis as plfa " +
+                "where name = \"" + dataName + "\" and plfa.uuid = idp.uuid and plfa.minTime = idp.startTime;";
+        List<Map<String, String>> results = executeSynchQuery(positionQuery);
+
+        ArrayList<Point3d> listOfPoints = new ArrayList<Point3d>();
+        for (Map<String, String> row : results) {
+            int x = Integer.parseInt(row.get("x"));
+            int y = Integer.parseInt(row.get("z"));
+            int height = Integer.parseInt(row.get("y"));
+            int floor = getFloorForHeight(height);
+            listOfPoints.add(new Point3d(x, y, floor));
+
+        }
+        return listOfPoints;
+
+    }
+
+    private int getFloorForHeight(int height) {
+        if (height > 33)
+            return 2;
+        else if (height <= 33 && height > 24)
+            return 1;
+        else
+            return 0;
     }
 
     private void ConnectToDB() throws DBConnectFail {
@@ -169,6 +200,29 @@ public class Database {
 
     public int getMinYOfFloor(int i) {
         return this.floorMinYs.get(i);
+    }
+
+
+    public Collection<String> getDataNames() {
+        if(dataNames == null ){
+            initializeDataNames();
+        }
+        return dataNames;
+    }
+
+    private void initializeDataNames() {
+        this.dataNames = new ArrayList<String>();
+        String positionQuery = "SELECT distinct name FROM mc_statistician.idplayermapping where obsolete =0;";
+        List<Map<String, String>> results = executeSynchQuery(positionQuery);
+
+
+        for (Map<String, String> row : results) {
+            String name = row.get("name");
+
+            this.dataNames.add(name);
+
+        }
+
     }
 }
 

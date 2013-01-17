@@ -80,7 +80,7 @@ public class ModelFile {
 
 
         for (int i = 0; i < 2; i++) {
-            tag = sc.nextLine();
+            tag = sc.nextLine().trim();
             result.getStaircaseIds().add(parseInt(valueOfTag("staircaseId", tag)));
         }
 
@@ -104,8 +104,6 @@ public class ModelFile {
             String nextTag = sc.nextLine().trim();
             String tagName = getTagName(nextTag);
             if (isEndingTag(nextTag) && tagName.equals("floor")) {
-
-
                 return new ModelFloor(id, rooms, links, staircases);
             } else if (tagName.equals("room")) {
                 rooms.add(getRoomInfo(sc));
@@ -127,7 +125,16 @@ public class ModelFile {
         int id = getIdFromIdTag(tag);
 
         tag = sc.nextLine().trim();
+
         String tagName = getTagName(tag);
+        String name= "";
+        if("name".equals(tagName)){
+
+            name = valueOfTag("name", tag);
+            tag = sc.nextLine().trim();
+        }
+
+        tagName = getTagName(tag);
         HashMap<String, String> attribs = getAttributes(tag);
         assert tagName.equals("corner0");
         Point corner0 = new Point(
@@ -144,7 +151,9 @@ public class ModelFile {
 
         tag = sc.nextLine().trim();
         assert isEndingTag(tag) && getTagName(tag).equals("staircase");
-        return new ModelStaircase(id, corner0, corner1);
+        ModelStaircase staircase = new ModelStaircase(id, corner0, corner1);
+        staircase.setName(name);
+        return staircase;
 
     }
 
@@ -189,8 +198,22 @@ public class ModelFile {
         int id = getIdFromIdTag(tag);
 
         tag = sc.nextLine().trim();
+
+//        System.out.println(id);
         String tagName = getTagName(tag);
+
+        String name= "";
+//        System.out.println(tagName);
+        if("name".equals(tagName)){
+
+            name = valueOfTag("name", tag);
+            tag = sc.nextLine().trim();
+        }
+//        System.out.println(tag);
+
+        tagName = getTagName(tag);
         HashMap<String, String> attribs = getAttributes(tag);
+//        System.out.println(attribs);
         assert "corner0".equals(tagName);
         Point corner0 = new Point(
                 parseInt(attribs.get("x")),
@@ -206,7 +229,9 @@ public class ModelFile {
 
         tag = sc.nextLine().trim();
         assert isEndingTag(tag) && getTagName(tag).equals("room");
-        return new ModelRoom(id, corner0, corner1);
+        ModelRoom result = new ModelRoom(id, corner0, corner1);
+        result.setName(name);
+        return result;
     }
 
     private int getIdFromIdTag(String tag) {
@@ -249,14 +274,15 @@ public class ModelFile {
     }
 
     private String removeAngularBrackets(String st) {
-        String result = st.substring(1, st.length() - 1);
-        if (result.charAt(result.length() - 1) == '/') {
-            return result.substring(0, result.length() - 1);
-        } else if (result.charAt(0) == '/') {
-            return result.substring(1, result.length());
-        } else {
-            return result;
-        }
+//        String result = st.substring(1, st.length() - 1);
+//        if (result.charAt(result.length() - 1) == '/') {
+//            return result.substring(0, result.length() - 1);
+//        } else if (result.charAt(0) == '/') {
+//            return result.substring(1, result.length());
+//        } else {
+//            return result;
+//        }
+        return st.replaceAll("</"," ").replaceAll("<"," ").replaceAll("/>","").replaceAll(">"," ").trim();
     }
 
     private boolean verifyFirstLine(String firstLine) {
@@ -292,7 +318,7 @@ public class ModelFile {
         for (ModelStaircaseGroup group : this.getStaircaseGroups()) {
             HashMap<String, String> attribMap = new HashMap<String, String>();
             attribMap.put("name", group.getName());
-            result.append("\t").append(startTag("staircaseGroups", attribMap, false)).append("\n");
+            result.append("\t").append(startTag("staircaseGroups", attribMap, false));
 
             result.append(writeId(2, group.getId()));
             for (Integer id : group.getStaircaseIds()) {
@@ -348,6 +374,10 @@ public class ModelFile {
 
     }
 
+    private String writeName(int level, String name) {
+        return writeTag(level, "name", name, null);
+    }
+
     private String writeFloors() {
         StringBuilder result = new StringBuilder();
         for (ModelFloor floor : this.getFloors()) {
@@ -373,6 +403,8 @@ public class ModelFile {
             }
             result.append(startTag("room", null, false)).append("\n");
             result.append(writeId(level + 1, room.getId()));
+            if(room.getName()!=null && !room.getName().isEmpty())
+                result.append(writeName(level+1, room.getName()));
 
             HashMap<String, String> point = getPointAsMap(room.getCorner0());
             result.append(writeTag(level + 1, "corner0", null, point));
@@ -387,6 +419,8 @@ public class ModelFile {
         }
         return result.toString();
     }
+
+
 
     private HashMap<String, String> getPointAsMap(Point corner0) {
         Long x = Math.round(corner0.getX());
@@ -435,6 +469,8 @@ public class ModelFile {
             }
             result.append(startTag("staircase", null, false)).append("\n");
             result.append(writeId(level + 1, staircase.getId()));
+            if(staircase.getName()!=null && !staircase.getName().isEmpty())
+                result.append(writeName(level+1, staircase.getName()));
 
             HashMap<String, String> point = getPointAsMap(staircase.getCorner0());
             result.append(writeTag(level + 1, "corner0", null, point));

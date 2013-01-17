@@ -1,4 +1,4 @@
-/**
+package gui; /**
  * Created with IntelliJ IDEA.
  * User: vaisagh
  * Date: 1/8/13
@@ -6,12 +6,14 @@
  * To change this template use File | Settings | File Templates.
  */
 
+import database.Database;
+
 import javax.swing.*;
 import java.awt.*;
 import java.awt.image.BufferedImage;
 import java.util.ArrayList;
 
-public class MapImagePanel extends JPanel {
+public class MapImagePanel extends MainPanel {
     private static int scale = 6;
     private static int generalOffset = 5;
     private static final long serialVersionUID = 1L;
@@ -27,8 +29,9 @@ public class MapImagePanel extends JPanel {
     private boolean viewImages = true;
     private boolean viewRooms = true;
     private static boolean zoomChanged = false;
+    private static MapImagePanel instance;
 
-    public MapImagePanel() {
+    private MapImagePanel() {
         currentFloor = 0;
         for (int i = 0; i < Database.getInstance().getNumberOfFloors(); i++) {
 
@@ -52,7 +55,7 @@ public class MapImagePanel extends JPanel {
         if (document == null)
             return;
 
-        if (!networkView) {
+
             if (zoomChanged && viewImages) {
                 floorImages.clear();
                 for (int i = 0; i < Database.getInstance().getNumberOfFloors(); i++) {
@@ -85,9 +88,7 @@ public class MapImagePanel extends JPanel {
             }
 
 
-        } else {
-            drawNetwork(document);
-        }
+
         g.dispose();
     }
 
@@ -107,13 +108,9 @@ public class MapImagePanel extends JPanel {
         return image;
     }
 
-    public void setToNetworkView() {
-        this.networkView = true;
-    }
 
-    public void setToRoomView() {
-        this.networkView = false;
-    }
+
+
 
     public void enableImageView() {
         this.viewImages = true;
@@ -123,10 +120,7 @@ public class MapImagePanel extends JPanel {
         this.viewImages = false;
     }
 
-    private void drawNetwork(Document document) {
 
-
-    }
 
     public void enableRoomView() {
         this.viewRooms = true;
@@ -172,6 +166,13 @@ public class MapImagePanel extends JPanel {
 
     public void unsetSelection() {
         hasSelection = false;
+    }
+
+    public static MainPanel instance() {
+        if(instance==null)
+            instance = new MapImagePanel();
+
+        return instance;
     }
 }
 
