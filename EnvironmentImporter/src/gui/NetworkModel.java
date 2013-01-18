@@ -6,15 +6,17 @@ import edu.uci.ics.jung.algorithms.layout.Layout;
 import edu.uci.ics.jung.graph.DirectedSparseMultigraph;
 import edu.uci.ics.jung.graph.Graph;
 import edu.uci.ics.jung.graph.UndirectedSparseGraph;
-import edu.uci.ics.jung.visualization.BasicVisualizationServer;
+import edu.uci.ics.jung.visualization.VisualizationViewer;
+import edu.uci.ics.jung.visualization.control.DefaultModalGraphMouse;
+import edu.uci.ics.jung.visualization.control.ModalGraphMouse;
 import edu.uci.ics.jung.visualization.decorators.ToStringLabeller;
 import edu.uci.ics.jung.visualization.renderers.Renderer.VertexLabel.Position;
 import modelcomponents.*;
+import org.apache.commons.collections15.Transformer;
 
-import javax.vecmath.Point3d;
 import java.awt.*;
-import java.util.ArrayList;
-import java.util.HashMap;
+import java.util.*;
+import java.util.List;
 
 /**
  * Created with IntelliJ IDEA.
@@ -36,8 +38,9 @@ public class NetworkModel extends MainPanel {
     private Document document;
     private static NetworkModel instance;
     HashMap<ModelArea, Integer> areaFloorMapping;
-    private String currentDisplay;
+    private String currentData;
     HashMap<Integer, ModelGroup> areaIdGroupMapping;
+    private HashSet<Phase> selectedPhases;
 
 
     /**
@@ -48,8 +51,8 @@ public class NetworkModel extends MainPanel {
 //        // Layout<V, E>, VisualizationComponent<V,E>
 
 
-        currentDisplay = null;
-
+        currentData = null;
+        selectedPhases = new HashSet<Phase>();
 
     }
 
@@ -103,10 +106,10 @@ public class NetworkModel extends MainPanel {
             );
 
         }
-        currentDisplay = "default";
+        currentData = "default";
         currentGraph = completeGraph;
 
-        initializePanel();
+        redrawPanel();
     }
 
     private void addNewVertex(Graph<ModelObject, ModelEdge> graph, ModelArea area) {
@@ -122,33 +125,41 @@ public class NetworkModel extends MainPanel {
     public void setDisplay(String dataName) {
         if (dataName.equalsIgnoreCase("default")) {
             currentGraph = completeGraph;
+            selectedPhases.clear();
         } else {
-            ArrayList<Point3d> pathPoints = Database.getInstance().getMovementOfPlayer(dataName);
-            currentGraph = getDirectedTreeFromPoint(pathPoints);
+
+
+            selectedPhases.clear();
+            selectedPhases.add(Phase.EXPLORATION);
+            selectedPhases.add(Phase.TASK_1);
+            selectedPhases.add(Phase.TASK_2);
+            selectedPhases.add(Phase.TASK_3);
+            List<HashMap<String, Number>> pathPoints = Database.getInstance().getMovementOfPlayer(dataName, selectedPhases);
+            currentGraph = getDirectedGraphFromPoint(pathPoints);
         }
-        currentDisplay = dataName;
-        initializePanel();
+        currentData = dataName;
+        redrawPanel();
     }
 
-    private Graph<ModelObject, ModelEdge> getDirectedTreeFromPoint(ArrayList<Point3d> pathPoints) {
+    private Graph<ModelObject, ModelEdge> getDirectedGraphFromPoint(List<HashMap<String, Number>> resultList) {
         Graph result = new DirectedSparseMultigraph<ModelObject, ModelEdge>();
         ModelObject prevVertex = null;
 
-        for (Point3d point : pathPoints) {
-            int x = (int) Math.round(point.x);
-            int y = (int) Math.round(point.y);
-            int floor = (int) Math.round(point.z);
+        for (HashMap<String, Number> row : resultList) {
+            int x = (Integer) row.get("x");
+            int y = (Integer) row.get("y");
+            int floor = (Integer) row.get("floor");
+            long time = (Long) row.get("time");
             ModelObject vertex = findVertexOfLocation(x, y, floor, prevVertex);
             if (vertex != null) {
-                if(prevVertex==null){
-                    System.out.println(vertex);
-                }
                 if (prevVertex != null && !prevVertex.equals(vertex)) {
 
                     if (!result.containsVertex(vertex))
                         result.addVertex(vertex);
 
-                    result.addEdge(new ModelEdge(), prevVertex, vertex);
+                    ModelEdge edge = new ModelEdge();
+                    edge.setTime(time);
+                    result.addEdge(edge, prevVertex, vertex);
 
                     prevVertex = vertex;
                 } else {
@@ -156,6 +167,19 @@ public class NetworkModel extends MainPanel {
                         result.addVertex(vertex);
                     prevVertex = vertex;
                 }
+            } else {
+
+                vertex = findFromScratch(x, y, floor);
+                if (vertex != null) {
+                    System.out.println("Area " + vertex + " not a neighbour of " + prevVertex);
+//                    System.out.println(completeGraph.getNeighbors(prevVertex));
+                    if (!result.containsVertex(vertex))
+                        result.addVertex(vertex);
+
+                    prevVertex = vertex;
+
+                }
+
             }
 
         }
@@ -196,13 +220,7 @@ public class NetworkModel extends MainPanel {
             return prevVertex;  // if in previous area return that itself
         } else {
             ModelObject newVertex = findInNeighbouringVertices(x, y, floor, prevVertex);
-            if (newVertex == null) {
-                ModelObject area = findFromScratch(x, y, floor);
-                if (area != null) {
-                    System.out.println("Area " + area + " not a neighbour of " + prevVertex);
-                    System.out.println(completeGraph.getNeighbors(prevVertex));
-                }
-            }
+
             return newVertex; // returns null if nothing found (i.e. between areas)
         }
 
@@ -240,7 +258,7 @@ public class NetworkModel extends MainPanel {
             for (Integer areaId : group.getAreaIds()) {
                 ModelArea area = idAreaMapping.get(areaId);
 
-                if ((this.areaFloorMapping.get(area) == floor) && isInArea(area, x, y)){
+                if ((this.areaFloorMapping.get(area) == floor) && isInArea(area, x, y)) {
                     return true;
                 }
 
@@ -287,35 +305,37 @@ public class NetworkModel extends MainPanel {
         return false;
     }
 
-    private void initializePanel() {
+    private void redrawPanel() {
         this.removeAll();
         Layout<ModelObject, ModelEdge> layout = new KKLayout<ModelObject, ModelEdge>(this.currentGraph);
+////        ((FRLayout2)layout).setMaxIterations(3000);
+//        ((FRLayout2)layout).setAttractionMultiplier(2);
+//        ((FRLayout2)layout).setRepulsionMultiplier(0.25);
+
+
         layout.setSize(new Dimension(1600, 900));
-        BasicVisualizationServer<ModelObject, ModelEdge> vv = new BasicVisualizationServer<ModelObject, ModelEdge>(layout);
+        VisualizationViewer<ModelObject, ModelEdge> vv = new VisualizationViewer<ModelObject, ModelEdge>(layout);
         vv.setPreferredSize(new Dimension(1600, 900));
         // Setup up a new vertex to paint transformer...
-//        Transformer<Integer, Paint> vertexPaint = new Transformer<Integer, Paint>() {
-//            public Paint transform(Integer i) {
-//                return Color.GREEN;
-//            }
-//        };
-        // Set up a new stroke Transformer for the edges
-//        float dash[] = {10.0f};
-//        final Stroke edgeStroke = new BasicStroke(1.0f, BasicStroke.CAP_BUTT,
-//                BasicStroke.JOIN_MITER, 10.0f, dash, 0.0f);
-//        Transformer<String, Stroke> edgeStrokeTransformer = new Transformer<String, Stroke>() {
-//            public Stroke transform(String s) {
-//                return edgeStroke;
-//            }
-//        };
-//        vv.getRenderContext().setVertexFillPaintTransformer(vertexPaint);
+
+
+        // Create a graph mouse and add it to the visualization component
+        DefaultModalGraphMouse gm = new DefaultModalGraphMouse();
+        gm.setMode(ModalGraphMouse.Mode.PICKING);
+        vv.setGraphMouse(gm);
+
+        vv.getRenderContext().setVertexFillPaintTransformer(new SimpleFloorColoringTransformer<ModelObject, Paint>());
+        vv.getRenderContext().setVertexShapeTransformer(new VertexRectangleTransformer<ModelObject, Shape>());
 //        vv.getRenderContext().setEdgeStrokeTransformer(edgeStrokeTransformer);
         vv.getRenderContext().setVertexLabelTransformer(new ToStringLabeller());
 //        vv.getRenderContext().setEdgeLabelTransformer(new ToStringLabeller());
         vv.getRenderer().getVertexLabelRenderer().setPosition(Position.CNTR);
 
+
         this.add(vv);
+        this.revalidate();
     }
+
 
     public static MainPanel instance() {
         if (instance == null)
@@ -323,6 +343,133 @@ public class NetworkModel extends MainPanel {
 
         return instance;
     }
+
+    public void switchOnPhase(Phase phase) {
+        selectedPhases.add(phase);
+        List<HashMap<String, Number>> pathPoints = Database.getInstance().getMovementOfPlayer(currentData, selectedPhases);
+//        System.out.println(pathPoints.size());
+        this.currentGraph = getDirectedGraphFromPoint(pathPoints);
+        redrawPanel();
+    }
+
+    public void switchOffPhase(Phase phase) {
+        selectedPhases.remove(phase);
+        List<HashMap<String, Number>> pathPoints = Database.getInstance().getMovementOfPlayer(currentData, selectedPhases);
+        this.currentGraph = getDirectedGraphFromPoint(pathPoints);
+//        System.out.println(currentGraph.getVertexCount());
+
+        redrawPanel();
+    }
+
+    private class SimpleFloorColoringTransformer<ModelObject, Paint> implements Transformer<ModelObject, Paint> {
+        @Override
+        public Paint transform(ModelObject obj) {
+            ModelArea area;
+
+            if (!(obj instanceof ModelArea)) {
+                area = idAreaMapping.get(((ModelGroup) obj).getAreaIds().iterator().next());
+            } else {
+                area = (ModelArea) obj;
+            }
+
+            int floor = areaFloorMapping.get(area);
+            switch (floor) {
+                case 0:
+                    return (Paint) Color.LIGHT_GRAY;
+                case 1:
+                    return (Paint) Color.GREEN;
+                case 2:
+                    return (Paint) Color.YELLOW;
+            }
+            return (Paint) Color.BLACK;
+        }
+    }
+
+    private class VertexRectangleTransformer<ModelObject, Shape> implements Transformer<ModelObject, Shape> {
+
+        @Override
+        public Shape transform(ModelObject modelObject) {
+            int width = modelObject.toString().length() * 10;
+            return (Shape) new Rectangle(-width / 2, -10, width, 20);
+
+
+        }
+    }
+
+    public HashMap<String, HashMap<String, Number>> getDataFor(String dataName, VertexStatisticsDialog.StatisticChoice choice) {
+        HashMap<Phase, DirectedSparseMultigraph<ModelObject, ModelEdge>> phaseGraphMap;
+        phaseGraphMap = new HashMap<Phase, DirectedSparseMultigraph<ModelObject, ModelEdge>>();
+
+        HashSet<Phase> phases = new HashSet<Phase>();
+        HashMap<String, HashMap<String, Number>> result = new HashMap<String, HashMap<String, Number>>();
+        for (Phase phase : Phase.values()) {
+            phases.clear();
+            phases.add(phase);
+            List<HashMap<String, Number>> pathPoints = Database.getInstance().getMovementOfPlayer(dataName, phases);
+            phaseGraphMap.put(phase, (DirectedSparseMultigraph<ModelObject, ModelEdge>) getDirectedGraphFromPoint(pathPoints));
+
+        }
+
+        if (choice == VertexStatisticsDialog.StatisticChoice.VERTEX_VISIT_FREQUENCY) {
+            for (Phase phase : Phase.values()) {
+                DirectedSparseMultigraph<ModelObject, ModelEdge> graph = phaseGraphMap.get(phase);
+                for (ModelObject vertex : graph.getVertices()) {
+                    if (!result.containsKey(vertex.toString())) {
+                        result.put(vertex.toString(), new HashMap<String, Number>());
+                    }
+                    HashMap<String, Number> map = result.get(vertex.toString());
+                    map.put(phase.toString(), graph.inDegree(vertex));
+                    result.put(vertex.toString(), map);
+
+
+                }
+            }
+        } else if (choice == VertexStatisticsDialog.StatisticChoice.TIME_SPENT_PER_VERTEX) {
+
+            for (Phase phase : Phase.values()) {
+                DirectedSparseMultigraph<ModelObject, ModelEdge> graph = phaseGraphMap.get(phase);
+                for (ModelObject vertex : graph.getVertices()) {
+                    if (!result.containsKey(vertex.toString())) {
+                        result.put(vertex.toString(), new HashMap<String, Number>());
+                    }
+                    HashMap<String, Number> map = result.get(vertex.toString());
+                    TreeSet<ModelEdge> sortedEdgeSet = new TreeSet<ModelEdge>(new Comparator<ModelEdge>() {
+                        @Override
+                        public int compare(ModelEdge modelEdge, ModelEdge modelEdge1) {
+                            return (int) (modelEdge.getTime()-modelEdge1.getTime());
+                        }
+                    });
+                    sortedEdgeSet.addAll(graph.getIncidentEdges(vertex));
+                    long time =0;
+                    if(graph.inDegree(vertex)>graph.outDegree(vertex)){
+                        //Ending Vertex;
+                        ModelEdge lastEdge = sortedEdgeSet.pollLast();
+                        time += Long.parseLong(Database.getInstance().getPhaseCompleteTime(phase, dataName))-lastEdge.getTime();
+                    }else if(graph.inDegree(vertex)<graph.outDegree(vertex)){
+                        //First Vertex;
+                        ModelEdge firstEdge = sortedEdgeSet.pollFirst();
+                        time += firstEdge.getTime()-Long.parseLong(Database.getInstance().getPhaseStartTime(phase, dataName)));
+                    }
+
+                    assert graph.inDegree(vertex)== graph.outDegree(vertex);
+                    int numberOfEdges = sortedEdgeSet.size();
+                    for(int i=0;i<numberOfEdges/2;i++){
+                        ModelEdge incoming = sortedEdgeSet.pollFirst();
+                        ModelEdge outgoing = sortedEdgeSet.pollFirst();
+                        time+=outgoing.getTime()-incoming.getTime();
+
+                    }
+                    map.put(phase.toString(), time);
+                    result.put(vertex.toString(), map);
+
+
+                }
+            }
+
+        }
+        return result;
+    }
+
 }
 
 

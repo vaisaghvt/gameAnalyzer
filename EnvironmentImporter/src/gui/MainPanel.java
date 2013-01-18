@@ -6,6 +6,7 @@ import modelcomponents.ModelEdge;
 import modelcomponents.ModelObject;
 
 import javax.swing.*;
+import java.util.List;
 
 /**
  * Created with IntelliJ IDEA.

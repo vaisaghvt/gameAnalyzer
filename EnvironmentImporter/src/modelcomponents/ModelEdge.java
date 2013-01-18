@@ -8,9 +8,19 @@ package modelcomponents;
  * To change this template use File | Settings | File Templates.
  */
 public class ModelEdge {
-    private int id;
+
+
+    private long time;
 
     public ModelEdge() {
-        this.id = id;
+
+    }
+
+    public void setTime(long time) {
+        this.time = time;
+    }
+
+    public long getTime() {
+        return time;
     }
 }

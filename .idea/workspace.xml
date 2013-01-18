@@ -2,16 +2,15 @@
 <project version="4">
   <component name="ChangeListManager">
     <list default="true" id="80f32fdf-167a-49ea-bd7c-d2bdf0f136b0" name="Default" comment="">
-      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/EnvironmentImporter/src/modelcomponents/ModelGroup.java" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/out/production/EnvironmentImporter/modelcomponents/ModelFile.class" afterPath="$PROJECT_DIR$/out/production/EnvironmentImporter/modelcomponents/ModelFile.class" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/out/production/EnvironmentImporter/modelcomponents/ModelFloor.class" afterPath="$PROJECT_DIR$/out/production/EnvironmentImporter/modelcomponents/ModelFloor.class" />
+      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/EnvironmentImporter/src/gui/PathStatisticsDialog.java" />
+      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/EnvironmentImporter/src/gui/Phase.java" />
+      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/EnvironmentImporter/src/gui/StatisticChoice.java" />
+      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/EnvironmentImporter/src/gui/VertexStatisticsDialog.java" />
       <change type="MODIFICATION" beforePath="$PROJECT_DIR$/.idea/workspace.xml" afterPath="$PROJECT_DIR$/.idea/workspace.xml" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/EnvironmentImporter/src/gui/Document.java" afterPath="$PROJECT_DIR$/EnvironmentImporter/src/gui/Document.java" />
       <change type="MODIFICATION" beforePath="$PROJECT_DIR$/EnvironmentImporter/src/gui/Main.java" afterPath="$PROJECT_DIR$/EnvironmentImporter/src/gui/Main.java" />
       <change type="MODIFICATION" beforePath="$PROJECT_DIR$/EnvironmentImporter/src/gui/MainPanel.java" afterPath="$PROJECT_DIR$/EnvironmentImporter/src/gui/MainPanel.java" />
       <change type="MODIFICATION" beforePath="$PROJECT_DIR$/EnvironmentImporter/src/gui/NetworkModel.java" afterPath="$PROJECT_DIR$/EnvironmentImporter/src/gui/NetworkModel.java" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/EnvironmentImporter/src/modelcomponents/ModelFile.java" afterPath="$PROJECT_DIR$/EnvironmentImporter/src/modelcomponents/ModelFile.java" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/EnvironmentImporter/src/modelcomponents/ModelFloor.java" afterPath="$PROJECT_DIR$/EnvironmentImporter/src/modelcomponents/ModelFloor.java" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/EnvironmentImporter/src/modelcomponents/ModelEdge.java" afterPath="$PROJECT_DIR$/EnvironmentImporter/src/modelcomponents/ModelEdge.java" />
     </list>
     <ignored path="gameAnalyzer.iws" />
     <ignored path=".idea/workspace.xml" />
@@ -35,7 +34,7 @@
   </component>
   <component name="DebuggerManager">
     <line_breakpoints>
-      <breakpoint url="file://$PROJECT_DIR$/EnvironmentImporter/src/gui/Main.java" line="280" class="gui.Main" package="gui">
+      <breakpoint url="file://$PROJECT_DIR$/EnvironmentImporter/src/gui/Main.java" line="314" class="gui.Main" package="gui">
         <option name="ENABLED" value="true" />
         <option name="LOG_ENABLED" value="false" />
         <option name="LOG_EXPRESSION_ENABLED" value="false" />
@@ -48,7 +47,7 @@
         <option name="CONDITION" value="" />
         <option name="LOG_MESSAGE" value="" />
       </breakpoint>
-      <breakpoint url="file://$PROJECT_DIR$/EnvironmentImporter/src/gui/Main.java" line="426" class="gui.Main" package="gui">
+      <breakpoint url="file://$PROJECT_DIR$/EnvironmentImporter/src/gui/Main.java" line="466" class="gui.Main" package="gui">
         <option name="ENABLED" value="true" />
         <option name="LOG_ENABLED" value="false" />
         <option name="LOG_EXPRESSION_ENABLED" value="false" />
@@ -61,7 +60,59 @@
         <option name="CONDITION" value="" />
         <option name="LOG_MESSAGE" value="" />
       </breakpoint>
-      <breakpoint url="file://$PROJECT_DIR$/EnvironmentImporter/src/gui/NetworkModel.java" line="201" class="gui.NetworkModel" package="gui">
+      <breakpoint url="file://$PROJECT_DIR$/EnvironmentImporter/src/gui/VertexStatisticsDialog.java" line="121" class="gui.VertexStatisticsDialog" package="gui">
+        <option name="ENABLED" value="true" />
+        <option name="LOG_ENABLED" value="false" />
+        <option name="LOG_EXPRESSION_ENABLED" value="false" />
+        <option name="SUSPEND_POLICY" value="SuspendAll" />
+        <option name="COUNT_FILTER_ENABLED" value="false" />
+        <option name="COUNT_FILTER" value="0" />
+        <option name="CONDITION_ENABLED" value="false" />
+        <option name="CLASS_FILTERS_ENABLED" value="false" />
+        <option name="INSTANCE_FILTERS_ENABLED" value="false" />
+        <option name="CONDITION" value="" />
+        <option name="LOG_MESSAGE" value="" />
+      </breakpoint>
+      <breakpoint url="file://$PROJECT_DIR$/EnvironmentImporter/src/gui/NetworkModel.java" line="407" class="gui.NetworkModel" package="gui">
+        <option name="ENABLED" value="true" />
+        <option name="LOG_ENABLED" value="false" />
+        <option name="LOG_EXPRESSION_ENABLED" value="false" />
+        <option name="SUSPEND_POLICY" value="SuspendAll" />
+        <option name="COUNT_FILTER_ENABLED" value="false" />
+        <option name="COUNT_FILTER" value="0" />
+        <option name="CONDITION_ENABLED" value="false" />
+        <option name="CLASS_FILTERS_ENABLED" value="false" />
+        <option name="INSTANCE_FILTERS_ENABLED" value="false" />
+        <option name="CONDITION" value="" />
+        <option name="LOG_MESSAGE" value="" />
+      </breakpoint>
+      <breakpoint url="file://$PROJECT_DIR$/EnvironmentImporter/src/gui/NetworkModel.java" line="413" class="gui.NetworkModel" package="gui">
+        <option name="ENABLED" value="true" />
+        <option name="LOG_ENABLED" value="false" />
+        <option name="LOG_EXPRESSION_ENABLED" value="false" />
+        <option name="SUSPEND_POLICY" value="SuspendAll" />
+        <option name="COUNT_FILTER_ENABLED" value="false" />
+        <option name="COUNT_FILTER" value="0" />
+        <option name="CONDITION_ENABLED" value="false" />
+        <option name="CLASS_FILTERS_ENABLED" value="false" />
+        <option name="INSTANCE_FILTERS_ENABLED" value="false" />
+        <option name="CONDITION" value="" />
+        <option name="LOG_MESSAGE" value="" />
+      </breakpoint>
+      <breakpoint url="file://$PROJECT_DIR$/EnvironmentImporter/src/gui/NetworkModel.java" line="428" class="gui.NetworkModel" package="gui">
+        <option name="ENABLED" value="true" />
+        <option name="LOG_ENABLED" value="false" />
+        <option name="LOG_EXPRESSION_ENABLED" value="false" />
+        <option name="SUSPEND_POLICY" value="SuspendAll" />
+        <option name="COUNT_FILTER_ENABLED" value="false" />
+        <option name="COUNT_FILTER" value="0" />
+        <option name="CONDITION_ENABLED" value="false" />
+        <option name="CLASS_FILTERS_ENABLED" value="false" />
+        <option name="INSTANCE_FILTERS_ENABLED" value="false" />
+        <option name="CONDITION" value="" />
+        <option name="LOG_MESSAGE" value="" />
+      </breakpoint>
+      <breakpoint url="file://$PROJECT_DIR$/EnvironmentImporter/src/gui/NetworkModel.java" line="415" class="gui.NetworkModel" package="gui">
         <option name="ENABLED" value="true" />
         <option name="LOG_ENABLED" value="false" />
         <option name="LOG_EXPRESSION_ENABLED" value="false" />
@@ -115,51 +166,66 @@
   </component>
   <component name="FileEditorManager">
     <leaf>
-      <file leaf-file-name="ModelArea.java" pinned="false" current="false" current-in-tab="false">
-        <entry file="file://$PROJECT_DIR$/EnvironmentImporter/src/modelcomponents/ModelArea.java">
-          <provider selected="true" editor-type-id="text-editor">
-            <state line="36" column="0" selection-start="686" selection-end="686" vertical-scroll-proportion="0.0">
-              <folding />
-            </state>
-          </provider>
-        </entry>
-      </file>
-      <file leaf-file-name="ModelRoom.java" pinned="false" current="false" current-in-tab="false">
-        <entry file="file://$PROJECT_DIR$/EnvironmentImporter/src/modelcomponents/ModelRoom.java">
-          <provider selected="true" editor-type-id="text-editor">
-            <state line="13" column="10" selection-start="314" selection-end="314" vertical-scroll-proportion="0.0">
-              <folding />
-            </state>
-          </provider>
-        </entry>
-      </file>
-      <file leaf-file-name="ModelStaircase.java" pinned="false" current="false" current-in-tab="false">
-        <entry file="file://$PROJECT_DIR$/EnvironmentImporter/src/modelcomponents/ModelStaircase.java">
-          <provider selected="true" editor-type-id="text-editor">
-            <state line="13" column="10" selection-start="324" selection-end="324" vertical-scroll-proportion="0.0">
-              <folding />
-            </state>
-          </provider>
-        </entry>
-      </file>
-      <file leaf-file-name="Document.java" pinned="false" current="false" current-in-tab="false">
-        <entry file="file://$PROJECT_DIR$/EnvironmentImporter/src/gui/Document.java">
-          <provider selected="true" editor-type-id="text-editor">
-            <state line="426" column="0" selection-start="15705" selection-end="15705" vertical-scroll-proportion="0.0">
-              <folding />
-            </state>
-          </provider>
-        </entry>
-      </file>
       <file leaf-file-name="NetworkModel.java" pinned="false" current="true" current-in-tab="true">
         <entry file="file://$PROJECT_DIR$/EnvironmentImporter/src/gui/NetworkModel.java">
           <provider selected="true" editor-type-id="text-editor">
-            <state line="218" column="0" selection-start="7646" selection-end="7646" vertical-scroll-proportion="0.021356784">
+            <state line="450" column="52" selection-start="17496" selection-end="17496" vertical-scroll-proportion="0.47225502">
               <folding>
                 <element signature="imports" expanded="true" />
-                <element signature="e#3137#3146#0" expanded="true" />
-                <element signature="e#10358#10382#0" expanded="true" />
-                <element signature="e#10543#10567#0" expanded="true" />
+                <element signature="e#3360#3369#0" expanded="true" />
+                <element signature="e#11021#11045#0" expanded="true" />
+                <element signature="e#11372#11396#0" expanded="true" />
+                <element signature="e#14711#14718#0" expanded="true" />
+                <element signature="e#14791#14824#0" expanded="true" />
+                <element signature="e#16533#16544#0" expanded="true" />
+                <element signature="e#16545#16829#0" expanded="true" />
+                <element signature="e#16806#16807#0" expanded="true" />
+              </folding>
+            </state>
+          </provider>
+        </entry>
+      </file>
+      <file leaf-file-name="ModelEdge.java" pinned="false" current="false" current-in-tab="false">
+        <entry file="file://$PROJECT_DIR$/EnvironmentImporter/src/modelcomponents/ModelEdge.java">
+          <provider selected="true" editor-type-id="text-editor">
+            <state line="22" column="15" selection-start="346" selection-end="350" vertical-scroll-proportion="0.0">
+              <folding />
+            </state>
+          </provider>
+        </entry>
+      </file>
+      <file leaf-file-name="Database.java" pinned="false" current="false" current-in-tab="false">
+        <entry file="file://$PROJECT_DIR$/EnvironmentImporter/src/database/Database.java">
+          <provider selected="true" editor-type-id="text-editor">
+            <state line="341" column="0" selection-start="11842" selection-end="11842" vertical-scroll-proportion="-13.692307">
+              <folding>
+                <element signature="imports" expanded="true" />
+                <element signature="e#6786#6811#0" expanded="true" />
+                <element signature="e#7264#7280#0" expanded="true" />
+                <element signature="e#9637#9658#0" expanded="true" />
+                <element signature="e#9941#9957#0" expanded="true" />
+              </folding>
+            </state>
+          </provider>
+        </entry>
+      </file>
+      <file leaf-file-name="ConnectionImpl.class" pinned="false" current="false" current-in-tab="false">
+        <entry file="jar://$USER_HOME$/Downloads/mysql-connector-java-5.1.22/mysql-connector-java-5.1.22-bin.jar!/com/mysql/jdbc/ConnectionImpl.class">
+          <provider selected="true" editor-type-id="text-editor">
+            <state line="286" column="30" selection-start="17145" selection-end="17145" vertical-scroll-proportion="0.0">
+              <folding />
+            </state>
+          </provider>
+        </entry>
+      </file>
+      <file leaf-file-name="VertexStatisticsDialog.java" pinned="false" current="false" current-in-tab="false">
+        <entry file="file://$PROJECT_DIR$/EnvironmentImporter/src/gui/VertexStatisticsDialog.java">
+          <provider selected="true" editor-type-id="text-editor">
+            <state line="132" column="0" selection-start="4853" selection-end="4853" vertical-scroll-proportion="0.0">
+              <folding>
+                <element signature="imports" expanded="true" />
+                <element signature="e#570#578#0" expanded="true" />
+                <element signature="e#639#647#0" expanded="true" />
               </folding>
             </state>
           </provider>
@@ -168,34 +234,7 @@
       <file leaf-file-name="MainPanel.java" pinned="false" current="false" current-in-tab="false">
         <entry file="file://$PROJECT_DIR$/EnvironmentImporter/src/gui/MainPanel.java">
           <provider selected="true" editor-type-id="text-editor">
-            <state line="22" column="0" selection-start="443" selection-end="443" vertical-scroll-proportion="0.0">
-              <folding />
-            </state>
-          </provider>
-        </entry>
-      </file>
-      <file leaf-file-name="ModelFloor.java" pinned="false" current="false" current-in-tab="false">
-        <entry file="file://$PROJECT_DIR$/EnvironmentImporter/src/modelcomponents/ModelFloor.java">
-          <provider selected="true" editor-type-id="text-editor">
-            <state line="20" column="16" selection-start="539" selection-end="539" vertical-scroll-proportion="0.0">
-              <folding />
-            </state>
-          </provider>
-        </entry>
-      </file>
-      <file leaf-file-name="ModelGroup.java" pinned="false" current="false" current-in-tab="false">
-        <entry file="file://$PROJECT_DIR$/EnvironmentImporter/src/modelcomponents/ModelGroup.java">
-          <provider selected="true" editor-type-id="text-editor">
-            <state line="44" column="19" selection-start="863" selection-end="863" vertical-scroll-proportion="0.0">
-              <folding />
-            </state>
-          </provider>
-        </entry>
-      </file>
-      <file leaf-file-name="ModelFile.java" pinned="false" current="false" current-in-tab="false">
-        <entry file="file://$PROJECT_DIR$/EnvironmentImporter/src/modelcomponents/ModelFile.java">
-          <provider selected="true" editor-type-id="text-editor">
-            <state line="321" column="0" selection-start="10111" selection-end="10111" vertical-scroll-proportion="0.0">
+            <state line="17" column="0" selection-start="357" selection-end="357" vertical-scroll-proportion="0.0">
               <folding />
             </state>
           </provider>
@@ -204,8 +243,39 @@
       <file leaf-file-name="Main.java" pinned="false" current="false" current-in-tab="false">
         <entry file="file://$PROJECT_DIR$/EnvironmentImporter/src/gui/Main.java">
           <provider selected="true" editor-type-id="text-editor">
-            <state line="307" column="79" selection-start="9858" selection-end="9862" vertical-scroll-proportion="0.0">
+            <state line="662" column="32" selection-start="23352" selection-end="23372" vertical-scroll-proportion="-6.962264">
               <folding />
+            </state>
+          </provider>
+        </entry>
+      </file>
+      <file leaf-file-name="AbstractCollection.class" pinned="false" current="false" current-in-tab="false">
+        <entry file="jar://C:/Program Files/Java/jdk1.7.0_07/jre/lib/rt.jar!/java/util/AbstractCollection.class">
+          <provider selected="true" editor-type-id="text-editor">
+            <state line="41" column="0" selection-start="1505" selection-end="1505" vertical-scroll-proportion="0.0">
+              <folding />
+            </state>
+          </provider>
+        </entry>
+      </file>
+      <file leaf-file-name="PathStatisticsDialog.java" pinned="false" current="false" current-in-tab="false">
+        <entry file="file://$PROJECT_DIR$/EnvironmentImporter/src/gui/PathStatisticsDialog.java">
+          <provider selected="true" editor-type-id="text-editor">
+            <state line="15" column="11" selection-start="355" selection-end="355" vertical-scroll-proportion="0.0">
+              <folding>
+                <element signature="imports" expanded="true" />
+              </folding>
+            </state>
+          </provider>
+        </entry>
+      </file>
+      <file leaf-file-name="ObjectPanelStaircaseGroup.java" pinned="false" current="false" current-in-tab="false">
+        <entry file="file://$PROJECT_DIR$/EnvironmentImporter/src/gui/ObjectPanelStaircaseGroup.java">
+          <provider selected="true" editor-type-id="text-editor">
+            <state line="216" column="12" selection-start="7316" selection-end="7603" vertical-scroll-proportion="0.0">
+              <folding>
+                <element signature="class#StaircaseModel#0;class#ObjectPanelStaircaseGroup#0" expanded="false" />
+              </folding>
             </state>
           </provider>
         </entry>
@@ -223,29 +293,30 @@
   <component name="IdeDocumentHistory">
     <option name="changedFiles">
       <list>
-        <option value="$PROJECT_DIR$/EnvironmentImporter/src/Main.java" />
-        <option value="$PROJECT_DIR$/EnvironmentImporter/src/Document.java" />
-        <option value="$PROJECT_DIR$/EnvironmentImporter/src/gui/SliderMenuItem.java" />
-        <option value="$PROJECT_DIR$/EnvironmentImporter/src/gui/SimpleGraphView2.java" />
-        <option value="$PROJECT_DIR$/EnvironmentImporter/src/modelcomponents/ModelEdge.java" />
         <option value="$PROJECT_DIR$/EnvironmentImporter/src/modelcomponents/ModelNode.java" />
         <option value="$PROJECT_DIR$/EnvironmentImporter/src/gui/MapImagePanel.java" />
         <option value="$PROJECT_DIR$/EnvironmentImporter/src/modelcomponents/ModelArea.java" />
-        <option value="$PROJECT_DIR$/EnvironmentImporter/src/database/Database.java" />
         <option value="$PROJECT_DIR$/EnvironmentImporter/src/modelcomponents/ModelFloor.java" />
-        <option value="$PROJECT_DIR$/EnvironmentImporter/src/gui/Main.java" />
         <option value="$PROJECT_DIR$/EnvironmentImporter/src/modelcomponents/ModelGroup.java" />
         <option value="$PROJECT_DIR$/EnvironmentImporter/src/modelcomponents/ModelFile.java" />
         <option value="$PROJECT_DIR$/EnvironmentImporter/src/gui/Document.java" />
+        <option value="$PROJECT_DIR$/EnvironmentImporter/src/gui/Phase.java" />
+        <option value="$PROJECT_DIR$/EnvironmentImporter/src/gui/PathStatisticsDialog.java" />
+        <option value="$PROJECT_DIR$/EnvironmentImporter/src/gui/StatisticChoice.java" />
         <option value="$PROJECT_DIR$/EnvironmentImporter/src/gui/MainPanel.java" />
+        <option value="$PROJECT_DIR$/EnvironmentImporter/src/modelcomponents/ModelEdge.java" />
+        <option value="$PROJECT_DIR$/EnvironmentImporter/src/gui/Main.java" />
+        <option value="$PROJECT_DIR$/EnvironmentImporter/src/database/Database.java" />
+        <option value="$PROJECT_DIR$/EnvironmentImporter/src/gui/VertexStatisticsDialog.java" />
         <option value="$PROJECT_DIR$/EnvironmentImporter/src/gui/NetworkModel.java" />
       </list>
     </option>
   </component>
   <component name="ProjectFrameBounds">
-    <option name="x" value="960" />
-    <option name="width" value="960" />
-    <option name="height" value="1040" />
+    <option name="x" value="-8" />
+    <option name="y" value="-8" />
+    <option name="width" value="1936" />
+    <option name="height" value="1056" />
   </component>
   <component name="ProjectLevelVcsManager" settingsEditedManually="true">
     <OptionsSetting value="true" id="Add" />
@@ -275,16 +346,6 @@
     <panes>
       <pane id="ProjectPane">
         <subPane>
-          <PATH>
-            <PATH_ELEMENT>
-              <option name="myItemId" value="gameAnalyzer" />
-              <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.ProjectViewProjectNode" />
-            </PATH_ELEMENT>
-            <PATH_ELEMENT>
-              <option name="myItemId" value="External Libraries" />
-              <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.ExternalLibrariesNode" />
-            </PATH_ELEMENT>
-          </PATH>
           <PATH>
             <PATH_ELEMENT>
               <option name="myItemId" value="gameAnalyzer" />
@@ -393,9 +454,9 @@
     <property name="GoToClass.toSaveIncludeLibraries" value="false" />
     <property name="MemberChooser.showClasses" value="true" />
     <property name="GoToClass.includeLibraries" value="false" />
-    <property name="options.searchVisible" value="true" />
-    <property name="options.splitter.details.proportions" value="0.2" />
     <property name="dynamic.classpath" value="false" />
+    <property name="options.splitter.details.proportions" value="0.2" />
+    <property name="options.searchVisible" value="true" />
   </component>
   <component name="RecentsManager">
     <key name="CopyClassDialog.RECENTS_KEY">
@@ -405,8 +466,8 @@
       <recent name="C:\Users\vaisagh\IdeaProjects\gameAnalyzer\EnvironmentImporter\src" />
     </key>
     <key name="CreateClassDialog.RecentsKey">
-      <recent name="modelcomponents" />
       <recent name="gui" />
+      <recent name="modelcomponents" />
       <recent name="" />
     </key>
   </component>
@@ -456,6 +517,24 @@
         <option name="Maven.BeforeRunTask" enabled="false" />
       </method>
     </configuration>
+    <configuration default="true" type="Applet" factoryName="Applet">
+      <module name="" />
+      <option name="MAIN_CLASS_NAME" />
+      <option name="HTML_FILE_NAME" />
+      <option name="HTML_USED" value="false" />
+      <option name="WIDTH" value="400" />
+      <option name="HEIGHT" value="300" />
+      <option name="POLICY_FILE" value="$APPLICATION_HOME_DIR$/bin/appletviewer.policy" />
+      <option name="VM_PARAMETERS" />
+      <option name="ALTERNATIVE_JRE_PATH_ENABLED" value="false" />
+      <option name="ALTERNATIVE_JRE_PATH" />
+      <method>
+        <option name="AntTarget" enabled="false" />
+        <option name="BuildArtifacts" enabled="false" />
+        <option name="Make" enabled="true" />
+        <option name="Maven.BeforeRunTask" enabled="false" />
+      </method>
+    </configuration>
     <configuration default="true" type="TestNG" factoryName="TestNG">
       <module name="" />
       <option name="ALTERNATIVE_JRE_PATH_ENABLED" value="false" />
@@ -481,24 +560,6 @@
       <envs />
       <properties />
       <listeners />
-      <method>
-        <option name="AntTarget" enabled="false" />
-        <option name="BuildArtifacts" enabled="false" />
-        <option name="Make" enabled="true" />
-        <option name="Maven.BeforeRunTask" enabled="false" />
-      </method>
-    </configuration>
-    <configuration default="true" type="Applet" factoryName="Applet">
-      <module name="" />
-      <option name="MAIN_CLASS_NAME" />
-      <option name="HTML_FILE_NAME" />
-      <option name="HTML_USED" value="false" />
-      <option name="WIDTH" value="400" />
-      <option name="HEIGHT" value="300" />
-      <option name="POLICY_FILE" value="$APPLICATION_HOME_DIR$/bin/appletviewer.policy" />
-      <option name="VM_PARAMETERS" />
-      <option name="ALTERNATIVE_JRE_PATH_ENABLED" value="false" />
-      <option name="ALTERNATIVE_JRE_PATH" />
       <method>
         <option name="AntTarget" enabled="false" />
         <option name="BuildArtifacts" enabled="false" />
@@ -609,27 +670,27 @@
     <servers />
   </component>
   <component name="ToolWindowManager">
-    <frame x="960" y="0" width="960" height="1040" extended-state="0" />
-    <editor active="false" />
+    <frame x="-8" y="-8" width="1936" height="1056" extended-state="6" />
+    <editor active="true" />
     <layout>
       <window_info id="Changes" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.33" sideWeight="0.5" order="7" side_tool="false" content_ui="tabs" />
       <window_info id="JetGradle" active="false" anchor="right" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.33" sideWeight="0.5" order="3" side_tool="false" content_ui="tabs" />
       <window_info id="Palette" active="false" anchor="right" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.33" sideWeight="0.5" order="4" side_tool="false" content_ui="tabs" />
+      <window_info id="Find" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.296875" sideWeight="0.5" order="1" side_tool="false" content_ui="tabs" />
       <window_info id="Ant Build" active="false" anchor="right" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.25" sideWeight="0.5" order="1" side_tool="false" content_ui="tabs" />
-      <window_info id="Debug" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.40066963" sideWeight="0.5" order="3" side_tool="false" content_ui="tabs" />
+      <window_info id="Debug" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.57366073" sideWeight="0.5" order="3" side_tool="false" content_ui="tabs" />
       <window_info id="Event Log" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.33" sideWeight="0.5" order="10" side_tool="true" content_ui="tabs" />
       <window_info id="Favorites" active="false" anchor="left" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.12560128" sideWeight="0.39174107" order="2" side_tool="true" content_ui="tabs" />
       <window_info id="Version Control" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.33" sideWeight="0.5" order="8" side_tool="false" content_ui="tabs" />
+      <window_info id="Messages" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.3247768" sideWeight="0.5" order="9" side_tool="false" content_ui="tabs" />
       <window_info id="TODO" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.33" sideWeight="0.5" order="6" side_tool="false" content_ui="tabs" />
-      <window_info id="Structure" active="false" anchor="left" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="true" weight="0.3452514" sideWeight="0.6090909" order="1" side_tool="true" content_ui="tabs" />
+      <window_info id="Structure" active="false" anchor="left" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="true" weight="0.16515233" sideWeight="0.17745535" order="1" side_tool="true" content_ui="tabs" />
       <window_info id="Maven Projects" active="false" anchor="right" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.33" sideWeight="0.5" order="5" side_tool="false" content_ui="tabs" />
       <window_info id="Commander" active="false" anchor="right" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.3997862" sideWeight="0.6707589" order="0" side_tool="false" content_ui="tabs" />
-      <window_info id="Project" active="false" anchor="left" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="true" weight="0.3452514" sideWeight="0.38295454" order="0" side_tool="false" content_ui="combo" />
-      <window_info id="Run" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.3560268" sideWeight="0.5" order="2" side_tool="false" content_ui="tabs" />
+      <window_info id="Project" active="false" anchor="left" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="true" weight="0.16515233" sideWeight="0.81473213" order="0" side_tool="false" content_ui="combo" />
+      <window_info id="Run" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.4107143" sideWeight="0.99849397" order="2" side_tool="false" content_ui="tabs" />
       <window_info id="Cvs" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.25" sideWeight="0.5" order="4" side_tool="false" content_ui="tabs" />
       <window_info id="Message" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.33" sideWeight="0.5" order="0" side_tool="false" content_ui="tabs" />
-      <window_info id="Find" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.40625" sideWeight="0.5" order="1" side_tool="false" content_ui="tabs" />
-      <window_info id="Messages" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.32700893" sideWeight="0.5" order="9" side_tool="false" content_ui="tabs" />
       <window_info id="Hierarchy" active="false" anchor="right" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.25" sideWeight="0.5" order="2" side_tool="false" content_ui="combo" />
       <window_info id="Inspection" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.4" sideWeight="0.5" order="5" side_tool="false" content_ui="tabs" />
     </layout>
@@ -693,71 +754,9 @@
     <option name="FILTER_TARGETS" value="false" />
   </component>
   <component name="editorHistoryManager">
-    <entry file="jar://$USER_HOME$/Downloads/jung2-2_0_1/jung-graph-impl-2.0.1.jar!/edu/uci/ics/jung/graph/UndirectedSparseGraph.class">
-      <provider selected="true" editor-type-id="text-editor">
-        <state line="11" column="11" selection-start="603" selection-end="603" vertical-scroll-proportion="0.0" />
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/EnvironmentImporter/src/modelcomponents/ModelLink.java">
-      <provider selected="true" editor-type-id="text-editor">
-        <state line="13" column="13" selection-start="270" selection-end="270" vertical-scroll-proportion="0.0" />
-      </provider>
-    </entry>
-    <entry file="jar://C:/Program Files/Java/jdk1.7.0_07/jre/lib/rt.jar!/javax/swing/JOptionPane.class">
-      <provider selected="true" editor-type-id="text-editor">
-        <state line="211" column="0" selection-start="12237" selection-end="12237" vertical-scroll-proportion="0.0" />
-      </provider>
-    </entry>
-    <entry file="jar://$USER_HOME$/Downloads/jung2-2_0_1/jung-api-2.0.1.jar!/edu/uci/ics/jung/graph/util/Pair.class">
-      <provider selected="true" editor-type-id="text-editor">
-        <state line="41" column="0" selection-start="1373" selection-end="1373" vertical-scroll-proportion="0.0" />
-      </provider>
-    </entry>
-    <entry file="jar://$USER_HOME$/Downloads/jung2-2_0_1/jung-graph-impl-2.0.1.jar!/edu/uci/ics/jung/graph/AbstractGraph.class">
-      <provider selected="true" editor-type-id="text-editor">
-        <state line="54" column="0" selection-start="2354" selection-end="2354" vertical-scroll-proportion="0.0" />
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/EnvironmentImporter/src/database/Database.java">
-      <provider selected="true" editor-type-id="text-editor">
-        <state line="106" column="30" selection-start="4250" selection-end="4250" vertical-scroll-proportion="0.0" />
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/EnvironmentImporter/src/modelcomponents/ModelArea.java">
-      <provider selected="true" editor-type-id="text-editor">
-        <state line="36" column="0" selection-start="686" selection-end="686" vertical-scroll-proportion="0.0" />
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/EnvironmentImporter/src/modelcomponents/ModelRoom.java">
-      <provider selected="true" editor-type-id="text-editor">
-        <state line="13" column="10" selection-start="314" selection-end="314" vertical-scroll-proportion="0.0" />
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/EnvironmentImporter/src/modelcomponents/ModelStaircase.java">
-      <provider selected="true" editor-type-id="text-editor">
-        <state line="13" column="10" selection-start="324" selection-end="324" vertical-scroll-proportion="0.0" />
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/EnvironmentImporter/src/gui/Document.java">
-      <provider selected="true" editor-type-id="text-editor">
-        <state line="426" column="0" selection-start="15705" selection-end="15705" vertical-scroll-proportion="0.0">
-          <folding />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/EnvironmentImporter/src/gui/MainPanel.java">
-      <provider selected="true" editor-type-id="text-editor">
-        <state line="22" column="0" selection-start="443" selection-end="443" vertical-scroll-proportion="0.0" />
-      </provider>
-    </entry>
     <entry file="file://$PROJECT_DIR$/EnvironmentImporter/src/modelcomponents/ModelFloor.java">
       <provider selected="true" editor-type-id="text-editor">
         <state line="20" column="16" selection-start="539" selection-end="539" vertical-scroll-proportion="0.0" />
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/EnvironmentImporter/src/modelcomponents/ModelGroup.java">
-      <provider selected="true" editor-type-id="text-editor">
-        <state line="44" column="19" selection-start="863" selection-end="863" vertical-scroll-proportion="0.0" />
       </provider>
     </entry>
     <entry file="file://$PROJECT_DIR$/EnvironmentImporter/src/modelcomponents/ModelFile.java">
@@ -765,21 +764,124 @@
         <state line="321" column="0" selection-start="10111" selection-end="10111" vertical-scroll-proportion="0.0" />
       </provider>
     </entry>
+    <entry file="file://$PROJECT_DIR$/EnvironmentImporter/src/gui/Phase.java">
+      <provider selected="true" editor-type-id="text-editor">
+        <state line="9" column="19" selection-start="189" selection-end="189" vertical-scroll-proportion="0.0">
+          <folding />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/EnvironmentImporter/src/gui/Document.java">
+      <provider selected="true" editor-type-id="text-editor">
+        <state line="252" column="31" selection-start="8481" selection-end="8481" vertical-scroll-proportion="-7.96">
+          <folding />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/EnvironmentImporter/src/modelcomponents/ModelGroup.java">
+      <provider selected="true" editor-type-id="text-editor">
+        <state line="44" column="19" selection-start="863" selection-end="863" vertical-scroll-proportion="0.0">
+          <folding />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/EnvironmentImporter/src/gui/StatisticChoice.java">
+      <provider selected="true" editor-type-id="text-editor">
+        <state line="0" column="0" selection-start="0" selection-end="0" vertical-scroll-proportion="0.0">
+          <folding />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/EnvironmentImporter/src/gui/PathStatisticsDialog.java">
+      <provider selected="true" editor-type-id="text-editor">
+        <state line="15" column="11" selection-start="355" selection-end="355" vertical-scroll-proportion="0.0">
+          <folding>
+            <element signature="imports" expanded="true" />
+          </folding>
+        </state>
+      </provider>
+    </entry>
+    <entry file="jar://C:/Program Files/Java/jdk1.7.0_07/jre/lib/rt.jar!/java/util/AbstractCollection.class">
+      <provider selected="true" editor-type-id="text-editor">
+        <state line="41" column="0" selection-start="1505" selection-end="1505" vertical-scroll-proportion="0.0">
+          <folding />
+        </state>
+      </provider>
+    </entry>
+    <entry file="jar://$USER_HOME$/Downloads/mysql-connector-java-5.1.22/mysql-connector-java-5.1.22-bin.jar!/com/mysql/jdbc/ConnectionImpl.class">
+      <provider selected="true" editor-type-id="text-editor">
+        <state line="286" column="30" selection-start="17145" selection-end="17145" vertical-scroll-proportion="0.0">
+          <folding />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/EnvironmentImporter/src/gui/ObjectPanelStaircaseGroup.java">
+      <provider selected="true" editor-type-id="text-editor">
+        <state line="216" column="12" selection-start="7316" selection-end="7603" vertical-scroll-proportion="0.0">
+          <folding>
+            <element signature="class#StaircaseModel#0;class#ObjectPanelStaircaseGroup#0" expanded="false" />
+          </folding>
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/EnvironmentImporter/src/modelcomponents/ModelEdge.java">
+      <provider selected="true" editor-type-id="text-editor">
+        <state line="22" column="15" selection-start="346" selection-end="350" vertical-scroll-proportion="0.0">
+          <folding />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/EnvironmentImporter/src/gui/MainPanel.java">
+      <provider selected="true" editor-type-id="text-editor">
+        <state line="17" column="0" selection-start="357" selection-end="357" vertical-scroll-proportion="0.0">
+          <folding />
+        </state>
+      </provider>
+    </entry>
     <entry file="file://$PROJECT_DIR$/EnvironmentImporter/src/gui/Main.java">
       <provider selected="true" editor-type-id="text-editor">
-        <state line="307" column="79" selection-start="9858" selection-end="9862" vertical-scroll-proportion="0.0">
+        <state line="662" column="32" selection-start="23352" selection-end="23372" vertical-scroll-proportion="-6.962264">
           <folding />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/EnvironmentImporter/src/gui/VertexStatisticsDialog.java">
+      <provider selected="true" editor-type-id="text-editor">
+        <state line="132" column="0" selection-start="4853" selection-end="4853" vertical-scroll-proportion="0.0">
+          <folding>
+            <element signature="imports" expanded="true" />
+            <element signature="e#570#578#0" expanded="true" />
+            <element signature="e#639#647#0" expanded="true" />
+          </folding>
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/EnvironmentImporter/src/database/Database.java">
+      <provider selected="true" editor-type-id="text-editor">
+        <state line="341" column="0" selection-start="11842" selection-end="11842" vertical-scroll-proportion="-13.692307">
+          <folding>
+            <element signature="imports" expanded="true" />
+            <element signature="e#6786#6811#0" expanded="true" />
+            <element signature="e#7264#7280#0" expanded="true" />
+            <element signature="e#9637#9658#0" expanded="true" />
+            <element signature="e#9941#9957#0" expanded="true" />
+          </folding>
         </state>
       </provider>
     </entry>
     <entry file="file://$PROJECT_DIR$/EnvironmentImporter/src/gui/NetworkModel.java">
       <provider selected="true" editor-type-id="text-editor">
-        <state line="218" column="0" selection-start="7646" selection-end="7646" vertical-scroll-proportion="0.021356784">
+        <state line="450" column="52" selection-start="17496" selection-end="17496" vertical-scroll-proportion="0.47225502">
           <folding>
             <element signature="imports" expanded="true" />
-            <element signature="e#3137#3146#0" expanded="true" />
-            <element signature="e#10358#10382#0" expanded="true" />
-            <element signature="e#10543#10567#0" expanded="true" />
+            <element signature="e#3360#3369#0" expanded="true" />
+            <element signature="e#11021#11045#0" expanded="true" />
+            <element signature="e#11372#11396#0" expanded="true" />
+            <element signature="e#14711#14718#0" expanded="true" />
+            <element signature="e#14791#14824#0" expanded="true" />
+            <element signature="e#16533#16544#0" expanded="true" />
+            <element signature="e#16545#16829#0" expanded="true" />
+            <element signature="e#16806#16807#0" expanded="true" />
           </folding>
         </state>
       </provider>

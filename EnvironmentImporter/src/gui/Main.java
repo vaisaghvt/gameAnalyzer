@@ -44,6 +44,16 @@ public class Main extends JFrame implements ActionListener, MouseListener, Mouse
     private static final int DEFAULT_ZOOM = 5;
     private final SliderMenuItem miZoom = new SliderMenuItem("Zoom", MIN_ZOOM, MAX_ZOOM, DEFAULT_ZOOM);
     private final JMenu mViewDataFor = new JMenu("Choose dataname...");
+    private final JMenu mChoosePhase = new JMenu("Choose phase...");
+    private final JMenuItem miExplorationPhase = new JCheckBoxMenuItem("Exploration");
+    private final JMenuItem miTask1 = new JCheckBoxMenuItem("Task 1");
+    private final JMenuItem miTask2 = new JCheckBoxMenuItem("Task 2");
+    private final JMenuItem miTask3 = new JCheckBoxMenuItem("Task 3");
+
+    private final JMenu mAnalysis = new JMenu("Analyze");
+    private final JMenuItem miPathStatistics = new JMenuItem("Path Statistics");
+    private final JMenuItem miVertexStatistics = new JMenuItem("Vertex Statistics");
+
 
     private MainPanel mainPanel = null;
 
@@ -108,7 +118,9 @@ public class Main extends JFrame implements ActionListener, MouseListener, Mouse
             miSave.setEnabled(true);
             miClose.setEnabled(true);
             mView.setEnabled(true);
+            mAnalysis.setEnabled(false);
             mViewDataFor.setEnabled(false);
+            mChoosePhase.setEnabled(false);
 
             mainPanel.setDocument(current);
 
@@ -118,6 +130,7 @@ public class Main extends JFrame implements ActionListener, MouseListener, Mouse
             miSave.setEnabled(false);
             miClose.setEnabled(false);
             mView.setEnabled(false);
+            mAnalysis.setEnabled(false);
 
             mainPanel.setDocument(null);
 
@@ -132,12 +145,23 @@ public class Main extends JFrame implements ActionListener, MouseListener, Mouse
         menuBar.removeAll();
         menuBar.add(mFile);
         menuBar.add(mView);
+        menuBar.add(mAnalysis);
 
         mFile.add(miNew);
         mFile.add(miOpen);
         mFile.add(miSave);
         mFile.add(miClose);
         mFile.add(miExit);
+
+
+        mChoosePhase.add(miExplorationPhase);
+
+        mChoosePhase.add(miTask1);
+
+        mChoosePhase.add(miTask2);
+
+        mChoosePhase.add(miTask3);
+
 
         ButtonGroup radioGroup = new ButtonGroup();
 
@@ -163,6 +187,10 @@ public class Main extends JFrame implements ActionListener, MouseListener, Mouse
 
         mView.addSeparator();
         mView.add(this.mViewDataFor);
+        mView.add(this.mChoosePhase);
+
+        mAnalysis.add(miPathStatistics);
+        mAnalysis.add(miVertexStatistics);
 
 
         miNew.addActionListener(this);
@@ -175,6 +203,12 @@ public class Main extends JFrame implements ActionListener, MouseListener, Mouse
         miViewImage.addActionListener(this);
         miViewRooms.addActionListener(this);
         miZoom.addChangeListener(this);
+        miExplorationPhase.addActionListener(this);
+        miTask1.addActionListener(this);
+        miTask2.addActionListener(this);
+        miTask3.addActionListener(this);
+        miPathStatistics.addActionListener(this);
+        miVertexStatistics.addActionListener(this);
 
         this.setJMenuBar(menuBar);
     }
@@ -237,7 +271,7 @@ public class Main extends JFrame implements ActionListener, MouseListener, Mouse
                 miRemoveGroup.setEnabled(false);
             }
             if (this.hoveringOverStaircaseId != null) miEditStaircaseGroup.setEnabled(true);
-        } else{
+        } else {
             miAddRoom.setEnabled(true);
             miAddLink.setEnabled(true);
             miAddStaircase.setEnabled(true);
@@ -417,6 +451,12 @@ public class Main extends JFrame implements ActionListener, MouseListener, Mouse
             } else {
                 System.exit(0);
             }
+        } else if (event.getSource() == miPathStatistics) {
+            PathStatisticsDialog dialog = new PathStatisticsDialog(current);
+            dialog.setVisible(true);
+        } else if (event.getSource() == miVertexStatistics) {
+            VertexStatisticsDialog dialog = new VertexStatisticsDialog(current);
+            dialog.setVisible(true);
         } else if (event.getSource() == miNetworkView) {
             if (miNetworkView.isSelected()) {
                 assert miNetworkView.isSelected() && !miRoomView.isSelected();
@@ -460,10 +500,49 @@ public class Main extends JFrame implements ActionListener, MouseListener, Mouse
 
 
             ((NetworkModel) mainPanel).setDisplay(item.getText());
+            this.setTitle(item.getText() + " - Network Display");
+            if (item.getText().equalsIgnoreCase("default")) {
+                mChoosePhase.setEnabled(false);
+            } else {
+                mChoosePhase.setEnabled(true);
+                miExplorationPhase.setSelected(true);
+                miTask1.setSelected(true);
+                miTask2.setSelected(true);
+                miTask3.setSelected(true);
+
+            }
 
 
             this.invalidateImagePanel();
 
+        } else if (event.getSource() == miExplorationPhase) {
+            if (miExplorationPhase.isSelected()) {
+                ((NetworkModel) mainPanel).switchOnPhase(Phase.EXPLORATION);
+            } else {
+                ((NetworkModel) mainPanel).switchOffPhase(Phase.EXPLORATION);
+
+            }
+        } else if (event.getSource() == miTask1) {
+            if (miTask1.isSelected()) {
+                ((NetworkModel) mainPanel).switchOnPhase(Phase.TASK_1);
+            } else {
+                ((NetworkModel) mainPanel).switchOffPhase(Phase.TASK_1);
+
+            }
+        } else if (event.getSource() == miTask2) {
+            if (miTask2.isSelected()) {
+                ((NetworkModel) mainPanel).switchOnPhase(Phase.TASK_2);
+            } else {
+                ((NetworkModel) mainPanel).switchOffPhase(Phase.TASK_2);
+
+            }
+        } else if (event.getSource() == miTask3) {
+            if (miTask3.isSelected()) {
+                ((NetworkModel) mainPanel).switchOnPhase(Phase.TASK_3);
+            } else {
+                ((NetworkModel) mainPanel).switchOffPhase(Phase.TASK_3);
+
+            }
         } else {
             assert mainPanel instanceof MapImagePanel;
             Point actualPoint = MapImagePanel.convertToActualCoordinate(new Point(drawnX1, drawnY1), current.getCurrentFloor());
@@ -536,6 +615,7 @@ public class Main extends JFrame implements ActionListener, MouseListener, Mouse
 
         this.getContentPane().remove(mainPanel);
         if (type.equals("network")) {
+            this.setTitle("default - Network Display");
             mainPanel = NetworkModel.instance();
             mainPanel.setDocument(current);
             invalidateImagePanel();
@@ -570,6 +650,7 @@ public class Main extends JFrame implements ActionListener, MouseListener, Mouse
                 radioGroup.add(item);
             }
             mViewDataFor.setEnabled(true);
+            mAnalysis.setEnabled(true);
 
 
         } else if (type.equals("map")) {
@@ -580,6 +661,10 @@ public class Main extends JFrame implements ActionListener, MouseListener, Mouse
             miViewRooms.setEnabled(true);
             miZoom.setEnabled(true);
             mViewDataFor.setEnabled(false);
+            mAnalysis.setEnabled(false);
+            mChoosePhase.setEnabled(false);
+
+            this.setTitle(current.name() + " - " + APPLICATION_TITLE);
         } else {
         }
         this.getContentPane().add(mainPanel, BorderLayout.CENTER);
