@@ -2,6 +2,7 @@ package gui;
 
 import com.google.common.collect.ListMultimap;
 import database.Database;
+import database.StatisticChoice;
 
 import javax.swing.*;
 import java.awt.*;
@@ -22,22 +23,14 @@ public class VertexStatisticsDialog extends JDialog implements ActionListener {
     private JComboBox<String> nameList = new JComboBox<String>();
     private JComboBox<String> attemptList = new JComboBox<String>();
 
-    public enum StatisticChoice {
-        VERTEX_VISIT_FREQUENCY, TIME_SPENT_PER_VERTEX, VERTEX_VISIT_TIMES;
-
-
-    }
-
-    private Document document;
-
     private final JPanel mainPanel = new JPanel();
 
     private final JPanel buttonPanel = new JPanel();
     private final JButton bOk = new JButton("Ok");
     private final JButton bCancel = new JButton("Cancel");
 
-    public VertexStatisticsDialog(Document current) {
-        this.document = document;
+    public VertexStatisticsDialog() {
+
 
         this.setTitle("Vertex Statistics Options");
         this.setResizable(false);
@@ -114,7 +107,7 @@ public class VertexStatisticsDialog extends JDialog implements ActionListener {
         }
 
 
-        display(((NetworkModel) NetworkModel.instance()).getDataFor(dataName, choice));
+        display(((NetworkModel) NetworkModel.instance()).getVertexDataFor(dataName, choice));
 
     }
 

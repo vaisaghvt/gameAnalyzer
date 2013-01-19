@@ -452,10 +452,10 @@ public class Main extends JFrame implements ActionListener, MouseListener, Mouse
                 System.exit(0);
             }
         } else if (event.getSource() == miPathStatistics) {
-            PathStatisticsDialog dialog = new PathStatisticsDialog(current);
+            PathStatisticsDialog dialog = new PathStatisticsDialog();
             dialog.setVisible(true);
         } else if (event.getSource() == miVertexStatistics) {
-            VertexStatisticsDialog dialog = new VertexStatisticsDialog(current);
+            VertexStatisticsDialog dialog = new VertexStatisticsDialog();
             dialog.setVisible(true);
         } else if (event.getSource() == miNetworkView) {
             if (miNetworkView.isSelected()) {

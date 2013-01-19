@@ -1,5 +1,9 @@
 package database;
 
+import com.google.common.collect.ArrayListMultimap;
+import com.google.common.collect.ListMultimap;
+import gui.Phase;
+
 import javax.vecmath.Point3d;
 import java.awt.*;
 import java.sql.*;
@@ -48,6 +52,7 @@ public class Database {
     private ArrayList<Integer> floorMinXs = new ArrayList<Integer>();
     private ArrayList<Integer> floorMinYs = new ArrayList<Integer>();
     private Collection<String> dataNames;
+    private ListMultimap<String, Integer> dataNameAttemptMap;
 
 
     public Database() throws ClassNotFoundException, DBConnectFail {
@@ -104,25 +109,133 @@ public class Database {
         }
     }
 
-    public ArrayList<Point3d> getMovementOfPlayer(String dataName) {
+    public List<HashMap<String, Number>> getMovementOfPlayer(String dataName, HashSet<Phase> selectedPhases) {
+
+        String exploreCompleteTime = getPhaseCompleteTime(Phase.EXPLORATION, dataName);
+        String task1CompleteTime = getPhaseCompleteTime(Phase.TASK_1, dataName);
+        String task2CompleteTime = getPhaseCompleteTime(Phase.TASK_2, dataName);
+        String task3CompleteTime = getPhaseCompleteTime(Phase.TASK_3, dataName);
+
+        StringBuffer whereQuery = new StringBuffer();
+
+        boolean first = true;
+        whereQuery.append(" and (");
+        if (!selectedPhases.isEmpty()) {
+
+            if (selectedPhases.contains(Phase.EXPLORATION)) {
+                whereQuery.append(" (time<=");
+                whereQuery.append(exploreCompleteTime);
+                whereQuery.append(")");
+                first = false;
+            }
+            if (selectedPhases.contains(Phase.TASK_1)) {
+                if (!first) {
+                    whereQuery.append(" or");
+                }
+                whereQuery.append(" (time>").append(exploreCompleteTime).append(" and time<=").append(task1CompleteTime).append(")");
+                first = false;
+            }
+            if (selectedPhases.contains(Phase.TASK_2)) {
+                if (!first) {
+                    whereQuery.append(" or");
+                }
+                whereQuery.append(" (time>").append(task1CompleteTime).append(" and time<=").append(task2CompleteTime).append(")");
+                first = false;
+            }
+            if (selectedPhases.contains(Phase.TASK_3)) {
+                if (!first) {
+                    whereQuery.append(" or");
+                }
+                whereQuery.append(" (time>").append(task2CompleteTime).append(" and time<=").append(task3CompleteTime).append(")");
+                first = false;
+            }
+            whereQuery.append(")");
+        }
+
 
         String positionQuery = "SELECT time, x, y, z " +
                 "FROM mc_statistician.IdPlayerMapping as idp, mc_statistician.playerlocationforanalysis as plfa " +
-                "where name = \"" + dataName + "\" and plfa.uuid = idp.uuid and plfa.minTime = idp.startTime;";
+                "where name = \"" + dataName + "\" and plfa.uuid = idp.uuid and plfa.minTime = idp.startTime" + whereQuery + ";";
         List<Map<String, String>> results = executeSynchQuery(positionQuery);
 
-        ArrayList<Point3d> listOfPoints = new ArrayList<Point3d>();
-        for (Map<String, String> row : results) {
-            int x = Integer.parseInt(row.get("x"));
-            int y = Integer.parseInt(row.get("z"));
-            int height = Integer.parseInt(row.get("y"));
-            int floor = getFloorForHeight(height);
-            listOfPoints.add(new Point3d(x, y, floor));
+//        System.out.println(positionQuery);
+        List<HashMap<String, Number>> listOfResults = new ArrayList<HashMap<String, Number>>();
+        if (results != null) {
+            for (Map<String, String> row : results) {
+                Integer x = Integer.parseInt(row.get("x"));
+                Integer y = Integer.parseInt(row.get("z"));
+                Integer height = Integer.parseInt(row.get("y"));
+                Integer floor = getFloorForHeight(height);
+                Long time = Long.parseLong(row.get("time"));
+                HashMap<String, Number>result = new HashMap<String, Number>();
+                result.put("x", x);
+                result.put("y", y);
+                result.put("floor", floor);
+                result.put("time", time);
 
+                listOfResults.add(result);
+
+            }
         }
-        return listOfPoints;
+        return listOfResults;
 
     }
+
+    public String getPhaseStartTime(Phase phase, String dataName) {
+        switch (phase) {
+
+            case TASK_1:
+                return getLeverOpenTime(dataName, 12);
+
+            case TASK_2:
+                return getLeverOpenTime(dataName, 13);
+
+            case TASK_3:
+                return getLeverOpenTime(dataName, 14);
+
+            case EXPLORATION:
+                return "0";
+
+        }
+        return null;
+    }
+
+    public String getPhaseCompleteTime(Phase phase, String dataName) {
+        switch (phase) {
+
+            case TASK_1:
+                return getLeverOpenTime(dataName, 13);
+
+            case TASK_2:
+                return getLeverOpenTime(dataName, 14);
+
+            case TASK_3:
+                return getLeverOpenTime(dataName, 15);
+
+            case EXPLORATION:
+                return getLeverOpenTime(dataName, 12);
+
+        }
+        return null;
+    }
+
+
+
+
+
+    private String getLeverOpenTime(String dataName, int i) {
+        String st = "select lo.leverID, time-st.startTime as t " +
+                "from mc_statistician.leveropentime as lo, (select startTime from mc_statistician.idplayermapping where name=\"" + dataName + "\") as st " +
+                "where name=\"" + dataName + "\" and leverID =" + i + ";";
+        List<Map<String, String>> results = executeSynchQuery(st);
+        assert results.size() == 1;
+
+        return results.get(0).get("t");
+    }
+
+
+
+
 
     private int getFloorForHeight(int height) {
         if (height > 33)
@@ -204,7 +317,7 @@ public class Database {
 
 
     public Collection<String> getDataNames() {
-        if(dataNames == null ){
+        if (dataNames == null) {
             initializeDataNames();
         }
         return dataNames;
@@ -224,6 +337,52 @@ public class Database {
         }
 
     }
+
+    public ListMultimap<String, Integer> getDataNameAndAttempts() {
+        if (dataNameAttemptMap == null) {
+            initializeDataNameAttemptMap();
+        }
+        return dataNameAttemptMap;
+    }
+
+    private void initializeDataNameAttemptMap() {
+        if(dataNames==null){
+            initializeDataNames();
+        }
+        this.dataNameAttemptMap = ArrayListMultimap.create();
+        for(String dataName:dataNames){
+            String name = getNameFromData(dataName);
+            Integer attempt = Integer.parseInt(getNumberFromData(dataName));
+            this.dataNameAttemptMap.put(name, attempt);
+
+
+        }
+
+
+
+
+    }
+
+    private String getNameFromData(String dataName) {
+        for(int i=0;i<dataName.length();i++){
+            if(Character.isDigit(dataName.charAt(i))){
+                return dataName.substring(0,i);
+            }
+        }
+        assert false;
+        return null;
+    }
+    private String getNumberFromData(String dataName) {
+        for(int i=0;i<dataName.length();i++){
+            if(Character.isDigit(dataName.charAt(i))){
+                return dataName.substring(i,dataName.length());
+            }
+        }
+        assert false;
+        return null;
+    }
+
+
 }
 
 

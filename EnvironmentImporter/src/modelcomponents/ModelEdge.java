@@ -23,4 +23,9 @@ public class ModelEdge {
     public long getTime() {
         return time;
     }
+
+    @Override
+    public String toString() {
+        return  time+"";
+    }
 }
