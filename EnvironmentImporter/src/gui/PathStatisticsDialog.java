@@ -1,9 +1,14 @@
 package gui;
 
 import com.google.common.collect.HashMultimap;
-import com.google.common.collect.Multiset;
 import database.Database;
 import database.StatisticChoice;
+import org.jfree.chart.ChartFactory;
+import org.jfree.chart.ChartPanel;
+import org.jfree.chart.JFreeChart;
+import org.jfree.chart.plot.PlotOrientation;
+import org.jfree.data.category.CategoryDataset;
+import org.jfree.data.category.DefaultCategoryDataset;
 
 import javax.swing.*;
 import java.awt.*;
@@ -11,7 +16,6 @@ import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.util.Collection;
 import java.util.HashSet;
-import java.util.Set;
 
 /**
  * Created with IntelliJ IDEA.
@@ -39,7 +43,7 @@ public class PathStatisticsDialog extends JDialog implements ActionListener {
 
 
         this.dataNameList = new HashSet<JCheckBox>();
-        this.setTitle("Vertex Statistics Options");
+        this.setTitle("Path Statistics Options");
 
         this.setSize(800, 200);
 
@@ -63,7 +67,7 @@ public class PathStatisticsDialog extends JDialog implements ActionListener {
     private void initialiseTopPanel() {
         initializeStatisticChoiceBox();
         initializePhaseChoiceBox();
-        topPanel.setLayout(new GridLayout(2,2));
+        topPanel.setLayout(new GridLayout(2, 2));
         topPanel.add(new JLabel("Choose Statistic:"));
         topPanel.add(statisticChoiceList);
         topPanel.add(new JLabel("Choose Phase:"));
@@ -75,13 +79,37 @@ public class PathStatisticsDialog extends JDialog implements ActionListener {
         Phase[] phases = new Phase[]{Phase.TASK_2, Phase.TASK_3};
 
 
-
         //Create the combo box, select item at index 4.
         //Indices start at 0, so 4 specifies the pig.
         phaseChoiceList = new JComboBox(phases);
         phaseChoiceList.setSelectedIndex(0);
         phaseChoiceList.addActionListener(this);
         phaseChoiceList.setEditable(false);
+    }
+    private void initialiseButtonPanel() {
+        bOk.setPreferredSize(new Dimension(100, 20));
+        bCancel.setPreferredSize(new Dimension(100, 20));
+
+        bOk.addActionListener(this);
+        bCancel.addActionListener(this);
+
+        buttonPanel.setLayout(new FlowLayout());
+        buttonPanel.add(bOk);
+        buttonPanel.add(bCancel);
+    }
+
+    public void initialiseDataNameList() {
+        Collection<String> dataNames = Database.getInstance().getDataNames();
+
+        this.dataNameList.clear();
+        for (String name : dataNames) {
+            JCheckBox cBox = new JCheckBox(name);
+            cBox.setSelected(true);
+            this.dataNameList.add(cBox);
+
+
+        }
+
     }
 
     private void initializeMainPanel() {
@@ -109,7 +137,7 @@ public class PathStatisticsDialog extends JDialog implements ActionListener {
 
 
         if (event.getSource() == bOk) {
-            this.getStatistics((Phase)phaseChoiceList.getSelectedItem(),(String) statisticChoiceList.getSelectedItem());
+            this.getStatistics((Phase) phaseChoiceList.getSelectedItem(), (String) statisticChoiceList.getSelectedItem());
 
 
             this.setVisible(false);
@@ -140,54 +168,71 @@ public class PathStatisticsDialog extends JDialog implements ActionListener {
 
         if (!dataNames.isEmpty()) {
 
-            display(((NetworkModel) NetworkModel.instance()).getPathDataFor(dataNames,phase, choice));
+            displayChart(((NetworkModel) NetworkModel.instance()).getPathDataFor(dataNames, phase, choice), phase);
         } else {
             System.out.println("No data to display!!");
         }
 
     }
 
+    private void displayChart(HashMultimap<String, String> data, Phase phase) {
+        final CategoryDataset dataSet = createDataSet(data, phase);
+        final JFreeChart chart = createChart(dataSet);
+        final ChartPanel chartPanel = new ChartPanel(chart);
+        chartPanel.setPreferredSize(new Dimension(500, 270));
+        JFrame frame = new JFrame("Path Statistics");
+        frame.setContentPane(chartPanel);
+        frame.setVisible(true);
+        frame.setSize(new Dimension(520,300));
+    }
+
+    private JFreeChart createChart(CategoryDataset dataset) {
+        // create the chart...
+        final JFreeChart chart = ChartFactory.createBarChart(
+                "Path Statistics",         // chart title
+                "",               // domain axis label
+                "Number",                  // range axis label
+                dataset,                  // data
+                PlotOrientation.VERTICAL, // orientation
+                true,                     // include legend
+                true,                     // tooltips?
+                false                     // URLs?
+        );
 
 
-    private void display(HashMultimap<String, String> data) {
-        if(data==null){
-            System.out.println("No Data!!");
-            return;
-        }
-        System.out.println("Path \t Frequency \t Users");
-        for (String path : data.keySet()) {
 
+        return chart;
+    }
 
-            System.out.println(path + "\t" + data.get(path).size() +"\t"+data.get(path) );
+    private CategoryDataset createDataSet(HashMultimap<String, String> data, Phase phase) {
+        if (phase == Phase.TASK_2) {
+            final String thirdFloor = "3rd Floor";
+            final String secondFloor = "2nd Floor";
+            final DefaultCategoryDataset dataSet = new DefaultCategoryDataset();
 
+            for (String path : data.keySet()) {
+                String category = path.substring(0,1) .equals("2")?secondFloor:thirdFloor;
+                dataSet.addValue(data.get(path).size(), path, category);
+            }
 
+            return dataSet;
+        } else if(phase == Phase.TASK_3){
+            final DefaultCategoryDataset dataSet = new DefaultCategoryDataset();
+            for (String path : data.keySet()) {
+
+                dataSet.addValue(data.get(path).size(), path, "default");
+            }
+            return dataSet;
+
+        } else{
+            return null;
         }
     }
 
 
-    private void initialiseButtonPanel() {
-        bOk.setPreferredSize(new Dimension(100, 20));
-        bCancel.setPreferredSize(new Dimension(100, 20));
-
-        bOk.addActionListener(this);
-        bCancel.addActionListener(this);
-
-        buttonPanel.setLayout(new FlowLayout());
-        buttonPanel.add(bOk);
-        buttonPanel.add(bCancel);
-    }
-
-    public void initialiseDataNameList() {
-        Collection<String> dataNames = Database.getInstance().getDataNames();
-
-        this.dataNameList.clear();
-        for (String name : dataNames) {
-            this.dataNameList.add(new JCheckBox(name));
 
 
-        }
 
-    }
 
 
 

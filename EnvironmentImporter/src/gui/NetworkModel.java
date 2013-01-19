@@ -463,7 +463,7 @@ public class NetworkModel extends MainPanel {
                     }
                 }
                 if (!added) {
-                    result.put("Floor3lost", name);
+                    result.put("3Lost", name);
                 }
             }
 
@@ -483,7 +483,7 @@ public class NetworkModel extends MainPanel {
                     }
                 }
                 if (!added) {
-                    result.put("Floor2lost", name);
+                    result.put("2Lost", name);
                 }
             }
             result.get("2LessConf").removeAll(result.get("2Perfect"));
