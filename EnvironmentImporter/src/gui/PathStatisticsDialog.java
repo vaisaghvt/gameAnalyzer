@@ -72,10 +72,13 @@ public class PathStatisticsDialog extends JDialog implements ActionListener {
 
     private void initializePhaseChoiceBox() {
 
+        Phase[] phases = new Phase[]{Phase.TASK_2, Phase.TASK_3};
+
+
 
         //Create the combo box, select item at index 4.
         //Indices start at 0, so 4 specifies the pig.
-        phaseChoiceList = new JComboBox(Phase.values());
+        phaseChoiceList = new JComboBox(phases);
         phaseChoiceList.setSelectedIndex(0);
         phaseChoiceList.addActionListener(this);
         phaseChoiceList.setEditable(false);
