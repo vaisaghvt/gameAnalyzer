@@ -11,12 +11,16 @@ import edu.uci.ics.jung.graph.UndirectedSparseGraph;
 import edu.uci.ics.jung.visualization.VisualizationViewer;
 import edu.uci.ics.jung.visualization.control.DefaultModalGraphMouse;
 import edu.uci.ics.jung.visualization.control.ModalGraphMouse;
+import edu.uci.ics.jung.visualization.control.PluggableGraphMouse;
 import edu.uci.ics.jung.visualization.decorators.ToStringLabeller;
 import edu.uci.ics.jung.visualization.renderers.Renderer.VertexLabel.Position;
 import modelcomponents.*;
 import org.apache.commons.collections15.Transformer;
 
+import javax.swing.*;
 import java.awt.*;
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
 import java.util.*;
 import java.util.List;
 
@@ -30,13 +34,14 @@ import static database.StatisticChoice.VERTEX_VISIT_FREQUENCY;
  * Time: 4:47 PM
  * To change this template use File | Settings | File Templates.
  */
-public class NetworkModel extends MainPanel {
+public class NetworkModel extends MainPanel implements ActionListener {
 
 
     /**
      * @author Dr. Greg M. Bernstein
      */
 
+    private final JMenu menu = new JMenu("Select Path");
     Graph<ModelObject, ModelEdge> completeGraph;
     Graph<ModelObject, ModelEdge> currentGraph;
     HashMap<Integer, ModelArea> idAreaMapping;
@@ -46,6 +51,20 @@ public class NetworkModel extends MainPanel {
     private String currentData;
     HashMap<Integer, ModelGroup> areaIdGroupMapping;
     private HashSet<Phase> selectedPhases;
+    private JMenuItem mi3Shortest = new JMenuItem("3Shortest");
+    private JMenuItem mi3Norm = new JMenuItem("3Norm");
+    private JMenuItem mi2Perfect = new JMenuItem("2Perfect");
+    private JMenuItem mi2Confuse = new JMenuItem("2Confuse");
+    private JMenuItem mi2Weird = new JMenuItem("2Weird");
+    private JMenuItem miPath1 = new JMenuItem("Shortest");
+    private JMenuItem miPath2 = new JMenuItem("Path2");
+    private JMenuItem miPath3 = new JMenuItem("Path3");
+    private JMenuItem miPath4 = new JMenuItem("Path4");
+    private JMenuItem miPath5 = new JMenuItem("Path5");
+    private HashMap<AbstractButton, String[]> nameToPathMapping;
+    private AbstractButton miPath6 = new JMenuItem("Path6");
+    private HashSet<String> highlightedVertices;
+    private VisualizationViewer<ModelObject, ModelEdge> vv;
 
 
     /**
@@ -55,9 +74,26 @@ public class NetworkModel extends MainPanel {
 //        NetworkModel sgv = new NetworkModel(); // This builds the graph
 //        // Layout<V, E>, VisualizationComponent<V,E>
 
+        highlightedVertices = new HashSet<String>();
+        nameToPathMapping = new HashMap<AbstractButton, String[]>();
+        nameToPathMapping.put(mi3Shortest, new String[]{"gallery", "Study1", "3Corr", "s3to2"});
+        nameToPathMapping.put(mi3Norm, new String[]{"gallery", "3Corr", "s3to2"});
+
+        nameToPathMapping.put(miPath1, new String[]{"LibraryG", "CorridorGB", "1MainJunc"});
+        nameToPathMapping.put(miPath2, new String[]{"LibraryG", "CorridorGA2", "Conf 2", "SPCorr"});
+        nameToPathMapping.put(miPath3, new String[]{"LibraryG", "CorridorGA2", "CorridorGA1", "1MainJunc"});
+        nameToPathMapping.put(miPath4, new String[]{"LibraryG", "CorridorGA2", "CorridorGA1", "Conf 2", "SPCorr"});
+        nameToPathMapping.put(miPath5, new String[]{"2CorrAMain", "92", "129", "left 2 stair", "left G main", "CorridorGA1", "1MainJunc"});
+        nameToPathMapping.put(miPath6, new String[]{"2CorrAMain", "92", "129", "right 2 stair", "right G main", "CorridorGB", "1MainJunc"});
+
+        nameToPathMapping.put(mi2Perfect, new String[]{"s2to3", "WayToFlr3", "2CorrC", "92", "2CorrAMain", "Library2"});
+        nameToPathMapping.put(mi2Confuse, new String[]{"s2to3", "WayToFlr3", "2CorrC", "92", "129", "2CorrAMain", "Library2", "2DormCorr", "2nowhereCorr", "2CorrC"});
+        nameToPathMapping.put(mi2Weird, new String[]{"s2to3", "WayToFlr3", "2CorrC", "2PassB", "DB2", "MB1", "MB3", "TheLounge", "2CorrASide"});
+
 
         currentData = null;
         selectedPhases = new HashSet<Phase>();
+        this.recreateContextMenu();
 
     }
 
@@ -114,6 +150,7 @@ public class NetworkModel extends MainPanel {
         currentData = "default";
         currentGraph = completeGraph;
 
+        this.recreateContextMenu();
         redrawPanel();
     }
 
@@ -127,9 +164,12 @@ public class NetworkModel extends MainPanel {
         }
     }
 
-    public void setDisplay(String dataName) {
+    public void setDisplay(String dataName, boolean b) {
+        if(!b)
+            highlightedVertices.clear();
         if (dataName.equalsIgnoreCase("default")) {
             currentGraph = completeGraph;
+            this.recreateContextMenu();
             selectedPhases.clear();
         } else {
 
@@ -319,7 +359,7 @@ public class NetworkModel extends MainPanel {
 
 
         layout.setSize(new Dimension(1600, 900));
-        VisualizationViewer<ModelObject, ModelEdge> vv = new VisualizationViewer<ModelObject, ModelEdge>(layout);
+        vv = new VisualizationViewer<ModelObject, ModelEdge>(layout);
         vv.setPreferredSize(new Dimension(1600, 900));
         // Setup up a new vertex to paint transformer...
 
@@ -328,6 +368,9 @@ public class NetworkModel extends MainPanel {
         DefaultModalGraphMouse gm = new DefaultModalGraphMouse();
         gm.setMode(ModalGraphMouse.Mode.PICKING);
         vv.setGraphMouse(gm);
+//        PluggableGraphMouse gm = new PluggableGraphMouse();
+//        gm.add(new PopupVertexEdgeMenuMousePlugin<ModelObject, ModelEdge>());
+
 
         vv.getRenderContext().setVertexFillPaintTransformer(new SimpleFloorColoringTransformer<ModelObject, Paint>());
         vv.getRenderContext().setVertexShapeTransformer(new VertexRectangleTransformer<ModelObject, Shape>());
@@ -337,7 +380,9 @@ public class NetworkModel extends MainPanel {
         vv.getRenderer().getVertexLabelRenderer().setPosition(Position.CNTR);
 
 
+
         this.add(vv);
+        vv.revalidate();
         this.revalidate();
     }
 
@@ -367,10 +412,30 @@ public class NetworkModel extends MainPanel {
     }
 
 
+
+
+
+    @Override
+    public void actionPerformed(ActionEvent event) {
+
+        highlightedVertices.clear();
+        highlightedVertices.addAll(Arrays.asList(nameToPathMapping.get(event.getSource())));
+
+        this.setDisplay(currentData, true);
+    }
+
+
     private class SimpleFloorColoringTransformer<ModelObject, Paint> implements Transformer<ModelObject, Paint> {
         @Override
         public Paint transform(ModelObject obj) {
             ModelArea area;
+
+            if(highlightedVertices!=null){
+                if(highlightedVertices.contains(obj.toString())){
+                    return (Paint) Color.RED;
+                }
+
+            }
 
             if (!(obj instanceof ModelArea)) {
                 area = idAreaMapping.get(((ModelGroup) obj).getAreaIds().iterator().next());
@@ -423,12 +488,13 @@ public class NetworkModel extends MainPanel {
 
         if (phase == Phase.TASK_3) {
             HashMap<String, String[]> paths = new HashMap<String, String[]>();
-            paths.put("Shortest", new String[]{"LibraryG", "CorridorGB", "1MainJunc"});
-            paths.put("Path 2", new String[]{"LibraryG", "CorridorGA2", "Conf 2", "SPCorr"});
-            paths.put("Path 3", new String[]{"LibraryG", "CorridorGA2", "CorridorGA1", "1MainJunc"});
-            paths.put("Path 4", new String[]{"LibraryG", "CorridorGA2", "CorridorGA1", "Conf 2", "SPCorr"});
-            paths.put("Path 5", new String[]{"2CorrAMain", "92", "129", "left 2 stair", "left G main", "CorridorGA1", "1MainJunc"});
-            paths.put("Path 6", new String[]{"2CorrAMain", "92", "129", "right 2 stair", "right G main", "CorridorGB", "1MainJunc"});
+            paths.put(miPath1.getText(), nameToPathMapping.get(miPath1));
+            paths.put(miPath2.getText(), nameToPathMapping.get(miPath2));
+            paths.put(miPath3.getText(), nameToPathMapping.get(miPath3));
+            paths.put(miPath4.getText(), nameToPathMapping.get(miPath4));
+            paths.put(miPath5.getText(), nameToPathMapping.get(miPath5));
+            paths.put(miPath6.getText(), nameToPathMapping.get(miPath6));
+
             for (String name : dataNames) {
                 assert dataNameGraphMap.containsKey(name);
                 boolean added = false;
@@ -449,8 +515,8 @@ public class NetworkModel extends MainPanel {
         } else if (phase == Phase.TASK_2) {
 
             HashMap<String, String[]> pathForFloor3 = new HashMap<String, String[]>();
-            pathForFloor3.put("3Shortest", new String[]{"gallery", "Study1", "3Corr", "s3to2"});
-            pathForFloor3.put("3Norm", new String[]{"gallery", "3Corr", "s3to2"});
+            pathForFloor3.put(mi3Shortest.getText(), nameToPathMapping.get(mi3Shortest));
+            pathForFloor3.put(mi3Norm.getText(), nameToPathMapping.get(mi3Norm));
             for (String name : dataNames) {
                 assert dataNameGraphMap.containsKey(name);
                 boolean added = false;
@@ -468,9 +534,10 @@ public class NetworkModel extends MainPanel {
             }
 
             HashMap<String, String[]> pathForFloor2 = new HashMap<String, String[]>();
-            pathForFloor2.put("2Perfect", new String[]{"s2to3", "WayToFlr3", "2CorrC", "92", "2CorrAMain", "Library2"});
-            pathForFloor2.put("2LessConf", new String[]{"s2to3", "WayToFlr3", "2CorrC", "92","129", "2CorrAMain", "Library2", "2DormCorr", "2nowhereCorr", "2CorrC"});
-            pathForFloor2.put("2Weird", new String[]{"s2to3", "WayToFlr3", "2CorrC", "2PassB", "DB2", "MB1", "MB3", "TheLounge", "2CorrASide"});
+            pathForFloor2.put(mi2Perfect.getText(), nameToPathMapping.get(mi2Perfect));
+            pathForFloor2.put(mi2Confuse.getText(), nameToPathMapping.get(mi2Confuse));
+            pathForFloor2.put(mi2Weird.getText(), nameToPathMapping.get(mi2Weird));
+
             for (String name : dataNames) {
                 assert dataNameGraphMap.containsKey(name);
                 boolean added = false;
@@ -530,16 +597,16 @@ public class NetworkModel extends MainPanel {
 
 
         }
-        if(level ==1){
-            if(graph.getVertexCount()==0){
+        if (level == 1) {
+            if (graph.getVertexCount() == 0) {
                 return true;
-            }else{
+            } else {
                 return false;
             }
-        }else{
-            if(graph.getVertexCount()==0 &&pathVertices.isEmpty()){
+        } else {
+            if (graph.getVertexCount() == 0 && pathVertices.isEmpty()) {
                 return true;
-            }else{
+            } else {
                 return false;
             }
         }
@@ -653,6 +720,48 @@ public class NetworkModel extends MainPanel {
         }
         return result;
     }
+
+    public JMenu getContextMenu(){
+        return this.menu;
+    }
+
+    void recreateContextMenu() {
+        //context menu
+        menu.removeAll();
+
+
+        menu.add(mi3Shortest);
+        menu.add(mi3Norm);
+
+        menu.add(mi2Perfect);
+        menu.add(mi2Confuse);
+        menu.add(mi2Weird);
+
+        mi3Shortest.addActionListener(this);
+        mi3Norm.addActionListener(this);
+        mi2Perfect.addActionListener(this);
+        mi2Confuse.addActionListener(this);
+        mi2Weird.addActionListener(this);
+
+
+        menu.add(miPath1);
+        menu.add(miPath2);
+        menu.add(miPath3);
+        menu.add(miPath4);
+        menu.add(miPath5);
+        menu.add(miPath6);
+
+        miPath1.addActionListener(this);
+        miPath2.addActionListener(this);
+        miPath3.addActionListener(this);
+        miPath4.addActionListener(this);
+        miPath5.addActionListener(this);
+        miPath6.addActionListener(this);
+
+
+    }
+
+
 
 }
 

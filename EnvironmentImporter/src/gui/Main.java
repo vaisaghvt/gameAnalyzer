@@ -499,16 +499,22 @@ public class Main extends JFrame implements ActionListener, MouseListener, Mouse
             JMenuItem item = (JMenuItem) event.getSource();
 
 
-            ((NetworkModel) mainPanel).setDisplay(item.getText());
+            ((NetworkModel) mainPanel).setDisplay(item.getText(), false);
             this.setTitle(item.getText() + " - Network Display");
             if (item.getText().equalsIgnoreCase("default")) {
                 mChoosePhase.setEnabled(false);
+                this.menuBar.add(((NetworkModel)mainPanel).getContextMenu());
+                ((NetworkModel)mainPanel).getContextMenu().setEnabled(true);
+                ((NetworkModel)mainPanel).getContextMenu().setVisible(true);
+                this.menuBar.revalidate();
             } else {
                 mChoosePhase.setEnabled(true);
                 miExplorationPhase.setSelected(true);
                 miTask1.setSelected(true);
                 miTask2.setSelected(true);
                 miTask3.setSelected(true);
+                this.menuBar.remove(((NetworkModel)mainPanel).getContextMenu());
+                this.menuBar.revalidate();
 
             }
 
@@ -522,6 +528,7 @@ public class Main extends JFrame implements ActionListener, MouseListener, Mouse
                 ((NetworkModel) mainPanel).switchOffPhase(Phase.EXPLORATION);
 
             }
+//            ((NetworkModel) mainPanel).recreateContextMenu();
         } else if (event.getSource() == miTask1) {
             if (miTask1.isSelected()) {
                 ((NetworkModel) mainPanel).switchOnPhase(Phase.TASK_1);
@@ -529,6 +536,7 @@ public class Main extends JFrame implements ActionListener, MouseListener, Mouse
                 ((NetworkModel) mainPanel).switchOffPhase(Phase.TASK_1);
 
             }
+//            ((NetworkModel) mainPanel).recreateContextMenu();
         } else if (event.getSource() == miTask2) {
             if (miTask2.isSelected()) {
                 ((NetworkModel) mainPanel).switchOnPhase(Phase.TASK_2);
@@ -536,6 +544,7 @@ public class Main extends JFrame implements ActionListener, MouseListener, Mouse
                 ((NetworkModel) mainPanel).switchOffPhase(Phase.TASK_2);
 
             }
+//            ((NetworkModel) mainPanel).recreateContextMenu();
         } else if (event.getSource() == miTask3) {
             if (miTask3.isSelected()) {
                 ((NetworkModel) mainPanel).switchOnPhase(Phase.TASK_3);
@@ -543,6 +552,7 @@ public class Main extends JFrame implements ActionListener, MouseListener, Mouse
                 ((NetworkModel) mainPanel).switchOffPhase(Phase.TASK_3);
 
             }
+//            ((NetworkModel) mainPanel).recreateContextMenu();
         } else {
             assert mainPanel instanceof MapImagePanel;
             Point actualPoint = MapImagePanel.convertToActualCoordinate(new Point(drawnX1, drawnY1), current.getCurrentFloor());
@@ -630,6 +640,7 @@ public class Main extends JFrame implements ActionListener, MouseListener, Mouse
             dataNameItems = null;
 
 
+
             ButtonGroup radioGroup = new ButtonGroup();
             dataNameItems = new HashSet<JRadioButtonMenuItem>();
             JRadioButtonMenuItem item = new JRadioButtonMenuItem("default");
@@ -652,8 +663,14 @@ public class Main extends JFrame implements ActionListener, MouseListener, Mouse
             mViewDataFor.setEnabled(true);
             mAnalysis.setEnabled(true);
 
+            this.menuBar.add(((NetworkModel)mainPanel).getContextMenu());
+            ((NetworkModel)mainPanel).getContextMenu().setEnabled(true);
+            ((NetworkModel)mainPanel).getContextMenu().setVisible(true);
+            this.menuBar.revalidate();
 
         } else if (type.equals("map")) {
+            this.menuBar.remove(((NetworkModel)mainPanel).getContextMenu());
+            this.menuBar.revalidate();
             mainPanel = MapImagePanel.instance();
             mainPanel.setDocument(current);
             invalidateImagePanel();
@@ -665,6 +682,9 @@ public class Main extends JFrame implements ActionListener, MouseListener, Mouse
             mChoosePhase.setEnabled(false);
 
             this.setTitle(current.name() + " - " + APPLICATION_TITLE);
+
+//            ((NetworkModel)mainPanel).getContextMenu().setEnabled(true);
+//            ((NetworkModel)mainPanel).getContextMenu().setVisible(true);
         } else {
         }
         this.getContentPane().add(mainPanel, BorderLayout.CENTER);

@@ -155,9 +155,9 @@ public class VertexStatisticsDialog extends JDialog implements ActionListener {
     private void getStatistics() {
 
         StatisticChoice choice;
-        if (((StatisticChoice) this.statisticChoiceList.getSelectedItem()) == StatisticChoice.VERTEX_VISIT_FREQUENCY) {
+        if (this.statisticChoiceList.getSelectedItem() == StatisticChoice.VERTEX_VISIT_FREQUENCY) {
             choice = StatisticChoice.VERTEX_VISIT_FREQUENCY;
-        } else if (((StatisticChoice) this.statisticChoiceList.getSelectedItem()) == StatisticChoice.TIME_SPENT_PER_VERTEX) {
+        } else if (this.statisticChoiceList.getSelectedItem() == StatisticChoice.TIME_SPENT_PER_VERTEX) {
             choice = StatisticChoice.TIME_SPENT_PER_VERTEX;
         } else {
             choice = null;
@@ -193,11 +193,12 @@ public class VertexStatisticsDialog extends JDialog implements ActionListener {
         for (String dataName : dataNameDataMap.keySet()) {
 
             HashMap<String, HashMap<String, Number>> dataForPerson = dataNameDataMap.get(dataName);
-            //Library
+
             HashMap<String, Number> library2Data = dataForPerson.get("Library2");
             HashMap<String, Number> libraryGData = dataForPerson.get("LibraryG");
             HashMap<String, Number> saunaData = dataForPerson.get("Sauna");
             HashMap<String, Number> galleryData = dataForPerson.get("Gallery");
+            HashMap<String, Number> startData = dataForPerson.get("StartingRoom");
             long valueForLibrary;
             if (library2Data != null) {
                 long library2Value = library2Data.get(phase.toString()) == null ? 0 : (library2Data.get(phase.toString())).longValue() ;
@@ -217,10 +218,17 @@ public class VertexStatisticsDialog extends JDialog implements ActionListener {
             } else {
                 valueForGallery =0;
             }
+            long valueForStart;
+            if (startData != null) {
+                valueForStart = startData.get(phase.toString()) == null ? 0 : startData.get(phase.toString()).longValue();
+            } else {
+                valueForStart =0;
+            }
             HashMap<String, Long> tempMap = new HashMap<String, Long>();
             tempMap.put("Library", valueForLibrary);
             tempMap.put("Gallery", valueForGallery);
             tempMap.put("Sauna", valueForSauna);
+            tempMap.put("StartingRoom", valueForStart);
             result.put(dataName, tempMap);
         }
         return result;
