@@ -13,12 +13,12 @@ import java.util.Collection;
  * Time: 12:39 PM
  * To change this template use File | Settings | File Templates.
  */
-public abstract class StatisticsHandler {
+public abstract class StatisticsHandler<T extends ConsoleDisplay, V extends ChartDisplay> {
 
-    ConsoleDisplay consoleDisplay;
-    ChartDisplay chartDisplay;
+    T consoleDisplay;
+    V chartDisplay;
 
-    protected StatisticsHandler(ChartDisplay chartDisplay,ConsoleDisplay consoleDisplay) {
+    protected StatisticsHandler(V chartDisplay,T consoleDisplay) {
         this.chartDisplay = chartDisplay;
 
         this.consoleDisplay = consoleDisplay;

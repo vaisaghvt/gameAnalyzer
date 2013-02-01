@@ -18,7 +18,7 @@ import java.util.HashMap;
  * Time: 12:46 PM
  * To change this template use File | Settings | File Templates.
  */
-public class PathHopStatisticHandler extends StatisticsHandler {
+public class PathHopStatisticHandler extends StatisticsHandler<PathHopConsoleDisplay, PathHopChartDisplay> {
 
 
 
@@ -39,7 +39,7 @@ public class PathHopStatisticHandler extends StatisticsHandler {
         HashMap<String, HashMap<String, String>> data = convertToActualData(pathData, hopsPerPhasePerPerson);
 
         this.chartDisplay.setTitle(choice.toString()+phase.toString());
-        ((PathHopChartDisplay)this.chartDisplay).setPhase(phase);
+        this.chartDisplay.setPhase(phase);
         this.chartDisplay.display(data);
         this.consoleDisplay.display(data);
 

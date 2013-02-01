@@ -18,7 +18,7 @@ import java.util.*;
  * Time: 12:46 PM
  * To change this template use File | Settings | File Templates.
  */
-public class RoomRememberedStatisticHandler extends StatisticsHandler {
+public class RoomRememberedStatisticHandler extends StatisticsHandler<RoomRepetitionConsoleDisplay, RoomRepetitionChartDisplay> {
 
 
 

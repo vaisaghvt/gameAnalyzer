@@ -16,7 +16,7 @@ import java.util.HashMap;
  * Time: 12:46 PM
  * To change this template use File | Settings | File Templates.
  */
-public class VertexVisitDurationStatisticHandler extends StatisticsHandler {
+public class VertexVisitDurationStatisticHandler extends StatisticsHandler<VertexConsoleDisplay, VertexChartDisplay> {
 
 
 

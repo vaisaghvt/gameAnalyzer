@@ -19,7 +19,7 @@ import java.util.Collection;
  * Time: 12:46 PM
  * To change this template use File | Settings | File Templates.
  */
-public class PathStatisticHandler extends StatisticsHandler {
+public class PathStatisticHandler extends StatisticsHandler<PathConsoleDisplay, PathChartDisplay> {
 
 
 

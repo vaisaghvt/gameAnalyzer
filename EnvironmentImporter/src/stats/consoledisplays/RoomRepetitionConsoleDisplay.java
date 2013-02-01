@@ -9,11 +9,11 @@ import java.util.HashMap;
  * Time: 1:05 PM
  * To change this template use File | Settings | File Templates.
  */
-public class RoomRepetitionConsoleDisplay extends ConsoleDisplay<HashMap<String, HashMap<String, String>>> {
+public class RoomRepetitionConsoleDisplay extends ConsoleDisplay<HashMap<String, HashMap<String, HashMap<String, String>>>> {
 
 
 
     @Override
-    public void display(HashMap<String, HashMap<String, String>> data) {
+    public void display(HashMap<String, HashMap<String, HashMap<String, String>>> data) {
     }
 }

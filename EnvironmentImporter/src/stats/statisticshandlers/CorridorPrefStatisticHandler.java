@@ -5,9 +5,8 @@ import gui.NetworkModel;
 import gui.Phase;
 import stats.StatisticChoice;
 import stats.chartdisplays.CorridorPrefChartDisplay;
-import stats.chartdisplays.StaircaseVisitChartDisplay;
 import stats.consoledisplays.CorridorPrefConsoleDisplay;
-import stats.consoledisplays.StaircaseVisitConsoleDisplay;
+
 
 import java.util.Collection;
 
@@ -18,7 +17,7 @@ import java.util.Collection;
  * Time: 12:46 PM
  * To change this template use File | Settings | File Templates.
  */
-public class CorridorPrefStatisticHandler extends StatisticsHandler {
+public class CorridorPrefStatisticHandler extends StatisticsHandler<CorridorPrefConsoleDisplay,CorridorPrefChartDisplay> {
 
 
 
@@ -35,11 +34,12 @@ public class CorridorPrefStatisticHandler extends StatisticsHandler {
         final StatisticChoice choice = StatisticChoice.CORRIDOR_PREFERENCE_MEASURE;
         HashMultimap<String, String> prefersCorridors =  ((NetworkModel) NetworkModel.instance()).getCorridorRelatedMotion(dataNames, phase);
         this.chartDisplay.setTitle(choice.toString()+phase.toString());
-        ((CorridorPrefChartDisplay)this.chartDisplay).setPhase(phase);
+        this.chartDisplay.setPhase(phase);
         this.chartDisplay.display(prefersCorridors);
         this.consoleDisplay.display(prefersCorridors);
 
     }
+
 
 
 

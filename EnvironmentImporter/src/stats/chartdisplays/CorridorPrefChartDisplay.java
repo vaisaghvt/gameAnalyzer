@@ -64,17 +64,6 @@ public class CorridorPrefChartDisplay extends ChartDisplay<HashMultimap<String, 
                 true,                     // tooltips?
                 false                     // URLs?
         );
-
-
         return chart;
-
     }
-
-
-
-
-
-
-
-
 }

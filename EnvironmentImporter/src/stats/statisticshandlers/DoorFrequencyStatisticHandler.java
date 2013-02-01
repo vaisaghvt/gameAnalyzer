@@ -18,7 +18,7 @@ import java.util.HashMap;
  * Time: 12:46 PM
  * To change this template use File | Settings | File Templates.
  */
-public class DoorFrequencyStatisticHandler extends StatisticsHandler {
+public class DoorFrequencyStatisticHandler extends StatisticsHandler<DoorFrequencyConsoleDisplay, DoorFrequencyChartDisplay> {
 
 
 
