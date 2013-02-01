@@ -51,8 +51,8 @@ public class Main extends JFrame implements ActionListener, MouseListener, Mouse
     private final JMenuItem miTask3 = new JCheckBoxMenuItem("Task 3");
 
     private final JMenu mAnalysis = new JMenu("Analyze");
-    private final JMenuItem miPathStatistics = new JMenuItem("Path Statistics");
-    private final JMenuItem miVertexStatistics = new JMenuItem("Vertex Statistics");
+    private final JMenuItem miStatistics = new JMenuItem("Statistics");
+
 
 
     private MainPanel mainPanel = null;
@@ -189,8 +189,8 @@ public class Main extends JFrame implements ActionListener, MouseListener, Mouse
         mView.add(this.mViewDataFor);
         mView.add(this.mChoosePhase);
 
-        mAnalysis.add(miPathStatistics);
-        mAnalysis.add(miVertexStatistics);
+        mAnalysis.add(miStatistics);
+
 
 
         miNew.addActionListener(this);
@@ -207,8 +207,8 @@ public class Main extends JFrame implements ActionListener, MouseListener, Mouse
         miTask1.addActionListener(this);
         miTask2.addActionListener(this);
         miTask3.addActionListener(this);
-        miPathStatistics.addActionListener(this);
-        miVertexStatistics.addActionListener(this);
+        miStatistics.addActionListener(this);
+
 
         this.setJMenuBar(menuBar);
     }
@@ -451,13 +451,10 @@ public class Main extends JFrame implements ActionListener, MouseListener, Mouse
             } else {
                 System.exit(0);
             }
-        } else if (event.getSource() == miPathStatistics) {
-            PathStatisticsDialog dialog = new PathStatisticsDialog();
+        } else if (event.getSource() == miStatistics) {
+            StatsDialog dialog = new StatsDialog();
             dialog.setVisible(true);
-        } else if (event.getSource() == miVertexStatistics) {
-            VertexStatisticsDialog dialog = new VertexStatisticsDialog();
-            dialog.setVisible(true);
-        } else if (event.getSource() == miNetworkView) {
+        }  else if (event.getSource() == miNetworkView) {
             if (miNetworkView.isSelected()) {
                 assert miNetworkView.isSelected() && !miRoomView.isSelected();
                 if (!(mainPanel instanceof NetworkModel) && current != null) {

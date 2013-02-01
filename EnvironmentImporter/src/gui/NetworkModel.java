@@ -2,16 +2,16 @@ package gui;
 
 import com.google.common.collect.HashMultimap;
 import database.Database;
-import database.StatisticChoice;
-import edu.uci.ics.jung.algorithms.layout.KKLayout;
+import stats.StatisticChoice;
 import edu.uci.ics.jung.algorithms.layout.Layout;
+import edu.uci.ics.jung.algorithms.layout.SpringLayout2;
 import edu.uci.ics.jung.graph.DirectedSparseMultigraph;
 import edu.uci.ics.jung.graph.Graph;
 import edu.uci.ics.jung.graph.UndirectedSparseGraph;
+import edu.uci.ics.jung.graph.util.Pair;
 import edu.uci.ics.jung.visualization.VisualizationViewer;
 import edu.uci.ics.jung.visualization.control.DefaultModalGraphMouse;
 import edu.uci.ics.jung.visualization.control.ModalGraphMouse;
-import edu.uci.ics.jung.visualization.control.PluggableGraphMouse;
 import edu.uci.ics.jung.visualization.decorators.ToStringLabeller;
 import edu.uci.ics.jung.visualization.renderers.Renderer.VertexLabel.Position;
 import modelcomponents.*;
@@ -24,8 +24,8 @@ import java.awt.event.ActionListener;
 import java.util.*;
 import java.util.List;
 
-import static database.StatisticChoice.TIME_SPENT_PER_VERTEX;
-import static database.StatisticChoice.VERTEX_VISIT_FREQUENCY;
+import static stats.StatisticChoice.TIME_SPENT_PER_VERTEX;
+import static stats.StatisticChoice.VERTEX_VISIT_FREQUENCY;
 
 /**
  * Created with IntelliJ IDEA.
@@ -55,6 +55,7 @@ public class NetworkModel extends MainPanel implements ActionListener {
     private JMenuItem mi3Norm = new JMenuItem("3Norm");
     private JMenuItem mi2Perfect = new JMenuItem("2Perfect");
     private JMenuItem mi2Confuse = new JMenuItem("2Confuse");
+    private JMenuItem mi2MoreConfuse = new JMenuItem("2MoreConfuse");
     private JMenuItem mi2Weird = new JMenuItem("2Weird");
     private JMenuItem miPath1 = new JMenuItem("Shortest");
     private JMenuItem miPath2 = new JMenuItem("Path2");
@@ -65,6 +66,7 @@ public class NetworkModel extends MainPanel implements ActionListener {
     private AbstractButton miPath6 = new JMenuItem("Path6");
     private HashSet<String> highlightedVertices;
     private VisualizationViewer<ModelObject, ModelEdge> vv;
+    private HashMap<String, HashMap<HashSet<Phase>, List<HashMap<String, Number>>>> nameToPhaseToMovementMap = new HashMap<String, HashMap<HashSet<Phase>, List<HashMap<String, Number>>>>();
 
 
     /**
@@ -76,18 +78,19 @@ public class NetworkModel extends MainPanel implements ActionListener {
 
         highlightedVertices = new HashSet<String>();
         nameToPathMapping = new HashMap<AbstractButton, String[]>();
-        nameToPathMapping.put(mi3Shortest, new String[]{"gallery", "Study1", "3Corr", "s3to2"});
-        nameToPathMapping.put(mi3Norm, new String[]{"gallery", "3Corr", "s3to2"});
+        nameToPathMapping.put(mi3Shortest, new String[]{"gallery", "Study1", "3Corr","S3StaircaseRoom", "s3to2"});
+        nameToPathMapping.put(mi3Norm, new String[]{"gallery", "3Corr","S3StaircaseRoom", "s3to2"});
 
         nameToPathMapping.put(miPath1, new String[]{"LibraryG", "CorridorGB", "1MainJunc"});
         nameToPathMapping.put(miPath2, new String[]{"LibraryG", "CorridorGA2", "Conf 2", "SPCorr"});
         nameToPathMapping.put(miPath3, new String[]{"LibraryG", "CorridorGA2", "CorridorGA1", "1MainJunc"});
         nameToPathMapping.put(miPath4, new String[]{"LibraryG", "CorridorGA2", "CorridorGA1", "Conf 2", "SPCorr"});
-        nameToPathMapping.put(miPath5, new String[]{"2CorrAMain", "92", "129", "left 2 stair", "left G main", "CorridorGA1", "1MainJunc"});
-        nameToPathMapping.put(miPath6, new String[]{"2CorrAMain", "92", "129", "right 2 stair", "right G main", "CorridorGB", "1MainJunc"});
+        nameToPathMapping.put(miPath5, new String[]{"2CorrAMain", "92", "ACToDown", "left 2 stair", "left G main", "CorridorGA1", "1MainJunc"});
+        nameToPathMapping.put(miPath6, new String[]{"2CorrAMain", "92", "ACToDown", "right 2 stair", "right G main", "CorridorGB", "1MainJunc"});
 
         nameToPathMapping.put(mi2Perfect, new String[]{"s2to3", "WayToFlr3", "2CorrC", "92", "2CorrAMain", "Library2"});
-        nameToPathMapping.put(mi2Confuse, new String[]{"s2to3", "WayToFlr3", "2CorrC", "92", "129", "2CorrAMain", "Library2", "2DormCorr", "2nowhereCorr", "2CorrC"});
+        nameToPathMapping.put(mi2Confuse, new String[]{"s2to3", "WayToFlr3", "2CorrC", "92", "ACToDown", "2CorrAMain", "Library2", "2DormCorr", "2nowhereCorr", "2CorrC"});
+        nameToPathMapping.put(mi2MoreConfuse, new String[]{"s2to3", "WayToFlr3", "2CorrC", "92", "ACToDown", "2CorrAMain", "Library2", "2DormCorr", "2nowhereCorr", "2CorrC", "Dorm 1", "Dorm 2"});
         nameToPathMapping.put(mi2Weird, new String[]{"s2to3", "WayToFlr3", "2CorrC", "2PassB", "DB2", "MB1", "MB3", "TheLounge", "2CorrASide"});
 
 
@@ -165,7 +168,7 @@ public class NetworkModel extends MainPanel implements ActionListener {
     }
 
     public void setDisplay(String dataName, boolean b) {
-        if(!b)
+        if (!b)
             highlightedVertices.clear();
         if (dataName.equalsIgnoreCase("default")) {
             currentGraph = completeGraph;
@@ -179,7 +182,7 @@ public class NetworkModel extends MainPanel implements ActionListener {
             selectedPhases.add(Phase.TASK_1);
             selectedPhases.add(Phase.TASK_2);
             selectedPhases.add(Phase.TASK_3);
-            List<HashMap<String, Number>> pathPoints = Database.getInstance().getMovementOfPlayer(dataName, selectedPhases);
+            List<HashMap<String, Number>> pathPoints = this.getMovementOfPlayer(dataName, selectedPhases);
             currentGraph = getDirectedGraphFromPoint(pathPoints);
         }
         currentData = dataName;
@@ -352,7 +355,7 @@ public class NetworkModel extends MainPanel implements ActionListener {
 
     private void redrawPanel() {
         this.removeAll();
-        Layout<ModelObject, ModelEdge> layout = new KKLayout<ModelObject, ModelEdge>(this.currentGraph);
+        Layout<ModelObject, ModelEdge> layout = new SpringLayout2<ModelObject, ModelEdge>(this.currentGraph);
 ////        ((FRLayout2)layout).setMaxIterations(3000);
 //        ((FRLayout2)layout).setAttractionMultiplier(2);
 //        ((FRLayout2)layout).setRepulsionMultiplier(0.25);
@@ -380,7 +383,6 @@ public class NetworkModel extends MainPanel implements ActionListener {
         vv.getRenderer().getVertexLabelRenderer().setPosition(Position.CNTR);
 
 
-
         this.add(vv);
         vv.revalidate();
         this.revalidate();
@@ -396,7 +398,7 @@ public class NetworkModel extends MainPanel implements ActionListener {
 
     public void switchOnPhase(Phase phase) {
         selectedPhases.add(phase);
-        List<HashMap<String, Number>> pathPoints = Database.getInstance().getMovementOfPlayer(currentData, selectedPhases);
+        List<HashMap<String, Number>> pathPoints = this.getMovementOfPlayer(currentData, selectedPhases);
 //        System.out.println(pathPoints.size());
         this.currentGraph = getDirectedGraphFromPoint(pathPoints);
         redrawPanel();
@@ -404,15 +406,12 @@ public class NetworkModel extends MainPanel implements ActionListener {
 
     public void switchOffPhase(Phase phase) {
         selectedPhases.remove(phase);
-        List<HashMap<String, Number>> pathPoints = Database.getInstance().getMovementOfPlayer(currentData, selectedPhases);
+        List<HashMap<String, Number>> pathPoints = this.getMovementOfPlayer(currentData, selectedPhases);
         this.currentGraph = getDirectedGraphFromPoint(pathPoints);
 //        System.out.println(currentGraph.getVertexCount());
 
         redrawPanel();
     }
-
-
-
 
 
     @Override
@@ -424,14 +423,264 @@ public class NetworkModel extends MainPanel implements ActionListener {
         this.setDisplay(currentData, true);
     }
 
+    public HashMap<String, HashMap<String, Integer>> getHopDataFor(Collection<String> dataNames) {
+
+
+        HashSet<Phase> phases = new HashSet<Phase>();
+
+        HashMap<String, HashMap<String, Integer>> result = new HashMap<String, HashMap<String, Integer>>();
+        for (String dataName : dataNames) {
+            System.out.println("Processing " + dataName + "...");
+            result.put(dataName, new HashMap<String, Integer>());
+            for (Phase phase : Phase.values()) {
+                phases.clear();
+                phases.add(phase);
+                List<HashMap<String, Number>> pathPoints = this.getMovementOfPlayer(dataName, phases);
+                DirectedSparseMultigraph<ModelObject, ModelEdge> localGraph = (DirectedSparseMultigraph<ModelObject, ModelEdge>) getDirectedGraphFromPoint(pathPoints);
+                HashMap<String, Integer> map = result.get(dataName);
+                map.put(phase.toString(), localGraph.getEdgeCount());
+                result.put(dataName, map);
+
+            }
+
+        }
+
+        return result;
+    }
+
+    private List<HashMap<String, Number>> getMovementOfPlayer(String dataName, HashSet<Phase> phases) {
+        List<HashMap<String, Number>> result;
+        if (!this.nameToPhaseToMovementMap.containsKey(dataName) || !this.nameToPhaseToMovementMap.get(dataName).containsKey(phases)) {
+            result = Database.getInstance().getMovementOfPlayer(dataName, phases);
+            HashMap<HashSet<Phase>, List<HashMap<String, Number>>> dataForName = this.nameToPhaseToMovementMap.get(dataName);
+            if (dataForName == null) {
+                dataForName = new HashMap<HashSet<Phase>, List<HashMap<String, Number>>>();
+            }
+            dataForName.put(phases, result);
+            this.nameToPhaseToMovementMap.put(dataName, dataForName);
+        } else {
+
+            result = this.nameToPhaseToMovementMap.get(dataName).get(phases);
+
+        }
+        return result;
+    }
+
+    public HashMultimap<String, String> getStaircaseRelatedMotion(Collection<String> dataNames, Phase phase) {
+        HashSet<Phase> phases = new HashSet<Phase>();
+        HashMultimap<String, String> result = HashMultimap.create();
+        phases.clear();
+        phases.add(phase);
+        for (String dataName : dataNames) {
+            System.out.println("Processing " + dataName + "...");
+
+
+            List<HashMap<String, Number>> pathPoints = this.getMovementOfPlayer(dataName, phases);
+            DirectedSparseMultigraph<ModelObject, ModelEdge> localGraph = (DirectedSparseMultigraph<ModelObject, ModelEdge>) getDirectedGraphFromPoint(pathPoints);
+
+            YES_NO_CHOICE resultTemp = usesStaircaseUnusually(localGraph, phase);
+            if (resultTemp == YES_NO_CHOICE.YES) {
+                result.put("yes", dataName);
+            } else if (resultTemp == YES_NO_CHOICE.NO) {
+                result.put("no", dataName);
+            } else {
+                result.put("maybe", dataName);
+            }
+
+        }
+
+        return result;
+    }
+
+    private YES_NO_CHOICE usesStaircaseUnusually(DirectedSparseMultigraph<ModelObject, ModelEdge> localGraph, Phase phase) {
+
+        if (phase == Phase.TASK_1) {
+            ModelObject b2staircaseRoom = findRoomByName(completeGraph, "BToDown");
+            ModelObject ac2staircaseRoom = findRoomByName(completeGraph, "ACToDown");
+            ModelObject secondFloorLib = findRoomByName(completeGraph, "Library2");
+//            ModelObject l3staircaseRoom = findRoomByName(localGraph, "S3StaircaseRoom");
+            boolean beenHere = false;
+
+            if (localGraph.containsVertex(ac2staircaseRoom)) {
+                beenHere = true;
+                if (localGraph.getSuccessors(ac2staircaseRoom).contains(findRoomByName(completeGraph, "left 2 stair")) || localGraph.getSuccessors(ac2staircaseRoom).contains(findRoomByName(completeGraph, "right 2 stair"))) {
+                    return YES_NO_CHOICE.YES;
+                }
+            }
+            if (localGraph.containsVertex(b2staircaseRoom)) {
+                beenHere = true;
+                if (localGraph.getSuccessors(b2staircaseRoom).contains(findRoomByName(completeGraph, "B2 Stairs"))) {
+                    return YES_NO_CHOICE.YES;
+                }
+            }
+
+            if (localGraph.containsVertex(secondFloorLib)) {
+                beenHere = true;
+                if (localGraph.getSuccessors(secondFloorLib).contains(findRoomByName(completeGraph, "LibraryG"))) {
+                    return YES_NO_CHOICE.YES;
+                }
+            }
+//          TODO : l3staircase Room implementation.
+// else if(localGraph.containsVertex(l3staircaseRoom)) {
+//                if(localGraph.getNeighbors(l3staircaseRoom).contains(findRoomByName(localGraph, "s3to2"))){
+//                    return true;
+//                }
+//            }
+            if (!beenHere) {
+                System.out.println("Not even come here");
+                return YES_NO_CHOICE.MAYBE;
+            }
+            return YES_NO_CHOICE.NO;
+
+
+        } else if (phase == Phase.TASK_2) {
+            ModelObject b2staircaseRoom = findRoomByName(completeGraph, "BToDown");
+            ModelObject ac2staircaseRoom = findRoomByName(completeGraph, "ACToDown");
+            ModelObject secondFloorLib = findRoomByName(completeGraph, "Library2");
+            boolean beenHere = false;
+            if (localGraph.containsVertex(ac2staircaseRoom)) {
+                beenHere = true;
+                if (localGraph.getSuccessors(ac2staircaseRoom).contains(findRoomByName(completeGraph, "left 2 stair")) || localGraph.getSuccessors(ac2staircaseRoom).contains(findRoomByName(completeGraph, "right 2 stair"))) {
+                    return YES_NO_CHOICE.YES;
+                }
+            }
+            if (localGraph.containsVertex(b2staircaseRoom)) {
+                beenHere = true;
+                if (localGraph.getSuccessors(b2staircaseRoom).contains(findRoomByName(completeGraph, "B2 Stairs"))) {
+                    return YES_NO_CHOICE.YES;
+                }
+            }
+            if (localGraph.containsVertex(secondFloorLib)) {
+                beenHere = true;
+                if (localGraph.getSuccessors(secondFloorLib).contains(findRoomByName(completeGraph, "LibraryG"))) {
+                    return YES_NO_CHOICE.YES;
+                }
+            }
+            //          TODO : l3staircase Room implementation.
+// else if(localGraph.containsVertex(l3staircaseRoom)) {
+//                if(localGraph.getNeighbors(l3staircaseRoom).contains(findRoomByName(localGraph, "s3to2"))){
+//                    return true;
+//                }
+//            }
+            if (!beenHere) {
+                System.out.println("Not even come here");
+                return YES_NO_CHOICE.MAYBE;
+            }
+            return YES_NO_CHOICE.NO;
+
+        } else if (phase == Phase.TASK_3) {
+            ModelObject secondFloorLib = findRoomByName(completeGraph, "Library2");
+
+            if (localGraph.containsVertex(secondFloorLib)) {
+                if (!localGraph.getSuccessors(secondFloorLib).contains(findRoomByName(completeGraph, "LibraryG"))) {
+                    return YES_NO_CHOICE.YES;
+                } else {
+                    return YES_NO_CHOICE.NO;
+                }
+            } else {
+                System.out.println("What?????");
+                return YES_NO_CHOICE.MAYBE;
+            }
+
+        }
+        System.out.println("INVALID!!!!");
+        return null;
+
+    }
+
+    public HashMultimap<String, Long> getVertexInTimesFor(String dataName) {
+        HashMultimap<String, Long> result = HashMultimap.create();
+
+        HashSet<Phase> phases = new HashSet<Phase>();
+        phases.clear();
+        phases.add(Phase.EXPLORATION);
+        List<HashMap<String, Number>> pathPoints = this.getMovementOfPlayer(dataName, phases);
+        DirectedSparseMultigraph<ModelObject, ModelEdge> localGraph = (DirectedSparseMultigraph<ModelObject, ModelEdge>) getDirectedGraphFromPoint(pathPoints);
+        for(ModelObject vertex: localGraph.getVertices()){
+            for(ModelEdge edge: localGraph.getInEdges(vertex)){
+                result.put(vertex.toString(), edge.getTime());
+
+            }
+        }
+        return result;
+
+    }
+
+    public HashMap<String, Integer> getEdgesForEachRoom(){
+        HashMap<String, Integer> result = new HashMap<String, Integer>();
+        for(ModelObject vertex: completeGraph.getVertices()){
+            result.put(vertex.toString(), completeGraph.degree(vertex));
+        }
+        return result;
+    }
+
+    public HashMultimap<String, String> getCorridorRelatedMotion(Collection<String> dataNames, Phase phase) {
+        HashSet<Phase> phases = new HashSet<Phase>();
+        HashMultimap<String, String> result = HashMultimap.create();
+        phases.clear();
+        phases.add(phase);
+        for (String dataName : dataNames) {
+            System.out.println("Processing " + dataName + "...");
+
+
+            List<HashMap<String, Number>> pathPoints = this.getMovementOfPlayer(dataName, phases);
+            DirectedSparseMultigraph<ModelObject, ModelEdge> localGraph = (DirectedSparseMultigraph<ModelObject, ModelEdge>) getDirectedGraphFromPoint(pathPoints);
+
+            YES_NO_CHOICE resultTemp = prefersCorridors(localGraph, phase);
+            if (resultTemp == YES_NO_CHOICE.YES) {
+                result.put("yes", dataName);
+            } else if (resultTemp == YES_NO_CHOICE.NO) {
+                result.put("no", dataName);
+            } else {
+                result.put("maybe", dataName);
+            }
+
+        }
+
+        return result;
+    }
+
+    private YES_NO_CHOICE prefersCorridors(DirectedSparseMultigraph<ModelObject, ModelEdge> localGraph, Phase phase) {
+        ModelObject db2 = findRoomByName(completeGraph, "DB2");
+        ModelObject mb1 = findRoomByName(completeGraph, "MB1");
+        ModelObject mb3 = findRoomByName(completeGraph, "MB3");
+        ModelObject theLounge = findRoomByName(completeGraph, "TheLounge");
+        ModelObject gallery = findRoomByName(completeGraph, "Gallery");
+        ModelObject study1 = findRoomByName(completeGraph, "Study1");
+        ModelObject mr = findRoomByName(completeGraph, "MR");
+        ModelObject study3 = findRoomByName(completeGraph, "Study3");
+
+        if (localGraph.containsVertex(db2)&& localGraph.containsVertex(mb1)&&
+                localGraph.isNeighbor(db2, mb1)) {
+            return YES_NO_CHOICE.NO;
+        }
+        if (localGraph.containsVertex(mb3)&& localGraph.containsVertex(theLounge)&&
+                localGraph.isNeighbor(mb3, theLounge)) {
+            return YES_NO_CHOICE.NO;
+        }
+        if (localGraph.containsVertex(mr)&& localGraph.containsVertex(study3)&&
+                localGraph.isNeighbor(mr, study3)) {
+            return YES_NO_CHOICE.NO;
+        }
+        if (localGraph.containsVertex(gallery)&& localGraph.containsVertex(study1)&&
+                localGraph.isNeighbor(gallery, study1)) {
+            return YES_NO_CHOICE.NO;
+        }
+        return YES_NO_CHOICE.YES;
+
+
+    }
+
+
+
 
     private class SimpleFloorColoringTransformer<ModelObject, Paint> implements Transformer<ModelObject, Paint> {
         @Override
         public Paint transform(ModelObject obj) {
             ModelArea area;
 
-            if(highlightedVertices!=null){
-                if(highlightedVertices.contains(obj.toString())){
+            if (highlightedVertices != null) {
+                if (highlightedVertices.contains(obj.toString())) {
                     return (Paint) Color.RED;
                 }
 
@@ -468,7 +717,7 @@ public class NetworkModel extends MainPanel implements ActionListener {
     }
 
     public HashMultimap<String, String> getPathDataFor(Collection<String> dataNames, Phase phase, StatisticChoice choice) {
-        assert choice == StatisticChoice.PATH_FREQUENCY;
+
         HashMap<String, DirectedSparseMultigraph<ModelObject, ModelEdge>> dataNameGraphMap;
         dataNameGraphMap = new HashMap<String, DirectedSparseMultigraph<ModelObject, ModelEdge>>();
 
@@ -479,7 +728,7 @@ public class NetworkModel extends MainPanel implements ActionListener {
         for (String dataName : dataNames) {
             System.out.println("Processing " + dataName + "...");
 
-            List<HashMap<String, Number>> pathPoints = Database.getInstance().getMovementOfPlayer(dataName, phases);
+            List<HashMap<String, Number>> pathPoints = this.getMovementOfPlayer(dataName, phases);
             dataNameGraphMap.put(dataName, (DirectedSparseMultigraph<ModelObject, ModelEdge>) getDirectedGraphFromPoint(pathPoints));
 
 
@@ -536,6 +785,7 @@ public class NetworkModel extends MainPanel implements ActionListener {
             HashMap<String, String[]> pathForFloor2 = new HashMap<String, String[]>();
             pathForFloor2.put(mi2Perfect.getText(), nameToPathMapping.get(mi2Perfect));
             pathForFloor2.put(mi2Confuse.getText(), nameToPathMapping.get(mi2Confuse));
+            pathForFloor2.put(mi2MoreConfuse.getText(), nameToPathMapping.get(mi2MoreConfuse));
             pathForFloor2.put(mi2Weird.getText(), nameToPathMapping.get(mi2Weird));
 
             for (String name : dataNames) {
@@ -553,7 +803,10 @@ public class NetworkModel extends MainPanel implements ActionListener {
                     result.put("2Lost", name);
                 }
             }
-            result.get("2LessConf").removeAll(result.get("2Perfect"));
+            result.get(mi2MoreConfuse.getText()).removeAll(result.get(mi2Confuse.getText()));
+            result.get(mi2Confuse.getText()).removeAll(result.get(mi2Perfect.getText()));
+
+
             return result;
         } else {
 
@@ -641,8 +894,8 @@ public class NetworkModel extends MainPanel implements ActionListener {
                 return vertex;
             }
         }
+        System.out.println("WARNING! COULDN'T FIND ROOM WITH NAME:" + roomName);
         assert false;
-        System.out.println("Couldn't find.. WARNING!!!");
         return null;
     }
 
@@ -656,7 +909,7 @@ public class NetworkModel extends MainPanel implements ActionListener {
         for (Phase phase : Phase.values()) {
             phases.clear();
             phases.add(phase);
-            List<HashMap<String, Number>> pathPoints = Database.getInstance().getMovementOfPlayer(dataName, phases);
+            List<HashMap<String, Number>> pathPoints = this.getMovementOfPlayer(dataName, phases);
             phaseGraphMap.put(phase, (DirectedSparseMultigraph<ModelObject, ModelEdge>) getDirectedGraphFromPoint(pathPoints));
 
         }
@@ -721,7 +974,56 @@ public class NetworkModel extends MainPanel implements ActionListener {
         return result;
     }
 
-    public JMenu getContextMenu(){
+    public HashMap<String, HashMap<String, Number>> getEdgeDataFor(String dataName) {
+
+        HashMap<Phase, DirectedSparseMultigraph<ModelObject, ModelEdge>> phaseGraphMap;
+        phaseGraphMap = new HashMap<Phase, DirectedSparseMultigraph<ModelObject, ModelEdge>>();
+
+        HashSet<Phase> phases = new HashSet<Phase>();
+        HashMap<String, HashMap<String, Number>> result = new HashMap<String, HashMap<String, Number>>();
+        for (Phase phase : Phase.values()) {
+            phases.clear();
+            phases.add(phase);
+            List<HashMap<String, Number>> pathPoints = this.getMovementOfPlayer(dataName, phases);
+            phaseGraphMap.put(phase, (DirectedSparseMultigraph<ModelObject, ModelEdge>) getDirectedGraphFromPoint(pathPoints));
+
+        }
+
+
+        for (Phase phase : Phase.values()) {
+            DirectedSparseMultigraph<ModelObject, ModelEdge> graph = phaseGraphMap.get(phase);
+            for (ModelEdge edge : graph.getEdges()) {
+                String edgeStringRepresentation = edgeToString(graph.getEndpoints(edge));
+                if (!result.containsKey(edgeStringRepresentation)) {
+                    result.put(edgeStringRepresentation, new HashMap<String, Number>());
+                }
+
+                HashMap<String, Number> map = result.get(edgeStringRepresentation);
+                Integer previousNumber = (Integer) map.get(phase.toString());
+                if (previousNumber == null) {
+                    map.put(phase.toString(), 0);
+                } else {
+                    map.put(phase.toString(), previousNumber + 1);
+                }
+                result.put(edgeStringRepresentation, map);
+
+
+            }
+        }
+
+
+        return result;
+    }
+
+    private String edgeToString(Pair<ModelObject> endpoints) {
+        TreeSet<String> set = new TreeSet<String>();
+        set.add(endpoints.getFirst().toString());
+        set.add(endpoints.getSecond().toString());
+        return set.pollFirst() + "to" + set.pollLast();
+
+    }
+
+    public JMenu getContextMenu() {
         return this.menu;
     }
 
@@ -735,12 +1037,14 @@ public class NetworkModel extends MainPanel implements ActionListener {
 
         menu.add(mi2Perfect);
         menu.add(mi2Confuse);
+        menu.add(mi2MoreConfuse);
         menu.add(mi2Weird);
 
         mi3Shortest.addActionListener(this);
         mi3Norm.addActionListener(this);
         mi2Perfect.addActionListener(this);
         mi2Confuse.addActionListener(this);
+        mi2MoreConfuse.addActionListener(this);
         mi2Weird.addActionListener(this);
 
 
@@ -760,7 +1064,6 @@ public class NetworkModel extends MainPanel implements ActionListener {
 
 
     }
-
 
 
 }

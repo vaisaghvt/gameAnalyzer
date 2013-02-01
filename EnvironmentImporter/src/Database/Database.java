@@ -4,7 +4,6 @@ import com.google.common.collect.ArrayListMultimap;
 import com.google.common.collect.ListMultimap;
 import gui.Phase;
 
-import javax.vecmath.Point3d;
 import java.awt.*;
 import java.sql.*;
 import java.util.*;
@@ -110,6 +109,8 @@ public class Database {
     }
 
     public List<HashMap<String, Number>> getMovementOfPlayer(String dataName, HashSet<Phase> selectedPhases) {
+
+
 
         String exploreCompleteTime = getPhaseCompleteTime(Phase.EXPLORATION, dataName);
         String task1CompleteTime = getPhaseCompleteTime(Phase.TASK_1, dataName);
@@ -224,11 +225,20 @@ public class Database {
 
 
     private String getLeverOpenTime(String dataName, int i) {
-        String st = "select lo.leverID, time-st.startTime as t " +
+        String st;
+        if(i>12){
+            st = "select lo.leverID, time-st.startTime as t " +
                 "from mc_statistician.leveropentime as lo, (select startTime from mc_statistician.idplayermapping where name=\"" + dataName + "\") as st " +
                 "where name=\"" + dataName + "\" and leverID =" + i + ";";
+        }else{
+            st = "select lo.leverID, time-st.startTime as t " +
+                    "from mc_statistician.leveropentime as lo, " +
+                    "(select startTime from mc_statistician.idplayermapping " +
+                    "where name=\"" + dataName + "\") as st " +
+                    "where name=\"" + dataName + "\" and leverID NOT IN(13,14,15) ORDER BY t desc;";
+        }
         List<Map<String, String>> results = executeSynchQuery(st);
-        assert results.size() == 1;
+//        assert results.size() == 1;
 
         return results.get(0).get("t");
     }
