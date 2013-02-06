@@ -16,23 +16,46 @@ import java.util.List;
  * To change this template use File | Settings | File Templates.
  */
 public enum StatisticChoice {
-    VERTEX_VISIT_FREQUENCY("VertexVisitFrequencyStatisticHandler", Phase.EXPLORATION, Phase.TASK_1, Phase.TASK_2, Phase.TASK_3),
-    TIME_SPENT_PER_VERTEX("VertexVisitDurationStatisticHandler", Phase.EXPLORATION, Phase.TASK_1, Phase.TASK_2, Phase.TASK_3),
-    VERTEX_VISIT_TIMES("", Phase.EXPLORATION, Phase.TASK_1, Phase.TASK_2, Phase.TASK_3),
-    PATH_FREQUENCY("PathStatisticHandler", Phase.TASK_2, Phase.TASK_3),
-    DOOR_FREQUENCY("DoorFrequencyStatisticHandler", Phase.EXPLORATION, Phase.TASK_1, Phase.TASK_2, Phase.TASK_3),
-    PATH_HOP_RELATIONSHIP("PathHopStatisticHandler", Phase.TASK_2, Phase.TASK_3),
-    ROOM_REMEMBERED("RoomRememberedStatisticHandler", Phase.EXPLORATION, Phase.TASK_1),
-    STAIRCASE_VISIT_CHANCE("StaircaseVisitStatisticHandler", Phase.TASK_1, Phase.TASK_2, Phase.TASK_3),
-    CORRIDOR_PREFERENCE_MEASURE("CorridorPrefStatisticHandler", Phase.TASK_1, Phase.TASK_2, Phase.TASK_3),
-    REPETITION_FREQUENCY("RepetitionFrequencyStatisticHandler", Phase.EXPLORATION, Phase.TASK_1);
+    SIGNIFICANT_VERTEX_VISIT_FREQUENCY("SignificantVertexVisitFrequencyStatisticHandler","Find the visit frequency for" +
+            " the \"significant\" rooms"
+            , Phase.EXPLORATION, Phase.TASK_1, Phase.TASK_2, Phase.TASK_3),
+    TIME_SPENT_PER_SIGNIFICANT_VERTEX("SignificantVertexVisitDurationStatisticHandler",  "Time spent at the significant vertices",
+            Phase.EXPLORATION, Phase.TASK_1, Phase.TASK_2, Phase.TASK_3),
+    VERTEX_VISIT_FREQUENCY("VertexVisitFrequencyStatisticHandler","Find the visit frequency for" +
+            " the rooms"
+            , Phase.EXPLORATION, Phase.TASK_1, Phase.TASK_2, Phase.TASK_3),
+    TIME_SPENT_PER_VERTEX("VertexVisitDurationStatisticHandler",  "Time spent at the vertices",
+            Phase.EXPLORATION, Phase.TASK_1, Phase.TASK_2, Phase.TASK_3),
+    VERTEX_VISIT_TIMES("", "Time spent at the significant vertices",
+            Phase.EXPLORATION, Phase.TASK_1, Phase.TASK_2, Phase.TASK_3),
+    PATH_FREQUENCY("PathStatisticHandler","Histogram of paths",
+            Phase.TASK_2, Phase.TASK_3),
+    DOOR_FREQUENCY("SignificantDoorFrequencyStatisticHandler","Frequency of visit to significant doors",
+            Phase.EXPLORATION, Phase.TASK_1, Phase.TASK_2, Phase.TASK_3),
+    PATH_HOP_RELATIONSHIP("PathHopStatisticHandler","Total number of hops to path taken scatter plot",
+            Phase.TASK_2, Phase.TASK_3),
+    ROOM_REMEMBERED("RoomRememberedStatisticHandler","Correlation of experience to survey answer",
+            Phase.EXPLORATION, Phase.TASK_1),
+    STAIRCASE_VISIT_CHANCE("StaircaseVisitStatisticHandler","Chances of visit to a staircase",
+            Phase.TASK_1, Phase.TASK_2, Phase.TASK_3),
+    CORRIDOR_PREFERENCE_MEASURE("CorridorPrefStatisticHandler","Chances of preference for a corridor",
+            Phase.TASK_1, Phase.TASK_2, Phase.TASK_3),
+    DOOR_REPETITION_FREQUENCY("DoorRepetitionFrequencyStatisticHandler","the histogram of door usage repetition frequency",
+            Phase.EXPLORATION, Phase.TASK_1),
+    NODE_REPETITION_FREQUENCY("NodeRepetitionFrequencyStatisticHandler","The histogram of node usage repetition frequency",
+            Phase.EXPLORATION, Phase.TASK_1),
+    COVERAGE("CoverageStatisticHandler","The coverage of each agent",
+            Phase.EXPLORATION),
+    DISTANCE_TIME_STATISTIC("DistanceTimeStatisticHandler","Display distance and time taken by each agent");
 
     private List<Phase> phases;
     private StatisticsHandler statisticsHandler;
     private final String packageName = "stats.statisticshandlers.";
+    private final String description ;
 
-    StatisticChoice(String handler, Phase... phases) {
+    StatisticChoice(String handler,String description, Phase... phases) {
 
+        this.description =description;
 
         this.phases = new ArrayList<Phase>();
         for (Phase phase : phases) {

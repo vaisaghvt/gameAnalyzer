@@ -3,10 +3,8 @@ package stats.statisticshandlers;
 import gui.NetworkModel;
 import gui.Phase;
 import stats.StatisticChoice;
-import stats.chartdisplays.DoorFrequencyChartDisplay;
-import stats.chartdisplays.VertexChartDisplay;
-import stats.consoledisplays.DoorFrequencyConsoleDisplay;
-import stats.consoledisplays.VertexConsoleDisplay;
+import stats.chartdisplays.SignificantDoorFrequencyChartDisplay;
+import stats.consoledisplays.SignificantDoorFrequencyConsoleDisplay;
 
 import java.util.Collection;
 import java.util.HashMap;
@@ -18,13 +16,13 @@ import java.util.HashMap;
  * Time: 12:46 PM
  * To change this template use File | Settings | File Templates.
  */
-public class DoorFrequencyStatisticHandler extends StatisticsHandler<DoorFrequencyConsoleDisplay, DoorFrequencyChartDisplay> {
+public class SignificantDoorFrequencyStatisticHandler extends StatisticsHandler<SignificantDoorFrequencyConsoleDisplay, SignificantDoorFrequencyChartDisplay> {
 
 
 
-    public DoorFrequencyStatisticHandler() {
-        super(new DoorFrequencyChartDisplay(),
-                new DoorFrequencyConsoleDisplay()
+    public SignificantDoorFrequencyStatisticHandler() {
+        super(new SignificantDoorFrequencyChartDisplay(),
+                new SignificantDoorFrequencyConsoleDisplay()
         );
 
     }
@@ -77,12 +75,12 @@ public class DoorFrequencyStatisticHandler extends StatisticsHandler<DoorFrequen
                 valueForShort = 0;
             }
             long valueForLong;
-            if (secondFloorMain != null)
+            if (firstFloorLong != null)
                 valueForLong = firstFloorLong.get(phase.toString()) == null ? 0 : (firstFloorLong.get(phase.toString())).longValue();
             else
                 valueForLong = 0;
             long valueForSecondMain;
-            if (secondFloorSide != null) {
+            if (secondFloorMain != null) {
                 valueForSecondMain = secondFloorMain.get(phase.toString()) == null ? 0 : (secondFloorMain.get(phase.toString())).longValue();
             } else {
                 valueForSecondMain = 0;
@@ -95,7 +93,7 @@ public class DoorFrequencyStatisticHandler extends StatisticsHandler<DoorFrequen
             }
 
             long interLibraryValue;
-            if (secondFloorSide != null) {
+            if (interLibrary != null) {
                 interLibraryValue = interLibrary.get(phase.toString()) == null ? 0 : (interLibrary.get(phase.toString())).longValue();
             } else {
                 interLibraryValue = 0;

@@ -108,7 +108,7 @@ public class Database {
         }
     }
 
-    public List<HashMap<String, Number>> getMovementOfPlayer(String dataName, HashSet<Phase> selectedPhases) {
+    public List<HashMap<String, Number>> getMovementOfPlayer(String dataName, Collection<Phase> selectedPhases) {
 
 
 
@@ -391,6 +391,7 @@ public class Database {
         assert false;
         return null;
     }
+
 
 
 }

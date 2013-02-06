@@ -5,11 +5,10 @@ import com.google.common.collect.HashMultiset;
 import com.google.common.collect.Multiset;
 import gui.NetworkModel;
 import gui.Phase;
-import stats.StatisticChoice;
-import stats.chartdisplays.RepetitionFrequencyChartDisplay;
-import stats.chartdisplays.VertexChartDisplay;
-import stats.consoledisplays.RepetitionFrequencyConsoleDisplay;
-import stats.consoledisplays.VertexConsoleDisplay;
+import stats.chartdisplays.DoorRepetitionFrequencyChartDisplay;
+import stats.chartdisplays.NodeRepetitionFrequencyChartDisplay;
+import stats.consoledisplays.DoorRepetitionFrequencyConsoleDisplay;
+import stats.consoledisplays.NodeRepetitionFrequencyConsoleDisplay;
 
 import java.util.Collection;
 import java.util.HashMap;
@@ -23,13 +22,13 @@ import java.util.TreeSet;
  * Time: 12:46 PM
  * To change this template use File | Settings | File Templates.
  */
-public class RepetitionFrequencyStatisticHandler extends StatisticsHandler<RepetitionFrequencyConsoleDisplay, RepetitionFrequencyChartDisplay> {
+public class DoorRepetitionFrequencyStatisticHandler extends StatisticsHandler<DoorRepetitionFrequencyConsoleDisplay, DoorRepetitionFrequencyChartDisplay> {
 
 
 
-    public RepetitionFrequencyStatisticHandler() {
-        super(new RepetitionFrequencyChartDisplay(),
-                new RepetitionFrequencyConsoleDisplay()
+    public DoorRepetitionFrequencyStatisticHandler() {
+        super(new DoorRepetitionFrequencyChartDisplay(),
+                new DoorRepetitionFrequencyConsoleDisplay()
         );
 
     }
@@ -39,7 +38,7 @@ public class RepetitionFrequencyStatisticHandler extends StatisticsHandler<Repet
     public void generateAndDisplayStats(Collection<String> dataNames, Phase phase) {
         for (String dataName : dataNames) {
 //                String dataName = dataNames.iterator().next();
-            HashMultimap<String, Long> roomVisitTimeMap = ((NetworkModel) NetworkModel.instance()).getVertexInTimesFor(dataName);
+            HashMultimap<String, Long> roomVisitTimeMap = ((NetworkModel) NetworkModel.instance()).getDoorInTimesFor(dataName);
 
             HashMap<String, Integer> roomDegree = ((NetworkModel) NetworkModel.instance()).getEdgesForEachRoom();
             Multiset<Double> deltaTToFrequencyMapping = findDeltaTToFrequencyMapping(roomVisitTimeMap, roomDegree);

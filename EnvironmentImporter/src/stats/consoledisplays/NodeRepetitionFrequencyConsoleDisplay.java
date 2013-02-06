@@ -11,7 +11,7 @@ import java.util.HashMap;
  * Time: 1:05 PM
  * To change this template use File | Settings | File Templates.
  */
-public class RepetitionFrequencyConsoleDisplay extends ConsoleDisplay<Multiset<Double>> {
+public class NodeRepetitionFrequencyConsoleDisplay extends ConsoleDisplay<Multiset<Double>> {
 
 
 

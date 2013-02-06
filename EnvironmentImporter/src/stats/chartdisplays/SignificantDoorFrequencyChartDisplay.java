@@ -18,33 +18,33 @@ import java.util.HashMap;
  * Time: 1:13 PM
  * To change this template use File | Settings | File Templates.
  */
-public class VertexChartDisplay extends ChartDisplay<HashMap<String, Long>> {
+public class SignificantDoorFrequencyChartDisplay extends ChartDisplay<HashMap<String, HashMap<String, Long>>> {
 
 
 
 
 
     @Override
-    public void display(HashMap<String, Long> data) {
+    public void display(HashMap<String, HashMap<String, Long>> data) {
         final CategoryDataset dataSet = createDataSet(data);
         final JFreeChart chart = createChart(dataSet);
         final ChartPanel chartPanel = new ChartPanel(chart);
         chartPanel.setPreferredSize(new Dimension(500, 270));
-        JFrame frame = new JFrame(getTitle());
+        JFrame frame = new JFrame(this.getTitle());
         frame.setContentPane(chartPanel);
         frame.setVisible(true);
-        frame.setLocation(100,100);
         frame.setSize(new Dimension(520, 300));
     }
 
-
-    public CategoryDataset createDataSet(HashMap<String, Long> data) {
+    private CategoryDataset createDataSet(HashMap<String, HashMap<String, Long>> data) {
 
 
         final DefaultCategoryDataset dataSet = new DefaultCategoryDataset();
-        for (String roomName : data.keySet()) {
-            dataSet.addValue(data.get(roomName), roomName, "");
-
+        for (String dataName : data.keySet()) {
+            HashMap<String, Long> dataValue = data.get(dataName);
+            for (String room : dataValue.keySet()) {
+                dataSet.addValue(dataValue.get(room), dataName, room);
+            }
         }
 
         return dataSet;
@@ -52,22 +52,25 @@ public class VertexChartDisplay extends ChartDisplay<HashMap<String, Long>> {
     }
 
 
-    public JFreeChart createChart(CategoryDataset dataSet) {
+    private JFreeChart createChart(CategoryDataset dataset) {
         // create the chart...
         final JFreeChart chart = ChartFactory.createBarChart(
                 this.getTitle(),         // chart title
                 "Room",               // domain axis label
                 "Value",                  // range axis label
-                dataSet,                  // data
+                dataset,                  // data
                 PlotOrientation.VERTICAL, // orientation
                 false,                     // include legend
-                true,                     // tooltips?
+                false,                     // tooltips?
                 false                     // URLs?
         );
 
 
         return chart;
     }
+
+
+
 
 
 }

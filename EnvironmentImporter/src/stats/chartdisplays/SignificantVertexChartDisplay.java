@@ -6,6 +6,7 @@ import org.jfree.chart.JFreeChart;
 import org.jfree.chart.plot.PlotOrientation;
 import org.jfree.data.category.CategoryDataset;
 import org.jfree.data.category.DefaultCategoryDataset;
+import stats.consoledisplays.ConsoleDisplay;
 
 import javax.swing.*;
 import java.awt.*;
@@ -18,14 +19,14 @@ import java.util.HashMap;
  * Time: 1:13 PM
  * To change this template use File | Settings | File Templates.
  */
-public class VertexChartDisplay extends ChartDisplay<HashMap<String, Long>> {
+public class SignificantVertexChartDisplay extends ChartDisplay<HashMap<String, HashMap<String, Long>>> {
 
 
 
 
 
     @Override
-    public void display(HashMap<String, Long> data) {
+    public void display(HashMap<String, HashMap<String, Long>> data) {
         final CategoryDataset dataSet = createDataSet(data);
         final JFreeChart chart = createChart(dataSet);
         final ChartPanel chartPanel = new ChartPanel(chart);
@@ -38,13 +39,15 @@ public class VertexChartDisplay extends ChartDisplay<HashMap<String, Long>> {
     }
 
 
-    public CategoryDataset createDataSet(HashMap<String, Long> data) {
+    public CategoryDataset createDataSet(HashMap<String, HashMap<String, Long>> data) {
 
 
         final DefaultCategoryDataset dataSet = new DefaultCategoryDataset();
-        for (String roomName : data.keySet()) {
-            dataSet.addValue(data.get(roomName), roomName, "");
-
+        for (String dataName : data.keySet()) {
+            HashMap<String, Long> dataValue = data.get(dataName);
+            for (String room : dataValue.keySet()) {
+                dataSet.addValue(dataValue.get(room), dataName, room);
+            }
         }
 
         return dataSet;
@@ -60,8 +63,8 @@ public class VertexChartDisplay extends ChartDisplay<HashMap<String, Long>> {
                 "Value",                  // range axis label
                 dataSet,                  // data
                 PlotOrientation.VERTICAL, // orientation
-                false,                     // include legend
-                true,                     // tooltips?
+                true,                     // include legend
+                false,                     // tooltips?
                 false                     // URLs?
         );
 

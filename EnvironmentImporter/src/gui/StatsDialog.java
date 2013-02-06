@@ -49,8 +49,8 @@ public class StatsDialog extends JDialog implements ActionListener {
         this.dataNameList = new ArrayList<JCheckBox>();
         this.setTitle("Vertex Statistics Options");
 
-        this.setLocation(400,200);
-        this.setSize(800, 200);
+        this.setLocation(400, 200);
+        this.setSize(800, 600);
 
 
         this.initialiseTopPanel();
@@ -78,7 +78,7 @@ public class StatsDialog extends JDialog implements ActionListener {
 
     private void initializeMainPanel() {
         initialiseDataNameList();
-        mainPanel.setLayout(new GridLayout((!dataNameList.isEmpty() ? dataNameList.size()/3 : 1), 3));
+        mainPanel.setLayout(new GridLayout((!dataNameList.isEmpty() ? dataNameList.size() / 3 : 1), 3));
 //        mainPanel.setLayout(new FlowLayout());
 
         for (JCheckBox box : dataNameList) {
@@ -182,7 +182,16 @@ public class StatsDialog extends JDialog implements ActionListener {
                     dataNames.add(box.getText());
                 }
             }
-            choice.getStatisticsHandler().generateAndDisplayStats(dataNames, phaseChoiceList.getItemAt(phaseChoiceList.getSelectedIndex()));
+            if (choice.getStatisticsHandler() != null) {
+                int index = phaseChoiceList.getSelectedIndex();
+                Phase phase = null;
+                if(index!=-1){
+                    phase = phaseChoiceList.getItemAt(index);
+                }
+                choice.getStatisticsHandler().generateAndDisplayStats(dataNames, phase);
+            } else {
+                JOptionPane.showMessageDialog(this, "ERROR: That analysis cannot be done.", "An Error Occured", JOptionPane.ERROR_MESSAGE);
+            }
         } else if (event.getSource() == bCancel) {
             this.setVisible(false);
             this.dispose();
@@ -191,6 +200,9 @@ public class StatsDialog extends JDialog implements ActionListener {
             this.phaseChoiceList.removeAllItems();
             for (Phase phase : choice.getPhases()) {
                 phaseChoiceList.addItem(phase);
+            }
+            if (choice.getPhases().size() > 0) {
+                phaseChoiceList.setSelectedIndex(0);
             }
             this.validate();
         } else if (event.getSource() == bAll) {

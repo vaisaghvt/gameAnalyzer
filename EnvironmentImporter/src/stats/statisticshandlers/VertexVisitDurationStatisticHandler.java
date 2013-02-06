@@ -19,7 +19,6 @@ import java.util.HashMap;
 public class VertexVisitDurationStatisticHandler extends StatisticsHandler<VertexConsoleDisplay, VertexChartDisplay> {
 
 
-
     public VertexVisitDurationStatisticHandler() {
         super(new VertexChartDisplay(),
                 new VertexConsoleDisplay()
@@ -32,19 +31,28 @@ public class VertexVisitDurationStatisticHandler extends StatisticsHandler<Verte
     public void generateAndDisplayStats(Collection<String> dataNames, Phase phase) {
         final StatisticChoice choice = StatisticChoice.TIME_SPENT_PER_VERTEX;
         if (!dataNames.isEmpty()) {
-            HashMap<String, HashMap<String, HashMap<String, Number>>> dataNameDataMap = new HashMap<String, HashMap<String, HashMap<String, Number>>>();
+
+            HashMap<String, Integer> roomEdgeCountMapping = ((NetworkModel) NetworkModel.instance()).getEdgesForEachRoom();
             for (String dataName : dataNames) {
                 System.out.println("Processing " + dataName + "...");
-                dataNameDataMap.put(dataName, ((NetworkModel) NetworkModel.instance()).getVertexDataFor(dataName, choice));
+                HashMap<String, HashMap<String, Number>> temp = ((NetworkModel) NetworkModel.instance()).getVertexDataFor(dataName, choice);
+                HashMap<String, Long> result = new HashMap<String, Long>();
+
+                for (String roomName : temp.keySet()) {
+                    int numberOfEdges = roomEdgeCountMapping.get(roomName);
+                    long value = temp.get(roomName).get(phase.toString()) == null ? 0 : temp.get(roomName).get(phase.toString()).longValue();
+                    result.put(roomName, value / numberOfEdges);
+                }
+
+                System.out.println("Displaying Chart...");
+                this.chartDisplay.setTitle(dataName+":"+choice.toString());
+                this.chartDisplay.display(result);
+                this.consoleDisplay.display(result);
 
             }
 
-            HashMap<String, HashMap<String, Long>> data = summarizeData(dataNameDataMap, phase);
 
-            System.out.println("Displaying Chart...");
-            this.chartDisplay.setTitle(choice.toString() + " :" + phase.toString());
-            this.chartDisplay.display(data);
-            this.consoleDisplay.display(data);
+
 
 //            else {
 //                HashMap<String, Long> normalizedRoomVisitFrequencies = findNormalizedRoomVisitFrequencies(dataNameDataMap);
@@ -56,58 +64,5 @@ public class VertexVisitDurationStatisticHandler extends StatisticsHandler<Verte
         }
     }
 
-    private HashMap<String, HashMap<String, Long>> summarizeData(HashMap<String, HashMap<String, HashMap<String, Number>>> dataNameDataMap, Phase phase) {
-        HashMap<String, HashMap<String, Long>> result = new HashMap<String, HashMap<String, Long>>();
 
-        for (String dataName : dataNameDataMap.keySet()) {
-
-            HashMap<String, HashMap<String, Number>> dataForPerson = dataNameDataMap.get(dataName);
-
-            HashMap<String, Number> library2Data = dataForPerson.get("Library2");
-            HashMap<String, Number> libraryGData = dataForPerson.get("LibraryG");
-            HashMap<String, Number> saunaData = dataForPerson.get("Sauna");
-            HashMap<String, Number> galleryData = dataForPerson.get("Gallery");
-            HashMap<String, Number> startData = dataForPerson.get("StartingRoom");
-            HashMap<String, Integer> roomEdgeCountMapping = ((NetworkModel) NetworkModel.instance()).getEdgesForEachRoom();
-            long valueForLibrary;
-            if (library2Data != null) {
-                long library2Value = library2Data.get(phase.toString()) == null ? 0 : (library2Data.get(phase.toString())).longValue();
-                long libraryGValue = (libraryGData.get(phase.toString()) == null ? 0 : (libraryGData.get(phase.toString())).longValue());
-                valueForLibrary = (library2Value/ roomEdgeCountMapping.get("Library2")) + (libraryGValue/ roomEdgeCountMapping.get("LibraryG"));
-            } else {
-                valueForLibrary = 0;
-            }
-
-            long valueForSauna;
-            if (saunaData != null)
-                valueForSauna = saunaData.get(phase.toString()) == null ? 0 : (saunaData.get(phase.toString())).longValue();
-            else
-                valueForSauna = 0;
-            valueForSauna/= roomEdgeCountMapping.get("Sauna") ;
-
-            long valueForGallery;
-            if (galleryData != null) {
-                valueForGallery = galleryData.get(phase.toString()) == null ? 0 : (galleryData.get(phase.toString())).longValue();
-            } else {
-                valueForGallery = 0;
-            }
-            valueForGallery/= roomEdgeCountMapping.get("Gallery") ;
-
-            long valueForStart;
-            if (startData != null) {
-                valueForStart = startData.get(phase.toString()) == null ? 0 : startData.get(phase.toString()).longValue();
-            } else {
-                valueForStart = 0;
-            }
-            valueForStart/= roomEdgeCountMapping.get("StartingRoom") ;
-
-            HashMap<String, Long> tempMap = new HashMap<String, Long>();
-            tempMap.put("Library", valueForLibrary);
-            tempMap.put("PictureGallery", valueForGallery);
-            tempMap.put("Sauna", valueForSauna);
-            tempMap.put("StartingRoom", valueForStart);
-            result.put(dataName, tempMap);
-        }
-        return result;
-    }
 }

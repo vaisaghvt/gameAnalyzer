@@ -7,8 +7,6 @@ import org.jfree.chart.JFreeChart;
 import org.jfree.chart.axis.NumberAxis;
 import org.jfree.chart.plot.PlotOrientation;
 import org.jfree.chart.plot.XYPlot;
-import org.jfree.data.category.CategoryDataset;
-import org.jfree.data.category.DefaultCategoryDataset;
 import org.jfree.data.general.Dataset;
 import org.jfree.data.xy.XYDataset;
 import org.jfree.data.xy.XYSeries;
@@ -17,7 +15,6 @@ import org.jfree.util.ShapeUtilities;
 
 import javax.swing.*;
 import java.awt.*;
-import java.util.HashMap;
 import java.util.TreeSet;
 
 /**
@@ -27,7 +24,7 @@ import java.util.TreeSet;
  * Time: 1:13 PM
  * To change this template use File | Settings | File Templates.
  */
-public class RepetitionFrequencyChartDisplay extends ChartDisplay<Multiset<Double>> {
+public class DoorRepetitionFrequencyChartDisplay extends ChartDisplay<Multiset<Double>> {
 
 
 
