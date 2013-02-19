@@ -3,6 +3,7 @@ package stats.statisticshandlers;
 import com.google.common.collect.HashMultimap;
 import gui.NetworkModel;
 import gui.Phase;
+import gui.StatsDialog;
 import stats.StatisticChoice;
 import stats.chartdisplays.CorridorPrefChartDisplay;
 import stats.consoledisplays.CorridorPrefConsoleDisplay;
@@ -30,7 +31,7 @@ public class CorridorPrefStatisticHandler extends StatisticsHandler<CorridorPref
 
 
     @Override
-    public void generateAndDisplayStats(Collection<String> dataNames, Phase phase) {
+    public void generateAndDisplayStats(Collection<String> dataNames, Phase phase, StatsDialog.AllOrOne all, StatsDialog.AggregationType itemAt) {
         final StatisticChoice choice = StatisticChoice.CORRIDOR_PREFERENCE_MEASURE;
         HashMultimap<String, String> prefersCorridors =  ((NetworkModel) NetworkModel.instance()).getCorridorRelatedMotion(dataNames, phase);
         this.chartDisplay.setTitle(choice.toString()+phase.toString());

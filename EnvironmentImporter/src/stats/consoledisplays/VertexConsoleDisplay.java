@@ -9,11 +9,11 @@ import java.util.HashMap;
  * Time: 1:05 PM
  * To change this template use File | Settings | File Templates.
  */
-public class VertexConsoleDisplay extends ConsoleDisplay<HashMap<String, Long>> {
+public class VertexConsoleDisplay extends ConsoleDisplay<HashMap<String, ? extends Number>> {
 
 
 
     @Override
-    public void display(HashMap<String, Long> data) {
+    public void display(HashMap<String, ? extends Number> data) {
     }
 }

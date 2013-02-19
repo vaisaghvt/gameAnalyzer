@@ -1,22 +1,19 @@
 package stats.chartdisplays;
 
-import com.google.common.collect.HashMultimap;
 import org.jfree.chart.ChartFactory;
 import org.jfree.chart.ChartPanel;
 import org.jfree.chart.JFreeChart;
 import org.jfree.chart.axis.NumberAxis;
 import org.jfree.chart.plot.PlotOrientation;
 import org.jfree.chart.plot.XYPlot;
-import org.jfree.data.category.CategoryDataset;
-import org.jfree.data.category.DefaultCategoryDataset;
 import org.jfree.data.xy.XYDataset;
 import org.jfree.data.xy.XYSeries;
 import org.jfree.data.xy.XYSeriesCollection;
 import org.jfree.util.ShapeUtilities;
 
-import javax.swing.*;
 import java.awt.*;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 
 /**
@@ -46,10 +43,11 @@ public class RoomRepetitionChartDisplay extends ChartDisplay<HashMap<String, Has
         panel.setMaximumDrawHeight(2000);
         panel.setMinimumDrawWidth(20);
         panel.setMaximumDrawWidth(2000);
-        JFrame frame = new JFrame("blah");
-        frame.setContentPane(panel);
-        frame.setVisible(true);
-        frame.setSize(new Dimension(520, 300));
+        createNewFrameAndSetLocation();
+        currentFrame.setTitle("blah");
+        currentFrame.setContentPane(panel);
+        currentFrame.setVisible(true);
+        currentFrame.setSize(new Dimension(520, 300));
 
     }
 

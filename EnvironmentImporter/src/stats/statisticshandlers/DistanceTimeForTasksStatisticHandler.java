@@ -1,12 +1,10 @@
 package stats.statisticshandlers;
 
-import com.google.common.collect.HashMultimap;
 import gui.NetworkModel;
 import gui.Phase;
+import gui.StatsDialog;
 import stats.StatisticChoice;
-import stats.chartdisplays.CoverageChartDisplay;
 import stats.chartdisplays.DistanceTimeChartDisplay;
-import stats.consoledisplays.CoverageConsoleDisplay;
 import stats.consoledisplays.DistanceTimeConsoleDisplay;
 
 import java.util.Collection;
@@ -19,11 +17,11 @@ import java.util.HashMap;
  * Time: 12:46 PM
  * To change this template use File | Settings | File Templates.
  */
-public class DistanceTimeStatisticHandler extends StatisticsHandler<DistanceTimeConsoleDisplay, DistanceTimeChartDisplay> {
+public class DistanceTimeForTasksStatisticHandler extends StatisticsHandler<DistanceTimeConsoleDisplay, DistanceTimeChartDisplay> {
 
 
 
-    public DistanceTimeStatisticHandler() {
+    public DistanceTimeForTasksStatisticHandler() {
         super(new DistanceTimeChartDisplay(),
                 new DistanceTimeConsoleDisplay()
         );
@@ -32,14 +30,11 @@ public class DistanceTimeStatisticHandler extends StatisticsHandler<DistanceTime
 
 
     @Override
-    public void generateAndDisplayStats(Collection<String> dataNames, Phase phase) {
-        final StatisticChoice choice = StatisticChoice.DISTANCE_TIME_STATISTIC;
-//        HashMap<String, Double> distanceTraveled =  ((NetworkModel) NetworkModel.instance()).getDistanceTraveledDuringTasks(dataNames);
-//        HashMap<String, Long> timeTaken =  ((NetworkModel) NetworkModel.instance()).getTimeTraveledDuringTasks(dataNames);
+    public void generateAndDisplayStats(Collection<String> dataNames, Phase phase, StatsDialog.AllOrOne all, StatsDialog.AggregationType itemAt) {
+        final StatisticChoice choice = StatisticChoice.DISTANCE_TIME_FOR_TASKS_STATISTIC;
+        HashMap<String, Double> distanceTraveled =  ((NetworkModel) NetworkModel.instance()).getDistanceTraveledDuringTasks(dataNames);
+        HashMap<String, Long> timeTaken =  ((NetworkModel) NetworkModel.instance()).getTimeTraveledDuringTasks(dataNames);
 
-
-        HashMap<String, Double> distanceTraveled =  ((NetworkModel) NetworkModel.instance()).getDistanceTraveledTotal(dataNames);
-        HashMap<String, Long> timeTaken =  ((NetworkModel) NetworkModel.instance()).getTimeTraveledTotal(dataNames);
 
         HashMap<String, HashMap<String, Double>> summary = summarizeDistanceTime(distanceTraveled, timeTaken);
         this.chartDisplay.setTitle(choice.toString());

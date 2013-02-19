@@ -6,9 +6,7 @@ import org.jfree.chart.JFreeChart;
 import org.jfree.chart.plot.PlotOrientation;
 import org.jfree.data.category.CategoryDataset;
 import org.jfree.data.category.DefaultCategoryDataset;
-import stats.consoledisplays.ConsoleDisplay;
 
-import javax.swing.*;
 import java.awt.*;
 import java.util.HashMap;
 
@@ -19,32 +17,32 @@ import java.util.HashMap;
  * Time: 1:13 PM
  * To change this template use File | Settings | File Templates.
  */
-public class SignificantVertexChartDisplay extends ChartDisplay<HashMap<String, HashMap<String, Long>>> {
+public class SignificantVertexChartDisplay extends ChartDisplay<HashMap<String, HashMap<String, Number>>> {
 
 
 
 
 
     @Override
-    public void display(HashMap<String, HashMap<String, Long>> data) {
+    public void display(HashMap<String, HashMap<String,Number>> data) {
         final CategoryDataset dataSet = createDataSet(data);
         final JFreeChart chart = createChart(dataSet);
         final ChartPanel chartPanel = new ChartPanel(chart);
         chartPanel.setPreferredSize(new Dimension(500, 270));
-        JFrame frame = new JFrame(getTitle());
-        frame.setContentPane(chartPanel);
-        frame.setVisible(true);
-        frame.setLocation(100,100);
-        frame.setSize(new Dimension(520, 300));
+        createNewFrameAndSetLocation();
+        currentFrame.setTitle(this.getTitle());
+        currentFrame.setContentPane(chartPanel);
+        currentFrame.setVisible(true);
+        currentFrame.setSize(new Dimension(520, 300));
     }
 
 
-    public CategoryDataset createDataSet(HashMap<String, HashMap<String, Long>> data) {
+    public CategoryDataset createDataSet(HashMap<String, HashMap<String, Number>> data) {
 
 
         final DefaultCategoryDataset dataSet = new DefaultCategoryDataset();
         for (String dataName : data.keySet()) {
-            HashMap<String, Long> dataValue = data.get(dataName);
+            HashMap<String, Number> dataValue = data.get(dataName);
             for (String room : dataValue.keySet()) {
                 dataSet.addValue(dataValue.get(room), dataName, room);
             }

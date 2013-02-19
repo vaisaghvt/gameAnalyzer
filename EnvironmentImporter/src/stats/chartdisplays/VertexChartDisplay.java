@@ -1,5 +1,6 @@
 package stats.chartdisplays;
 
+import gui.NetworkModel;
 import org.jfree.chart.ChartFactory;
 import org.jfree.chart.ChartPanel;
 import org.jfree.chart.JFreeChart;
@@ -7,8 +8,8 @@ import org.jfree.chart.plot.PlotOrientation;
 import org.jfree.data.category.CategoryDataset;
 import org.jfree.data.category.DefaultCategoryDataset;
 
-import javax.swing.*;
 import java.awt.*;
+import java.util.Collection;
 import java.util.HashMap;
 
 /**
@@ -18,33 +19,38 @@ import java.util.HashMap;
  * Time: 1:13 PM
  * To change this template use File | Settings | File Templates.
  */
-public class VertexChartDisplay extends ChartDisplay<HashMap<String, Long>> {
+public class VertexChartDisplay extends ChartDisplay<HashMap<String, ? extends Number>> {
 
 
 
 
 
     @Override
-    public void display(HashMap<String, Long> data) {
+    public void display(HashMap<String,  ? extends Number> data) {
         final CategoryDataset dataSet = createDataSet(data);
         final JFreeChart chart = createChart(dataSet);
         final ChartPanel chartPanel = new ChartPanel(chart);
         chartPanel.setPreferredSize(new Dimension(500, 270));
-        JFrame frame = new JFrame(getTitle());
-        frame.setContentPane(chartPanel);
-        frame.setVisible(true);
-        frame.setLocation(100,100);
-        frame.setSize(new Dimension(520, 300));
+        createNewFrameAndSetLocation();
+        currentFrame.setTitle(this.getTitle());
+        currentFrame.setContentPane(chartPanel);
+        currentFrame.setVisible(true);
+
+        currentFrame.setSize(new Dimension(520, 300));
     }
 
 
-    public CategoryDataset createDataSet(HashMap<String, Long> data) {
+    public CategoryDataset createDataSet(HashMap<String,  ? extends Number> data) {
 
 
+        Collection<String> sortedRoomNames = ((NetworkModel) NetworkModel.instance()).getSortedRooms();
         final DefaultCategoryDataset dataSet = new DefaultCategoryDataset();
-        for (String roomName : data.keySet()) {
-            dataSet.addValue(data.get(roomName), roomName, "");
-
+        for (String roomName : sortedRoomNames) {
+            if(data.containsKey(roomName)){
+                dataSet.addValue(data.get(roomName), roomName, "");
+            }else{
+                dataSet.addValue(0,roomName,"");
+            }
         }
 
         return dataSet;

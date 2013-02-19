@@ -12,7 +12,6 @@ import org.jfree.data.xy.XYSeries;
 import org.jfree.data.xy.XYSeriesCollection;
 import org.jfree.util.ShapeUtilities;
 
-import javax.swing.*;
 import java.awt.*;
 import java.util.HashMap;
 
@@ -44,10 +43,11 @@ public class PathHopChartDisplay extends ChartDisplay<HashMap<String, HashMap<St
         panel.setMaximumDrawHeight(2000);
         panel.setMinimumDrawWidth(20);
         panel.setMaximumDrawWidth(2000);
-        JFrame frame = new JFrame("blah");
-        frame.setContentPane(panel);
-        frame.setVisible(true);
-        frame.setSize(new Dimension(520, 300));
+        currentFrame.setTitle("blah");
+        createNewFrameAndSetLocation();
+        currentFrame.setContentPane(panel);
+        currentFrame.setVisible(true);
+        currentFrame.setSize(new Dimension(520, 300));
     }
 
     private JFreeChart createChart(XYDataset data) {

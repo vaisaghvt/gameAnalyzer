@@ -8,5 +8,14 @@ package gui;
  * To change this template use File | Settings | File Templates.
  */
 public enum Phase {
-    TASK_1, TASK_2, TASK_3, EXPLORATION
+    TASK_1(2), TASK_2(3), TASK_3(4), EXPLORATION(1);
+    private int num;
+
+    Phase(int i) {
+        this.num=i;
+    }
+
+    public int getNum() {
+        return num;
+    }
 }

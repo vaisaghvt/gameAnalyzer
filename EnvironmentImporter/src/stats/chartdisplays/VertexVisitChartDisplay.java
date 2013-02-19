@@ -1,7 +1,6 @@
 package stats.chartdisplays;
 
-import com.google.common.collect.HashMultimap;
-import gui.Phase;
+import com.google.common.collect.Multiset;
 import org.jfree.chart.ChartFactory;
 import org.jfree.chart.ChartPanel;
 import org.jfree.chart.JFreeChart;
@@ -10,6 +9,7 @@ import org.jfree.data.category.CategoryDataset;
 import org.jfree.data.category.DefaultCategoryDataset;
 
 import java.awt.*;
+import java.util.TreeSet;
 
 /**
  * Created with IntelliJ IDEA.
@@ -18,54 +18,59 @@ import java.awt.*;
  * Time: 1:13 PM
  * To change this template use File | Settings | File Templates.
  */
-public class CorridorPrefChartDisplay extends ChartDisplay<HashMultimap<String, String>> {
+public class VertexVisitChartDisplay extends ChartDisplay<Multiset<Double>> {
 
 
 
-    private Phase phase;
 
-    public void setPhase(Phase phase) {
-        this.phase = phase;
-    }
 
     @Override
-    public void display(HashMultimap<String, String> data) {
+    public void display(Multiset<Double> data) {
         final CategoryDataset dataSet = createDataSet(data);
         final JFreeChart chart = createChart(dataSet);
         final ChartPanel chartPanel = new ChartPanel(chart);
         chartPanel.setPreferredSize(new Dimension(500, 270));
         createNewFrameAndSetLocation();
-        currentFrame.setTitle(getTitle());
+        currentFrame.setTitle(this.getTitle());
         currentFrame.setContentPane(chartPanel);
         currentFrame.setVisible(true);
         currentFrame.setSize(new Dimension(520, 300));
     }
 
 
+    public CategoryDataset createDataSet(Multiset<Double> data) {
 
-    private CategoryDataset createDataSet(HashMultimap<String, String> data) {
+
+        TreeSet<Double> vertices = new TreeSet<Double>();
+        vertices.addAll(data.elementSet());
 
         final DefaultCategoryDataset dataSet = new DefaultCategoryDataset();
+        for (Double frequency : vertices) {
+            dataSet.addValue(data.count(frequency),frequency.toString(), "");
 
-            dataSet.addValue(data.get("yes").size(),"yes","");
-        dataSet.addValue(data.get("no").size(),"no","");
-        dataSet.addValue(data.get("maybe").size(),"maybe","");
+        }
 
         return dataSet;
+
     }
 
-    private JFreeChart createChart(CategoryDataset dataSet) {
+
+    public JFreeChart createChart(CategoryDataset dataSet) {
         // create the chart...
         final JFreeChart chart = ChartFactory.createBarChart(
                 this.getTitle(),         // chart title
-                "",               // domain axis label
-                "Number",                  // range axis label
+                "Normalized Number of visits",               // domain axis label
+                "Frequency",                  // range axis label
                 dataSet,                  // data
                 PlotOrientation.VERTICAL, // orientation
-                true,                     // include legend
+                false,                     // include legend
                 true,                     // tooltips?
                 false                     // URLs?
         );
+
+
         return chart;
     }
+
+
 }

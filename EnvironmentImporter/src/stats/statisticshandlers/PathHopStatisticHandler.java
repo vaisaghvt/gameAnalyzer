@@ -3,6 +3,7 @@ package stats.statisticshandlers;
 import com.google.common.collect.HashMultimap;
 import gui.NetworkModel;
 import gui.Phase;
+import gui.StatsDialog;
 import stats.StatisticChoice;
 import stats.chartdisplays.PathHopChartDisplay;
 import stats.consoledisplays.PathHopConsoleDisplay;
@@ -31,7 +32,7 @@ public class PathHopStatisticHandler extends StatisticsHandler<PathHopConsoleDis
 
 
     @Override
-    public void generateAndDisplayStats(Collection<String> dataNames, Phase phase) {
+    public void generateAndDisplayStats(Collection<String> dataNames, Phase phase, StatsDialog.AllOrOne all, StatsDialog.AggregationType itemAt) {
         final StatisticChoice choice = StatisticChoice.PATH_HOP_RELATIONSHIP;
         HashMultimap<String, String> pathData = ((NetworkModel) NetworkModel.instance()).getPathDataFor(dataNames, phase, choice);
         HashMap<String, HashMap<String, Integer>> hopsPerPhasePerPerson = ((NetworkModel) NetworkModel.instance()).getHopDataFor(dataNames);

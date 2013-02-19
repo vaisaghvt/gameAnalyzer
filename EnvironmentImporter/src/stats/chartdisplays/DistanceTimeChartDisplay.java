@@ -6,8 +6,6 @@ import org.jfree.chart.JFreeChart;
 import org.jfree.chart.plot.PlotOrientation;
 import org.jfree.data.category.CategoryDataset;
 import org.jfree.data.category.DefaultCategoryDataset;
-import org.jfree.data.xy.XYSeries;
-import org.jfree.data.xy.XYSeriesCollection;
 
 import javax.swing.*;
 import java.awt.*;
@@ -30,18 +28,24 @@ public class DistanceTimeChartDisplay extends ChartDisplay<HashMap<String, HashM
     public void display(HashMap<String, HashMap<String, Double>> data) {
         final CategoryDataset timeDataSet = createTimeDataSet(data);
         final CategoryDataset distanceDataSet = createDistanceDataSet(data);
-
+        currentFrame.setVisible(false);
         createFrameAndChart(timeDataSet, "time");
         createFrameAndChart(distanceDataSet, "distance");
 
     }
 
     private void createFrameAndChart(CategoryDataset dataSet, String type) {
+        String st;
+        if(getTitle().contains("Total")){
+           st = "Total :";
+        }else{
+            st = "Tasks :";
+        }
 
-        final JFreeChart chart = createChart(dataSet);
+        final JFreeChart chart = createChart(dataSet,st+type+ " for each agent" );
         final ChartPanel chartPanel = new ChartPanel(chart);
         chartPanel.setPreferredSize(new Dimension(500, 270));
-        JFrame frame = new JFrame(getTitle()+":"+type);
+        JFrame frame = new JFrame("total "+type+ " for each agent");
         frame.setContentPane(chartPanel);
         frame.setVisible(true);
         frame.setLocation(100,100);
@@ -55,7 +59,7 @@ public class DistanceTimeChartDisplay extends ChartDisplay<HashMap<String, HashM
         for (String dataName : data.keySet()) {
 
             dataset.addValue(data.get(dataName).get("distance"),"distance", dataName);
-            System.out.println(dataName+":"+data.get(dataName).get("distance"));
+
 //            dataset.addValue(data.get(dataName).get("distance"),"time", dataName);
         }
         return dataset;
@@ -75,10 +79,10 @@ public class DistanceTimeChartDisplay extends ChartDisplay<HashMap<String, HashM
         return dataset;
 
     }
-    public JFreeChart createChart(CategoryDataset dataSet) {
+    public JFreeChart createChart(CategoryDataset dataSet, String s) {
         // create the chart...
         final JFreeChart chart = ChartFactory.createBarChart(
-                this.getTitle(),         // chart title
+                s,         // chart title
                 "Name",               // domain axis label
                 "Value",                  // range axis label
                 dataSet,                  // data

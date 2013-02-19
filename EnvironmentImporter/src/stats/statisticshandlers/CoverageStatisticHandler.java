@@ -3,11 +3,10 @@ package stats.statisticshandlers;
 import com.google.common.collect.HashMultimap;
 import gui.NetworkModel;
 import gui.Phase;
+import gui.StatsDialog;
 import stats.StatisticChoice;
 import stats.chartdisplays.CoverageChartDisplay;
-import stats.chartdisplays.StaircaseVisitChartDisplay;
 import stats.consoledisplays.CoverageConsoleDisplay;
-import stats.consoledisplays.StaircaseVisitConsoleDisplay;
 
 import java.util.Collection;
 
@@ -31,7 +30,7 @@ public class CoverageStatisticHandler extends StatisticsHandler<CoverageConsoleD
 
 
     @Override
-    public void generateAndDisplayStats(Collection<String> dataNames, Phase phase) {
+    public void generateAndDisplayStats(Collection<String> dataNames, Phase phase, StatsDialog.AllOrOne all, StatsDialog.AggregationType itemAt) {
         final StatisticChoice choice = StatisticChoice.COVERAGE;
         HashMultimap<Integer, String> coverageLevel =  ((NetworkModel) NetworkModel.instance()).getCoverage(dataNames, phase);
         this.chartDisplay.setTitle(choice.toString()+phase.toString());

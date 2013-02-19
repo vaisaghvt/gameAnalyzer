@@ -3,11 +3,9 @@ package stats.statisticshandlers;
 import com.google.common.collect.HashMultimap;
 import gui.NetworkModel;
 import gui.Phase;
+import gui.StatsDialog;
 import stats.StatisticChoice;
-import stats.chartdisplays.CorridorPrefChartDisplay;
 import stats.chartdisplays.PathChartDisplay;
-import stats.chartdisplays.StaircaseVisitChartDisplay;
-import stats.consoledisplays.CorridorPrefConsoleDisplay;
 import stats.consoledisplays.PathConsoleDisplay;
 
 import java.util.Collection;
@@ -32,11 +30,11 @@ public class PathStatisticHandler extends StatisticsHandler<PathConsoleDisplay, 
 
 
     @Override
-    public void generateAndDisplayStats(Collection<String> dataNames, Phase phase) {
+    public void generateAndDisplayStats(Collection<String> dataNames, Phase phase, StatsDialog.AllOrOne all, StatsDialog.AggregationType itemAt) {
         final StatisticChoice choice = StatisticChoice.PATH_FREQUENCY;
         HashMultimap<String, String> data = ((NetworkModel) NetworkModel.instance()).getPathDataFor(dataNames, phase, choice);
         this.chartDisplay.setTitle(choice.toString()+phase.toString());
-        ((PathChartDisplay)this.chartDisplay).setPhase(phase);
+        this.chartDisplay.setPhase(phase);
         this.chartDisplay.display(data);
         this.consoleDisplay.display(data);
 

@@ -9,9 +9,7 @@ import org.jfree.chart.plot.PlotOrientation;
 import org.jfree.data.category.CategoryDataset;
 import org.jfree.data.category.DefaultCategoryDataset;
 
-import javax.swing.*;
 import java.awt.*;
-import java.util.HashMap;
 
 /**
  * Created with IntelliJ IDEA.
@@ -38,10 +36,11 @@ public class StaircaseVisitChartDisplay extends ChartDisplay<HashMultimap<String
         final JFreeChart chart = createChart(dataSet);
         final ChartPanel chartPanel = new ChartPanel(chart);
         chartPanel.setPreferredSize(new Dimension(500, 270));
-        JFrame frame = new JFrame(this.getTitle());
-        frame.setContentPane(chartPanel);
-        frame.setVisible(true);
-        frame.setSize(new Dimension(520, 300));
+        createNewFrameAndSetLocation();
+        currentFrame.setTitle(this.getTitle());
+        currentFrame.setContentPane(chartPanel);
+        currentFrame.setVisible(true);
+        currentFrame.setSize(new Dimension(520, 300));
     }
 
     private JFreeChart createChart(CategoryDataset dataSet) {

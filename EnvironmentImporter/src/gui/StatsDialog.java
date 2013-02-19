@@ -7,9 +7,8 @@ import javax.swing.*;
 import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.HashSet;
+import java.util.*;
+import java.util.List;
 
 /**
  * Created with IntelliJ IDEA.
@@ -19,6 +18,15 @@ import java.util.HashSet;
  * To change this template use File | Settings | File Templates.
  */
 public class StatsDialog extends JDialog implements ActionListener {
+
+    public enum AllOrOne {
+        ALL, EACH;
+    }
+
+    public enum AggregationType {
+        SUM, MEAN, MIN, MAX;
+    }
+
 
     private ArrayList<JCheckBox> dataNameList;
 
@@ -33,10 +41,18 @@ public class StatsDialog extends JDialog implements ActionListener {
     private final JButton bCancel = new JButton("Cancel");
 
     private final JPanel nameListButtonPanel = new JPanel();
-    private final JButton bOneRandom = new JButton("Select 1");
+    private final JButton bOneRandom = new JButton("Select One");
     private final JButton bNRandom = new JButton("Select Random");
     private final JButton bNone = new JButton("Clear All");
     private final JButton bAll = new JButton("Select All");
+    private final JButton attemptOne = new JButton("Attempt 1");
+    private final JButton attemptTwo = new JButton("Attempt 2");
+    private final JButton attemptThree = new JButton("Attempt 3");
+    private final JButton attemptHigher = new JButton("Attempt >3");
+
+    private final JPanel statOptionPanel = new JPanel();
+    private JComboBox<AllOrOne> allOrOneComboBox;
+    private JComboBox<AggregationType> aggregationTypeComboBox;
 
 
     private JComboBox<StatisticChoice> statisticChoiceList;
@@ -50,17 +66,20 @@ public class StatsDialog extends JDialog implements ActionListener {
         this.setTitle("Vertex Statistics Options");
 
         this.setLocation(400, 200);
-        this.setSize(800, 600);
+        this.setSize(1000, 600);
 
 
         this.initialiseTopPanel();
         this.initializeMainPanel();
         this.initialisePrimaryButtonPanel();
         this.initialiseDataNameButtonPanel();
+        this.initialiseStatOptionPanel();
 
-        buttonPanel.setLayout(new GridLayout(2, 1));
+        buttonPanel.setLayout(new GridLayout(3, 1));
         buttonPanel.add(nameListButtonPanel);
+        buttonPanel.add(statOptionPanel);
         buttonPanel.add(primaryButtonPanel);
+
 
         pane = new JScrollPane(mainPanel, JScrollPane.VERTICAL_SCROLLBAR_ALWAYS,
                 JScrollPane.HORIZONTAL_SCROLLBAR_NEVER);
@@ -72,6 +91,36 @@ public class StatsDialog extends JDialog implements ActionListener {
         this.getContentPane().add(pane, BorderLayout.CENTER);
         this.getContentPane().add(buttonPanel, BorderLayout.SOUTH);
         this.revalidate();
+
+    }
+
+    private void initialiseStatOptionPanel() {
+        allOrOneComboBox = new JComboBox<AllOrOne>(AllOrOne.values());
+        allOrOneComboBox.setSelectedIndex(0);
+        allOrOneComboBox.addActionListener(this);
+
+        aggregationTypeComboBox = new JComboBox<AggregationType>(AggregationType.values());
+        aggregationTypeComboBox.setSelectedIndex(0);
+
+        statOptionPanel.setLayout(new GridLayout(1, 4));
+        statOptionPanel.add(new JLabel("  Together or Individual:"));
+        statOptionPanel.add(allOrOneComboBox);
+        statOptionPanel.add(new JLabel("  AggregationMethod:"));
+        statOptionPanel.add(aggregationTypeComboBox);
+
+        StatisticChoice choice = statisticChoiceList.getItemAt(statisticChoiceList.getSelectedIndex());
+        if (!choice.canAggregate()) {
+            this.allOrOneComboBox.setEnabled(false);
+            this.aggregationTypeComboBox.setEnabled(false);
+        } else {
+            this.allOrOneComboBox.setEnabled(true);
+            if (allOrOneComboBox.getItemAt(allOrOneComboBox.getSelectedIndex()) == AllOrOne.ALL) {
+                this.aggregationTypeComboBox.setEnabled(true);
+            } else {
+                this.aggregationTypeComboBox.setEnabled(false);
+            }
+
+        }
 
     }
 
@@ -105,13 +154,20 @@ public class StatsDialog extends JDialog implements ActionListener {
         bNRandom.addActionListener(this);
         bAll.addActionListener(this);
         bNone.addActionListener(this);
+        attemptOne.addActionListener(this);
+        attemptTwo.addActionListener(this);
+        attemptThree.addActionListener(this);
+        attemptHigher.addActionListener(this);
 
-        nameListButtonPanel.setLayout(new GridLayout(1, 4));
+        nameListButtonPanel.setLayout(new GridLayout(1, 7));
         nameListButtonPanel.add(bOneRandom);
         nameListButtonPanel.add(bNRandom);
         nameListButtonPanel.add(bAll);
         nameListButtonPanel.add(bNone);
-
+        nameListButtonPanel.add(attemptOne);
+        nameListButtonPanel.add(attemptTwo);
+        nameListButtonPanel.add(attemptThree);
+        nameListButtonPanel.add(attemptHigher);
 
     }
 
@@ -119,9 +175,9 @@ public class StatsDialog extends JDialog implements ActionListener {
         initializeStatisticChoiceBox();
         initializePhaseChoiceBox();
         topPanel.setLayout(new GridLayout(2, 2));
-        topPanel.add(new JLabel("Choose Statistic:"));
+        topPanel.add(new JLabel("  Choose Statistic:"));
         topPanel.add(statisticChoiceList);
-        topPanel.add(new JLabel("Choose Phase:"));
+        topPanel.add(new JLabel("  Choose Phase:"));
         topPanel.add(phaseChoiceList);
     }
 
@@ -162,7 +218,23 @@ public class StatsDialog extends JDialog implements ActionListener {
 
         //Create the combo box, select item at index 4.
         //Indices start at 0, so 4 specifies the pig.
-        statisticChoiceList = new JComboBox(StatisticChoice.values());
+        List<StatisticChoice> listOfChoices = Arrays.asList(StatisticChoice.values());
+        Collections.sort(listOfChoices, new Comparator<StatisticChoice>() {
+            @Override
+            public int compare(StatisticChoice statisticChoice, StatisticChoice statisticChoice1) {
+                return statisticChoice.toString().compareTo(statisticChoice1.toString());
+            }
+        });
+        int size = listOfChoices.size();
+        statisticChoiceList = new JComboBox();
+        for(StatisticChoice choice:listOfChoices){
+            if(choice.getStatisticsHandler()!=null){
+              statisticChoiceList.addItem(choice);
+
+            }
+        }
+
+
         statisticChoiceList.setSelectedIndex(0);
         statisticChoiceList.addActionListener(this);
         statisticChoiceList.setEditable(false);
@@ -185,16 +257,36 @@ public class StatsDialog extends JDialog implements ActionListener {
             if (choice.getStatisticsHandler() != null) {
                 int index = phaseChoiceList.getSelectedIndex();
                 Phase phase = null;
-                if(index!=-1){
+                if (index != -1) {
                     phase = phaseChoiceList.getItemAt(index);
                 }
-                choice.getStatisticsHandler().generateAndDisplayStats(dataNames, phase);
+                if (allOrOneComboBox.getItemAt(allOrOneComboBox.getSelectedIndex()) == AllOrOne.EACH) {
+                    choice.getStatisticsHandler().generateAndDisplayStats(dataNames, phase, AllOrOne.EACH, null);
+                } else {
+                    choice.getStatisticsHandler().generateAndDisplayStats(dataNames, phase, AllOrOne.ALL,
+                            aggregationTypeComboBox.getItemAt(aggregationTypeComboBox.getSelectedIndex()));
+                }
+
             } else {
                 JOptionPane.showMessageDialog(this, "ERROR: That analysis cannot be done.", "An Error Occured", JOptionPane.ERROR_MESSAGE);
             }
         } else if (event.getSource() == bCancel) {
             this.setVisible(false);
             this.dispose();
+        } else if (event.getSource() == allOrOneComboBox) {
+            AllOrOne choice = this.allOrOneComboBox.getItemAt(allOrOneComboBox.getSelectedIndex());
+            this.aggregationTypeComboBox.removeAllItems();
+            if (choice == AllOrOne.ALL &&statisticChoiceList.getItemAt(statisticChoiceList.getSelectedIndex()).hasAggregationChoice()) {
+                aggregationTypeComboBox.setEnabled(true);
+                for (AggregationType type : AggregationType.values()) {
+                    this.aggregationTypeComboBox.addItem(type);
+                }
+                aggregationTypeComboBox.setSelectedIndex(0);
+            } else {
+                aggregationTypeComboBox.setEnabled(false);
+            }
+
+            this.validate();
         } else if (event.getSource() == statisticChoiceList) {
             StatisticChoice choice = statisticChoiceList.getItemAt(statisticChoiceList.getSelectedIndex());
             this.phaseChoiceList.removeAllItems();
@@ -202,13 +294,65 @@ public class StatsDialog extends JDialog implements ActionListener {
                 phaseChoiceList.addItem(phase);
             }
             if (choice.getPhases().size() > 0) {
+                phaseChoiceList.setEnabled(true);
                 phaseChoiceList.setSelectedIndex(0);
+            } else {
+                phaseChoiceList.setEnabled(false);
             }
+
+            if (!choice.canAggregate()) {
+                this.allOrOneComboBox.setEnabled(false);
+                this.aggregationTypeComboBox.setEnabled(false);
+            } else {
+                this.allOrOneComboBox.setEnabled(true);
+                if (choice.hasAggregationChoice() && allOrOneComboBox.getItemAt(allOrOneComboBox.getSelectedIndex()) == AllOrOne.ALL) {
+                    this.aggregationTypeComboBox.setEnabled(true);
+                } else {
+                    this.aggregationTypeComboBox.setEnabled(false);
+                }
+
+            }
+
+
             this.validate();
         } else if (event.getSource() == bAll) {
 
             for (JCheckBox cBox : dataNameList) {
                 cBox.setSelected(true);
+            }
+
+        } else if (event.getSource() == attemptOne) {
+
+            for (JCheckBox cBox : dataNameList) {
+                if (cBox.getText().contains("1")) {
+                    cBox.setSelected(true);
+                }
+            }
+
+        } else if (event.getSource() == attemptTwo) {
+
+            for (JCheckBox cBox : dataNameList) {
+                if (cBox.getText().contains("2")) {
+                    cBox.setSelected(true);
+                }
+            }
+
+        } else if (event.getSource() == attemptThree) {
+
+            for (JCheckBox cBox : dataNameList) {
+                if (cBox.getText().contains("3")) {
+                    cBox.setSelected(true);
+                }
+            }
+
+        } else if (event.getSource() == attemptHigher) {
+
+            for (JCheckBox cBox : dataNameList) {
+                if (!cBox.getText().contains("1")
+                        && !cBox.getText().contains("2")
+                        && !cBox.getText().contains("3")) {
+                    cBox.setSelected(true);
+                }
             }
 
         } else if (event.getSource() == bNone) {

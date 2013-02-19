@@ -111,7 +111,6 @@ public class Database {
     public List<HashMap<String, Number>> getMovementOfPlayer(String dataName, Collection<Phase> selectedPhases) {
 
 
-
         String exploreCompleteTime = getPhaseCompleteTime(Phase.EXPLORATION, dataName);
         String task1CompleteTime = getPhaseCompleteTime(Phase.TASK_1, dataName);
         String task2CompleteTime = getPhaseCompleteTime(Phase.TASK_2, dataName);
@@ -168,7 +167,7 @@ public class Database {
                 Integer height = Integer.parseInt(row.get("y"));
                 Integer floor = getFloorForHeight(height);
                 Long time = Long.parseLong(row.get("time"));
-                HashMap<String, Number>result = new HashMap<String, Number>();
+                HashMap<String, Number> result = new HashMap<String, Number>();
                 result.put("x", x);
                 result.put("y", y);
                 result.put("floor", floor);
@@ -221,16 +220,13 @@ public class Database {
     }
 
 
-
-
-
     private String getLeverOpenTime(String dataName, int i) {
         String st;
-        if(i>12){
+        if (i > 12) {
             st = "select lo.leverID, time-st.startTime as t " +
-                "from mc_statistician.leveropentime as lo, (select startTime from mc_statistician.idplayermapping where name=\"" + dataName + "\") as st " +
-                "where name=\"" + dataName + "\" and leverID =" + i + ";";
-        }else{
+                    "from mc_statistician.leveropentime as lo, (select startTime from mc_statistician.idplayermapping where name=\"" + dataName + "\") as st " +
+                    "where name=\"" + dataName + "\" and leverID =" + i + ";";
+        } else {
             st = "select lo.leverID, time-st.startTime as t " +
                     "from mc_statistician.leveropentime as lo, " +
                     "(select startTime from mc_statistician.idplayermapping " +
@@ -242,9 +238,6 @@ public class Database {
 
         return results.get(0).get("t");
     }
-
-
-
 
 
     private int getFloorForHeight(int height) {
@@ -356,11 +349,11 @@ public class Database {
     }
 
     private void initializeDataNameAttemptMap() {
-        if(dataNames==null){
+        if (dataNames == null) {
             initializeDataNames();
         }
         this.dataNameAttemptMap = ArrayListMultimap.create();
-        for(String dataName:dataNames){
+        for (String dataName : dataNames) {
             String name = getNameFromData(dataName);
             Integer attempt = Integer.parseInt(getNumberFromData(dataName));
             this.dataNameAttemptMap.put(name, attempt);
@@ -369,29 +362,27 @@ public class Database {
         }
 
 
-
-
     }
 
     private String getNameFromData(String dataName) {
-        for(int i=0;i<dataName.length();i++){
-            if(Character.isDigit(dataName.charAt(i))){
-                return dataName.substring(0,i);
-            }
-        }
-        assert false;
-        return null;
-    }
-    private String getNumberFromData(String dataName) {
-        for(int i=0;i<dataName.length();i++){
-            if(Character.isDigit(dataName.charAt(i))){
-                return dataName.substring(i,dataName.length());
+        for (int i = 0; i < dataName.length(); i++) {
+            if (Character.isDigit(dataName.charAt(i))) {
+                return dataName.substring(0, i);
             }
         }
         assert false;
         return null;
     }
 
+    private String getNumberFromData(String dataName) {
+        for (int i = 0; i < dataName.length(); i++) {
+            if (Character.isDigit(dataName.charAt(i))) {
+                return dataName.substring(i, dataName.length());
+            }
+        }
+        assert false;
+        return null;
+    }
 
 
 }

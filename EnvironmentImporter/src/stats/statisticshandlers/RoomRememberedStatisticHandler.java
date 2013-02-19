@@ -3,6 +3,7 @@ package stats.statisticshandlers;
 import com.google.common.collect.HashMultimap;
 import gui.NetworkModel;
 import gui.Phase;
+import gui.StatsDialog;
 import stats.StatisticChoice;
 import stats.chartdisplays.RoomRepetitionChartDisplay;
 import stats.consoledisplays.RoomRepetitionConsoleDisplay;
@@ -21,7 +22,6 @@ import java.util.*;
 public class RoomRememberedStatisticHandler extends StatisticsHandler<RoomRepetitionConsoleDisplay, RoomRepetitionChartDisplay> {
 
 
-
     public RoomRememberedStatisticHandler() {
         super(new RoomRepetitionChartDisplay(),
                 new RoomRepetitionConsoleDisplay()
@@ -31,13 +31,13 @@ public class RoomRememberedStatisticHandler extends StatisticsHandler<RoomRepeti
 
 
     @Override
-    public void generateAndDisplayStats(Collection<String> dataNames, Phase phase) {
+    public void generateAndDisplayStats(Collection<String> dataNames, Phase phase, StatsDialog.AllOrOne all, StatsDialog.AggregationType itemAt) {
         final StatisticChoice choice = StatisticChoice.ROOM_REMEMBERED;
         if (!dataNames.isEmpty()) {
-            HashMap<String, HashMap<String, HashMap<String, Number>>> dataNameDataMap = new HashMap<String, HashMap<String, HashMap<String, Number>>>();
+            HashMap<String, HashMap<String, Number>> dataNameDataMap = new HashMap<String, HashMap<String, Number>>();
             for (String dataName : dataNames) {
                 System.out.println("Processing " + dataName + "...");
-                dataNameDataMap.put(dataName, ((NetworkModel) NetworkModel.instance()).getVertexDataFor(dataName, StatisticChoice.TIME_SPENT_PER_VERTEX));
+                dataNameDataMap.put(dataName, ((NetworkModel) NetworkModel.instance()).getVertexDataFor(dataName, StatisticChoice.TIME_SPENT_PER_VERTEX, phase));
 
             }
             HashMap<String, HashMap<String, Long>> roomVisitData = summarizeData(dataNameDataMap, phase);
@@ -54,43 +54,23 @@ public class RoomRememberedStatisticHandler extends StatisticsHandler<RoomRepeti
         }
     }
 
-    private HashMap<String, HashMap<String, Long>> summarizeData(HashMap<String, HashMap<String, HashMap<String, Number>>> dataNameDataMap, Phase phase) {
+    private HashMap<String, HashMap<String, Long>> summarizeData(HashMap<String, HashMap<String, Number>> dataNameDataMap, Phase phase) {
         HashMap<String, HashMap<String, Long>> result = new HashMap<String, HashMap<String, Long>>();
 
         for (String dataName : dataNameDataMap.keySet()) {
 
-            HashMap<String, HashMap<String, Number>> dataForPerson = dataNameDataMap.get(dataName);
-
-            HashMap<String, Number> library2Data = dataForPerson.get("Library2");
-            HashMap<String, Number> libraryGData = dataForPerson.get("LibraryG");
-            HashMap<String, Number> saunaData = dataForPerson.get("Sauna");
-            HashMap<String, Number> galleryData = dataForPerson.get("Gallery");
-            HashMap<String, Number> startData = dataForPerson.get("StartingRoom");
+            HashMap<String, Number> dataForPerson = dataNameDataMap.get(dataName);
             long valueForLibrary;
-            if (library2Data != null) {
-                long library2Value = library2Data.get(phase.toString()) == null ? 0 : (library2Data.get(phase.toString())).longValue();
-                long libraryGValue = (libraryGData.get(phase.toString()) == null ? 0 : (libraryGData.get(phase.toString())).longValue());
-                valueForLibrary = library2Value + libraryGValue;
-            } else {
-                valueForLibrary = 0;
-            }
+            long library2Value = dataForPerson.get("Library2") == null ? 0 : dataForPerson.get("Library2").longValue();
+            long libraryGValue = dataForPerson.get("LibraryG") == null ? 0 : dataForPerson.get("LibraryG").longValue();
+            valueForLibrary = library2Value + libraryGValue;
+
             long valueForSauna;
-            if (saunaData != null)
-                valueForSauna = saunaData.get(phase.toString()) == null ? 0 : (saunaData.get(phase.toString())).longValue();
-            else
-                valueForSauna = 0;
+            valueForSauna = dataForPerson.get("Sauna") == null ? 0 : dataForPerson.get("Sauna").longValue();
             long valueForGallery;
-            if (galleryData != null) {
-                valueForGallery = galleryData.get(phase.toString()) == null ? 0 : (galleryData.get(phase.toString())).longValue();
-            } else {
-                valueForGallery = 0;
-            }
+            valueForGallery = dataForPerson.get("Gallery") == null ? 0 : dataForPerson.get("Gallery").longValue();
             long valueForStart;
-            if (startData != null) {
-                valueForStart = startData.get(phase.toString()) == null ? 0 : startData.get(phase.toString()).longValue();
-            } else {
-                valueForStart = 0;
-            }
+            valueForStart = dataForPerson.get("StartingRoom") == null ? 0 : dataForPerson.get("StartingRoom").longValue();
             HashMap<String, Long> tempMap = new HashMap<String, Long>();
             tempMap.put("Library", valueForLibrary);
             tempMap.put("PictureGallery", valueForGallery);
@@ -130,7 +110,6 @@ public class RoomRememberedStatisticHandler extends StatisticsHandler<RoomRepeti
                                                                                          HashMultimap<String, String> rememberedRooms) {
 
 
-
         List<String> significantRooms = new ArrayList<String>();
         significantRooms.add("PictureGallery");
         significantRooms.add("Library");
@@ -146,14 +125,13 @@ public class RoomRememberedStatisticHandler extends StatisticsHandler<RoomRepeti
             if (rememberedRoomsForName != null && roomVisitFrequencyForName != null) {
                 for (String significantRoom : significantRooms) {
                     HashMap<String, String> mapForRoom = mapForName.get(significantRoom);
-                    if(mapForRoom==null)
-                         mapForRoom= new HashMap<String, String>();
+                    if (mapForRoom == null)
+                        mapForRoom = new HashMap<String, String>();
                     Long visitFrequency = roomVisitFrequencyForName.get(significantRoom) != null ?
                             roomVisitFrequencyForName.get(significantRoom) : 0;
                     mapForRoom.put("frequency", visitFrequency.toString());
                     if (rememberedRoomsForName.contains(significantRoom)) {        // Remembers the room. So add Dataname to Yes List
-                          mapForRoom.put("remembers", "yes");
-
+                        mapForRoom.put("remembers", "yes");
 
 
 //                        result[1] = visitFrequency;
@@ -175,7 +153,7 @@ public class RoomRememberedStatisticHandler extends StatisticsHandler<RoomRepeti
         }
 
 
-           return result;
+        return result;
 
     }
 

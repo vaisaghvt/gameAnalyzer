@@ -7,17 +7,13 @@ import org.jfree.chart.JFreeChart;
 import org.jfree.chart.axis.NumberAxis;
 import org.jfree.chart.plot.PlotOrientation;
 import org.jfree.chart.plot.XYPlot;
-import org.jfree.data.category.CategoryDataset;
-import org.jfree.data.category.DefaultCategoryDataset;
 import org.jfree.data.general.Dataset;
 import org.jfree.data.xy.XYDataset;
 import org.jfree.data.xy.XYSeries;
 import org.jfree.data.xy.XYSeriesCollection;
 import org.jfree.util.ShapeUtilities;
 
-import javax.swing.*;
 import java.awt.*;
-import java.util.HashMap;
 import java.util.TreeSet;
 
 /**
@@ -39,18 +35,19 @@ public class NodeRepetitionFrequencyChartDisplay extends ChartDisplay<Multiset<D
         final JFreeChart chart = createChart(dataSet);
         final ChartPanel chartPanel = new ChartPanel(chart);
         chartPanel.setPreferredSize(new Dimension(500, 270));
-        JFrame frame = new JFrame(this.getTitle());
-        frame.setContentPane(chartPanel);
-        frame.setVisible(true);
-        frame.setSize(new Dimension(520, 300));
+        createNewFrameAndSetLocation();
+        currentFrame.setTitle(this.getTitle()+": deltaT = Time between Door use");
+        currentFrame.setContentPane(chartPanel);
+        currentFrame.setVisible(true);
+        currentFrame.setSize(new Dimension(520, 300));
 
     }
 
 
     public JFreeChart createChart(Dataset dataSet) {
         final JFreeChart chart = ChartFactory.createScatterPlot(
-                this.getTitle(),
-                "deltaT",
+                this.getTitle()+": deltaT = Time between Door use",
+                "deltaT = Time between Room visits",
                 "Frequency",
                 (XYDataset) dataSet,
                 PlotOrientation.VERTICAL,

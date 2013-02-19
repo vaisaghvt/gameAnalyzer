@@ -8,10 +8,7 @@ import org.jfree.chart.plot.PlotOrientation;
 import org.jfree.data.category.CategoryDataset;
 import org.jfree.data.category.DefaultCategoryDataset;
 
-import javax.swing.*;
 import java.awt.*;
-import java.util.*;
-import java.util.List;
 
 /**
  * Created with IntelliJ IDEA.
@@ -32,11 +29,11 @@ public class CoverageChartDisplay extends ChartDisplay<HashMultimap<Integer, Str
         final JFreeChart chart = createChart(dataSet);
         final ChartPanel chartPanel = new ChartPanel(chart);
         chartPanel.setPreferredSize(new Dimension(500, 270));
-        JFrame frame = new JFrame(getTitle());
-        frame.setContentPane(chartPanel);
-        frame.setVisible(true);
-        frame.setLocation(100,100);
-        frame.setSize(new Dimension(520, 300));
+        createNewFrameAndSetLocation();
+        currentFrame.setContentPane(chartPanel);
+        currentFrame.setVisible(true);
+
+        currentFrame.setSize(new Dimension(520, 300));
     }
 
 

@@ -3,6 +3,7 @@ package stats.statisticshandlers;
 import com.google.common.collect.HashMultimap;
 import gui.NetworkModel;
 import gui.Phase;
+import gui.StatsDialog;
 import stats.StatisticChoice;
 import stats.chartdisplays.StaircaseVisitChartDisplay;
 import stats.consoledisplays.StaircaseVisitConsoleDisplay;
@@ -29,7 +30,7 @@ public class StaircaseVisitStatisticHandler extends StatisticsHandler<StaircaseV
 
 
     @Override
-    public void generateAndDisplayStats(Collection<String> dataNames, Phase phase) {
+    public void generateAndDisplayStats(Collection<String> dataNames, Phase phase, StatsDialog.AllOrOne all, StatsDialog.AggregationType itemAt) {
         final StatisticChoice choice = StatisticChoice.STAIRCASE_VISIT_CHANCE;
         HashMultimap<String, String> usesStaircaseUnusuallyList =  ((NetworkModel) NetworkModel.instance()).getStaircaseRelatedMotion(dataNames, phase);
         this.chartDisplay.setTitle(choice.toString()+phase.toString());

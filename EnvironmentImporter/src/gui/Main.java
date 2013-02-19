@@ -18,7 +18,7 @@ import java.util.Set;
  * Date: 1/8/13
  * Time: 4:10 PM
  * <p/>
- * This is the main frame and panel.
+ * This is the main currentFrame and panel.
  */
 public class Main extends JFrame implements ActionListener, MouseListener, MouseMotionListener, ChangeListener {
     private static final long serialVersionUID = 1L;
@@ -776,7 +776,7 @@ public class Main extends JFrame implements ActionListener, MouseListener, Mouse
             drawnX2 = event.getX();
             drawnY2 = event.getY();
 
-            //no, draw the selection frame...
+            //no, draw the selection currentFrame...
             ((MapImagePanel) mainPanel).setSelection(drawnX1, drawnY1, drawnX2, drawnY2);
             this.invalidateImagePanel();
         }
