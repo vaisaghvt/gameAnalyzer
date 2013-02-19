@@ -38,7 +38,7 @@ public class VertexVisitCountStatisticHandler extends StatisticsHandler<VertexVi
                 HashMap<String, HashMap<String, Number>> dataNameDataMap = new HashMap<String, HashMap<String, Number>>();
                 for (String dataName : dataNames) {
                     System.out.println("Processing " + dataName + "...");
-                    dataNameDataMap.put(dataName, ((NetworkModel) NetworkModel.instance()).getVertexDataFor(dataName, choice,phase));
+                    dataNameDataMap.put(dataName, NetworkModel.instance().getVertexDataFor(dataName, choice,phase));
 
                 }
 
@@ -52,7 +52,7 @@ public class VertexVisitCountStatisticHandler extends StatisticsHandler<VertexVi
                 HashMap<String, HashMap<String, Number>> dataNameDataMap = new HashMap<String, HashMap<String, Number>>();
                 for (String dataName : dataNames) {
                     System.out.println("Processing " + dataName + "...");
-                    dataNameDataMap.put(dataName, ((NetworkModel) NetworkModel.instance()).getVertexDataFor(dataName, choice,phase));
+                    dataNameDataMap.put(dataName, NetworkModel.instance().getVertexDataFor(dataName, choice,phase));
 
                     Multiset<Double> data = summarizeData(dataNameDataMap, phase);
 
@@ -73,7 +73,7 @@ public class VertexVisitCountStatisticHandler extends StatisticsHandler<VertexVi
 
     private Multiset<Double> summarizeData(HashMap<String, HashMap<String, Number>> dataNameDataMap, Phase phase) {
         Multiset<Double> result = HashMultiset.create();
-        HashMap<String, Integer> roomEdgeCountMapping = ((NetworkModel) NetworkModel.instance()).getEdgesForEachRoom();
+        HashMap<String, Integer> roomEdgeCountMapping = NetworkModel.instance().getEdgesForEachRoom();
         for (String dataName : dataNameDataMap.keySet()) {
 
             HashMap<String, Number> dataForPerson = dataNameDataMap.get(dataName);

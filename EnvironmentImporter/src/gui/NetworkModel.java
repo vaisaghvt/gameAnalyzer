@@ -44,7 +44,7 @@ public class NetworkModel extends MainPanel implements ActionListener {
     HashMap<Integer, ModelArea> idAreaMapping;
     private Document document;
     private static NetworkModel instance;
-    HashMap<ModelArea, Integer> areaFloorMapping;
+    private HashMap<ModelArea, Integer> areaFloorMapping;
     private String currentData;
     HashMap<Integer, ModelGroup> areaIdGroupMapping;
     private HashSet<Phase> selectedPhases;
@@ -388,7 +388,7 @@ public class NetworkModel extends MainPanel implements ActionListener {
     }
 
 
-    public static MainPanel instance() {
+    public static NetworkModel instance() {
         if (instance == null)
             instance = new NetworkModel();
 
@@ -447,7 +447,7 @@ public class NetworkModel extends MainPanel implements ActionListener {
         return result;
     }
 
-    private DirectedSparseMultigraph<ModelObject, ModelEdge> getDirectedGraphOfPlayer(String dataName, HashSet<Phase> phases) {
+    public DirectedSparseMultigraph<ModelObject, ModelEdge> getDirectedGraphOfPlayer(String dataName, HashSet<Phase> phases) {
         DirectedSparseMultigraph<ModelObject, ModelEdge> result = getCachedGraph(dataName, phases);
         if (result == null) {
             List<HashMap<String, Number>> resultList = getMovementOfPlayer(dataName, phases);
@@ -530,7 +530,7 @@ public class NetworkModel extends MainPanel implements ActionListener {
 
     }
 
-    private List<HashMap<String, Number>> getMovementOfPlayer(String dataName, HashSet<Phase> phases) {
+    public List<HashMap<String, Number>> getMovementOfPlayer(String dataName, HashSet<Phase> phases) {
         List<HashMap<String, Number>> result;
         int code = findCode(phases);
         if (!nameToPhaseToMovementMap.containsKey(dataName) || !nameToPhaseToMovementMap.get(dataName).containsKey(code)) {
@@ -557,7 +557,8 @@ public class NetworkModel extends MainPanel implements ActionListener {
                 return phase.getNum() - phase1.getNum();
             }
         });
-        int count = 0;
+        phasesSorted.addAll(phases);
+        int count = 1;
         int result = 0;
         for (Phase phase : phasesSorted) {
             result += phase.getNum() * count;
@@ -975,6 +976,14 @@ public class NetworkModel extends MainPanel implements ActionListener {
         }
     }
 
+    public int getTotalNumberOfVertices() {
+        if(completeGraph!=null){
+            return completeGraph.getVertexCount();
+        }else
+            return -1;
+
+    }
+
 
     private class SimpleFloorColoringTransformer<ModelObject, Paint> implements Transformer<ModelObject, Paint> {
         @Override
@@ -1018,7 +1027,7 @@ public class NetworkModel extends MainPanel implements ActionListener {
         }
     }
 
-    public HashMultimap<String, String> getPathDataFor(Collection<String> dataNames, Phase phase, StatisticChoice choice) {
+    public HashMultimap<String, String> getPathDataFor(Collection<String> dataNames, Phase phase) {
 
         HashMap<String, DirectedSparseMultigraph<ModelObject, ModelEdge>> dataNameGraphMap;
         dataNameGraphMap = new HashMap<String, DirectedSparseMultigraph<ModelObject, ModelEdge>>();
@@ -1361,7 +1370,9 @@ public class NetworkModel extends MainPanel implements ActionListener {
 
     }
 
-
+    public int getFloorForArea(ModelArea area){
+        return this.areaFloorMapping.get(area);
+    }
 }
 
 

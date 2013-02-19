@@ -43,7 +43,7 @@ public class VertexChartDisplay extends ChartDisplay<HashMap<String, ? extends N
     public CategoryDataset createDataSet(HashMap<String,  ? extends Number> data) {
 
 
-        Collection<String> sortedRoomNames = ((NetworkModel) NetworkModel.instance()).getSortedRooms();
+        Collection<String> sortedRoomNames = NetworkModel.instance().getSortedRooms();
         final DefaultCategoryDataset dataSet = new DefaultCategoryDataset();
         for (String roomName : sortedRoomNames) {
             if(data.containsKey(roomName)){

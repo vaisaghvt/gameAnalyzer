@@ -32,8 +32,8 @@ public class DistanceTimeForTasksStatisticHandler extends StatisticsHandler<Dist
     @Override
     public void generateAndDisplayStats(Collection<String> dataNames, Phase phase, StatsDialog.AllOrOne all, StatsDialog.AggregationType itemAt) {
         final StatisticChoice choice = StatisticChoice.DISTANCE_TIME_FOR_TASKS_STATISTIC;
-        HashMap<String, Double> distanceTraveled =  ((NetworkModel) NetworkModel.instance()).getDistanceTraveledDuringTasks(dataNames);
-        HashMap<String, Long> timeTaken =  ((NetworkModel) NetworkModel.instance()).getTimeTraveledDuringTasks(dataNames);
+        HashMap<String, Double> distanceTraveled =  NetworkModel.instance().getDistanceTraveledDuringTasks(dataNames);
+        HashMap<String, Long> timeTaken =  NetworkModel.instance().getTimeTraveledDuringTasks(dataNames);
 
 
         HashMap<String, HashMap<String, Double>> summary = summarizeDistanceTime(distanceTraveled, timeTaken);

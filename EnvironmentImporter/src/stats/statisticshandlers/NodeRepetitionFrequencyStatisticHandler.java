@@ -38,9 +38,9 @@ public class NodeRepetitionFrequencyStatisticHandler extends StatisticsHandler<N
         if (allOrOne == StatsDialog.AllOrOne.EACH) {
             for (String dataName : dataNames) {
 //                String dataName = dataNames.iterator().next();
-                HashMultimap<String, Long> roomVisitTimeMap = ((NetworkModel) NetworkModel.instance()).getVertexInTimesFor(dataName);
+                HashMultimap<String, Long> roomVisitTimeMap = NetworkModel.instance().getVertexInTimesFor(dataName);
 
-                HashMap<String, Integer> roomDegree = ((NetworkModel) NetworkModel.instance()).getEdgesForEachRoom();
+                HashMap<String, Integer> roomDegree = NetworkModel.instance().getEdgesForEachRoom();
                 Multiset<Double> deltaTToFrequencyMapping = findDeltaTToFrequencyMapping(roomVisitTimeMap);
 
                 this.chartDisplay.setName(dataName);
@@ -52,7 +52,7 @@ public class NodeRepetitionFrequencyStatisticHandler extends StatisticsHandler<N
             HashMap<String, Multiset<Double>> nameToData = new HashMap<String, Multiset<Double>>();
             for (String dataName : dataNames) {
 //                String dataName = dataNames.iterator().next();
-                HashMultimap<String, Long> roomVisitTimeMap = ((NetworkModel) NetworkModel.instance()).getVertexInTimesFor(dataName);
+                HashMultimap<String, Long> roomVisitTimeMap = NetworkModel.instance().getVertexInTimesFor(dataName);
 
 
                 Multiset<Double> deltaTToFrequencyMapping = findDeltaTToFrequencyMapping(roomVisitTimeMap);

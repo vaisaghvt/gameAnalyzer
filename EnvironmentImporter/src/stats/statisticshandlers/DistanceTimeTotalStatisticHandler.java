@@ -34,8 +34,8 @@ public class DistanceTimeTotalStatisticHandler extends StatisticsHandler<Distanc
         final StatisticChoice choice = StatisticChoice.DISTANCE_TIME_TOTAL_STATISTIC;
 
 
-        HashMap<String, Double> distanceTraveled =  ((NetworkModel) NetworkModel.instance()).getDistanceTraveledTotal(dataNames);
-        HashMap<String, Long> timeTaken =  ((NetworkModel) NetworkModel.instance()).getTimeTraveledTotal(dataNames);
+        HashMap<String, Double> distanceTraveled =  NetworkModel.instance().getDistanceTraveledTotal(dataNames);
+        HashMap<String, Long> timeTaken =  NetworkModel.instance().getTimeTraveledTotal(dataNames);
 
         HashMap<String, HashMap<String, Double>> summary = summarizeDistanceTime(distanceTraveled, timeTaken);
         this.chartDisplay.setTitle(choice.toString());

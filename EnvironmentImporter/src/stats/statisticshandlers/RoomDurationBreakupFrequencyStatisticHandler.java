@@ -40,7 +40,7 @@ public class RoomDurationBreakupFrequencyStatisticHandler extends StatisticsHand
                 HashMultimap<String, Long> result = HashMultimap.create();
                 for (String dataName : dataNames) {
                     System.out.println("Processing " + dataName + "...");
-                    HashMap<String, HashMultimap<String, Long>> temp = ((NetworkModel) NetworkModel.instance()).
+                    HashMap<String, HashMultimap<String, Long>> temp = NetworkModel.instance().
                             getTimeSpentPerVisit(dataName);
 
                     for (String roomName : temp.keySet()) {
@@ -63,7 +63,7 @@ public class RoomDurationBreakupFrequencyStatisticHandler extends StatisticsHand
                 for (String dataName : dataNames) {
                     HashMultimap<String, Long> result = HashMultimap.create();
                     System.out.println("Processing " + dataName + "...");
-                    HashMap<String, HashMultimap<String, Long>> temp = ((NetworkModel) NetworkModel.instance()).
+                    HashMap<String, HashMultimap<String, Long>> temp = NetworkModel.instance().
                             getTimeSpentPerVisit(dataName);
 
                     for (String roomName : temp.keySet()) {

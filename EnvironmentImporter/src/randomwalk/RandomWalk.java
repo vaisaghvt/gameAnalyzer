@@ -6,6 +6,7 @@ import edu.uci.ics.jung.graph.DirectedGraph;
 import edu.uci.ics.jung.graph.DirectedSparseMultigraph;
 import edu.uci.ics.jung.graph.Graph;
 import gui.NetworkModel;
+import javafx.geometry.Point3D;
 import modelcomponents.ModelArea;
 import modelcomponents.ModelEdge;
 import modelcomponents.ModelGroup;
@@ -15,7 +16,6 @@ import org.apache.commons.math3.stat.descriptive.moment.Mean;
 import org.apache.commons.math3.stat.descriptive.moment.Variance;
 
 import java.awt.*;
-import java.awt.geom.Point2D;
 import java.util.*;
 import java.util.List;
 
@@ -36,8 +36,8 @@ public class RandomWalk {
     private RandomWalk() {
     }
 
-    public static RandomWalk instance(){
-        if(randomWalkInstance ==null){
+    public static RandomWalk instance() {
+        if (randomWalkInstance == null) {
             randomWalkInstance = new RandomWalk();
         }
         return randomWalkInstance;
@@ -78,43 +78,43 @@ public class RandomWalk {
 
     private static boolean isStable(List<Double> listOfGyrationRadius) {
 
-        double[] primitiveNumbers =  new double[listOfGyrationRadius.size()];
-        int i=0;
-        for(Double number:listOfGyrationRadius){
-            primitiveNumbers[i]= number;
+        double[] primitiveNumbers = new double[listOfGyrationRadius.size()];
+        int i = 0;
+        for (Double number : listOfGyrationRadius) {
+            primitiveNumbers[i] = number;
             i++;
         }
         Mean meanEvaluator = new Mean();
         double mean = meanEvaluator.evaluate(primitiveNumbers);
 
 
-        Variance varianceEvaluator= new Variance();
+        Variance varianceEvaluator = new Variance();
         double var = varianceEvaluator.evaluate(primitiveNumbers, mean);
 
         varianceList.add(var);
 
-        if(varianceList.size()<5){
+        if (varianceList.size() < 5) {
             return false;
         }
 
         double[] primitiveVariance = new double[5];
-        i=0;
-        for(Double number:varianceList){
-            primitiveVariance[i]= number;
+        i = 0;
+        for (Double number : varianceList) {
+            primitiveVariance[i] = number;
             i++;
         }
 
         mean = meanEvaluator.evaluate(primitiveVariance);
 
-        if(varianceEvaluator.evaluate(primitiveVariance, mean)<0.001){
+        if (varianceEvaluator.evaluate(primitiveVariance, mean) < 0.001) {
             return true;
-        }else{
+        } else {
             return false;
         }
     }
 
     private static Double calculateRadiusOfGyration(DirectedGraph<ModelObject, ModelEdge> graph, ModelObject start) {
-        Point2D.Double centerOfMass = calcCenterOfMass(graph, start);
+        Point3D centerOfMass = calcCenterOfMass(graph, start);
 
         TreeSet<ModelEdge> setOfEdges = new TreeSet<ModelEdge>(new Comparator<ModelEdge>() {
             @Override
@@ -126,18 +126,18 @@ public class RandomWalk {
         double sum = 0;
 
         ModelObject current = start;
-        sum += getCenterOfArea(current).distanceSq(centerOfMass);
+        sum += Math.pow(getCenterOfArea(current).distance(centerOfMass),2.0);
         int n = 0;
         for (ModelEdge edge : setOfEdges) {
             current = graph.getOpposite(current, edge);
-            sum += getCenterOfArea(current).distanceSq(centerOfMass);
+            sum += Math.pow(getCenterOfArea(current).distance(centerOfMass),2.0);
             n++;
         }
 
         return Math.sqrt(sum / n);
     }
 
-    private static Point2D.Double getCenterOfArea(ModelObject area) {
+    private static Point3D getCenterOfArea(ModelObject area) {
         if (area instanceof ModelArea) {
             ModelArea room = (ModelArea) area;
             return getCenterOfRoom(room);
@@ -146,34 +146,39 @@ public class RandomWalk {
         ModelGroup group = (ModelGroup) area;
         double sumX = 0;
         double sumY = 0;
-        int n =0;
+        double sumZ = 0;
+        int n = 0;
         for (int areaId : group.getAreaIds()) {
 
-            ModelArea tempArea = ((NetworkModel) NetworkModel.instance()).getRoomForId(areaId);
-            Point2D.Double tempPoint = getCenterOfRoom(tempArea);
-            sumX += tempPoint.x;
-            sumY += tempPoint.y;
+            ModelArea tempArea = NetworkModel.instance().getRoomForId(areaId);
+            Point3D tempPoint = getCenterOfRoom(tempArea);
+            sumX += tempPoint.getX();
+            sumY += tempPoint.getY();
+            sumZ += tempPoint.getZ();
             n++;
         }
 
 
-        return new Point2D.Double(sumX/n, sumY/n);
+        return new Point3D(sumX / n, sumY / n, sumZ / n);
     }
 
-    private static Point2D.Double getCenterOfRoom(ModelArea room) {
+    private static Point3D getCenterOfRoom(ModelArea room) {
         Point p1 = room.getCorner0();
         Point p2 = room.getCorner1();
+
         double x = (p1.getX() + p2.getX()) / 2;
         double y = (p1.getY() + p2.getY()) / 2;
-        return new Point2D.Double(x, y);
+        double z = (double) NetworkModel.instance().getFloorForArea(room);
+        return new Point3D(x, y, z);
 
     }
 
-    private static Point2D.Double calcCenterOfMass(DirectedGraph<ModelObject, ModelEdge> graph, ModelObject start) {
+    private static Point3D calcCenterOfMass(DirectedGraph<ModelObject, ModelEdge> graph, ModelObject start) {
         ModelObject current = start;
         double sumX = 0;
         double sumY = 0;
-        int n =0;
+        double sumZ = 0;
+        int n = 0;
 
         TreeSet<ModelEdge> setOfEdges = new TreeSet<ModelEdge>(new Comparator<ModelEdge>() {
             @Override
@@ -184,15 +189,16 @@ public class RandomWalk {
         setOfEdges.addAll(graph.getEdges());
         for (ModelEdge edge : setOfEdges) {
 
-                current = graph.getOpposite(current, edge);
+            current = graph.getOpposite(current, edge);
 
-                Point2D.Double p= getCenterOfArea(current);
-            sumX+=p.getX();
-            sumY+=p.getY();
+            Point3D p = getCenterOfArea(current);
+            sumX += p.getX();
+            sumY += p.getY();
+            sumZ += p.getZ();
 
             n++;
         }
-        return new Point2D.Double(sumX/n, sumY/n);
+        return new Point3D(sumX / n, sumY / n, sumZ /n);
     }
 
 
@@ -220,7 +226,6 @@ public class RandomWalk {
     }
 
 
-
     private static int calculateCoverage(Graph<ModelObject, ModelEdge> completeGraph, DirectedGraph<ModelObject, ModelEdge> graph) {
         int count = 0;
         for (ModelObject vertex : completeGraph.getVertices()) {
@@ -232,7 +237,7 @@ public class RandomWalk {
     }
 
     public HashMap<String, Double> subtractRandomWalkFromRoomToVisitMapping(HashMap<String, Double> playerMap) {
-        if(this.randomWalkGraphs == null){
+        if (this.randomWalkGraphs == null) {
             return playerMap;
         }
         HashMap<String, Double> averageOfRandomWalks = calculateAverageRoomVisitFrequency();
@@ -241,32 +246,32 @@ public class RandomWalk {
 
     private HashMap<String, Double> normalizedResult(HashMap<String, Double> playerMap, HashMap<String, Double> averageOfRandomWalks) {
 
-        for(String roomName: playerMap.keySet()){
-            playerMap.put(roomName,playerMap.get(roomName)-averageOfRandomWalks.get(roomName));
+        for (String roomName : playerMap.keySet()) {
+            playerMap.put(roomName, playerMap.get(roomName) - averageOfRandomWalks.get(roomName));
         }
         return playerMap;
     }
 
     private HashMap<String, Double> calculateAverageRoomVisitFrequency() {
 
-        HashMap<String, Double> result= new HashMap<String, Double>();
-        HashMap<String, Integer> roomEdgeCountMapping = ((NetworkModel) NetworkModel.instance()).getEdgesForEachRoom();
-        for(DirectedGraph<ModelObject, ModelEdge> graph: this.randomWalkGraphs){
+        HashMap<String, Double> result = new HashMap<String, Double>();
+        HashMap<String, Integer> roomEdgeCountMapping = NetworkModel.instance().getEdgesForEachRoom();
+        for (DirectedGraph<ModelObject, ModelEdge> graph : this.randomWalkGraphs) {
             for (ModelObject vertex : graph.getVertices()) {
-                double count =0;
+                double count = 0;
                 if (result.containsKey(vertex.toString())) {
                     count = result.get(vertex.toString());
                 }
                 int numberOfEdges = roomEdgeCountMapping.get(vertex.toString());
 
-                result.put(vertex.toString(), (graph.inDegree(vertex)/numberOfEdges )+count);
+                result.put(vertex.toString(), (graph.inDegree(vertex) / numberOfEdges) + count);
 
 
             }
         }
 
-        for(String roomName: result.keySet()){
-            result.put(roomName, result.get(roomName)/this.randomWalkGraphs.size());
+        for (String roomName : result.keySet()) {
+            result.put(roomName, result.get(roomName) / this.randomWalkGraphs.size());
         }
         return result;
 

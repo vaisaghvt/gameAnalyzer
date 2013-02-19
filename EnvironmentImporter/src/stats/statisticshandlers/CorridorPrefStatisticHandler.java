@@ -33,7 +33,7 @@ public class CorridorPrefStatisticHandler extends StatisticsHandler<CorridorPref
     @Override
     public void generateAndDisplayStats(Collection<String> dataNames, Phase phase, StatsDialog.AllOrOne all, StatsDialog.AggregationType itemAt) {
         final StatisticChoice choice = StatisticChoice.CORRIDOR_PREFERENCE_MEASURE;
-        HashMultimap<String, String> prefersCorridors =  ((NetworkModel) NetworkModel.instance()).getCorridorRelatedMotion(dataNames, phase);
+        HashMultimap<String, String> prefersCorridors =  NetworkModel.instance().getCorridorRelatedMotion(dataNames, phase);
         this.chartDisplay.setTitle(choice.toString()+phase.toString());
         this.chartDisplay.setPhase(phase);
         this.chartDisplay.display(prefersCorridors);

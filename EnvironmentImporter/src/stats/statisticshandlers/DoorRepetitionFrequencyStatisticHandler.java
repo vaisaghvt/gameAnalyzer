@@ -37,9 +37,9 @@ public class DoorRepetitionFrequencyStatisticHandler extends StatisticsHandler<D
         if (allOrOne == StatsDialog.AllOrOne.EACH) {
             for (String dataName : dataNames) {
 //                String dataName = dataNames.iterator().next();
-                HashMultimap<String, Long> roomVisitTimeMap = ((NetworkModel) NetworkModel.instance()).getDoorInTimesFor(dataName);
+                HashMultimap<String, Long> roomVisitTimeMap = NetworkModel.instance().getDoorInTimesFor(dataName);
 
-                HashMap<String, Integer> roomDegree = ((NetworkModel) NetworkModel.instance()).getEdgesForEachRoom();
+                HashMap<String, Integer> roomDegree = NetworkModel.instance().getEdgesForEachRoom();
                 Multiset<Double> deltaTToFrequencyMapping = findDeltaTToFrequencyMapping(roomVisitTimeMap, roomDegree);
 
                 this.chartDisplay.setName(dataName);
@@ -51,9 +51,9 @@ public class DoorRepetitionFrequencyStatisticHandler extends StatisticsHandler<D
             HashMap<String, Multiset<Double>> nameToData = new HashMap<String, Multiset<Double>>();
             for (String dataName : dataNames) {
 //                String dataName = dataNames.iterator().next();
-                HashMultimap<String, Long> roomVisitTimeMap = ((NetworkModel) NetworkModel.instance()).getDoorInTimesFor(dataName);
+                HashMultimap<String, Long> roomVisitTimeMap = NetworkModel.instance().getDoorInTimesFor(dataName);
 
-                HashMap<String, Integer> roomDegree = ((NetworkModel) NetworkModel.instance()).getEdgesForEachRoom();
+                HashMap<String, Integer> roomDegree = NetworkModel.instance().getEdgesForEachRoom();
                 Multiset<Double> deltaTToFrequencyMapping = findDeltaTToFrequencyMapping(roomVisitTimeMap, roomDegree);
                 nameToData.put(dataName, deltaTToFrequencyMapping);
             }

@@ -32,7 +32,7 @@ public class CoverageStatisticHandler extends StatisticsHandler<CoverageConsoleD
     @Override
     public void generateAndDisplayStats(Collection<String> dataNames, Phase phase, StatsDialog.AllOrOne all, StatsDialog.AggregationType itemAt) {
         final StatisticChoice choice = StatisticChoice.COVERAGE;
-        HashMultimap<Integer, String> coverageLevel =  ((NetworkModel) NetworkModel.instance()).getCoverage(dataNames, phase);
+        HashMultimap<Integer, String> coverageLevel =  NetworkModel.instance().getCoverage(dataNames, phase);
         this.chartDisplay.setTitle(choice.toString()+phase.toString());
 
         this.chartDisplay.display(coverageLevel);

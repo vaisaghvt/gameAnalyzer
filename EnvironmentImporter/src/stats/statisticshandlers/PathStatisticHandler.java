@@ -32,7 +32,7 @@ public class PathStatisticHandler extends StatisticsHandler<PathConsoleDisplay, 
     @Override
     public void generateAndDisplayStats(Collection<String> dataNames, Phase phase, StatsDialog.AllOrOne all, StatsDialog.AggregationType itemAt) {
         final StatisticChoice choice = StatisticChoice.PATH_FREQUENCY;
-        HashMultimap<String, String> data = ((NetworkModel) NetworkModel.instance()).getPathDataFor(dataNames, phase, choice);
+        HashMultimap<String, String> data = NetworkModel.instance().getPathDataFor(dataNames, phase);
         this.chartDisplay.setTitle(choice.toString()+phase.toString());
         this.chartDisplay.setPhase(phase);
         this.chartDisplay.display(data);

@@ -37,7 +37,7 @@ public class RoomRememberedStatisticHandler extends StatisticsHandler<RoomRepeti
             HashMap<String, HashMap<String, Number>> dataNameDataMap = new HashMap<String, HashMap<String, Number>>();
             for (String dataName : dataNames) {
                 System.out.println("Processing " + dataName + "...");
-                dataNameDataMap.put(dataName, ((NetworkModel) NetworkModel.instance()).getVertexDataFor(dataName, StatisticChoice.TIME_SPENT_PER_VERTEX, phase));
+                dataNameDataMap.put(dataName, NetworkModel.instance().getVertexDataFor(dataName, StatisticChoice.TIME_SPENT_PER_VERTEX, phase));
 
             }
             HashMap<String, HashMap<String, Long>> roomVisitData = summarizeData(dataNameDataMap, phase);

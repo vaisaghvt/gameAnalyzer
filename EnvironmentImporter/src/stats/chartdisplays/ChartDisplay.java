@@ -25,9 +25,7 @@ public abstract class ChartDisplay<T> implements StatisticsDisplay<T>, Component
     private HashMap<JFrame, String> frameToNameMapping = new HashMap<JFrame, String>();
 
     protected ChartDisplay() {
-        currentFrame = new JFrame();
-        name = null;
-        currentFrame.addComponentListener(this);
+
     }
 
     public String getTitle() {
@@ -56,6 +54,11 @@ public abstract class ChartDisplay<T> implements StatisticsDisplay<T>, Component
                 currentFrame.addComponentListener(this);
                 currentFrame.setLocation(100,100);
             }
+        } else{
+            currentFrame = new JFrame();
+
+
+            currentFrame.setLocation(100,100);
         }
     }
 

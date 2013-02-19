@@ -39,7 +39,7 @@ public class SignificantDoorFrequencyStatisticHandler extends StatisticsHandler<
                 HashMap<String, HashMap<String, HashMap<String, Number>>> dataNameDataMap = new HashMap<String, HashMap<String, HashMap<String, Number>>>();
                 for (String dataName : dataNames) {
                     System.out.println("Processing " + dataName + "...");
-                    dataNameDataMap.put(dataName, ((NetworkModel) NetworkModel.instance()).getEdgeDataFor(dataName));
+                    dataNameDataMap.put(dataName, NetworkModel.instance().getEdgeDataFor(dataName));
 
                 }
 
@@ -53,7 +53,7 @@ public class SignificantDoorFrequencyStatisticHandler extends StatisticsHandler<
                 HashMap<String, HashMap<String, HashMap<String, Number>>> dataNameDataMap = new HashMap<String, HashMap<String, HashMap<String, Number>>>();
                 for (String dataName : dataNames) {
                     System.out.println("Processing " + dataName + "...");
-                    dataNameDataMap.put(dataName, ((NetworkModel) NetworkModel.instance()).getEdgeDataFor(dataName));
+                    dataNameDataMap.put(dataName, NetworkModel.instance().getEdgeDataFor(dataName));
 
 
                 }

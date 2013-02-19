@@ -34,12 +34,12 @@ public class VertexVisitDurationStatisticHandler extends StatisticsHandler<Verte
         final StatisticChoice choice = StatisticChoice.TIME_SPENT_PER_VERTEX;
         if (!dataNames.isEmpty()) {
 
-            HashMap<String, Integer> roomEdgeCountMapping = ((NetworkModel) NetworkModel.instance()).getEdgesForEachRoom();
+            HashMap<String, Integer> roomEdgeCountMapping = NetworkModel.instance().getEdgesForEachRoom();
 
             if (allOrOne == StatsDialog.AllOrOne.EACH) {
                 for (String dataName : dataNames) {
                     System.out.println("Processing " + dataName + "...");
-                    HashMap<String, Number> temp = ((NetworkModel) NetworkModel.instance()).getVertexDataFor(dataName, choice, phase);
+                    HashMap<String, Number> temp = NetworkModel.instance().getVertexDataFor(dataName, choice, phase);
                     HashMap<String, Double> result = new HashMap<String, Double>();
 
                     for (String roomName : temp.keySet()) {
@@ -60,7 +60,7 @@ public class VertexVisitDurationStatisticHandler extends StatisticsHandler<Verte
                 HashMultimap<String, Double> result = HashMultimap.create();
                 for (String dataName : dataNames) {
                     System.out.println("Processing " + dataName + "...");
-                    HashMap<String, Number> temp = ((NetworkModel) NetworkModel.instance()).getVertexDataFor(dataName, choice, phase);
+                    HashMap<String, Number> temp = NetworkModel.instance().getVertexDataFor(dataName, choice, phase);
 
 
                     for (String roomName : temp.keySet()) {

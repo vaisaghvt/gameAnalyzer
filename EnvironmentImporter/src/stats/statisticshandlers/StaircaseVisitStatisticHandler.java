@@ -32,7 +32,7 @@ public class StaircaseVisitStatisticHandler extends StatisticsHandler<StaircaseV
     @Override
     public void generateAndDisplayStats(Collection<String> dataNames, Phase phase, StatsDialog.AllOrOne all, StatsDialog.AggregationType itemAt) {
         final StatisticChoice choice = StatisticChoice.STAIRCASE_VISIT_CHANCE;
-        HashMultimap<String, String> usesStaircaseUnusuallyList =  ((NetworkModel) NetworkModel.instance()).getStaircaseRelatedMotion(dataNames, phase);
+        HashMultimap<String, String> usesStaircaseUnusuallyList =  NetworkModel.instance().getStaircaseRelatedMotion(dataNames, phase);
         this.chartDisplay.setTitle(choice.toString()+phase.toString());
         this.chartDisplay.setPhase(phase);
         this.chartDisplay.display(usesStaircaseUnusuallyList);

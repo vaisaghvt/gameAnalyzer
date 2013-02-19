@@ -35,13 +35,13 @@ public class RoomDurationTotalFrequencyStatisticHandler extends StatisticsHandle
 
         if (!dataNames.isEmpty()) {
             if (allOrOne == StatsDialog.AllOrOne.ALL) {
-                HashMap<String, Integer> roomEdgeCountMapping = ((NetworkModel) NetworkModel.instance()).getEdgesForEachRoom();
+                HashMap<String, Integer> roomEdgeCountMapping = NetworkModel.instance().getEdgesForEachRoom();
 
                 HashMap<String, HashMap<String, Long>> fullResult = new HashMap<String, HashMap<String, Long>>();
 
                 for (String dataName : dataNames) {
                     System.out.println("Processing " + dataName + "...");
-                    HashMap<String, Number> temp = ((NetworkModel) NetworkModel.instance()).
+                    HashMap<String, Number> temp = NetworkModel.instance().
                             getVertexDataFor(dataName, StatisticChoice.TIME_SPENT_PER_VERTEX, phase);
                     HashMap<String, Long> result = new HashMap<String, Long>();
                     for (String roomName : temp.keySet()) {
@@ -60,12 +60,12 @@ public class RoomDurationTotalFrequencyStatisticHandler extends StatisticsHandle
                 this.chartDisplay.display(dataResult);
                 this.consoleDisplay.display(dataResult);
             } else {
-                HashMap<String, Integer> roomEdgeCountMapping = ((NetworkModel) NetworkModel.instance()).getEdgesForEachRoom();
+                HashMap<String, Integer> roomEdgeCountMapping = NetworkModel.instance().getEdgesForEachRoom();
 
 
                 for (String dataName : dataNames) {
                     System.out.println("Processing " + dataName + "...");
-                    HashMap<String, Number> temp = ((NetworkModel) NetworkModel.instance()).
+                    HashMap<String, Number> temp = NetworkModel.instance().
                             getVertexDataFor(dataName, StatisticChoice.TIME_SPENT_PER_VERTEX, phase);
                     HashMap<String, Long> result = new HashMap<String, Long>();
                     for (String roomName : temp.keySet()) {

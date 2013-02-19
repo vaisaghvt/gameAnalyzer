@@ -168,7 +168,7 @@ public class MapImagePanel extends MainPanel {
         hasSelection = false;
     }
 
-    public static MainPanel instance() {
+    public static MapImagePanel instance() {
         if(instance==null)
             instance = new MapImagePanel();
 

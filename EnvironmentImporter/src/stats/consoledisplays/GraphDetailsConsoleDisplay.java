@@ -9,11 +9,15 @@ import java.util.HashMap;
  * Time: 1:05 PM
  * To change this template use File | Settings | File Templates.
  */
-public class GraphDetailsConsoleDisplay extends ConsoleDisplay<HashMap<String, ? extends Number>> {
+public class GraphDetailsConsoleDisplay extends ConsoleDisplay<HashMap<String, String>> {
 
 
 
     @Override
-    public void display(HashMap<String, ? extends Number> data) {
+    public void display(HashMap<String, String> data) {
+        for(String key: data.keySet()){
+            System.out.println(key + " = " + data.get(key));
+        }
+
     }
 }
