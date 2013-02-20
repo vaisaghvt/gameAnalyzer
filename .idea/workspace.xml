@@ -2,52 +2,30 @@
 <project version="4">
   <component name="ChangeListManager">
     <list default="true" id="80f32fdf-167a-49ea-bd7c-d2bdf0f136b0" name="Default" comment="">
-      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/EnvironmentImporter/src/stats/chartdisplays/GraphDetailsChartDisplay.java" />
-      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/EnvironmentImporter/src/stats/consoledisplays/GraphDetailsConsoleDisplay.java" />
-      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/EnvironmentImporter/src/stats/statisticshandlers/GraphDetailsStatisticHandler.java" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/EnvironmentImporter/src/stats/chartdisplays/ChartDisplay.java" afterPath="$PROJECT_DIR$/EnvironmentImporter/src/stats/chartdisplays/ChartDisplay.java" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/EnvironmentImporter/src/stats/statisticshandlers/CorridorPrefStatisticHandler.java" afterPath="$PROJECT_DIR$/EnvironmentImporter/src/stats/statisticshandlers/CorridorPrefStatisticHandler.java" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/EnvironmentImporter/src/stats/statisticshandlers/CoverageStatisticHandler.java" afterPath="$PROJECT_DIR$/EnvironmentImporter/src/stats/statisticshandlers/CoverageStatisticHandler.java" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/EnvironmentImporter/src/stats/statisticshandlers/DistanceTimeForTasksStatisticHandler.java" afterPath="$PROJECT_DIR$/EnvironmentImporter/src/stats/statisticshandlers/DistanceTimeForTasksStatisticHandler.java" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/EnvironmentImporter/src/stats/statisticshandlers/DistanceTimeTotalStatisticHandler.java" afterPath="$PROJECT_DIR$/EnvironmentImporter/src/stats/statisticshandlers/DistanceTimeTotalStatisticHandler.java" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/EnvironmentImporter/src/stats/statisticshandlers/DoorRepetitionFrequencyStatisticHandler.java" afterPath="$PROJECT_DIR$/EnvironmentImporter/src/stats/statisticshandlers/DoorRepetitionFrequencyStatisticHandler.java" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/EnvironmentImporter/src/gui/MapImagePanel.java" afterPath="$PROJECT_DIR$/EnvironmentImporter/src/gui/MapImagePanel.java" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/EnvironmentImporter/src/gui/NetworkModel.java" afterPath="$PROJECT_DIR$/EnvironmentImporter/src/gui/NetworkModel.java" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/EnvironmentImporter/src/stats/statisticshandlers/NodeRepetitionFrequencyStatisticHandler.java" afterPath="$PROJECT_DIR$/EnvironmentImporter/src/stats/statisticshandlers/NodeRepetitionFrequencyStatisticHandler.java" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/EnvironmentImporter/src/stats/statisticshandlers/PathHopStatisticHandler.java" afterPath="$PROJECT_DIR$/EnvironmentImporter/src/stats/statisticshandlers/PathHopStatisticHandler.java" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/EnvironmentImporter/src/stats/statisticshandlers/PathStatisticHandler.java" afterPath="$PROJECT_DIR$/EnvironmentImporter/src/stats/statisticshandlers/PathStatisticHandler.java" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/EnvironmentImporter/src/randomwalk/RandomWalk.java" afterPath="$PROJECT_DIR$/EnvironmentImporter/src/randomwalk/RandomWalk.java" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/EnvironmentImporter/src/stats/statisticshandlers/RoomDurationBreakupFrequencyStatisticHandler.java" afterPath="$PROJECT_DIR$/EnvironmentImporter/src/stats/statisticshandlers/RoomDurationBreakupFrequencyStatisticHandler.java" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/EnvironmentImporter/src/stats/statisticshandlers/RoomDurationTotalFrequencyStatisticHandler.java" afterPath="$PROJECT_DIR$/EnvironmentImporter/src/stats/statisticshandlers/RoomDurationTotalFrequencyStatisticHandler.java" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/EnvironmentImporter/src/stats/statisticshandlers/RoomRememberedStatisticHandler.java" afterPath="$PROJECT_DIR$/EnvironmentImporter/src/stats/statisticshandlers/RoomRememberedStatisticHandler.java" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/EnvironmentImporter/src/stats/statisticshandlers/SignificantDoorFrequencyStatisticHandler.java" afterPath="$PROJECT_DIR$/EnvironmentImporter/src/stats/statisticshandlers/SignificantDoorFrequencyStatisticHandler.java" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/EnvironmentImporter/src/stats/statisticshandlers/SignificantVertexVisitDurationStatisticHandler.java" afterPath="$PROJECT_DIR$/EnvironmentImporter/src/stats/statisticshandlers/SignificantVertexVisitDurationStatisticHandler.java" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/EnvironmentImporter/src/stats/statisticshandlers/SignificantVertexVisitFrequencyStatisticHandler.java" afterPath="$PROJECT_DIR$/EnvironmentImporter/src/stats/statisticshandlers/SignificantVertexVisitFrequencyStatisticHandler.java" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/EnvironmentImporter/src/stats/statisticshandlers/StaircaseVisitStatisticHandler.java" afterPath="$PROJECT_DIR$/EnvironmentImporter/src/stats/statisticshandlers/StaircaseVisitStatisticHandler.java" />
+      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/EnvironmentImporter/src/stats/chartdisplays/ParallelCoordinatePlotChart.java" />
+      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/EnvironmentImporter/src/stats/statisticshandlers/ParallelCoordinatePlotGenerator.java" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/EnvironmentImporter/src/stats/chartdisplays/GraphDetailsChartDisplay.java" afterPath="$PROJECT_DIR$/EnvironmentImporter/src/stats/chartdisplays/GraphDetailsChartDisplay.java" />
       <change type="MODIFICATION" beforePath="$PROJECT_DIR$/EnvironmentImporter/src/stats/StatisticChoice.java" afterPath="$PROJECT_DIR$/EnvironmentImporter/src/stats/StatisticChoice.java" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/EnvironmentImporter/src/stats/chartdisplays/VertexChartDisplay.java" afterPath="$PROJECT_DIR$/EnvironmentImporter/src/stats/chartdisplays/VertexChartDisplay.java" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/EnvironmentImporter/src/stats/statisticshandlers/VertexVisitCountStatisticHandler.java" afterPath="$PROJECT_DIR$/EnvironmentImporter/src/stats/statisticshandlers/VertexVisitCountStatisticHandler.java" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/EnvironmentImporter/src/stats/statisticshandlers/VertexVisitDurationStatisticHandler.java" afterPath="$PROJECT_DIR$/EnvironmentImporter/src/stats/statisticshandlers/VertexVisitDurationStatisticHandler.java" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/EnvironmentImporter/src/stats/statisticshandlers/VertexVisitFrequencyStatisticHandler.java" afterPath="$PROJECT_DIR$/EnvironmentImporter/src/stats/statisticshandlers/VertexVisitFrequencyStatisticHandler.java" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/.idea/compiler.xml" afterPath="$PROJECT_DIR$/.idea/compiler.xml" />
       <change type="MODIFICATION" beforePath="$PROJECT_DIR$/.idea/workspace.xml" afterPath="$PROJECT_DIR$/.idea/workspace.xml" />
     </list>
     <ignored path="gameAnalyzer.iws" />
     <ignored path=".idea/workspace.xml" />
-    <file path="/Dummy.txt" changelist="80f32fdf-167a-49ea-bd7c-d2bdf0f136b0" time="1361258017634" ignored="false" />
+    <file path="/Dummy.txt" changelist="80f32fdf-167a-49ea-bd7c-d2bdf0f136b0" time="1361337557176" ignored="false" />
     <file path="/StatsDialog.java" changelist="80f32fdf-167a-49ea-bd7c-d2bdf0f136b0" time="1361263447718" ignored="false" />
     <file path="/CorridorPrefStatisticHandler.java" changelist="80f32fdf-167a-49ea-bd7c-d2bdf0f136b0" time="1361257934262" ignored="false" />
     <file path="/CorridorPrefChartDisplay.java" changelist="80f32fdf-167a-49ea-bd7c-d2bdf0f136b0" time="1361258039267" ignored="false" />
     <file path="/a.dummy" changelist="80f32fdf-167a-49ea-bd7c-d2bdf0f136b0" time="1361260527687" ignored="false" />
     <file path="/NetworkModel.java" changelist="80f32fdf-167a-49ea-bd7c-d2bdf0f136b0" time="1361289046996" ignored="false" />
     <file path="/RandomWalk.java" changelist="80f32fdf-167a-49ea-bd7c-d2bdf0f136b0" time="1361261127887" ignored="false" />
-    <file path="/fragment.java" changelist="80f32fdf-167a-49ea-bd7c-d2bdf0f136b0" time="1361261436849" ignored="false" />
+    <file path="/fragment.java" changelist="80f32fdf-167a-49ea-bd7c-d2bdf0f136b0" time="1361338028912" ignored="false" />
     <file path="/GraphDetailsStatisticHandler.java" changelist="80f32fdf-167a-49ea-bd7c-d2bdf0f136b0" time="1361295672829" ignored="false" />
     <file path="/GraphDetailsChartDisplay.java" changelist="80f32fdf-167a-49ea-bd7c-d2bdf0f136b0" time="1361285931702" ignored="false" />
     <file path="/GraphDetailsConsoleDisplay.java" changelist="80f32fdf-167a-49ea-bd7c-d2bdf0f136b0" time="1361285904532" ignored="false" />
     <file path="/MapImagePanel.java" changelist="80f32fdf-167a-49ea-bd7c-d2bdf0f136b0" time="1361287566791" ignored="false" />
-    <file path="/StatisticChoice.java" changelist="80f32fdf-167a-49ea-bd7c-d2bdf0f136b0" time="1361288108323" ignored="false" />
+    <file path="/StatisticChoice.java" changelist="80f32fdf-167a-49ea-bd7c-d2bdf0f136b0" time="1361343709110" ignored="false" />
     <file path="/ChartDisplay.java" changelist="80f32fdf-167a-49ea-bd7c-d2bdf0f136b0" time="1361295784341" ignored="false" />
+    <file path="/ParallelCoordinatePlotGenerator.java" changelist="80f32fdf-167a-49ea-bd7c-d2bdf0f136b0" time="1361338000175" ignored="false" />
+    <file path="/ParallelCoordinatePlotChart.java" changelist="80f32fdf-167a-49ea-bd7c-d2bdf0f136b0" time="1361345969566" ignored="false" />
     <option name="TRACKING_ENABLED" value="true" />
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -67,7 +45,6 @@
     <disable_hints />
   </component>
   <component name="DebuggerManager">
-    <ui_properties default_suspend_policy="SuspendAll" default_condition_enabled="true" />
     <line_breakpoints default_suspend_policy="SuspendAll" default_condition_enabled="true">
       <breakpoint url="file://$PROJECT_DIR$/EnvironmentImporter/src/gui/Main.java" line="314" class="gui.Main" package="gui">
         <option name="ENABLED" value="true" />
@@ -279,7 +256,36 @@
         <option name="CONDITION" value="" />
         <option name="LOG_MESSAGE" value="" />
       </breakpoint>
+      <breakpoint url="file://$PROJECT_DIR$/EnvironmentImporter/src/stats/chartdisplays/ParallelCoordinatePlotChart.java" line="66" class="stats.chartdisplays.ParallelCoordinatePlotChart" package="stats.chartdisplays">
+        <option name="ENABLED" value="true" />
+        <option name="LOG_ENABLED" value="false" />
+        <option name="LOG_EXPRESSION_ENABLED" value="false" />
+        <option name="SUSPEND_POLICY" value="SuspendAll" />
+        <option name="SUSPEND" value="true" />
+        <option name="COUNT_FILTER_ENABLED" value="false" />
+        <option name="COUNT_FILTER" value="0" />
+        <option name="CONDITION_ENABLED" value="true" />
+        <option name="CLASS_FILTERS_ENABLED" value="false" />
+        <option name="INSTANCE_FILTERS_ENABLED" value="false" />
+        <option name="CONDITION" value="" />
+        <option name="LOG_MESSAGE" value="" />
+      </breakpoint>
+      <breakpoint url="file://$PROJECT_DIR$/EnvironmentImporter/src/stats/chartdisplays/ParallelCoordinatePlotChart.java" line="53" class="stats.chartdisplays.ParallelCoordinatePlotChart" package="stats.chartdisplays">
+        <option name="ENABLED" value="true" />
+        <option name="LOG_ENABLED" value="false" />
+        <option name="LOG_EXPRESSION_ENABLED" value="false" />
+        <option name="SUSPEND_POLICY" value="SuspendAll" />
+        <option name="SUSPEND" value="true" />
+        <option name="COUNT_FILTER_ENABLED" value="false" />
+        <option name="COUNT_FILTER" value="0" />
+        <option name="CONDITION_ENABLED" value="true" />
+        <option name="CLASS_FILTERS_ENABLED" value="false" />
+        <option name="INSTANCE_FILTERS_ENABLED" value="false" />
+        <option name="CONDITION" value="" />
+        <option name="LOG_MESSAGE" value="" />
+      </breakpoint>
     </line_breakpoints>
+    <ui_properties default_suspend_policy="SuspendAll" default_condition_enabled="true" />
     <breakpoint_any default_suspend_policy="SuspendAll" default_condition_enabled="true">
       <breakpoint>
         <option name="NOTIFY_CAUGHT" value="true" />
@@ -323,104 +329,37 @@
   </component>
   <component name="FileEditorManager">
     <leaf>
-      <file leaf-file-name="VertexVisitFrequencyStatisticHandler.java" pinned="false" current="false" current-in-tab="false">
-        <entry file="file://$PROJECT_DIR$/EnvironmentImporter/src/stats/statisticshandlers/VertexVisitFrequencyStatisticHandler.java">
+      <file leaf-file-name="ParallelCoordinatePlotChart.java" pinned="false" current="true" current-in-tab="true">
+        <entry file="file://$PROJECT_DIR$/EnvironmentImporter/src/stats/chartdisplays/ParallelCoordinatePlotChart.java">
           <provider selected="true" editor-type-id="text-editor">
-            <state line="64" column="74" selection-start="2524" selection-end="2524" vertical-scroll-proportion="0.0">
-              <folding />
-            </state>
-          </provider>
-        </entry>
-      </file>
-      <file leaf-file-name="Main.java" pinned="false" current="false" current-in-tab="false">
-        <entry file="file://$PROJECT_DIR$/EnvironmentImporter/src/gui/Main.java">
-          <provider selected="true" editor-type-id="text-editor">
-            <state line="22" column="7" selection-start="433" selection-end="433" vertical-scroll-proportion="0.0">
-              <folding />
-            </state>
-          </provider>
-        </entry>
-      </file>
-      <file leaf-file-name="StatisticChoice.java" pinned="false" current="false" current-in-tab="false">
-        <entry file="file://$PROJECT_DIR$/EnvironmentImporter/src/stats/StatisticChoice.java">
-          <provider selected="true" editor-type-id="text-editor">
-            <state line="55" column="93" selection-start="3804" selection-end="3804" vertical-scroll-proportion="0.0">
-              <folding />
-            </state>
-          </provider>
-        </entry>
-      </file>
-      <file leaf-file-name="MapImagePanel.java" pinned="false" current="false" current-in-tab="false">
-        <entry file="file://$PROJECT_DIR$/EnvironmentImporter/src/gui/MapImagePanel.java">
-          <provider selected="true" editor-type-id="text-editor">
-            <state line="171" column="0" selection-start="4948" selection-end="4948" vertical-scroll-proportion="0.0">
-              <folding>
-                <element signature="e#776#791#0" expanded="true" />
-              </folding>
-            </state>
-          </provider>
-        </entry>
-      </file>
-      <file leaf-file-name="MainPanel.java" pinned="false" current="false" current-in-tab="false">
-        <entry file="file://$PROJECT_DIR$/EnvironmentImporter/src/gui/MainPanel.java">
-          <provider selected="true" editor-type-id="text-editor">
-            <state line="17" column="0" selection-start="357" selection-end="357" vertical-scroll-proportion="0.0">
-              <folding />
-            </state>
-          </provider>
-        </entry>
-      </file>
-      <file leaf-file-name="GraphDetailsStatisticHandler.java" pinned="false" current="false" current-in-tab="false">
-        <entry file="file://$PROJECT_DIR$/EnvironmentImporter/src/stats/statisticshandlers/GraphDetailsStatisticHandler.java">
-          <provider selected="true" editor-type-id="text-editor">
-            <state line="165" column="46" selection-start="6604" selection-end="6604" vertical-scroll-proportion="0.0">
+            <state line="125" column="38" selection-start="4248" selection-end="4248" vertical-scroll-proportion="2.3854961">
               <folding>
                 <element signature="imports" expanded="true" />
-                <element signature="e#1338#1345#0" expanded="true" />
-                <element signature="e#1537#1570#0" expanded="true" />
-                <element signature="e#1988#2004#0" expanded="true" />
-                <element signature="e#3376#3392#0" expanded="true" />
+                <element signature="e#2809#2825#0" expanded="true" />
+                <element signature="e#3810#3827#0" expanded="true" />
               </folding>
             </state>
           </provider>
         </entry>
       </file>
-      <file leaf-file-name="NetworkModel.java" pinned="false" current="false" current-in-tab="false">
-        <entry file="file://$PROJECT_DIR$/EnvironmentImporter/src/gui/NetworkModel.java">
+      <file leaf-file-name="ParallelCoordinatePlotGenerator.java" pinned="false" current="false" current-in-tab="false">
+        <entry file="file://$PROJECT_DIR$/EnvironmentImporter/src/stats/statisticshandlers/ParallelCoordinatePlotGenerator.java">
           <provider selected="true" editor-type-id="text-editor">
-            <state line="1126" column="134" selection-start="44390" selection-end="44396" vertical-scroll-proportion="-11.192307">
+            <state line="63" column="61" selection-start="2368" selection-end="2368" vertical-scroll-proportion="0.0">
               <folding>
-                <element signature="e#21758#21765#0" expanded="true" />
-                <element signature="e#21766#21954#0" expanded="true" />
-                <element signature="e#21943#21944#0" expanded="true" />
-                <element signature="e#40161#40168#0" expanded="true" />
+                <element signature="imports" expanded="true" />
+                <element signature="e#1406#1413#0" expanded="true" />
+                <element signature="e#1608#1641#0" expanded="true" />
+                <element signature="e#2059#2075#0" expanded="true" />
               </folding>
             </state>
           </provider>
         </entry>
       </file>
-      <file leaf-file-name="StatsDialog.java" pinned="false" current="false" current-in-tab="false">
-        <entry file="file://$PROJECT_DIR$/EnvironmentImporter/src/gui/StatsDialog.java">
+      <file leaf-file-name="XYSeriesCollection.class" pinned="false" current="false" current-in-tab="false">
+        <entry file="jar://$USER_HOME$/Downloads/jfreechart-1.0.14/lib/jfreechart-1.0.14.jar!/org/jfree/data/xy/XYSeriesCollection.class">
           <provider selected="true" editor-type-id="text-editor">
-            <state line="5" column="9" selection-start="80" selection-end="80" vertical-scroll-proportion="0.0">
-              <folding />
-            </state>
-          </provider>
-        </entry>
-      </file>
-      <file leaf-file-name="GraphDetailsChartDisplay.java" pinned="false" current="true" current-in-tab="true">
-        <entry file="file://$PROJECT_DIR$/EnvironmentImporter/src/stats/chartdisplays/GraphDetailsChartDisplay.java">
-          <provider selected="true" editor-type-id="text-editor">
-            <state line="36" column="44" selection-start="981" selection-end="981" vertical-scroll-proportion="0.6505102">
-              <folding />
-            </state>
-          </provider>
-        </entry>
-      </file>
-      <file leaf-file-name="ChartDisplay.java" pinned="false" current="false" current-in-tab="false">
-        <entry file="file://$PROJECT_DIR$/EnvironmentImporter/src/stats/chartdisplays/ChartDisplay.java">
-          <provider selected="true" editor-type-id="text-editor">
-            <state line="58" column="0" selection-start="1691" selection-end="1693" vertical-scroll-proportion="0.0">
+            <state line="23" column="16" selection-start="1079" selection-end="1079" vertical-scroll-proportion="0.0">
               <folding />
             </state>
           </provider>
@@ -444,8 +383,6 @@
   <component name="IdeDocumentHistory">
     <option name="changedFiles">
       <list>
-        <option value="$PROJECT_DIR$/EnvironmentImporter/src/stats/statisticshandlers/RoomDurationBreakupFrequencyStatisticHandler.java" />
-        <option value="$PROJECT_DIR$/EnvironmentImporter/src/stats/statisticshandlers/RoomDurationTotalFrequencyStatisticHandler.java" />
         <option value="$PROJECT_DIR$/EnvironmentImporter/src/stats/statisticshandlers/RoomRememberedStatisticHandler.java" />
         <option value="$PROJECT_DIR$/EnvironmentImporter/src/stats/statisticshandlers/SignificantDoorFrequencyStatisticHandler.java" />
         <option value="$PROJECT_DIR$/EnvironmentImporter/src/stats/statisticshandlers/SignificantVertexVisitDurationStatisticHandler.java" />
@@ -455,18 +392,20 @@
         <option value="$PROJECT_DIR$/EnvironmentImporter/src/stats/statisticshandlers/VertexVisitDurationStatisticHandler.java" />
         <option value="$PROJECT_DIR$/EnvironmentImporter/src/stats/statisticshandlers/VertexVisitFrequencyStatisticHandler.java" />
         <option value="$PROJECT_DIR$/EnvironmentImporter/src/gui/MapImagePanel.java" />
-        <option value="$PROJECT_DIR$/EnvironmentImporter/src/stats/StatisticChoice.java" />
         <option value="$PROJECT_DIR$/EnvironmentImporter/src/gui/NetworkModel.java" />
         <option value="$PROJECT_DIR$/EnvironmentImporter/src/stats/statisticshandlers/GraphDetailsStatisticHandler.java" />
         <option value="$PROJECT_DIR$/EnvironmentImporter/src/stats/chartdisplays/ChartDisplay.java" />
         <option value="$PROJECT_DIR$/EnvironmentImporter/src/stats/chartdisplays/GraphDetailsChartDisplay.java" />
+        <option value="$PROJECT_DIR$/EnvironmentImporter/src/stats/StatisticChoice.java" />
+        <option value="$PROJECT_DIR$/EnvironmentImporter/src/stats/statisticshandlers/ParallelCoordinatePlotGenerator.java" />
+        <option value="$PROJECT_DIR$/EnvironmentImporter/src/stats/chartdisplays/ParallelCoordinatePlotChart.java" />
       </list>
     </option>
   </component>
   <component name="ProjectFrameBounds">
-    <option name="x" value="316" />
-    <option name="y" value="22" />
-    <option name="width" value="1848" />
+    <option name="x" value="813" />
+    <option name="y" value="26" />
+    <option name="width" value="936" />
     <option name="height" value="970" />
   </component>
   <component name="ProjectLevelVcsManager" settingsEditedManually="true">
@@ -495,6 +434,20 @@
       <sortByType />
     </navigator>
     <panes>
+      <pane id="PackagesPane">
+        <subPane>
+          <PATH>
+            <PATH_ELEMENT>
+              <option name="myItemId" value="gameAnalyzer" />
+              <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.PackageViewProjectNode" />
+            </PATH_ELEMENT>
+            <PATH_ELEMENT>
+              <option name="myItemId" value="EnvironmentImporter" />
+              <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.PackageViewModuleNode" />
+            </PATH_ELEMENT>
+          </PATH>
+        </subPane>
+      </pane>
       <pane id="ProjectPane">
         <subPane>
           <PATH>
@@ -669,20 +622,6 @@
           </PATH>
         </subPane>
       </pane>
-      <pane id="PackagesPane">
-        <subPane>
-          <PATH>
-            <PATH_ELEMENT>
-              <option name="myItemId" value="gameAnalyzer" />
-              <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.PackageViewProjectNode" />
-            </PATH_ELEMENT>
-            <PATH_ELEMENT>
-              <option name="myItemId" value="EnvironmentImporter" />
-              <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.PackageViewModuleNode" />
-            </PATH_ELEMENT>
-          </PATH>
-        </subPane>
-      </pane>
     </panes>
   </component>
   <component name="PropertiesComponent">
@@ -709,8 +648,8 @@
   <component name="RecentsManager">
     <key name="CopyClassDialog.RECENTS_KEY">
       <recent name="stats.chartdisplays" />
-      <recent name="stats.consoledisplays" />
       <recent name="stats.statisticshandlers" />
+      <recent name="stats.consoledisplays" />
       <recent name="stats" />
       <recent name="" />
     </key>
@@ -926,13 +865,12 @@
     <servers />
   </component>
   <component name="ToolWindowManager">
-    <frame x="316" y="22" width="1848" height="970" extended-state="0" />
-    <editor active="true" />
+    <frame x="813" y="26" width="936" height="970" extended-state="0" />
+    <editor active="false" />
     <layout>
       <window_info id="Changes" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.33" sideWeight="0.5" order="7" side_tool="false" content_ui="tabs" />
       <window_info id="JetGradle" active="false" anchor="right" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.33" sideWeight="0.5" order="3" side_tool="false" content_ui="tabs" />
       <window_info id="Palette" active="false" anchor="right" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.33" sideWeight="0.5" order="4" side_tool="false" content_ui="tabs" />
-      <window_info id="Find" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.44705883" sideWeight="0.99675673" order="1" side_tool="false" content_ui="tabs" />
       <window_info id="Ant Build" active="false" anchor="right" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.25" sideWeight="0.5" order="1" side_tool="false" content_ui="tabs" />
       <window_info id="Debug" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.5364706" sideWeight="0.98457086" order="3" side_tool="false" content_ui="tabs" />
       <window_info id="Event Log" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.33" sideWeight="0.5" order="10" side_tool="true" content_ui="tabs" />
@@ -940,13 +878,14 @@
       <window_info id="Version Control" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.33" sideWeight="0.5" order="8" side_tool="false" content_ui="tabs" />
       <window_info id="Messages" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.4" sideWeight="0.99206346" order="9" side_tool="false" content_ui="tabs" />
       <window_info id="TODO" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.33" sideWeight="0.5" order="6" side_tool="false" content_ui="tabs" />
-      <window_info id="Structure" active="false" anchor="left" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="true" weight="0.2874584" sideWeight="0.13294117" order="1" side_tool="true" content_ui="tabs" />
+      <window_info id="Structure" active="false" anchor="left" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="true" weight="0.27415732" sideWeight="0.4435294" order="1" side_tool="true" content_ui="tabs" />
       <window_info id="Maven Projects" active="false" anchor="right" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.33" sideWeight="0.5" order="5" side_tool="false" content_ui="tabs" />
       <window_info id="Commander" active="false" anchor="right" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.3997862" sideWeight="0.6707589" order="0" side_tool="false" content_ui="tabs" />
-      <window_info id="Project" active="false" anchor="left" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="true" weight="0.2874584" sideWeight="0.38" order="0" side_tool="false" content_ui="combo" />
-      <window_info id="Run" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.47882354" sideWeight="0.99850744" order="2" side_tool="false" content_ui="tabs" />
+      <window_info id="Project" active="false" anchor="left" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="true" weight="0.27415732" sideWeight="0.5482353" order="0" side_tool="false" content_ui="combo" />
+      <window_info id="Run" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.19529411" sideWeight="0.99850744" order="2" side_tool="false" content_ui="tabs" />
       <window_info id="Cvs" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.25" sideWeight="0.5" order="4" side_tool="false" content_ui="tabs" />
       <window_info id="Message" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.33" sideWeight="0.5" order="0" side_tool="false" content_ui="tabs" />
+      <window_info id="Find" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.44705883" sideWeight="0.99675673" order="1" side_tool="false" content_ui="tabs" />
       <window_info id="Hierarchy" active="false" anchor="right" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.25" sideWeight="0.5" order="2" side_tool="false" content_ui="combo" />
       <window_info id="Inspection" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.4" sideWeight="0.5" order="5" side_tool="false" content_ui="tabs" />
     </layout>
@@ -1019,37 +958,38 @@
     <option name="FILTER_TARGETS" value="false" />
   </component>
   <component name="editorHistoryManager">
-    <entry file="file://$PROJECT_DIR$/EnvironmentImporter/src/stats/statisticshandlers/StaircaseVisitStatisticHandler.java">
-      <provider selected="true" editor-type-id="text-editor">
-        <state line="34" column="90" selection-start="1107" selection-end="1107" vertical-scroll-proportion="0.0">
-          <folding />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/EnvironmentImporter/src/stats/statisticshandlers/VertexVisitCountStatisticHandler.java">
-      <provider selected="true" editor-type-id="text-editor">
-        <state line="75" column="56" selection-start="3035" selection-end="3035" vertical-scroll-proportion="0.0">
-          <folding />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/EnvironmentImporter/src/stats/statisticshandlers/VertexVisitDurationStatisticHandler.java">
-      <provider selected="true" editor-type-id="text-editor">
-        <state line="62" column="74" selection-start="2503" selection-end="2503" vertical-scroll-proportion="0.0">
-          <folding />
-        </state>
-      </provider>
-    </entry>
     <entry file="jar:///Library/Java/JavaVirtualMachines/jdk1.7.0_13.jdk/Contents/Home/jre/lib/rt.jar!/com/apple/laf/AquaMenuBarUI.class">
       <provider selected="true" editor-type-id="text-editor">
-        <state line="14" column="47" selection-start="531" selection-end="531" vertical-scroll-proportion="0.0">
-          <folding />
-        </state>
+        <state line="14" column="47" selection-start="531" selection-end="531" vertical-scroll-proportion="0.0" />
       </provider>
     </entry>
     <entry file="jar:///Library/Java/JavaVirtualMachines/jdk1.7.0_13.jdk/Contents/Home/jre/lib/rt.jar!/com/apple/laf/AquaPanelUI.class">
       <provider selected="true" editor-type-id="text-editor">
-        <state line="11" column="47" selection-start="404" selection-end="404" vertical-scroll-proportion="0.0">
+        <state line="11" column="47" selection-start="404" selection-end="404" vertical-scroll-proportion="0.0" />
+      </provider>
+    </entry>
+    <entry file="jar:///Library/Java/JavaVirtualMachines/jdk1.7.0_13.jdk/Contents/Home/jre/lib/rt.jar!/com/apple/laf/AquaLookAndFeel.class">
+      <provider selected="true" editor-type-id="text-editor">
+        <state line="29" column="16" selection-start="1151" selection-end="1151" vertical-scroll-proportion="0.0" />
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/EnvironmentImporter/src/stats/statisticshandlers/VertexVisitFrequencyStatisticHandler.java">
+      <provider selected="true" editor-type-id="text-editor">
+        <state line="64" column="74" selection-start="2524" selection-end="2524" vertical-scroll-proportion="0.0">
+          <folding />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/EnvironmentImporter/src/gui/Main.java">
+      <provider selected="true" editor-type-id="text-editor">
+        <state line="22" column="7" selection-start="433" selection-end="433" vertical-scroll-proportion="0.0">
+          <folding />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/EnvironmentImporter/src/gui/MapImagePanel.java">
+      <provider selected="true" editor-type-id="text-editor">
+        <state line="171" column="0" selection-start="4948" selection-end="4948" vertical-scroll-proportion="0.0">
           <folding />
         </state>
       </provider>
@@ -1061,52 +1001,10 @@
         </state>
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/EnvironmentImporter/src/stats/statisticshandlers/VertexVisitFrequencyStatisticHandler.java">
-      <provider selected="true" editor-type-id="text-editor">
-        <state line="64" column="74" selection-start="2524" selection-end="2524" vertical-scroll-proportion="0.0">
-          <folding />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/EnvironmentImporter/src/stats/StatisticChoice.java">
-      <provider selected="true" editor-type-id="text-editor">
-        <state line="55" column="93" selection-start="3804" selection-end="3804" vertical-scroll-proportion="0.0">
-          <folding />
-        </state>
-      </provider>
-    </entry>
-    <entry file="jar:///Library/Java/JavaVirtualMachines/jdk1.7.0_13.jdk/Contents/Home/jre/lib/rt.jar!/com/apple/laf/AquaLookAndFeel.class">
-      <provider selected="true" editor-type-id="text-editor">
-        <state line="29" column="16" selection-start="1151" selection-end="1151" vertical-scroll-proportion="0.0">
-          <folding />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/EnvironmentImporter/src/gui/MapImagePanel.java">
-      <provider selected="true" editor-type-id="text-editor">
-        <state line="171" column="0" selection-start="4948" selection-end="4948" vertical-scroll-proportion="0.0">
-          <folding>
-            <element signature="e#776#791#0" expanded="true" />
-          </folding>
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/EnvironmentImporter/src/gui/Main.java">
-      <provider selected="true" editor-type-id="text-editor">
-        <state line="22" column="7" selection-start="433" selection-end="433" vertical-scroll-proportion="0.0">
-          <folding />
-        </state>
-      </provider>
-    </entry>
     <entry file="file://$PROJECT_DIR$/EnvironmentImporter/src/gui/NetworkModel.java">
       <provider selected="true" editor-type-id="text-editor">
-        <state line="1126" column="134" selection-start="44390" selection-end="44396" vertical-scroll-proportion="-11.192307">
-          <folding>
-            <element signature="e#21758#21765#0" expanded="true" />
-            <element signature="e#21766#21954#0" expanded="true" />
-            <element signature="e#21943#21944#0" expanded="true" />
-            <element signature="e#40161#40168#0" expanded="true" />
-          </folding>
+        <state line="1126" column="134" selection-start="44390" selection-end="44396" vertical-scroll-proportion="0.0">
+          <folding />
         </state>
       </provider>
     </entry>
@@ -1117,19 +1015,6 @@
         </state>
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/EnvironmentImporter/src/stats/statisticshandlers/GraphDetailsStatisticHandler.java">
-      <provider selected="true" editor-type-id="text-editor">
-        <state line="165" column="46" selection-start="6604" selection-end="6604" vertical-scroll-proportion="0.0">
-          <folding>
-            <element signature="imports" expanded="true" />
-            <element signature="e#1338#1345#0" expanded="true" />
-            <element signature="e#1537#1570#0" expanded="true" />
-            <element signature="e#1988#2004#0" expanded="true" />
-            <element signature="e#3376#3392#0" expanded="true" />
-          </folding>
-        </state>
-      </provider>
-    </entry>
     <entry file="file://$PROJECT_DIR$/EnvironmentImporter/src/stats/chartdisplays/ChartDisplay.java">
       <provider selected="true" editor-type-id="text-editor">
         <state line="58" column="0" selection-start="1691" selection-end="1693" vertical-scroll-proportion="0.0">
@@ -1137,10 +1022,54 @@
         </state>
       </provider>
     </entry>
+    <entry file="file://$PROJECT_DIR$/EnvironmentImporter/src/stats/statisticshandlers/GraphDetailsStatisticHandler.java">
+      <provider selected="true" editor-type-id="text-editor">
+        <state line="140" column="20" selection-start="3421" selection-end="5880" vertical-scroll-proportion="0.0">
+          <folding />
+        </state>
+      </provider>
+    </entry>
     <entry file="file://$PROJECT_DIR$/EnvironmentImporter/src/stats/chartdisplays/GraphDetailsChartDisplay.java">
       <provider selected="true" editor-type-id="text-editor">
-        <state line="36" column="44" selection-start="981" selection-end="981" vertical-scroll-proportion="0.6505102">
+        <state line="42" column="24" selection-start="1157" selection-end="1157" vertical-scroll-proportion="0.0">
           <folding />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/EnvironmentImporter/src/stats/StatisticChoice.java">
+      <provider selected="true" editor-type-id="text-editor">
+        <state line="55" column="62" selection-start="3773" selection-end="3773" vertical-scroll-proportion="0.0">
+          <folding />
+        </state>
+      </provider>
+    </entry>
+    <entry file="jar://$USER_HOME$/Downloads/jfreechart-1.0.14/lib/jfreechart-1.0.14.jar!/org/jfree/data/xy/XYSeriesCollection.class">
+      <provider selected="true" editor-type-id="text-editor">
+        <state line="23" column="16" selection-start="1079" selection-end="1079" vertical-scroll-proportion="0.0">
+          <folding />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/EnvironmentImporter/src/stats/statisticshandlers/ParallelCoordinatePlotGenerator.java">
+      <provider selected="true" editor-type-id="text-editor">
+        <state line="63" column="61" selection-start="2368" selection-end="2368" vertical-scroll-proportion="0.0">
+          <folding>
+            <element signature="imports" expanded="true" />
+            <element signature="e#1406#1413#0" expanded="true" />
+            <element signature="e#1608#1641#0" expanded="true" />
+            <element signature="e#2059#2075#0" expanded="true" />
+          </folding>
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/EnvironmentImporter/src/stats/chartdisplays/ParallelCoordinatePlotChart.java">
+      <provider selected="true" editor-type-id="text-editor">
+        <state line="125" column="38" selection-start="4248" selection-end="4248" vertical-scroll-proportion="2.3854961">
+          <folding>
+            <element signature="imports" expanded="true" />
+            <element signature="e#2809#2825#0" expanded="true" />
+            <element signature="e#3810#3827#0" expanded="true" />
+          </folding>
         </state>
       </provider>
     </entry>

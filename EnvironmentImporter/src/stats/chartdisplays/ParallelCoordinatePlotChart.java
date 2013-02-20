@@ -1,16 +1,26 @@
 package stats.chartdisplays;
 
 import gui.NetworkModel;
+import gui.StatsDialog;
+import javafx.geometry.Point3D;
+import org.apache.commons.lang3.math.NumberUtils;
 import org.jfree.chart.ChartFactory;
 import org.jfree.chart.ChartPanel;
 import org.jfree.chart.JFreeChart;
+import org.jfree.chart.axis.NumberAxis;
 import org.jfree.chart.plot.PlotOrientation;
+import org.jfree.chart.plot.XYPlot;
+import org.jfree.chart.renderer.xy.XYLineAndShapeRenderer;
 import org.jfree.data.category.CategoryDataset;
 import org.jfree.data.category.DefaultCategoryDataset;
+import org.jfree.data.xy.XYDataset;
+import org.jfree.data.xy.XYSeries;
+import org.jfree.data.xy.XYSeriesCollection;
 
 import java.awt.*;
 import java.util.Collection;
 import java.util.HashMap;
+import java.util.Set;
 
 /**
  * Created with IntelliJ IDEA.
@@ -19,60 +29,134 @@ import java.util.HashMap;
  * Time: 1:13 PM
  * To change this template use File | Settings | File Templates.
  */
-public class ParallelCoordinatePlotChart extends ChartDisplay<HashMap<String, ? extends Number>> {
-
-
-
+public class ParallelCoordinatePlotChart extends ChartDisplay<HashMap<String, HashMap<String, String>>> {
 
 
     @Override
-    public void display(HashMap<String,  ? extends Number> data) {
-        final CategoryDataset dataSet = createDataSet(data);
+    public void display(HashMap<String, HashMap<String, String>> data) {
+
+        final XYDataset dataSet = createDataSet(data);
         final JFreeChart chart = createChart(dataSet);
         final ChartPanel chartPanel = new ChartPanel(chart);
         chartPanel.setPreferredSize(new Dimension(500, 270));
+
         createNewFrameAndSetLocation();
         currentFrame.setTitle(this.getTitle());
         currentFrame.setContentPane(chartPanel);
         currentFrame.setVisible(true);
-
         currentFrame.setSize(new Dimension(520, 300));
+
     }
 
 
-    public CategoryDataset createDataSet(HashMap<String,  ? extends Number> data) {
+    public XYDataset createDataSet(HashMap<String, HashMap<String, String>> data) {
+
+        HashMap<String, Double> maxForEachKey = getMaxForEachKey(data);
+
+        final XYSeriesCollection dataset = new XYSeriesCollection();
 
 
-        Collection<String> sortedRoomNames = NetworkModel.instance().getSortedRooms();
-        final DefaultCategoryDataset dataSet = new DefaultCategoryDataset();
-        for (String roomName : sortedRoomNames) {
-            if(data.containsKey(roomName)){
-                dataSet.addValue(data.get(roomName), roomName, "");
-            }else{
-                dataSet.addValue(0,roomName,"");
+        HashMap<String, Integer> locationMap=null;
+        for (String dataName : data.keySet()) {
+            final XYSeries series = new XYSeries(dataName);
+
+            HashMap<String, String> resultForName = data.get(dataName);
+            if (locationMap == null) {
+                locationMap = generateLocationForKeys(resultForName.keySet());
             }
+            for (String key : resultForName.keySet()) {
+                if (NumberUtils.isNumber(resultForName.get(key))) {
+                    double location = (double) locationMap.get(key);
+                    double value = (Double.parseDouble(resultForName.get(key))) / maxForEachKey.get(key);
+
+                    series.add(location, value);
+                }
+            }
+
+
+            dataset.addSeries(series);
         }
 
-        return dataSet;
 
+        return dataset;
+    }
+
+    private HashMap<String, Double> getMaxForEachKey(HashMap<String, HashMap<String, String>> data) {
+
+        HashMap<String, Double> maxForEachKey = new HashMap<String, Double>();
+        for(String dataName : data.keySet()){
+            HashMap<String, String> resultForName = data.get(dataName);
+            for(String key:resultForName.keySet()){
+                if (NumberUtils.isNumber(resultForName.get(key))) {
+                    if(maxForEachKey.containsKey(key)){
+                        maxForEachKey.put(key,
+                                Math.max(
+                                        maxForEachKey.get(key),
+                                        Double.parseDouble(resultForName.get(key))));
+
+                    }else{
+                        maxForEachKey.put(key,
+                                Double.parseDouble(resultForName.get(key)));
+                    }
+
+                }
+            }
+        }
+        return maxForEachKey;
+    }
+
+    private HashMap<String, Integer> generateLocationForKeys(Set<String> strings) {
+        int n = 0;
+        System.out.println("Legend");
+        HashMap<String, Integer> result = new HashMap<String, Integer>();
+        for (String key : strings) {
+            result.put(key, n);
+            System.out.println(n + ":" + key);
+            n++;
+        }
+        return result;
     }
 
 
-    public JFreeChart createChart(CategoryDataset dataSet) {
+    public JFreeChart createChart(XYDataset dataset) {
+
         // create the chart...
-        final JFreeChart chart = ChartFactory.createBarChart(
-                this.getTitle(),         // chart title
-                "Room",               // domain axis label
-                "Value",                  // range axis label
-                dataSet,                  // data
-                PlotOrientation.VERTICAL, // orientation
-                false,                     // include legend
-                true,                     // tooltips?
-                false                     // URLs?
+        final JFreeChart chart = ChartFactory.createXYLineChart(
+                this.getTitle(),      // chart title
+                "Key(refer to console)",                      // x axis label
+                "NormalizedValue",                      // y axis label
+                dataset,                  // data
+                PlotOrientation.VERTICAL,
+                true,                     // include legend
+                true,                     // tooltips
+                false                     // urls
         );
 
+        // NOW DO SOME OPTIONAL CUSTOMISATION OF THE CHART...
+        chart.setBackgroundPaint(Color.white);
+
+//        final StandardLegend legend = (StandardLegend) chart.getLegend();
+        //      legend.setDisplaySeriesShapes(true);
+
+        // get a reference to the plot for further customisation...
+        final XYPlot plot = chart.getXYPlot();
+        plot.setBackgroundPaint(Color.lightGray);
+        //    plot.setAxisOffset(new Spacer(Spacer.ABSOLUTE, 5.0, 5.0, 5.0, 5.0));
+        plot.setDomainGridlinePaint(Color.white);
+        plot.setRangeGridlinePaint(Color.white);
+
+        final XYLineAndShapeRenderer renderer = new XYLineAndShapeRenderer();
+        renderer.setSeriesLinesVisible(0, false);
+        renderer.setSeriesShapesVisible(1, false);
+        plot.setRenderer(renderer);
+
+        // change the auto tick unit selection to integer units only...
+        final NumberAxis rangeAxis = (NumberAxis) plot.getRangeAxis();
+        rangeAxis.setStandardTickUnits(NumberAxis.createIntegerTickUnits());
+        // OPTIONAL CUSTOMISATION COMPLETED.
 
         return chart;
+
     }
 
 

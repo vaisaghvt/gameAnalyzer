@@ -54,6 +54,7 @@ public enum StatisticChoice {
     TIME_SPENT_PER_VISIT("RoomDurationBreakupFrequencyStatisticHandler","Frequency of time spent per visit",true,false,
         Phase.EXPLORATION, Phase.TASK_1, Phase.TASK_2, Phase.TASK_3),
     STAT_SUMMARY("GraphDetailsStatisticHandler","Detailed statistics of each agent",true,true),
+    PARALLEL_COORDINATE_PLOT("ParallelCoordinatePlotGenerator","Plot on a parallel coordinate plot",false,false),
     ;
 
 

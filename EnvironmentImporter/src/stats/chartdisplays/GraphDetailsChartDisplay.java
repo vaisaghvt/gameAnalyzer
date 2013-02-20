@@ -40,7 +40,7 @@ public class GraphDetailsChartDisplay extends ChartDisplay<HashMap<String, Strin
     private JPanel createPanel(HashMap<String, String> data) {
         JPanel mainPanel = new JPanel(
                 new GridLayout(
-                        (int) ((data.keySet().size()+1) / 2),
+                        ((data.keySet().size()+1) / 2),
                         2));
         for (String key : data.keySet()) {
             mainPanel.add(new JLabel(key));
