@@ -49,7 +49,7 @@ public enum StatisticChoice {
             Phase.EXPLORATION, Phase.TASK_1, Phase.TASK_2, Phase.TASK_3),
     ROOM_DURATION_FREQUENCY("RoomDurationTotalFrequencyStatisticHandler","Frequency of time spent per room",true, false,
             Phase.EXPLORATION, Phase.TASK_1, Phase.TASK_2, Phase.TASK_3),
-    DISTANCE_TIME_TOTAL_STATISTIC("DistanceTimeTotalStatisticHandler","Distance and time taken by each agent - Total",false,false),
+    DISTANCE_TIME_EXPLORATION_STATISTIC("DistanceTimeExplorationStatisticHandler","Distance and time taken by each agent - Exploration",false,false),
     DISTANCE_TIME_FOR_TASKS_STATISTIC("DistanceTimeForTasksStatisticHandler","Distance and time taken by each agent - Tasks",false,false),
     TIME_SPENT_PER_VISIT("RoomDurationBreakupFrequencyStatisticHandler","Frequency of time spent per visit",true,false,
         Phase.EXPLORATION, Phase.TASK_1, Phase.TASK_2, Phase.TASK_3),

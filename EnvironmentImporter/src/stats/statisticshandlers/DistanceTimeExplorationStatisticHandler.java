@@ -17,11 +17,11 @@ import java.util.HashMap;
  * Time: 12:46 PM
  * To change this template use File | Settings | File Templates.
  */
-public class DistanceTimeTotalStatisticHandler extends StatisticsHandler<DistanceTimeConsoleDisplay, DistanceTimeChartDisplay> {
+public class DistanceTimeExplorationStatisticHandler extends StatisticsHandler<DistanceTimeConsoleDisplay, DistanceTimeChartDisplay> {
 
 
 
-    public DistanceTimeTotalStatisticHandler() {
+    public DistanceTimeExplorationStatisticHandler() {
         super(new DistanceTimeChartDisplay(),
                 new DistanceTimeConsoleDisplay()
         );
@@ -31,10 +31,10 @@ public class DistanceTimeTotalStatisticHandler extends StatisticsHandler<Distanc
 
     @Override
     public void generateAndDisplayStats(Collection<String> dataNames, Phase phase, StatsDialog.AllOrOne all, StatsDialog.AggregationType itemAt) {
-        final StatisticChoice choice = StatisticChoice.DISTANCE_TIME_TOTAL_STATISTIC;
+        final StatisticChoice choice = StatisticChoice.DISTANCE_TIME_EXPLORATION_STATISTIC;
 
 
-        HashMap<String, Double> distanceTraveled =  NetworkModel.instance().getDistanceTraveledTotal(dataNames);
+        HashMap<String, Double> distanceTraveled =  NetworkModel.instance().getDistanceTraveledExploration(dataNames);
         HashMap<String, Long> timeTaken =  NetworkModel.instance().getTimeTraveledTotal(dataNames);
 
         HashMap<String, HashMap<String, Double>> summary = summarizeDistanceTime(distanceTraveled, timeTaken);

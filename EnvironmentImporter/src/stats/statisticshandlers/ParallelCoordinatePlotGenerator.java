@@ -8,12 +8,10 @@ import gui.StatsDialog;
 import javafx.geometry.Point3D;
 import modelcomponents.ModelEdge;
 import modelcomponents.ModelObject;
-import org.apache.commons.lang3.math.NumberUtils;
 import org.apache.commons.math3.stat.descriptive.moment.Mean;
 import org.apache.commons.math3.stat.descriptive.moment.Variance;
-import stats.chartdisplays.GraphDetailsChartDisplay;
 import stats.chartdisplays.ParallelCoordinatePlotChart;
-import stats.consoledisplays.GraphDetailsConsoleDisplay;
+import stats.consoledisplays.GraphDetailsToFile;
 
 import java.util.*;
 
@@ -24,12 +22,12 @@ import java.util.*;
  * Time: 12:46 PM
  * To change this template use File | Settings | File Templates.
  */
-public class ParallelCoordinatePlotGenerator extends StatisticsHandler<GraphDetailsConsoleDisplay, ParallelCoordinatePlotChart> {
+public class ParallelCoordinatePlotGenerator extends StatisticsHandler<GraphDetailsToFile, ParallelCoordinatePlotChart> {
 
 
     public ParallelCoordinatePlotGenerator() {
         super(new ParallelCoordinatePlotChart(),
-                new GraphDetailsConsoleDisplay()
+                new GraphDetailsToFile()
         );
 
     }
@@ -63,6 +61,7 @@ public class ParallelCoordinatePlotGenerator extends StatisticsHandler<GraphDeta
 
             this.chartDisplay.setTitle("Parallel Plot of data");
             this.chartDisplay.display(nameToStatMapping);
+            this.consoleDisplay.display(nameToStatMapping);
 
 
 
@@ -108,8 +107,8 @@ public class ParallelCoordinatePlotGenerator extends StatisticsHandler<GraphDeta
         results.put("Vertex Coverage", Integer.toString((graph.getVertexCount() * 100) / totalVertexNumber));
 
 
-        double distanceTraveled = NetworkModel.instance().getDistanceTraveledTotal(Collections.singleton(dataName)).get(dataName);
-        results.put("Distance Covered (Total)", String.format("%1$.3f", distanceTraveled));
+        double distanceTraveled = NetworkModel.instance().getDistanceTraveledExploration(Collections.singleton(dataName)).get(dataName);
+        results.put("Distance Covered (Exploration)", String.format("%1$.3f", distanceTraveled));
 
 
         distanceTraveled = NetworkModel.instance().getDistanceTraveledDuringTasks(Collections.singleton(dataName)).get(dataName);

@@ -823,14 +823,15 @@ public class NetworkModel extends MainPanel implements ActionListener {
         return result;
     }
 
-    public HashMap<String, Double> getDistanceTraveledTotal(Collection<String> dataNames) {
+    public HashMap<String, Double> getDistanceTraveledExploration(Collection<String> dataNames) {
 
         HashMap<String, Double> result = new HashMap<String, Double>();
         for (String dataName : dataNames) {
             HashSet<Phase> phaseSet = new HashSet<Phase>();
-            for (Phase phase : Phase.values()) {
-                phaseSet.add(phase);
-            }
+//            for (Phase phase : Phase.values()) {
+//                phaseSet.add(phase);
+//            }
+            phaseSet.add(Phase.EXPLORATION);
             List<HashMap<String, Number>> pathPoints = this.getMovementOfPlayer(dataName, phaseSet);
 
 

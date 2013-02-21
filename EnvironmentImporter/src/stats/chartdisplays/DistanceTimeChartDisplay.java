@@ -28,7 +28,6 @@ public class DistanceTimeChartDisplay extends ChartDisplay<HashMap<String, HashM
     public void display(HashMap<String, HashMap<String, Double>> data) {
         final CategoryDataset timeDataSet = createTimeDataSet(data);
         final CategoryDataset distanceDataSet = createDistanceDataSet(data);
-        currentFrame.setVisible(false);
         createFrameAndChart(timeDataSet, "time");
         createFrameAndChart(distanceDataSet, "distance");
 
@@ -36,10 +35,10 @@ public class DistanceTimeChartDisplay extends ChartDisplay<HashMap<String, HashM
 
     private void createFrameAndChart(CategoryDataset dataSet, String type) {
         String st;
-        if(getTitle().contains("Total")){
-           st = "Total :";
+        if(getTitle().contains("Tasks")){
+           st = "Tasks :";
         }else{
-            st = "Tasks :";
+            st = "Exploration :";
         }
 
         final JFreeChart chart = createChart(dataSet,st+type+ " for each agent" );

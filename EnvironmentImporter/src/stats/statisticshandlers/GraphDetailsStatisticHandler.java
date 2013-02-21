@@ -203,15 +203,15 @@ public class GraphDetailsStatisticHandler extends StatisticsHandler<GraphDetails
         results.put("Vertex Coverage", Integer.toString((graph.getVertexCount()*100) /totalVertexNumber));
 
 
-        double distanceTraveled = NetworkModel.instance().getDistanceTraveledTotal(Collections.singleton(dataName)).get(dataName);
-        results.put("Distance Covered (Total)", String.format("%1$.3f", distanceTraveled));
+        double distanceTraveled = NetworkModel.instance().getDistanceTraveledExploration(Collections.singleton(dataName)).get(dataName);
+        results.put("Distance Covered (Exploration)", String.format("%1$.3f", distanceTraveled));
 
 
         distanceTraveled = NetworkModel.instance().getDistanceTraveledDuringTasks(Collections.singleton(dataName)).get(dataName);
         results.put("Distance Covered (Tasks)", String.format("%1$.3f", distanceTraveled));
 
         double timeTaken = NetworkModel.instance().getTimeTraveledTotal(Collections.singleton(dataName)).get(dataName);
-        results.put("Time Taken (Total)", String.format("%1$.3f", timeTaken));
+        results.put("Time Taken (Exploration)", String.format("%1$.3f", timeTaken));
 
 
         timeTaken = NetworkModel.instance().getTimeTraveledDuringTasks(Collections.singleton(dataName)).get(dataName);
