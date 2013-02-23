@@ -84,4 +84,6 @@ public class ModelFloor implements ModelObject {
     public Collection<ModelGroup> getGroups() {
         return this.groups;
     }
+
+
 }

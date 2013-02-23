@@ -4,6 +4,7 @@ import com.google.common.collect.HashMultimap;
 import database.Database;
 import edu.uci.ics.jung.algorithms.layout.Layout;
 import edu.uci.ics.jung.algorithms.layout.SpringLayout2;
+import edu.uci.ics.jung.algorithms.layout.StaticLayout;
 import edu.uci.ics.jung.graph.DirectedSparseMultigraph;
 import edu.uci.ics.jung.graph.Graph;
 import edu.uci.ics.jung.graph.UndirectedSparseGraph;
@@ -13,6 +14,7 @@ import edu.uci.ics.jung.visualization.control.DefaultModalGraphMouse;
 import edu.uci.ics.jung.visualization.control.ModalGraphMouse;
 import edu.uci.ics.jung.visualization.decorators.ToStringLabeller;
 import edu.uci.ics.jung.visualization.renderers.Renderer.VertexLabel.Position;
+import javafx.geometry.Point3D;
 import modelcomponents.*;
 import org.apache.commons.collections15.Transformer;
 import randomwalk.RandomWalk;
@@ -22,6 +24,7 @@ import javax.swing.*;
 import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.awt.geom.Point2D;
 import java.util.*;
 import java.util.List;
 
@@ -354,13 +357,16 @@ public class NetworkModel extends MainPanel implements ActionListener {
 
     private void redrawPanel() {
         this.removeAll();
-        Layout<ModelObject, ModelEdge> layout = new SpringLayout2<ModelObject, ModelEdge>(this.currentGraph);
+        Transformer<ModelObject, Point2D> areaToPointTransformer = new areaToLocationTransformer<ModelObject, Point2D>();
+        Layout<ModelObject, ModelEdge> layout = new StaticLayout<ModelObject, ModelEdge>(this.currentGraph,
+                areaToPointTransformer);
+//        Layout<ModelObject, ModelEdge> layout = new SpringLayout2<ModelObject, ModelEdge>(this.currentGraph);
 ////        ((FRLayout2)layout).setMaxIterations(3000);
 //        ((FRLayout2)layout).setAttractionMultiplier(2);
 //        ((FRLayout2)layout).setRepulsionMultiplier(0.25);
 
 
-        layout.setSize(new Dimension(1600, 900));
+//        layout.setSize(new Dimension(1600, 900));
         vv = new VisualizationViewer<ModelObject, ModelEdge>(layout);
         vv.setPreferredSize(new Dimension(1600, 900));
         // Setup up a new vertex to paint transformer...
@@ -1022,6 +1028,84 @@ public class NetworkModel extends MainPanel implements ActionListener {
             int width = modelObject.toString().length() * 10;
             return (Shape) new Rectangle(-width / 2, -10, width, 20);
 
+
+        }
+    }
+
+    public class areaToLocationTransformer<ModelObject, Point2D> implements Transformer<ModelObject, Point2D> {
+
+        @Override
+        public Point2D transform(ModelObject modelObject) {
+
+            System.out.println(getCenterOfArea(modelObject));
+            return getCenterOfArea(modelObject);
+        }
+
+
+        private Point2D getCenterOfArea(ModelObject area) {
+            if (area instanceof ModelArea) {
+                ModelArea room = (ModelArea) area;
+                Point3D tempPoint = getCenterOfRoom(room);
+                double x = tempPoint.getX();
+                double y = tempPoint.getY();
+                int floor = (int)tempPoint.getZ();
+
+
+                Point p = MapImagePanel.convertToDrawingCoordinate(new Point((int)x, (int)y), floor);
+
+                System.out.println("Before:"+p);
+                p= new Point((int) (p.getX()+
+                        (floor*700)),(int)p.getY());
+                System.out.println("After:"+p);
+
+                Point2D point =  (Point2D) (new java.awt.geom.Point2D.Double(p.x,p.y));
+
+
+                return point;
+            }
+
+            ModelGroup group = (ModelGroup) area;
+            double sumX = 0;
+            double sumY = 0;
+            int n = 0;
+           int floor=0;
+
+            for (int areaId : group.getAreaIds()) {
+
+
+                ModelArea tempArea = NetworkModel.instance().getRoomForId(areaId);
+                Point3D tempPoint = getCenterOfRoom(tempArea);
+                double x = tempPoint.getX();
+                double y = tempPoint.getY();
+
+                sumX += x;
+                sumY += y;
+
+                floor = (int)tempPoint.getZ();
+                n++;
+            }
+
+            Point p = MapImagePanel.convertToDrawingCoordinate(
+                    new Point((int)(sumX / n), (int)(sumY / n)), floor);
+            System.out.println("Before:"+p);
+
+            p= new Point((int) (p.getX()+(floor*700)),(int)p.getY());
+            System.out.println("After:"+p);
+
+            Point2D point =  (Point2D) (new java.awt.geom.Point2D.Double(p.getX(), p.getY()));
+
+
+            return point;
+        }
+
+        private Point3D getCenterOfRoom(ModelArea room) {
+            Point p1 = room.getCorner0();
+            Point p2 = room.getCorner1();
+
+            double x = (p1.getX() + p2.getX()) / 2;
+            double y = (p1.getY() + p2.getY()) / 2;
+            double z = (double) NetworkModel.instance().getFloorForArea(room);
+            return new Point3D(x, y, z);
 
         }
     }
