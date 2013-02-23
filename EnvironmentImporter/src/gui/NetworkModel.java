@@ -1,9 +1,9 @@
 package gui;
 
+
 import com.google.common.collect.HashMultimap;
 import database.Database;
 import edu.uci.ics.jung.algorithms.layout.Layout;
-import edu.uci.ics.jung.algorithms.layout.SpringLayout2;
 import edu.uci.ics.jung.algorithms.layout.StaticLayout;
 import edu.uci.ics.jung.graph.DirectedSparseMultigraph;
 import edu.uci.ics.jung.graph.Graph;
@@ -13,7 +13,7 @@ import edu.uci.ics.jung.visualization.VisualizationViewer;
 import edu.uci.ics.jung.visualization.control.DefaultModalGraphMouse;
 import edu.uci.ics.jung.visualization.control.ModalGraphMouse;
 import edu.uci.ics.jung.visualization.decorators.ToStringLabeller;
-import edu.uci.ics.jung.visualization.renderers.Renderer.VertexLabel.Position;
+import edu.uci.ics.jung.visualization.renderers.Renderer;
 import javafx.geometry.Point3D;
 import modelcomponents.*;
 import org.apache.commons.collections15.Transformer;
@@ -236,7 +236,7 @@ public class NetworkModel extends MainPanel implements ActionListener {
         return this.idAreaMapping.get(id);
     }
 
-    private void addNewEdge(Graph result, ModelArea area0, ModelArea area1) {
+    private void addNewEdge(Graph<ModelObject, ModelEdge> result, ModelArea area0, ModelArea area1) {
         int areaId0 = area0.getId();
         int areaId1 = area1.getId();
         ModelGroup group0 = null, group1 = null;
@@ -380,12 +380,12 @@ public class NetworkModel extends MainPanel implements ActionListener {
 //        gm.add(new PopupVertexEdgeMenuMousePlugin<ModelObject, ModelEdge>());
 
 
-        vv.getRenderContext().setVertexFillPaintTransformer(new SimpleFloorColoringTransformer<ModelObject, Paint>());
+        vv.getRenderContext().setVertexFillPaintTransformer(new DegreeBasedColorTransformer<ModelObject, Paint>());
         vv.getRenderContext().setVertexShapeTransformer(new VertexRectangleTransformer<ModelObject, Shape>());
 //        vv.getRenderContext().setEdgeStrokeTransformer(edgeStrokeTransformer);
-        vv.getRenderContext().setVertexLabelTransformer(new ToStringLabeller());
+        vv.getRenderContext().setVertexLabelTransformer(new ToStringLabeller<ModelObject>());
 //        vv.getRenderContext().setEdgeLabelTransformer(new ToStringLabeller());
-        vv.getRenderer().getVertexLabelRenderer().setPosition(Position.CNTR);
+        vv.getRenderer().getVertexLabelRenderer().setPosition(Renderer.VertexLabel.Position.CNTR);
 
 
         this.add(vv);
@@ -422,6 +422,7 @@ public class NetworkModel extends MainPanel implements ActionListener {
     public void actionPerformed(ActionEvent event) {
 
         highlightedVertices.clear();
+
         highlightedVertices.addAll(Arrays.asList(nameToPathMapping.get(event.getSource())));
 
         this.setDisplay(currentData, true);
@@ -1021,10 +1022,53 @@ public class NetworkModel extends MainPanel implements ActionListener {
         }
     }
 
+    private class DegreeBasedColorTransformer<ModelObject, Paint> implements Transformer<ModelObject, Paint> {
+        @Override
+        public Paint transform(ModelObject obj) {
+            int degree=0;
+            Object object;
+
+                object = (Object) obj;
+            modelcomponents.ModelObject object1 = (modelcomponents.ModelObject) object;
+
+
+
+
+            if(NetworkModel.this.currentGraph instanceof DirectedSparseMultigraph){
+                degree = NetworkModel.this.currentGraph.inDegree(object1);
+                degree-=(NetworkModel.this.completeGraph.degree(object1));
+            }   else{
+                degree = NetworkModel.this.currentGraph.degree(object1);
+            }
+
+            if(degree <0){
+
+                return (Paint)Color.white;
+
+            }
+            else if(degree ==0){
+                return (Paint) Color.LIGHT_GRAY;
+
+            }else if(degree ==1){
+
+                return (Paint) Color.YELLOW;
+
+            }else if(degree ==2){
+                return (Paint) Color.GREEN;
+            }else if(degree ==3){
+                return (Paint) Color.PINK;
+            }else{
+                return (Paint) Color.RED;
+            }
+
+        }
+    }
+
     private class VertexRectangleTransformer<ModelObject, Shape> implements Transformer<ModelObject, Shape> {
 
         @Override
         public Shape transform(ModelObject modelObject) {
+
             int width = modelObject.toString().length() * 10;
             return (Shape) new Rectangle(-width / 2, -10, width, 20);
 
@@ -1037,7 +1081,7 @@ public class NetworkModel extends MainPanel implements ActionListener {
         @Override
         public Point2D transform(ModelObject modelObject) {
 
-            System.out.println(getCenterOfArea(modelObject));
+
             return getCenterOfArea(modelObject);
         }
 
@@ -1053,10 +1097,10 @@ public class NetworkModel extends MainPanel implements ActionListener {
 
                 Point p = MapImagePanel.convertToDrawingCoordinate(new Point((int)x, (int)y), floor);
 
-                System.out.println("Before:"+p);
+
                 p= new Point((int) (p.getX()+
                         (floor*700)),(int)p.getY());
-                System.out.println("After:"+p);
+
 
                 Point2D point =  (Point2D) (new java.awt.geom.Point2D.Double(p.x,p.y));
 
@@ -1087,10 +1131,8 @@ public class NetworkModel extends MainPanel implements ActionListener {
 
             Point p = MapImagePanel.convertToDrawingCoordinate(
                     new Point((int)(sumX / n), (int)(sumY / n)), floor);
-            System.out.println("Before:"+p);
 
             p= new Point((int) (p.getX()+(floor*700)),(int)p.getY());
-            System.out.println("After:"+p);
 
             Point2D point =  (Point2D) (new java.awt.geom.Point2D.Double(p.getX(), p.getY()));
 
