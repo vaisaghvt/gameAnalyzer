@@ -8,7 +8,6 @@ package gui; /**
 
 import database.Database;
 
-import javax.swing.*;
 import java.awt.*;
 import java.awt.image.BufferedImage;
 import java.util.ArrayList;
@@ -56,37 +55,36 @@ public class MapImagePanel extends MainPanel {
             return;
 
 
-            if (zoomChanged && viewImages) {
-                floorImages.clear();
-                for (int i = 0; i < Database.getInstance().getNumberOfFloors(); i++) {
+        if (zoomChanged && viewImages) {
+            floorImages.clear();
+            for (int i = 0; i < Database.getInstance().getNumberOfFloors(); i++) {
 
-                    floorImages.add(createFloorImage(Database.getInstance().
-                            getImageValuesOfFloor(i), i));
-
-                }
-            }
-            assert floorImages != null;
-
-            if (viewImages) {
-
-                g.drawImage(floorImages.get(currentFloor), 0, 0, null);
+                floorImages.add(createFloorImage(Database.getInstance().
+                        getImageValuesOfFloor(i), i));
 
             }
-            if (viewRooms) {
-                g = document.image(g);
-            }
+        }
+        assert floorImages != null;
 
-            if (hasSelection) {
-                int minX = Math.min(x1, x2);
-                int minY = Math.min(y1, y2);
-                int maxX = Math.max(x1, x2);
-                int maxY = Math.max(y1, y2);
+        if (viewImages) {
 
-                g.setColor(Color.RED);
-                g.drawRect(minX, minY, maxX - minX, maxY - minY);
+            g.drawImage(floorImages.get(currentFloor), 0, 0, null);
 
-            }
+        }
+        if (viewRooms) {
+            g = document.image(g);
+        }
 
+        if (hasSelection) {
+            int minX = Math.min(x1, x2);
+            int minY = Math.min(y1, y2);
+            int maxX = Math.max(x1, x2);
+            int maxY = Math.max(y1, y2);
+
+            g.setColor(Color.RED);
+            g.drawRect(minX, minY, maxX - minX, maxY - minY);
+
+        }
 
 
         g.dispose();
@@ -109,9 +107,6 @@ public class MapImagePanel extends MainPanel {
     }
 
 
-
-
-
     public void enableImageView() {
         this.viewImages = true;
     }
@@ -119,7 +114,6 @@ public class MapImagePanel extends MainPanel {
     public void disableImageView() {
         this.viewImages = false;
     }
-
 
 
     public void enableRoomView() {
@@ -169,7 +163,7 @@ public class MapImagePanel extends MainPanel {
     }
 
     public static MapImagePanel instance() {
-        if(instance==null)
+        if (instance == null)
             instance = new MapImagePanel();
 
         return instance;

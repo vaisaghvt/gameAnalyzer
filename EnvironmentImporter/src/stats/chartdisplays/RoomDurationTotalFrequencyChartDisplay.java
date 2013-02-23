@@ -21,7 +21,6 @@ import java.util.TreeSet;
 public class RoomDurationTotalFrequencyChartDisplay extends ChartDisplay<Multiset<Long>> {
 
 
-
     @Override
     public void display(Multiset<Long> data) {
         final CategoryDataset dataSet = createDataSet(data);
@@ -44,7 +43,7 @@ public class RoomDurationTotalFrequencyChartDisplay extends ChartDisplay<Multise
 
         final DefaultCategoryDataset dataSet = new DefaultCategoryDataset();
         for (Long frequency : vertices) {
-            dataSet.addValue(data.count(frequency),frequency.toString(), "");
+            dataSet.addValue(data.count(frequency), frequency.toString(), "");
 
         }
 
@@ -69,7 +68,6 @@ public class RoomDurationTotalFrequencyChartDisplay extends ChartDisplay<Multise
 
         return chart;
     }
-
 
 
 }

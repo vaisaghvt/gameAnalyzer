@@ -21,9 +21,6 @@ import java.util.HashMap;
 public class DistanceTimeChartDisplay extends ChartDisplay<HashMap<String, HashMap<String, Double>>> {
 
 
-
-
-
     @Override
     public void display(HashMap<String, HashMap<String, Double>> data) {
         final CategoryDataset timeDataSet = createTimeDataSet(data);
@@ -35,19 +32,19 @@ public class DistanceTimeChartDisplay extends ChartDisplay<HashMap<String, HashM
 
     private void createFrameAndChart(CategoryDataset dataSet, String type) {
         String st;
-        if(getTitle().contains("Tasks")){
-           st = "Tasks :";
-        }else{
+        if (getTitle().contains("Tasks")) {
+            st = "Tasks :";
+        } else {
             st = "Exploration :";
         }
 
-        final JFreeChart chart = createChart(dataSet,st+type+ " for each agent" );
+        final JFreeChart chart = createChart(dataSet, st + type + " for each agent");
         final ChartPanel chartPanel = new ChartPanel(chart);
         chartPanel.setPreferredSize(new Dimension(500, 270));
-        JFrame frame = new JFrame("total "+type+ " for each agent");
+        JFrame frame = new JFrame("total " + type + " for each agent");
         frame.setContentPane(chartPanel);
         frame.setVisible(true);
-        frame.setLocation(100,100);
+        frame.setLocation(100, 100);
         frame.setSize(new Dimension(520, 300));
     }
 
@@ -57,7 +54,7 @@ public class DistanceTimeChartDisplay extends ChartDisplay<HashMap<String, HashM
         DefaultCategoryDataset dataset = new DefaultCategoryDataset();
         for (String dataName : data.keySet()) {
 
-            dataset.addValue(data.get(dataName).get("distance"),"distance", dataName);
+            dataset.addValue(data.get(dataName).get("distance"), "distance", dataName);
 
 //            dataset.addValue(data.get(dataName).get("distance"),"time", dataName);
         }
@@ -71,13 +68,14 @@ public class DistanceTimeChartDisplay extends ChartDisplay<HashMap<String, HashM
         DefaultCategoryDataset dataset = new DefaultCategoryDataset();
         for (String dataName : data.keySet()) {
 
-            dataset.addValue(data.get(dataName).get("time"),"time", dataName);
-            System.out.println(dataName+":"+data.get(dataName).get("time"));
+            dataset.addValue(data.get(dataName).get("time"), "time", dataName);
+            System.out.println(dataName + ":" + data.get(dataName).get("time"));
 //            dataset.addValue(data.get(dataName).get("distance"),"time", dataName);
         }
         return dataset;
 
     }
+
     public JFreeChart createChart(CategoryDataset dataSet, String s) {
         // create the chart...
         final JFreeChart chart = ChartFactory.createBarChart(
@@ -90,7 +88,6 @@ public class DistanceTimeChartDisplay extends ChartDisplay<HashMap<String, HashM
                 true,                     // tooltips?
                 false                     // URLs?
         );
-
 
 
         return chart;

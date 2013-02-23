@@ -112,7 +112,7 @@ public class SignificantDoorFrequencyStatisticHandler extends StatisticsHandler<
 
                 result.put(summaryName, tempMap);
             } else {
-                tempMap.put("firstFloorShort",getDoubleValue(firstFloorShort, phase.toString()));
+                tempMap.put("firstFloorShort", getDoubleValue(firstFloorShort, phase.toString()));
                 tempMap.put("firstFloorLong", getDoubleValue(firstFloorLong, phase.toString()));
                 tempMap.put("secondFloorMain", getDoubleValue(secondFloorMain, phase.toString()));
                 tempMap.put("secondFloorSide", getDoubleValue(secondFloorSide, phase.toString()));
@@ -126,7 +126,7 @@ public class SignificantDoorFrequencyStatisticHandler extends StatisticsHandler<
     }
 
     private double getDoubleValue(HashMap<String, Number> map, String key) {
-        return (map==null || !map.containsKey(key))? 0: map.get(key).doubleValue();
+        return (map == null || !map.containsKey(key)) ? 0 : map.get(key).doubleValue();
     }
 
 

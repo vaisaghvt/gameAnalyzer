@@ -12,7 +12,6 @@ import java.util.HashMap;
 public class VertexConsoleDisplay extends ConsoleDisplay<HashMap<String, ? extends Number>> {
 
 
-
     @Override
     public void display(HashMap<String, ? extends Number> data) {
     }

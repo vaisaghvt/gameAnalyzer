@@ -44,7 +44,7 @@ public class VertexVisitFrequencyStatisticHandler extends StatisticsHandler<Vert
 
                     for (String roomName : temp.keySet()) {
                         int numberOfEdges = roomEdgeCountMapping.get(roomName);
-                        long value = temp.get(roomName)== null ? 0 : temp.get(roomName).longValue();
+                        long value = temp.get(roomName) == null ? 0 : temp.get(roomName).longValue();
 
                         result.put(roomName, (double) value
                                 / (double) numberOfEdges);
@@ -53,7 +53,7 @@ public class VertexVisitFrequencyStatisticHandler extends StatisticsHandler<Vert
                     this.chartDisplay.setName(dataName);
 
 
-                    this.chartDisplay.setTitle(dataName+":"+choice.toString()+":"+phase.toString());
+                    this.chartDisplay.setTitle(dataName + ":" + choice.toString() + ":" + phase.toString());
                     this.chartDisplay.display(result);
                     this.consoleDisplay.display(result);
 
@@ -79,7 +79,7 @@ public class VertexVisitFrequencyStatisticHandler extends StatisticsHandler<Vert
 
                 HashMap<String, Double> finalResult = aggregateData(result, aggregationType);
                 System.out.println("Displaying Chart...");
-                this.chartDisplay.setTitle(choice.toString()+":"+phase.toString());
+                this.chartDisplay.setTitle(choice.toString() + ":" + phase.toString());
                 this.chartDisplay.display(finalResult);
                 this.consoleDisplay.display(finalResult);
 

@@ -20,7 +20,6 @@ import java.util.Collection;
 public class StaircaseVisitStatisticHandler extends StatisticsHandler<StaircaseVisitConsoleDisplay, StaircaseVisitChartDisplay> {
 
 
-
     public StaircaseVisitStatisticHandler() {
         super(new StaircaseVisitChartDisplay(),
                 new StaircaseVisitConsoleDisplay()
@@ -32,15 +31,13 @@ public class StaircaseVisitStatisticHandler extends StatisticsHandler<StaircaseV
     @Override
     public void generateAndDisplayStats(Collection<String> dataNames, Phase phase, StatsDialog.AllOrOne all, StatsDialog.AggregationType itemAt) {
         final StatisticChoice choice = StatisticChoice.STAIRCASE_VISIT_CHANCE;
-        HashMultimap<String, String> usesStaircaseUnusuallyList =  NetworkModel.instance().getStaircaseRelatedMotion(dataNames, phase);
-        this.chartDisplay.setTitle(choice.toString()+phase.toString());
+        HashMultimap<String, String> usesStaircaseUnusuallyList = NetworkModel.instance().getStaircaseRelatedMotion(dataNames, phase);
+        this.chartDisplay.setTitle(choice.toString() + phase.toString());
         this.chartDisplay.setPhase(phase);
         this.chartDisplay.display(usesStaircaseUnusuallyList);
         this.consoleDisplay.display(usesStaircaseUnusuallyList);
 
     }
-
-
 
 
 }

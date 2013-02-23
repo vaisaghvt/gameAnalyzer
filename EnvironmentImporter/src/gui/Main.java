@@ -54,7 +54,6 @@ public class Main extends JFrame implements ActionListener, MouseListener, Mouse
     private final JMenuItem miStatistics = new JMenuItem("Statistics");
 
 
-
     private MainPanel mainPanel = null;
 
 
@@ -190,7 +189,6 @@ public class Main extends JFrame implements ActionListener, MouseListener, Mouse
         mView.add(this.mChoosePhase);
 
         mAnalysis.add(miStatistics);
-
 
 
         miNew.addActionListener(this);
@@ -454,7 +452,7 @@ public class Main extends JFrame implements ActionListener, MouseListener, Mouse
         } else if (event.getSource() == miStatistics) {
             StatsDialog dialog = new StatsDialog();
             dialog.setVisible(true);
-        }  else if (event.getSource() == miNetworkView) {
+        } else if (event.getSource() == miNetworkView) {
             if (miNetworkView.isSelected()) {
                 assert miNetworkView.isSelected() && !miRoomView.isSelected();
                 if (!(mainPanel instanceof NetworkModel) && current != null) {
@@ -500,9 +498,9 @@ public class Main extends JFrame implements ActionListener, MouseListener, Mouse
             this.setTitle(item.getText() + " - Network Display");
             if (item.getText().equalsIgnoreCase("default")) {
                 mChoosePhase.setEnabled(false);
-                this.menuBar.add(((NetworkModel)mainPanel).getContextMenu());
-                ((NetworkModel)mainPanel).getContextMenu().setEnabled(true);
-                ((NetworkModel)mainPanel).getContextMenu().setVisible(true);
+                this.menuBar.add(((NetworkModel) mainPanel).getContextMenu());
+                ((NetworkModel) mainPanel).getContextMenu().setEnabled(true);
+                ((NetworkModel) mainPanel).getContextMenu().setVisible(true);
                 this.menuBar.revalidate();
             } else {
                 mChoosePhase.setEnabled(true);
@@ -510,7 +508,7 @@ public class Main extends JFrame implements ActionListener, MouseListener, Mouse
                 miTask1.setSelected(true);
                 miTask2.setSelected(true);
                 miTask3.setSelected(true);
-                this.menuBar.remove(((NetworkModel)mainPanel).getContextMenu());
+                this.menuBar.remove(((NetworkModel) mainPanel).getContextMenu());
                 this.menuBar.revalidate();
 
             }
@@ -637,7 +635,6 @@ public class Main extends JFrame implements ActionListener, MouseListener, Mouse
             dataNameItems = null;
 
 
-
             ButtonGroup radioGroup = new ButtonGroup();
             dataNameItems = new HashSet<JRadioButtonMenuItem>();
             JRadioButtonMenuItem item = new JRadioButtonMenuItem("default");
@@ -660,13 +657,13 @@ public class Main extends JFrame implements ActionListener, MouseListener, Mouse
             mViewDataFor.setEnabled(true);
             mAnalysis.setEnabled(true);
 
-            this.menuBar.add(((NetworkModel)mainPanel).getContextMenu());
-            ((NetworkModel)mainPanel).getContextMenu().setEnabled(true);
-            ((NetworkModel)mainPanel).getContextMenu().setVisible(true);
+            this.menuBar.add(((NetworkModel) mainPanel).getContextMenu());
+            ((NetworkModel) mainPanel).getContextMenu().setEnabled(true);
+            ((NetworkModel) mainPanel).getContextMenu().setVisible(true);
             this.menuBar.revalidate();
 
         } else if (type.equals("map")) {
-            this.menuBar.remove(((NetworkModel)mainPanel).getContextMenu());
+            this.menuBar.remove(((NetworkModel) mainPanel).getContextMenu());
             this.menuBar.revalidate();
             mainPanel = MapImagePanel.instance();
             mainPanel.setDocument(current);

@@ -21,7 +21,6 @@ import java.awt.*;
 public class PathChartDisplay extends ChartDisplay<HashMultimap<String, String>> {
 
 
-
     private Phase phase;
 
     public void setPhase(Phase phase) {
@@ -84,10 +83,6 @@ public class PathChartDisplay extends ChartDisplay<HashMultimap<String, String>>
             return null;
         }
     }
-
-
-
-
 
 
 }

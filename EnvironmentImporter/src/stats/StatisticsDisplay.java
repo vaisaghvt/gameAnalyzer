@@ -7,6 +7,6 @@ package stats;
  * Time: 12:31 PM
  * To change this template use File | Settings | File Templates.
  */
-public interface StatisticsDisplay<T>  {
+public interface StatisticsDisplay<T> {
     public void display(T item);
 }

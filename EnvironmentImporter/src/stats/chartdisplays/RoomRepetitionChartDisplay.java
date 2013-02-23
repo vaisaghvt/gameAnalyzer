@@ -26,9 +26,6 @@ import java.util.List;
 public class RoomRepetitionChartDisplay extends ChartDisplay<HashMap<String, HashMap<String, HashMap<String, String>>>> {
 
 
-
-
-
     @Override
     public void display(HashMap<String, HashMap<String, HashMap<String, String>>> hashMap) {
         final XYDataset data = convertToScatterPoints(hashMap);
@@ -65,21 +62,20 @@ public class RoomRepetitionChartDisplay extends ChartDisplay<HashMap<String, Has
         significantRooms.add("Sauna");
 
 
-
         for (String dataName : hashMap.keySet()) {
             HashMap<String, HashMap<String, String>> roomsForPerson = hashMap.get(dataName);
 
-                for (String significantRoom : roomsForPerson.keySet()) {
-                    HashMap<String, String> roomRelatedData = roomsForPerson.get(significantRoom);
-                    result[1] = Float.parseFloat(roomRelatedData.get("frequency"));
-                    if(roomRelatedData.get("remembers").equals("yes"))   {
-                        result[0] = significantRooms.indexOf(significantRoom) * 2;
-                    } else{
-                        result[0] = significantRooms.indexOf(significantRoom) * 2 + 1;
-                     }
-
-                    series.add(result[0], (result[1]) / 1000000);
+            for (String significantRoom : roomsForPerson.keySet()) {
+                HashMap<String, String> roomRelatedData = roomsForPerson.get(significantRoom);
+                result[1] = Float.parseFloat(roomRelatedData.get("frequency"));
+                if (roomRelatedData.get("remembers").equals("yes")) {
+                    result[0] = significantRooms.indexOf(significantRoom) * 2;
+                } else {
+                    result[0] = significantRooms.indexOf(significantRoom) * 2 + 1;
                 }
+
+                series.add(result[0], (result[1]) / 1000000);
+            }
 
 
         }
@@ -91,6 +87,7 @@ public class RoomRepetitionChartDisplay extends ChartDisplay<HashMap<String, Has
 
 
     }
+
     private JFreeChart createChart(XYDataset data) {
         final NumberAxis domainAxis = new NumberAxis("Group");
         domainAxis.setAutoRangeIncludesZero(false);
@@ -113,9 +110,6 @@ public class RoomRepetitionChartDisplay extends ChartDisplay<HashMap<String, Has
                 (RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
         return chart;
     }
-
-
-
 
 
 }

@@ -61,20 +61,21 @@ public class DoorRepetitionFrequencyStatisticHandler extends StatisticsHandler<D
             this.chartDisplay.setTitle("Time Between Revisits (Door)");
             this.chartDisplay.display(result);
             this.consoleDisplay.display(result);
-            }
-
         }
+
+    }
+
     private Multiset<Double> aggregateFromData(HashMap<String, Multiset<Double>> nameToData, StatsDialog.AggregationType aggregationType) {
         Multiset<Double> result = HashMultiset.create();
         HashMap<Double, Integer> valueFrequencyMapping = new HashMap<Double, Integer>();
-        int n=1;
+        int n = 1;
         for (String name : nameToData.keySet()) {
 
             Multiset<Double> valueForSet = nameToData.get(name);
             for (Double value : valueForSet.elementSet()) {
                 if (valueFrequencyMapping.containsKey(value)) {
                     valueFrequencyMapping.put(value,
-                            aggregateData(valueFrequencyMapping.get(value), valueForSet.count(value), aggregationType,n));
+                            aggregateData(valueFrequencyMapping.get(value), valueForSet.count(value), aggregationType, n));
                 } else {
                     valueFrequencyMapping.put(value,
                             valueForSet.count(value));
@@ -106,7 +107,6 @@ public class DoorRepetitionFrequencyStatisticHandler extends StatisticsHandler<D
                 return null;
         }
     }
-
 
 
     private Multiset<Double> findDeltaTToFrequencyMapping(HashMultimap<String, Long> roomVisitTimeMap, HashMap<String, Integer> roomDegree) {

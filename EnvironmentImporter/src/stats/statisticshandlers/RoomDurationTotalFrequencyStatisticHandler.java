@@ -104,11 +104,10 @@ public class RoomDurationTotalFrequencyStatisticHandler extends StatisticsHandle
     }
 
     private Multiset<Long> summarizeEach(HashMap<String, Long> result) {
-        Multiset<Long> data= HashMultiset.create();
+        Multiset<Long> data = HashMultiset.create();
 
 
-
-        for (String roomName: result.keySet()){
+        for (String roomName : result.keySet()) {
             data.add(result.get(roomName));
         }
 

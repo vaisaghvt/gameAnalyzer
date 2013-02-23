@@ -20,9 +20,6 @@ import java.util.HashMap;
 public class SignificantDoorFrequencyChartDisplay extends ChartDisplay<HashMap<String, HashMap<String, Number>>> {
 
 
-
-
-
     @Override
     public void display(HashMap<String, HashMap<String, Number>> data) {
         final CategoryDataset dataSet = createDataSet(data);
@@ -68,9 +65,6 @@ public class SignificantDoorFrequencyChartDisplay extends ChartDisplay<HashMap<S
 
         return chart;
     }
-
-
-
 
 
 }

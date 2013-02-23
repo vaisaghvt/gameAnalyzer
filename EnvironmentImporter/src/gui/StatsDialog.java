@@ -227,9 +227,9 @@ public class StatsDialog extends JDialog implements ActionListener {
         });
         int size = listOfChoices.size();
         statisticChoiceList = new JComboBox();
-        for(StatisticChoice choice:listOfChoices){
-            if(choice.getStatisticsHandler()!=null){
-              statisticChoiceList.addItem(choice);
+        for (StatisticChoice choice : listOfChoices) {
+            if (choice.getStatisticsHandler() != null) {
+                statisticChoiceList.addItem(choice);
 
             }
         }
@@ -276,7 +276,7 @@ public class StatsDialog extends JDialog implements ActionListener {
         } else if (event.getSource() == allOrOneComboBox) {
             AllOrOne choice = this.allOrOneComboBox.getItemAt(allOrOneComboBox.getSelectedIndex());
             this.aggregationTypeComboBox.removeAllItems();
-            if (choice == AllOrOne.ALL &&statisticChoiceList.getItemAt(statisticChoiceList.getSelectedIndex()).hasAggregationChoice()) {
+            if (choice == AllOrOne.ALL && statisticChoiceList.getItemAt(statisticChoiceList.getSelectedIndex()).hasAggregationChoice()) {
                 aggregationTypeComboBox.setEnabled(true);
                 for (AggregationType type : AggregationType.values()) {
                     this.aggregationTypeComboBox.addItem(type);

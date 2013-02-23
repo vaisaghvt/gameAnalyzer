@@ -26,6 +26,6 @@ public class ModelEdge {
 
     @Override
     public String toString() {
-        return  time+"";
+        return time + "";
     }
 }

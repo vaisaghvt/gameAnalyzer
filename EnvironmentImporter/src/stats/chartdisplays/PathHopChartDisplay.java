@@ -57,13 +57,13 @@ public class PathHopChartDisplay extends ChartDisplay<HashMap<String, HashMap<St
         rangeAxis.setAutoRangeIncludesZero(false);
 
 
-
         final JFreeChart chart = ChartFactory.createScatterPlot("Route Hop relationship",
-                "Route", "Number of hops/5", data, PlotOrientation.VERTICAL, true, true, false);;
+                "Route", "Number of hops/5", data, PlotOrientation.VERTICAL, true, true, false);
+        ;
         Shape cross = ShapeUtilities.createDiagonalCross(3, 1);
 
 
-        ((XYPlot)chart.getPlot()).getRenderer().setSeriesShape(0, cross);
+        ((XYPlot) chart.getPlot()).getRenderer().setSeriesShape(0, cross);
 
 //        chart.setLegend(null);
 

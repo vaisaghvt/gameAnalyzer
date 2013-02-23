@@ -18,7 +18,6 @@ public class GraphDetailsToFile extends ConsoleDisplay<HashMap<String, HashMap<S
     public void display(HashMap<String, HashMap<String, String>> data) {
 
 
-
         try {
             File outputFile = new File("dataSummary.txt");
 
@@ -34,8 +33,8 @@ public class GraphDetailsToFile extends ConsoleDisplay<HashMap<String, HashMap<S
                 ps.print(dataName);
                 System.out.print(dataName);
                 for (String key : resultForName.keySet()) {
-                    ps.print("\t"+resultForName.get(key));
-                    System.out.print("\t"+resultForName.get(key));
+                    ps.print("\t" + resultForName.get(key));
+                    System.out.print("\t" + resultForName.get(key));
 
                 }
                 ps.println();
@@ -58,7 +57,7 @@ public class GraphDetailsToFile extends ConsoleDisplay<HashMap<String, HashMap<S
 
         StringBuilder string = new StringBuilder();
         string.append("Name");
-        for(String key: keys){
+        for (String key : keys) {
             string.append("\t").append(key);
         }
 

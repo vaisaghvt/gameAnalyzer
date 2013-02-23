@@ -1,7 +1,5 @@
 package stats.consoledisplays;
 
-import com.google.common.collect.HashMultimap;
-
 import java.util.HashMap;
 
 /**
@@ -12,7 +10,6 @@ import java.util.HashMap;
  * To change this template use File | Settings | File Templates.
  */
 public class PathHopConsoleDisplay extends ConsoleDisplay<HashMap<String, HashMap<String, String>>> {
-
 
 
     @Override

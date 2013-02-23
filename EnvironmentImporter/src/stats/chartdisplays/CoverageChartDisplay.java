@@ -20,9 +20,6 @@ import java.awt.*;
 public class CoverageChartDisplay extends ChartDisplay<HashMultimap<Integer, String>> {
 
 
-
-
-
     @Override
     public void display(HashMultimap<Integer, String> data) {
         final CategoryDataset dataSet = createDataSet(data);
@@ -39,21 +36,21 @@ public class CoverageChartDisplay extends ChartDisplay<HashMultimap<Integer, Str
 
     public CategoryDataset createDataSet(HashMultimap<Integer, String> data) {
 
-        final float BIN_SIZE =5f;
+        final float BIN_SIZE = 5f;
         final DefaultCategoryDataset dataSet = new DefaultCategoryDataset();
 
         HashMultimap<Integer, String> result = HashMultimap.create();
-        for(Integer number: data.keySet()){
-            Integer bin = (int)(Math.floor(number/BIN_SIZE) * Math.floor(BIN_SIZE));
+        for (Integer number : data.keySet()) {
+            Integer bin = (int) (Math.floor(number / BIN_SIZE) * Math.floor(BIN_SIZE));
             result.putAll(bin, data.get(number));
         }
 
-        for(int i=0;i<=100;i+=BIN_SIZE){
+        for (int i = 0; i <= 100; i += BIN_SIZE) {
 
-            if(i!=100){
-                dataSet.addValue(result.get(i).size(), i+"-"+(i+BIN_SIZE-1), "");
-            }else{
-                dataSet.addValue(result.get(i).size(), "100","");
+            if (i != 100) {
+                dataSet.addValue(result.get(i).size(), i + "-" + (i + BIN_SIZE - 1), "");
+            } else {
+                dataSet.addValue(result.get(i).size(), "100", "");
             }
         }
 

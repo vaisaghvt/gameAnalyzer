@@ -64,14 +64,10 @@ public class ParallelCoordinatePlotGenerator extends StatisticsHandler<GraphDeta
             this.consoleDisplay.display(nameToStatMapping);
 
 
-
         } else {
             System.out.println("No data selected!");
         }
     }
-
-
-
 
 
     private HashMap<String, String> getStatsForGraph(String dataName, DirectedSparseMultigraph<ModelObject, ModelEdge> graph, HashMap<String, String> results) {

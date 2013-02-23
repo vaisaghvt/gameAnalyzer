@@ -20,7 +20,6 @@ import java.util.Collection;
 public class PathStatisticHandler extends StatisticsHandler<PathConsoleDisplay, PathChartDisplay> {
 
 
-
     public PathStatisticHandler() {
         super(new PathChartDisplay(),
                 new PathConsoleDisplay()
@@ -33,14 +32,12 @@ public class PathStatisticHandler extends StatisticsHandler<PathConsoleDisplay, 
     public void generateAndDisplayStats(Collection<String> dataNames, Phase phase, StatsDialog.AllOrOne all, StatsDialog.AggregationType itemAt) {
         final StatisticChoice choice = StatisticChoice.PATH_FREQUENCY;
         HashMultimap<String, String> data = NetworkModel.instance().getPathDataFor(dataNames, phase);
-        this.chartDisplay.setTitle(choice.toString()+phase.toString());
+        this.chartDisplay.setTitle(choice.toString() + phase.toString());
         this.chartDisplay.setPhase(phase);
         this.chartDisplay.display(data);
         this.consoleDisplay.display(data);
 
     }
-
-
 
 
 }

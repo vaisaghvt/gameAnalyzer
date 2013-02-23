@@ -69,14 +69,14 @@ public class NodeRepetitionFrequencyStatisticHandler extends StatisticsHandler<N
     private Multiset<Double> aggregateFromData(HashMap<String, Multiset<Double>> nameToData, StatsDialog.AggregationType aggregationType) {
         Multiset<Double> result = HashMultiset.create();
         HashMap<Double, Integer> valueFrequencyMapping = new HashMap<Double, Integer>();
-        int n=1;
+        int n = 1;
         for (String name : nameToData.keySet()) {
 
             Multiset<Double> valueForSet = nameToData.get(name);
             for (Double value : valueForSet.elementSet()) {
                 if (valueFrequencyMapping.containsKey(value)) {
                     valueFrequencyMapping.put(value,
-                            aggregateData(valueFrequencyMapping.get(value), valueForSet.count(value), aggregationType,n));
+                            aggregateData(valueFrequencyMapping.get(value), valueForSet.count(value), aggregationType, n));
                 } else {
                     valueFrequencyMapping.put(value,
                             valueForSet.count(value));

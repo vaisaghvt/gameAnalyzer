@@ -12,7 +12,7 @@ public enum Phase {
     private int num;
 
     Phase(int i) {
-        this.num=i;
+        this.num = i;
     }
 
     public int getNum() {

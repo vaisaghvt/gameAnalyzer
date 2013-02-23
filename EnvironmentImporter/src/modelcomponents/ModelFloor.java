@@ -1,6 +1,5 @@
 package modelcomponents;
 
-import javax.swing.tree.MutableTreeNode;
 import java.util.Collection;
 import java.util.HashSet;
 

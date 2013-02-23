@@ -572,10 +572,9 @@ public class Document {
             currentGroup = null;
             hasUnsavedChanges = true;
 
-        }else{
+        } else {
             System.out.println("Group creation failed");
         }
-
 
 
     }

@@ -12,10 +12,9 @@ import java.util.HashMap;
 public class GraphDetailsConsoleDisplay extends ConsoleDisplay<HashMap<String, String>> {
 
 
-
     @Override
     public void display(HashMap<String, String> data) {
-        for(String key: data.keySet()){
+        for (String key : data.keySet()) {
             System.out.println(key + " = " + data.get(key));
         }
 

@@ -8,11 +8,11 @@ import gui.StatsDialog;
 import javafx.geometry.Point3D;
 import modelcomponents.ModelEdge;
 import modelcomponents.ModelObject;
+import org.apache.commons.lang3.math.NumberUtils;
 import org.apache.commons.math3.stat.descriptive.moment.Mean;
 import org.apache.commons.math3.stat.descriptive.moment.Variance;
 import stats.chartdisplays.GraphDetailsChartDisplay;
 import stats.consoledisplays.GraphDetailsConsoleDisplay;
-import org.apache.commons.lang3.math.NumberUtils;
 
 import java.util.*;
 
@@ -40,7 +40,7 @@ public class GraphDetailsStatisticHandler extends StatisticsHandler<GraphDetails
 
         if (!dataNames.isEmpty()) {
             HashSet<Phase> phases = new HashSet<Phase>();
-            for(Phase tempPhase: Phase.values()){
+            for (Phase tempPhase : Phase.values()) {
                 phases.add(tempPhase);
             }
 
@@ -60,21 +60,20 @@ public class GraphDetailsStatisticHandler extends StatisticsHandler<GraphDetails
             }
 
 
-
             if (allOrOne == StatsDialog.AllOrOne.EACH) {
-                for(String dataName : dataNames){
+                for (String dataName : dataNames) {
                     this.chartDisplay.setName(dataName);
-                    this.chartDisplay.setTitle(dataName+" : Stats Summary");
+                    this.chartDisplay.setTitle(dataName + " : Stats Summary");
                     this.chartDisplay.display(nameToStatMapping.get(dataName));
 
-                    System.out.println("*************"+dataName+"*************");
+                    System.out.println("*************" + dataName + "*************");
                     this.consoleDisplay.display(nameToStatMapping.get(dataName));
                 }
 
 
             } else {
-               HashMap<String, String> results = summarizeResults(nameToStatMapping, aggregationType);
-                this.chartDisplay.setTitle("Total Stats Summary - "+aggregationType);
+                HashMap<String, String> results = summarizeResults(nameToStatMapping, aggregationType);
+                this.chartDisplay.setTitle("Total Stats Summary - " + aggregationType);
                 this.chartDisplay.display(results);
                 this.consoleDisplay.display(results);
             }
@@ -88,30 +87,30 @@ public class GraphDetailsStatisticHandler extends StatisticsHandler<GraphDetails
 
     private HashMap<String, String> summarizeResults(HashMap<String, HashMap<String, String>> nameToStatMapping, StatsDialog.AggregationType aggregationType) {
         HashMap<String, String> results = new HashMap<String, String>();
-        int n=0;
-        for (String name: nameToStatMapping.keySet()){
+        int n = 0;
+        for (String name : nameToStatMapping.keySet()) {
             HashMap<String, String> resultForName = nameToStatMapping.get(name);
-            for(String key: resultForName.keySet()){
+            for (String key : resultForName.keySet()) {
                 n++;
-                if (NumberUtils.isNumber(resultForName.get(key))){
-                    if(results.containsKey(key)){
+                if (NumberUtils.isNumber(resultForName.get(key))) {
+                    if (results.containsKey(key)) {
                         results.put(key,
-                            aggregate(
-                                    Double.parseDouble(results.get(key)),
-                                    Double.parseDouble(resultForName.get(key)),
-                                    aggregationType,
-                                    n));
-                    }else {
+                                aggregate(
+                                        Double.parseDouble(results.get(key)),
+                                        Double.parseDouble(resultForName.get(key)),
+                                        aggregationType,
+                                        n));
+                    } else {
                         results.put(key, resultForName.get(key));
                     }
-                }else if("Center of Mass".equals(key) && aggregationType!= StatsDialog.AggregationType.MAX
-                        && aggregationType != StatsDialog.AggregationType.MIN ){
-                    if(results.containsKey(key)){
+                } else if ("Center of Mass".equals(key) && aggregationType != StatsDialog.AggregationType.MAX
+                        && aggregationType != StatsDialog.AggregationType.MIN) {
+                    if (results.containsKey(key)) {
                         Point3D existingPoint = getPointFromString(results.get(key));
                         Point3D newPoint = getPointFromString(results.get(key));
                         double newX, newY, newZ;
 
-                        switch (aggregationType){
+                        switch (aggregationType) {
                             case SUM:
                                 newX = existingPoint.getX() + newPoint.getX();
                                 newY = existingPoint.getY() + newPoint.getY();
@@ -119,20 +118,20 @@ public class GraphDetailsStatisticHandler extends StatisticsHandler<GraphDetails
                                 break;
                             case MEAN:
 
-                                newX = ((existingPoint.getX()*(n-1)) + newPoint.getX())/n;
-                                newY = ((existingPoint.getY()*(n-1))  + newPoint.getY())/n;
-                                newZ = ((existingPoint.getZ()*(n-1))  + newPoint.getZ())/n;
+                                newX = ((existingPoint.getX() * (n - 1)) + newPoint.getX()) / n;
+                                newY = ((existingPoint.getY() * (n - 1)) + newPoint.getY()) / n;
+                                newZ = ((existingPoint.getZ() * (n - 1)) + newPoint.getZ()) / n;
                                 break;
                             default:
-                                newX=newY=newZ=0;
+                                newX = newY = newZ = 0;
                                 break;
 
                         }
-                        results.put(key,pointAsString(new Point3D(newX, newY, newZ)));
-                    }else{
+                        results.put(key, pointAsString(new Point3D(newX, newY, newZ)));
+                    } else {
                         results.put(key, resultForName.get(key));
                     }
-                }else{
+                } else {
                     //TODO : Add point
                     System.out.println(resultForName.get(key));
                 }
@@ -149,21 +148,20 @@ public class GraphDetailsStatisticHandler extends StatisticsHandler<GraphDetails
         return new Point3D(Double.parseDouble(parts[0]), Double.parseDouble(parts[1]), Double.parseDouble(parts[2]));
 
 
-
     }
 
     private String aggregate(double v1, double v2, StatsDialog.AggregationType aggregationType, int n) {
         switch (aggregationType) {
 
             case SUM:
-                return String.format("%1$.3f",v1 + v2);
+                return String.format("%1$.3f", v1 + v2);
 
             case MEAN:
-                return String.format("%1$.3f",(v1 * (n - 1) + v2) / n);
+                return String.format("%1$.3f", (v1 * (n - 1) + v2) / n);
             case MIN:
-                return String.format("%1$.3f",Math.min(v1, v2));
+                return String.format("%1$.3f", Math.min(v1, v2));
             case MAX:
-                return String.format("%1$.3f",Math.max(v1, v2));
+                return String.format("%1$.3f", Math.max(v1, v2));
             default:
                 return null;
         }
@@ -174,8 +172,8 @@ public class GraphDetailsStatisticHandler extends StatisticsHandler<GraphDetails
         double[] inDegrees = new double[graph.getVertexCount()];
         double[] outDegrees = new double[graph.getVertexCount()];
 
-        int i=0;
-        for(ModelObject area: graph.getVertices()){
+        int i = 0;
+        for (ModelObject area : graph.getVertices()) {
             inDegrees[i] = graph.getInEdges(area).size();
             outDegrees[i] = graph.getOutEdges(area).size();
 
@@ -188,7 +186,7 @@ public class GraphDetailsStatisticHandler extends StatisticsHandler<GraphDetails
 
 
         results.put("Edges Count", Integer.toString(graph.getEdgeCount()));
-        results.put("Vertex Count",Integer.toString(graph.getVertexCount()));
+        results.put("Vertex Count", Integer.toString(graph.getVertexCount()));
 
         results.put("Mean InDegree", String.format("%1$.3f", meanEvaluator.evaluate(inDegrees)));
         results.put("Variance InDegree", String.format("%1$.3f", varianceEvaluator.evaluate(inDegrees)));
@@ -200,7 +198,7 @@ public class GraphDetailsStatisticHandler extends StatisticsHandler<GraphDetails
 
 
         int totalVertexNumber = NetworkModel.instance().getTotalNumberOfVertices();
-        results.put("Vertex Coverage", Integer.toString((graph.getVertexCount()*100) /totalVertexNumber));
+        results.put("Vertex Coverage", Integer.toString((graph.getVertexCount() * 100) / totalVertexNumber));
 
 
         double distanceTraveled = NetworkModel.instance().getDistanceTraveledExploration(Collections.singleton(dataName)).get(dataName);
@@ -218,13 +216,10 @@ public class GraphDetailsStatisticHandler extends StatisticsHandler<GraphDetails
         results.put("Time Taken (Tasks)", String.format("%1$.3f", timeTaken));
 
         String task2Path = NetworkModel.instance().getPathDataFor(Collections.singleton(dataName), Phase.TASK_2).keySet().iterator().next();
-        results.put("Path for task 2",task2Path);
+        results.put("Path for task 2", task2Path);
 
         String task3Path = NetworkModel.instance().getPathDataFor(Collections.singleton(dataName), Phase.TASK_3).keySet().iterator().next();
         results.put("Path for task 3", task3Path);
-
-
-
 
 
         return results;
@@ -243,8 +238,8 @@ public class GraphDetailsStatisticHandler extends StatisticsHandler<GraphDetails
     }
 
     private String pointAsString(Point3D centerOfMass) {
-        return String.format("%1$.2f",centerOfMass.getX())+","
-                +String.format("%1$.2f",centerOfMass.getY())+","+
+        return String.format("%1$.2f", centerOfMass.getX()) + ","
+                + String.format("%1$.2f", centerOfMass.getY()) + "," +
                 String.format("%1$.2f", centerOfMass.getZ());
     }
 
@@ -255,9 +250,7 @@ public class GraphDetailsStatisticHandler extends StatisticsHandler<GraphDetails
         int n = 0;
 
 
-
-
-        for (HashMap<String, Number> row: movement) {
+        for (HashMap<String, Number> row : movement) {
 
             Point3D p = new Point3D(
                     row.get("x").doubleValue(),
@@ -269,18 +262,17 @@ public class GraphDetailsStatisticHandler extends StatisticsHandler<GraphDetails
 
             n++;
         }
-        return new Point3D(sumX / n, sumY / n, sumZ /n);
+        return new Point3D(sumX / n, sumY / n, sumZ / n);
     }
 
     private static double calculateRadiusOfGyration(List<HashMap<String, Number>> movement, Point3D centerOfMass) {
 
 
         double sum = 0;
-        int n=0;
+        int n = 0;
 
 
-
-        for (HashMap<String, Number> row: movement) {
+        for (HashMap<String, Number> row : movement) {
 
             Point3D p = new Point3D(
                     row.get("x").doubleValue(),
@@ -288,13 +280,12 @@ public class GraphDetailsStatisticHandler extends StatisticsHandler<GraphDetails
                     row.get("floor").doubleValue());
 
 
-            sum += Math.pow(p.distance(centerOfMass),2.0);
+            sum += Math.pow(p.distance(centerOfMass), 2.0);
             n++;
         }
 
         return Math.sqrt(sum / n);
     }
-
 
 
 }

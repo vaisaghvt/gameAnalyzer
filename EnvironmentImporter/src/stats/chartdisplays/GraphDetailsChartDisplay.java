@@ -1,16 +1,7 @@
 package stats.chartdisplays;
 
-import gui.NetworkModel;
-import org.jfree.chart.ChartFactory;
-import org.jfree.chart.ChartPanel;
-import org.jfree.chart.JFreeChart;
-import org.jfree.chart.plot.PlotOrientation;
-import org.jfree.data.category.CategoryDataset;
-import org.jfree.data.category.DefaultCategoryDataset;
-
 import javax.swing.*;
 import java.awt.*;
-import java.util.Collection;
 import java.util.HashMap;
 
 /**
@@ -40,7 +31,7 @@ public class GraphDetailsChartDisplay extends ChartDisplay<HashMap<String, Strin
     private JPanel createPanel(HashMap<String, String> data) {
         JPanel mainPanel = new JPanel(
                 new GridLayout(
-                        ((data.keySet().size()+1) / 2),
+                        ((data.keySet().size() + 1) / 2),
                         2));
         for (String key : data.keySet()) {
             mainPanel.add(new JLabel(key));

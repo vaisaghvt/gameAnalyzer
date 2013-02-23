@@ -69,7 +69,7 @@ public abstract class ModelArea implements ModelObject {
 
     @Override
     public String toString() {
-        if(name ==null ||name.isEmpty())
+        if (name == null || name.isEmpty())
             return id + "";
         else
             return name;

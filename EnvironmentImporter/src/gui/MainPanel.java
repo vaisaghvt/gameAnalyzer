@@ -1,12 +1,6 @@
 package gui;
 
-import edu.uci.ics.jung.graph.Graph;
-import modelcomponents.ModelArea;
-import modelcomponents.ModelEdge;
-import modelcomponents.ModelObject;
-
 import javax.swing.*;
-import java.util.List;
 
 /**
  * Created with IntelliJ IDEA.
@@ -19,7 +13,6 @@ public abstract class MainPanel extends JPanel {
 
 
     public abstract void setDocument(Document current);
-
 
 
 }

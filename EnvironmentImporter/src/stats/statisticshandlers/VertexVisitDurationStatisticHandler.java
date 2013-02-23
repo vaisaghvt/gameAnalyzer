@@ -75,7 +75,7 @@ public class VertexVisitDurationStatisticHandler extends StatisticsHandler<Verte
 
                 HashMap<String, Double> finalResult = aggregateData(result, aggregationType);
                 System.out.println("Displaying Chart...");
-                this.chartDisplay.setTitle(choice.toString()+":"+phase.toString());
+                this.chartDisplay.setTitle(choice.toString() + ":" + phase.toString());
                 this.chartDisplay.display(finalResult);
                 this.consoleDisplay.display(finalResult);
 

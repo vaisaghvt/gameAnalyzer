@@ -1,6 +1,5 @@
 package stats.chartdisplays;
 
-import database.Database;
 import org.apache.commons.lang3.math.NumberUtils;
 import org.jfree.chart.ChartFactory;
 import org.jfree.chart.ChartPanel;
@@ -15,10 +14,8 @@ import org.jfree.data.xy.XYSeriesCollection;
 
 import javax.swing.*;
 import java.awt.*;
-
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
-import java.util.Collection;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Set;
@@ -56,10 +53,10 @@ public class ParallelCoordinatePlotChart extends ChartDisplay<HashMap<String, Ha
 
         optionFrame.setLayout(new BorderLayout());
 
-        JPanel statChoicePanel = new JPanel(new GridLayout(keySet.size(),1));
+        JPanel statChoicePanel = new JPanel(new GridLayout(keySet.size(), 1));
 
         statChoices = new HashSet<JCheckBox>();
-        for(String key:keySet){
+        for (String key : keySet) {
             JCheckBox cBox = new JCheckBox(key);
             cBox.setSelected(true);
             statChoicePanel.add(cBox);
@@ -86,7 +83,7 @@ public class ParallelCoordinatePlotChart extends ChartDisplay<HashMap<String, Ha
         final XYSeriesCollection dataset = new XYSeriesCollection();
 
 
-        HashMap<String, Integer> locationMap=null;
+        HashMap<String, Integer> locationMap = null;
         for (String dataName : data.keySet()) {
             final XYSeries series = new XYSeries(dataName);
 
@@ -114,17 +111,17 @@ public class ParallelCoordinatePlotChart extends ChartDisplay<HashMap<String, Ha
     private HashMap<String, Double> getMaxForEachKey(HashMap<String, HashMap<String, String>> data) {
 
         HashMap<String, Double> maxForEachKey = new HashMap<String, Double>();
-        for(String dataName : data.keySet()){
+        for (String dataName : data.keySet()) {
             HashMap<String, String> resultForName = data.get(dataName);
-            for(String key:resultForName.keySet()){
+            for (String key : resultForName.keySet()) {
                 if (NumberUtils.isNumber(resultForName.get(key))) {
-                    if(maxForEachKey.containsKey(key)){
+                    if (maxForEachKey.containsKey(key)) {
                         maxForEachKey.put(key,
                                 Math.max(
                                         maxForEachKey.get(key),
                                         Double.parseDouble(resultForName.get(key))));
 
-                    }else{
+                    } else {
                         maxForEachKey.put(key,
                                 Double.parseDouble(resultForName.get(key)));
                     }
@@ -192,10 +189,10 @@ public class ParallelCoordinatePlotChart extends ChartDisplay<HashMap<String, Ha
 
     @Override
     public void actionPerformed(ActionEvent e) {
-        if(e.getSource().equals(okButton)){
+        if (e.getSource().equals(okButton)) {
             HashSet<String> statsChosen = new HashSet<String>();
-            for(JCheckBox box: statChoices){
-                if(box.isSelected()){
+            for (JCheckBox box : statChoices) {
+                if (box.isSelected()) {
                     statsChosen.add(box.getText());
                 }
             }

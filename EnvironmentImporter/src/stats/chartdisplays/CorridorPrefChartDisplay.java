@@ -21,7 +21,6 @@ import java.awt.*;
 public class CorridorPrefChartDisplay extends ChartDisplay<HashMultimap<String, String>> {
 
 
-
     private Phase phase;
 
     public void setPhase(Phase phase) {
@@ -42,14 +41,13 @@ public class CorridorPrefChartDisplay extends ChartDisplay<HashMultimap<String, 
     }
 
 
-
     private CategoryDataset createDataSet(HashMultimap<String, String> data) {
 
         final DefaultCategoryDataset dataSet = new DefaultCategoryDataset();
 
-            dataSet.addValue(data.get("yes").size(),"yes","");
-        dataSet.addValue(data.get("no").size(),"no","");
-        dataSet.addValue(data.get("maybe").size(),"maybe","");
+        dataSet.addValue(data.get("yes").size(), "yes", "");
+        dataSet.addValue(data.get("no").size(), "no", "");
+        dataSet.addValue(data.get("maybe").size(), "maybe", "");
 
         return dataSet;
     }

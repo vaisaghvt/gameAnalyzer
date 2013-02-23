@@ -21,9 +21,6 @@ import java.util.TreeSet;
 public class VertexVisitChartDisplay extends ChartDisplay<Multiset<Double>> {
 
 
-
-
-
     @Override
     public void display(Multiset<Double> data) {
         final CategoryDataset dataSet = createDataSet(data);
@@ -46,7 +43,7 @@ public class VertexVisitChartDisplay extends ChartDisplay<Multiset<Double>> {
 
         final DefaultCategoryDataset dataSet = new DefaultCategoryDataset();
         for (Double frequency : vertices) {
-            dataSet.addValue(data.count(frequency),frequency.toString(), "");
+            dataSet.addValue(data.count(frequency), frequency.toString(), "");
 
         }
 

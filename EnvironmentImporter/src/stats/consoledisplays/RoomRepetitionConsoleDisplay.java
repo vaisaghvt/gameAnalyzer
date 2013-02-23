@@ -12,7 +12,6 @@ import java.util.HashMap;
 public class RoomRepetitionConsoleDisplay extends ConsoleDisplay<HashMap<String, HashMap<String, HashMap<String, String>>>> {
 
 
-
     @Override
     public void display(HashMap<String, HashMap<String, HashMap<String, String>>> data) {
     }

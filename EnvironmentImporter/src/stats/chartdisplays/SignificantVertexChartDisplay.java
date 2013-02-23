@@ -20,11 +20,8 @@ import java.util.HashMap;
 public class SignificantVertexChartDisplay extends ChartDisplay<HashMap<String, HashMap<String, Number>>> {
 
 
-
-
-
     @Override
-    public void display(HashMap<String, HashMap<String,Number>> data) {
+    public void display(HashMap<String, HashMap<String, Number>> data) {
         final CategoryDataset dataSet = createDataSet(data);
         final JFreeChart chart = createChart(dataSet);
         final ChartPanel chartPanel = new ChartPanel(chart);

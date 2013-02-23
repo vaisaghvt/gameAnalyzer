@@ -26,9 +26,6 @@ import java.util.TreeSet;
 public class DoorRepetitionFrequencyChartDisplay extends ChartDisplay<Multiset<Double>> {
 
 
-
-
-
     @Override
     public void display(Multiset<Double> data) {
         final Dataset dataSet = createDataSet(data);
@@ -36,7 +33,7 @@ public class DoorRepetitionFrequencyChartDisplay extends ChartDisplay<Multiset<D
         final ChartPanel chartPanel = new ChartPanel(chart);
         chartPanel.setPreferredSize(new Dimension(500, 270));
         createNewFrameAndSetLocation();
-        currentFrame.setTitle(this.getTitle()+": deltaT = Time between Door use");
+        currentFrame.setTitle(this.getTitle() + ": deltaT = Time between Door use");
         currentFrame.setContentPane(chartPanel);
         currentFrame.setVisible(true);
         currentFrame.setSize(new Dimension(520, 300));
@@ -46,7 +43,7 @@ public class DoorRepetitionFrequencyChartDisplay extends ChartDisplay<Multiset<D
 
     public JFreeChart createChart(Dataset dataSet) {
         final JFreeChart chart = ChartFactory.createScatterPlot(
-                this.getTitle()+": deltaT = Time between Door use",
+                this.getTitle() + ": deltaT = Time between Door use",
                 "deltaT = Time between Door use",
                 "Frequency",
                 (XYDataset) dataSet,

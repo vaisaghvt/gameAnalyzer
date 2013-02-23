@@ -12,7 +12,6 @@ import java.util.HashMap;
 public class SignificantVertexConsoleDisplay extends ConsoleDisplay<HashMap<String, HashMap<String, Number>>> {
 
 
-
     @Override
     public void display(HashMap<String, HashMap<String, Number>> data) {
     }

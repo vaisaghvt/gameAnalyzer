@@ -52,13 +52,13 @@ public abstract class ChartDisplay<T> implements StatisticsDisplay<T>, Component
                 currentFrame = new JFrame();
                 this.frameToNameMapping.put(currentFrame, name);
                 currentFrame.addComponentListener(this);
-                currentFrame.setLocation(100,100);
+                currentFrame.setLocation(100, 100);
             }
-        } else{
+        } else {
             currentFrame = new JFrame();
 
 
-            currentFrame.setLocation(100,100);
+            currentFrame.setLocation(100, 100);
         }
     }
 
@@ -72,7 +72,7 @@ public abstract class ChartDisplay<T> implements StatisticsDisplay<T>, Component
     public void componentMoved(ComponentEvent componentEvent) {
 
         Point point = new Point(componentEvent.getComponent().getX(), componentEvent.getComponent().getY());
-        if (!(point.getX()==100 && point.getY()==100)&&this.frameToNameMapping.get(componentEvent.getSource()) != null) {
+        if (!(point.getX() == 100 && point.getY() == 100) && this.frameToNameMapping.get(componentEvent.getSource()) != null) {
 
             cachedFrameLocation.put(this.frameToNameMapping.get(componentEvent.getSource()), point);
         }

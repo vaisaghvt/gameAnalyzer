@@ -2,8 +2,6 @@ package stats.consoledisplays;
 
 import com.google.common.collect.Multiset;
 
-import java.util.HashMap;
-
 /**
  * Created with IntelliJ IDEA.
  * User: vaisagh
@@ -12,7 +10,6 @@ import java.util.HashMap;
  * To change this template use File | Settings | File Templates.
  */
 public class RoomDurationTotalFrequencyConsoleDisplay extends ConsoleDisplay<Multiset<Long>> {
-
 
 
     @Override

@@ -38,7 +38,7 @@ public class VertexVisitCountStatisticHandler extends StatisticsHandler<VertexVi
                 HashMap<String, HashMap<String, Number>> dataNameDataMap = new HashMap<String, HashMap<String, Number>>();
                 for (String dataName : dataNames) {
                     System.out.println("Processing " + dataName + "...");
-                    dataNameDataMap.put(dataName, NetworkModel.instance().getVertexDataFor(dataName, choice,phase));
+                    dataNameDataMap.put(dataName, NetworkModel.instance().getVertexDataFor(dataName, choice, phase));
 
                 }
 
@@ -48,16 +48,16 @@ public class VertexVisitCountStatisticHandler extends StatisticsHandler<VertexVi
                 this.chartDisplay.setTitle(choice.toString() + " :" + phase.toString());
                 this.chartDisplay.display(data);
                 this.consoleDisplay.display(data);
-            } else{
+            } else {
                 HashMap<String, HashMap<String, Number>> dataNameDataMap = new HashMap<String, HashMap<String, Number>>();
                 for (String dataName : dataNames) {
                     System.out.println("Processing " + dataName + "...");
-                    dataNameDataMap.put(dataName, NetworkModel.instance().getVertexDataFor(dataName, choice,phase));
+                    dataNameDataMap.put(dataName, NetworkModel.instance().getVertexDataFor(dataName, choice, phase));
 
                     Multiset<Double> data = summarizeData(dataNameDataMap, phase);
 
                     this.chartDisplay.setName(dataName);
-                    this.chartDisplay.setTitle(dataName+":"+choice.toString() + " :" + phase.toString() );
+                    this.chartDisplay.setTitle(dataName + ":" + choice.toString() + " :" + phase.toString());
                     this.chartDisplay.display(data);
                     this.consoleDisplay.display(data);
                     dataNameDataMap.clear();

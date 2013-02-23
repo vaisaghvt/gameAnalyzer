@@ -22,11 +22,8 @@ import java.util.HashMap;
 public class VertexChartDisplay extends ChartDisplay<HashMap<String, ? extends Number>> {
 
 
-
-
-
     @Override
-    public void display(HashMap<String,  ? extends Number> data) {
+    public void display(HashMap<String, ? extends Number> data) {
         final CategoryDataset dataSet = createDataSet(data);
         final JFreeChart chart = createChart(dataSet);
         final ChartPanel chartPanel = new ChartPanel(chart);
@@ -40,16 +37,16 @@ public class VertexChartDisplay extends ChartDisplay<HashMap<String, ? extends N
     }
 
 
-    public CategoryDataset createDataSet(HashMap<String,  ? extends Number> data) {
+    public CategoryDataset createDataSet(HashMap<String, ? extends Number> data) {
 
 
         Collection<String> sortedRoomNames = NetworkModel.instance().getSortedRooms();
         final DefaultCategoryDataset dataSet = new DefaultCategoryDataset();
         for (String roomName : sortedRoomNames) {
-            if(data.containsKey(roomName)){
+            if (data.containsKey(roomName)) {
                 dataSet.addValue(data.get(roomName), roomName, "");
-            }else{
-                dataSet.addValue(0,roomName,"");
+            } else {
+                dataSet.addValue(0, roomName, "");
             }
         }
 

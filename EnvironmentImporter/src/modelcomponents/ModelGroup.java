@@ -1,7 +1,6 @@
 package modelcomponents;
 
 import java.util.Collection;
-import java.util.HashSet;
 
 /**
  * Created with IntelliJ IDEA.
@@ -16,9 +15,8 @@ public class ModelGroup implements ModelObject {
     private String name;
 
 
-
     public ModelGroup(int id, String name, Collection<Integer> areaIds) {
-        this.id =id;
+        this.id = id;
         this.name = name;
         this.areaIds = areaIds;
     }
@@ -63,7 +61,7 @@ public class ModelGroup implements ModelObject {
 
     @Override
     public String toString() {
-        if(name ==null ||name.isEmpty())
+        if (name == null || name.isEmpty())
             return id + "";
         else
             return name;

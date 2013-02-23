@@ -126,11 +126,11 @@ public class RandomWalk {
         double sum = 0;
 
         ModelObject current = start;
-        sum += Math.pow(getCenterOfArea(current).distance(centerOfMass),2.0);
+        sum += Math.pow(getCenterOfArea(current).distance(centerOfMass), 2.0);
         int n = 0;
         for (ModelEdge edge : setOfEdges) {
             current = graph.getOpposite(current, edge);
-            sum += Math.pow(getCenterOfArea(current).distance(centerOfMass),2.0);
+            sum += Math.pow(getCenterOfArea(current).distance(centerOfMass), 2.0);
             n++;
         }
 
@@ -198,7 +198,7 @@ public class RandomWalk {
 
             n++;
         }
-        return new Point3D(sumX / n, sumY / n, sumZ /n);
+        return new Point3D(sumX / n, sumY / n, sumZ / n);
     }
 
 

@@ -22,7 +22,6 @@ import java.util.HashMap;
 public class PathHopStatisticHandler extends StatisticsHandler<PathHopConsoleDisplay, PathHopChartDisplay> {
 
 
-
     public PathHopStatisticHandler() {
         super(new PathHopChartDisplay(),
                 new PathHopConsoleDisplay()
@@ -39,13 +38,10 @@ public class PathHopStatisticHandler extends StatisticsHandler<PathHopConsoleDis
 
         HashMap<String, HashMap<String, String>> data = convertToActualData(pathData, hopsPerPhasePerPerson);
 
-        this.chartDisplay.setTitle(choice.toString()+phase.toString());
+        this.chartDisplay.setTitle(choice.toString() + phase.toString());
         this.chartDisplay.setPhase(phase);
         this.chartDisplay.display(data);
         this.consoleDisplay.display(data);
-
-
-
 
 
     }
@@ -58,32 +54,31 @@ public class PathHopStatisticHandler extends StatisticsHandler<PathHopConsoleDis
         HashMap<String, HashMap<String, String>> dataForPerson = new HashMap<String, HashMap<String, String>>();
 
 
-
-        for(String name: hopsPerPhasePerPerson.keySet()){
+        for (String name : hopsPerPhasePerPerson.keySet()) {
             HashMap<String, Integer> hopsPerPhase = hopsPerPhasePerPerson.get(name);
 
             HashMap<String, String> result = dataForPerson.get(name);
-            if(result==null){
+            if (result == null) {
                 result = new HashMap<String, String>();
             }
             Integer hopsForSelectedPhase = hopsPerPhase.get(phaseToBeConsidered.toString());
-            Integer number = hopsForSelectedPhase!=null?hopsForSelectedPhase:0;
-            result.put("hops",number.toString());
+            Integer number = hopsForSelectedPhase != null ? hopsForSelectedPhase : 0;
+            result.put("hops", number.toString());
 
 
-            for(int j=0;j< pathNames.size();j++){
-                if(pathData.containsEntry(pathNames.get(j),name)){
+            for (int j = 0; j < pathNames.size(); j++) {
+                if (pathData.containsEntry(pathNames.get(j), name)) {
 
-                    if(pathNames.get(j).equals("Shortest")) {
+                    if (pathNames.get(j).equals("Shortest")) {
 
                         result.put("path", "shortest");
-                    }else if(pathNames.get(j).equals("Path2")
+                    } else if (pathNames.get(j).equals("Path2")
                             || pathNames.get(j).equals("Path3")
-                            || pathNames.get(j).equals("Path4")){
+                            || pathNames.get(j).equals("Path4")) {
                         result.put("path", "normal");
-                    }else if(pathNames.get(j).equals("lost")){
+                    } else if (pathNames.get(j).equals("lost")) {
                         result.put("path", "lost");
-                    }else{
+                    } else {
                         result.put("path", "topFloor");
                     }
 
@@ -94,11 +89,6 @@ public class PathHopStatisticHandler extends StatisticsHandler<PathHopConsoleDis
         }
         return dataForPerson;
     }
-
-
-
-
-
 
 
 }

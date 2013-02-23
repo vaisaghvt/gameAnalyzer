@@ -12,7 +12,6 @@ import com.google.common.collect.Multiset;
 public class DoorRepetitionFrequencyConsoleDisplay extends ConsoleDisplay<Multiset<Double>> {
 
 
-
     @Override
     public void display(Multiset<Double> data) {
         System.out.println(data);

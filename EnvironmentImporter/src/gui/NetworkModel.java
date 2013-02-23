@@ -67,7 +67,7 @@ public class NetworkModel extends MainPanel implements ActionListener {
             new HashMap<String, HashMap<Integer, List<HashMap<String, Number>>>>();
 
     private Collection<String> sortedRoomNames;
-    private HashMap<String, HashMap<Integer, DirectedSparseMultigraph<ModelObject, ModelEdge>>> cachedGraph=
+    private HashMap<String, HashMap<Integer, DirectedSparseMultigraph<ModelObject, ModelEdge>>> cachedGraph =
             new HashMap<String, HashMap<Integer, DirectedSparseMultigraph<ModelObject, ModelEdge>>>();
 
     /**
@@ -501,31 +501,30 @@ public class NetworkModel extends MainPanel implements ActionListener {
     }
 
     private DirectedSparseMultigraph<ModelObject, ModelEdge> getCachedGraph(String dataName, HashSet<Phase> phases) {
-        if(!cachedGraph.containsKey(dataName)){
+        if (!cachedGraph.containsKey(dataName)) {
             return null;
         }
         HashMap<Integer, DirectedSparseMultigraph<ModelObject, ModelEdge>> tempMap = cachedGraph.get(dataName);
         int codeForPhases = findCode(phases);
-        if(!tempMap.containsKey(codeForPhases)){
+        if (!tempMap.containsKey(codeForPhases)) {
             return null;
-        }  else {
+        } else {
             return tempMap.get(codeForPhases);
         }
     }
 
     private void cacheGraph(String dataName, HashSet<Phase> phases, DirectedSparseMultigraph<ModelObject, ModelEdge> result) {
-        if(!cachedGraph.containsKey(dataName)){
+        if (!cachedGraph.containsKey(dataName)) {
             cachedGraph.put(dataName, new HashMap<Integer, DirectedSparseMultigraph<ModelObject, ModelEdge>>());
         }
         HashMap<Integer, DirectedSparseMultigraph<ModelObject, ModelEdge>> tempMap = cachedGraph.get(dataName);
         int codeForPhases = findCode(phases);
-        if(!tempMap.containsKey(codeForPhases)){
-            tempMap.put(codeForPhases, result) ;
+        if (!tempMap.containsKey(codeForPhases)) {
+            tempMap.put(codeForPhases, result);
             cachedGraph.put(dataName, tempMap);
-        }  else {
+        } else {
             System.out.println("INCORRECT CACHING!! ALREADY EXISTS.");
         }
-
 
 
     }
@@ -575,7 +574,6 @@ public class NetworkModel extends MainPanel implements ActionListener {
         phases.add(phase);
         for (String dataName : dataNames) {
             System.out.println("Processing " + dataName + "...");
-
 
 
             DirectedSparseMultigraph<ModelObject, ModelEdge> localGraph
@@ -698,7 +696,7 @@ public class NetworkModel extends MainPanel implements ActionListener {
         phases.clear();
         phases.add(Phase.EXPLORATION);
         DirectedSparseMultigraph<ModelObject, ModelEdge> localGraph
-                = getDirectedGraphOfPlayer(dataName,phases);
+                = getDirectedGraphOfPlayer(dataName, phases);
         for (ModelObject vertex : localGraph.getVertices()) {
             for (ModelEdge edge : localGraph.getInEdges(vertex)) {
                 result.put(vertex.toString(), edge.getTime());
@@ -719,7 +717,7 @@ public class NetworkModel extends MainPanel implements ActionListener {
         phases.add(Phase.EXPLORATION);
 
         DirectedSparseMultigraph<ModelObject, ModelEdge> localGraph
-                =  getDirectedGraphOfPlayer(dataName, phases);
+                = getDirectedGraphOfPlayer(dataName, phases);
         for (ModelEdge edge : localGraph.getEdges()) {
             String edgeStringRepresentation = edgeToString(localGraph.getEndpoints(edge));
 
@@ -915,7 +913,7 @@ public class NetworkModel extends MainPanel implements ActionListener {
             phases.clear();
             phases.add(phase);
 
-            phaseGraphMap.put(phase, (DirectedSparseMultigraph<ModelObject, ModelEdge>) getDirectedGraphOfPlayer(dataName,phases));
+            phaseGraphMap.put(phase, (DirectedSparseMultigraph<ModelObject, ModelEdge>) getDirectedGraphOfPlayer(dataName, phases));
 
         }
 
@@ -978,9 +976,9 @@ public class NetworkModel extends MainPanel implements ActionListener {
     }
 
     public int getTotalNumberOfVertices() {
-        if(completeGraph!=null){
+        if (completeGraph != null) {
             return completeGraph.getVertexCount();
-        }else
+        } else
             return -1;
 
     }
@@ -1221,7 +1219,7 @@ public class NetworkModel extends MainPanel implements ActionListener {
         phases.add(phase);
 
         DirectedSparseMultigraph<ModelObject, ModelEdge> graph =
-               this.getDirectedGraphOfPlayer(dataName, phases);
+                this.getDirectedGraphOfPlayer(dataName, phases);
 
 
         if (choice == VERTEX_VISIT_FREQUENCY) {
@@ -1277,7 +1275,6 @@ public class NetworkModel extends MainPanel implements ActionListener {
 
         return result;
     }
-
 
 
     public HashMap<String, HashMap<String, Number>> getEdgeDataFor(String dataName) {
@@ -1371,7 +1368,7 @@ public class NetworkModel extends MainPanel implements ActionListener {
 
     }
 
-    public int getFloorForArea(ModelArea area){
+    public int getFloorForArea(ModelArea area) {
         return this.areaFloorMapping.get(area);
     }
 }

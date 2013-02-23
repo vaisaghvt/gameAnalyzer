@@ -20,7 +20,6 @@ import java.util.Collection;
 public class CoverageStatisticHandler extends StatisticsHandler<CoverageConsoleDisplay, CoverageChartDisplay> {
 
 
-
     public CoverageStatisticHandler() {
         super(new CoverageChartDisplay(),
                 new CoverageConsoleDisplay()
@@ -32,15 +31,13 @@ public class CoverageStatisticHandler extends StatisticsHandler<CoverageConsoleD
     @Override
     public void generateAndDisplayStats(Collection<String> dataNames, Phase phase, StatsDialog.AllOrOne all, StatsDialog.AggregationType itemAt) {
         final StatisticChoice choice = StatisticChoice.COVERAGE;
-        HashMultimap<Integer, String> coverageLevel =  NetworkModel.instance().getCoverage(dataNames, phase);
-        this.chartDisplay.setTitle(choice.toString()+phase.toString());
+        HashMultimap<Integer, String> coverageLevel = NetworkModel.instance().getCoverage(dataNames, phase);
+        this.chartDisplay.setTitle(choice.toString() + phase.toString());
 
         this.chartDisplay.display(coverageLevel);
         this.consoleDisplay.display(coverageLevel);
 
     }
-
-
 
 
 }

@@ -20,7 +20,6 @@ import java.util.HashMap;
 public class DistanceTimeExplorationStatisticHandler extends StatisticsHandler<DistanceTimeConsoleDisplay, DistanceTimeChartDisplay> {
 
 
-
     public DistanceTimeExplorationStatisticHandler() {
         super(new DistanceTimeChartDisplay(),
                 new DistanceTimeConsoleDisplay()
@@ -34,8 +33,8 @@ public class DistanceTimeExplorationStatisticHandler extends StatisticsHandler<D
         final StatisticChoice choice = StatisticChoice.DISTANCE_TIME_EXPLORATION_STATISTIC;
 
 
-        HashMap<String, Double> distanceTraveled =  NetworkModel.instance().getDistanceTraveledExploration(dataNames);
-        HashMap<String, Long> timeTaken =  NetworkModel.instance().getTimeTraveledTotal(dataNames);
+        HashMap<String, Double> distanceTraveled = NetworkModel.instance().getDistanceTraveledExploration(dataNames);
+        HashMap<String, Long> timeTaken = NetworkModel.instance().getTimeTraveledTotal(dataNames);
 
         HashMap<String, HashMap<String, Double>> summary = summarizeDistanceTime(distanceTraveled, timeTaken);
         this.chartDisplay.setTitle(choice.toString());
@@ -47,14 +46,14 @@ public class DistanceTimeExplorationStatisticHandler extends StatisticsHandler<D
 
     private HashMap<String, HashMap<String, Double>> summarizeDistanceTime(HashMap<String, Double> distanceTraveled, HashMap<String, Long> timeTaken) {
         HashMap<String, HashMap<String, Double>> result = new HashMap<String, HashMap<String, Double>>();
-        System.out.println(distanceTraveled.keySet().size()+","+timeTaken.keySet().size());
-        for(String dataName:distanceTraveled.keySet()){
+        System.out.println(distanceTraveled.keySet().size() + "," + timeTaken.keySet().size());
+        for (String dataName : distanceTraveled.keySet()) {
             HashMap<String, Double> resultPart = new HashMap<String, Double>();
             resultPart.put("distance", distanceTraveled.get(dataName));
             resultPart.put("time", timeTaken.get(dataName).doubleValue());
 
 
-            result.put(dataName,resultPart );
+            result.put(dataName, resultPart);
 
         }
         return result;

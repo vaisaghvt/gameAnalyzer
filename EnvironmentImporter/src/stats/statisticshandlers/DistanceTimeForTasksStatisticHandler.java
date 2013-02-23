@@ -20,7 +20,6 @@ import java.util.HashMap;
 public class DistanceTimeForTasksStatisticHandler extends StatisticsHandler<DistanceTimeConsoleDisplay, DistanceTimeChartDisplay> {
 
 
-
     public DistanceTimeForTasksStatisticHandler() {
         super(new DistanceTimeChartDisplay(),
                 new DistanceTimeConsoleDisplay()
@@ -32,8 +31,8 @@ public class DistanceTimeForTasksStatisticHandler extends StatisticsHandler<Dist
     @Override
     public void generateAndDisplayStats(Collection<String> dataNames, Phase phase, StatsDialog.AllOrOne all, StatsDialog.AggregationType itemAt) {
         final StatisticChoice choice = StatisticChoice.DISTANCE_TIME_FOR_TASKS_STATISTIC;
-        HashMap<String, Double> distanceTraveled =  NetworkModel.instance().getDistanceTraveledDuringTasks(dataNames);
-        HashMap<String, Long> timeTaken =  NetworkModel.instance().getTimeTraveledDuringTasks(dataNames);
+        HashMap<String, Double> distanceTraveled = NetworkModel.instance().getDistanceTraveledDuringTasks(dataNames);
+        HashMap<String, Long> timeTaken = NetworkModel.instance().getTimeTraveledDuringTasks(dataNames);
 
 
         HashMap<String, HashMap<String, Double>> summary = summarizeDistanceTime(distanceTraveled, timeTaken);
@@ -46,14 +45,14 @@ public class DistanceTimeForTasksStatisticHandler extends StatisticsHandler<Dist
 
     private HashMap<String, HashMap<String, Double>> summarizeDistanceTime(HashMap<String, Double> distanceTraveled, HashMap<String, Long> timeTaken) {
         HashMap<String, HashMap<String, Double>> result = new HashMap<String, HashMap<String, Double>>();
-        System.out.println(distanceTraveled.keySet().size()+","+timeTaken.keySet().size());
-        for(String dataName:distanceTraveled.keySet()){
+        System.out.println(distanceTraveled.keySet().size() + "," + timeTaken.keySet().size());
+        for (String dataName : distanceTraveled.keySet()) {
             HashMap<String, Double> resultPart = new HashMap<String, Double>();
             resultPart.put("distance", distanceTraveled.get(dataName));
             resultPart.put("time", timeTaken.get(dataName).doubleValue());
 
 
-            result.put(dataName,resultPart );
+            result.put(dataName, resultPart);
 
         }
         return result;
