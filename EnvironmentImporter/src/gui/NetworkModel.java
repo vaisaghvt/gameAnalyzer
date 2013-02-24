@@ -368,7 +368,7 @@ public class NetworkModel extends MainPanel implements ActionListener {
 
 //        layout.setSize(new Dimension(1600, 900));
         vv = new VisualizationViewer<ModelObject, ModelEdge>(layout);
-        vv.setPreferredSize(new Dimension(1600, 900));
+        vv.setPreferredSize(new Dimension(1700, 900));
         // Setup up a new vertex to paint transformer...
 
 
@@ -382,6 +382,7 @@ public class NetworkModel extends MainPanel implements ActionListener {
 
         vv.getRenderContext().setVertexFillPaintTransformer(new DegreeBasedColorTransformer<ModelObject, Paint>());
         vv.getRenderContext().setVertexShapeTransformer(new VertexRectangleTransformer<ModelObject, Shape>());
+        vv.getRenderContext().setEdgeDrawPaintTransformer(new EdgeDurationColorTransformer<ModelEdge, Paint> ());
 //        vv.getRenderContext().setEdgeStrokeTransformer(edgeStrokeTransformer);
         vv.getRenderContext().setVertexLabelTransformer(new ToStringLabeller<ModelObject>());
 //        vv.getRenderContext().setEdgeLabelTransformer(new ToStringLabeller());
@@ -1496,6 +1497,24 @@ public class NetworkModel extends MainPanel implements ActionListener {
 
     public int getFloorForArea(ModelArea area) {
         return this.areaFloorMapping.get(area);
+    }
+
+    private class EdgeDurationColorTransformer<ModelEdge, Paint> implements Transformer<ModelEdge, Paint> {
+        @Override
+        public Paint transform(ModelEdge modelEdge) {
+            Object obj = (Object) modelEdge;
+            modelcomponents.ModelEdge edge = (modelcomponents.ModelEdge) obj;
+
+            if(currentData.equalsIgnoreCase("default")){
+                return (Paint) Color.BLACK;
+
+            }
+            long time = Long.parseLong(Database.getInstance().getPhaseCompleteTime(Phase.TASK_3, currentData));
+            float value = (float)edge.getTime()/ (float)time ;
+            //value *=255;
+            return (Paint) new Color(value, value, value);
+
+        }
     }
 }
 
