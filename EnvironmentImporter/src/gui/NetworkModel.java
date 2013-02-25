@@ -1027,6 +1027,7 @@ public class NetworkModel extends MainPanel implements ActionListener {
         @Override
         public Paint transform(ModelObject obj) {
             int degree=0;
+            double degreeNormalized =0;
             Object object;
 
                 object = (Object) obj;
@@ -1035,28 +1036,54 @@ public class NetworkModel extends MainPanel implements ActionListener {
 
 
 
+
+
             if(NetworkModel.this.currentGraph instanceof DirectedSparseMultigraph){
                 degree = NetworkModel.this.currentGraph.inDegree(object1);
+                degreeNormalized=(double)degree/(double)(NetworkModel.this.completeGraph.degree(object1));
                 degree-=(NetworkModel.this.completeGraph.degree(object1));
+
             }   else{
                 degree = NetworkModel.this.currentGraph.degree(object1);
             }
 
-            if(degree <0){
+
+//
+//            if(degree <0){
+//
+//                return (Paint)Color.white;
+//
+//            }
+//            else if(degree ==0){
+//                return (Paint) Color.LIGHT_GRAY;
+//
+//            }else if(degree ==1){
+//
+//                return (Paint) Color.YELLOW;
+//
+//            }else if(degree ==2){
+//                return (Paint) Color.GREEN;
+//            }else if(degree ==3){
+//                return (Paint) Color.PINK;
+//            }else{
+//                return (Paint) Color.RED;
+//            }
+
+            if(degreeNormalized <1.0){
 
                 return (Paint)Color.white;
 
             }
-            else if(degree ==0){
+            else if(degreeNormalized <=1.5){
                 return (Paint) Color.LIGHT_GRAY;
 
-            }else if(degree ==1){
+            }else if(degreeNormalized <=2){
 
                 return (Paint) Color.YELLOW;
 
-            }else if(degree ==2){
+            }else if(degreeNormalized <=2.5){
                 return (Paint) Color.GREEN;
-            }else if(degree ==3){
+            }else if(degreeNormalized <=3){
                 return (Paint) Color.PINK;
             }else{
                 return (Paint) Color.RED;
@@ -1512,7 +1539,7 @@ public class NetworkModel extends MainPanel implements ActionListener {
             long time = Long.parseLong(Database.getInstance().getPhaseCompleteTime(Phase.TASK_3, currentData));
             float value = (float)edge.getTime()/ (float)time ;
             //value *=255;
-            return (Paint) new Color(value, value, value);
+            return (Paint) new Color(1.0f-value, 1.0f-value, 1.0f-value);
 
         }
     }
