@@ -30,6 +30,7 @@ import java.util.List;
 public class RandomWalk {
     private final static MersenneTwister random = new MersenneTwister();
     private static CircularFifoBuffer<Double> varianceList = new CircularFifoBuffer<Double>(5);
+    private static final double EPSILON = 0.0001;
     private Collection<DirectedGraph<ModelObject, ModelEdge>> randomWalkGraphs;
     private static RandomWalk randomWalkInstance;
 
@@ -106,7 +107,7 @@ public class RandomWalk {
 
         mean = meanEvaluator.evaluate(primitiveVariance);
 
-        if (varianceEvaluator.evaluate(primitiveVariance, mean) < 0.001) {
+        if (varianceEvaluator.evaluate(primitiveVariance, mean) < EPSILON) {
             return true;
         } else {
             return false;
@@ -255,6 +256,31 @@ public class RandomWalk {
     public HashMap<String, Number> calculateAverageRoomVisitFrequency() {
 
         HashMap<String, Number> result = new HashMap<String, Number>();
+//        HashMap<String, Integer> roomEdgeCountMapping = NetworkModel.instance().getEdgesForEachRoom();
+        for (DirectedGraph<ModelObject, ModelEdge> graph : this.randomWalkGraphs) {
+            for (ModelObject vertex : graph.getVertices()) {
+                double count = 0;
+                if (result.containsKey(vertex.toString())) {
+                    count = result.get(vertex.toString()).doubleValue();
+                }
+//                int numberOfEdges = roomEdgeCountMapping.get(vertex.toString());
+
+//                result.put(vertex.toString(), (graph.inDegree(vertex) / numberOfEdges) + count);
+                 result.put(vertex.toString(), (graph.inDegree(vertex)+count));
+
+            }
+        }
+
+        for (String roomName : result.keySet()) {
+            result.put(roomName, result.get(roomName).doubleValue() / this.randomWalkGraphs.size());
+        }
+        return result;
+
+    }
+
+    public HashMap<String, Number> calculateNormalizedAverageRoomVisitFrequency() {
+
+        HashMap<String, Number> result = new HashMap<String, Number>();
         HashMap<String, Integer> roomEdgeCountMapping = NetworkModel.instance().getEdgesForEachRoom();
         for (DirectedGraph<ModelObject, ModelEdge> graph : this.randomWalkGraphs) {
             for (ModelObject vertex : graph.getVertices()) {
@@ -276,6 +302,5 @@ public class RandomWalk {
         return result;
 
     }
-
 
 }

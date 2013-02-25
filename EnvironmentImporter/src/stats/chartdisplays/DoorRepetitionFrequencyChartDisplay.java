@@ -60,8 +60,7 @@ public class DoorRepetitionFrequencyChartDisplay extends ChartDisplay<Multiset<D
 
         // set the range axis to display integers only...
         NumberAxis rangeAxis = (NumberAxis) ((XYPlot) chart.getPlot()).getRangeAxis();
-        rangeAxis.setStandardTickUnits(NumberAxis.createIntegerTickUnits());
-        rangeAxis.setRange(0, 20);
+
 
 
         return chart;

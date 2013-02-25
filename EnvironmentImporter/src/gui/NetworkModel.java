@@ -9,11 +9,13 @@ import edu.uci.ics.jung.graph.DirectedSparseMultigraph;
 import edu.uci.ics.jung.graph.Graph;
 import edu.uci.ics.jung.graph.UndirectedSparseGraph;
 import edu.uci.ics.jung.graph.util.Pair;
+import edu.uci.ics.jung.visualization.Layer;
 import edu.uci.ics.jung.visualization.VisualizationViewer;
 import edu.uci.ics.jung.visualization.control.DefaultModalGraphMouse;
 import edu.uci.ics.jung.visualization.control.ModalGraphMouse;
 import edu.uci.ics.jung.visualization.decorators.ToStringLabeller;
 import edu.uci.ics.jung.visualization.renderers.Renderer;
+import edu.uci.ics.jung.visualization.transform.MutableTransformer;
 import javafx.geometry.Point3D;
 import modelcomponents.*;
 import org.apache.commons.collections15.Transformer;
@@ -366,9 +368,13 @@ public class NetworkModel extends MainPanel implements ActionListener {
 //        ((FRLayout2)layout).setRepulsionMultiplier(0.25);
 
 
-//        layout.setSize(new Dimension(1600, 900));
+
+        layout.setSize(new Dimension(1600, 900));
+
         vv = new VisualizationViewer<ModelObject, ModelEdge>(layout);
         vv.setPreferredSize(new Dimension(1700, 900));
+        scaleToRightAmount(vv);
+
         // Setup up a new vertex to paint transformer...
 
 
@@ -376,10 +382,10 @@ public class NetworkModel extends MainPanel implements ActionListener {
         DefaultModalGraphMouse gm = new DefaultModalGraphMouse();
         gm.setMode(ModalGraphMouse.Mode.PICKING);
         vv.setGraphMouse(gm);
+
+
 //        PluggableGraphMouse gm = new PluggableGraphMouse();
 //        gm.add(new PopupVertexEdgeMenuMousePlugin<ModelObject, ModelEdge>());
-
-
         vv.getRenderContext().setVertexFillPaintTransformer(new DegreeBasedColorTransformer<ModelObject, Paint>());
         vv.getRenderContext().setVertexShapeTransformer(new VertexRectangleTransformer<ModelObject, Shape>());
         vv.getRenderContext().setEdgeDrawPaintTransformer(new EdgeDurationColorTransformer<ModelEdge, Paint> ());
@@ -392,6 +398,14 @@ public class NetworkModel extends MainPanel implements ActionListener {
         this.add(vv);
         vv.revalidate();
         this.revalidate();
+    }
+
+    private void scaleToRightAmount(VisualizationViewer<ModelObject, ModelEdge> vv) {
+
+        Point2D ivtfrom = vv.getRenderContext().getMultiLayerTransformer().inverseTransform(Layer.VIEW, new Point2D.Double(vv.getWidth(),vv.getHeight()));
+        MutableTransformer modelTransformer = vv.getRenderContext().getMultiLayerTransformer().getTransformer(Layer.LAYOUT);
+        modelTransformer.scale(0.9, 0.9, ivtfrom);
+        vv.repaint();
     }
 
 

@@ -17,7 +17,7 @@ import java.util.List;
  * Time: 11:19 AM
  * To change this template use File | Settings | File Templates.
  */
-public class StatsDialog extends JDialog implements ActionListener {
+public class StatsDialog extends JFrame implements ActionListener {
 
     public enum AllOrOne {
         ALL, EACH;
@@ -37,8 +37,8 @@ public class StatsDialog extends JDialog implements ActionListener {
     private final JPanel buttonPanel = new JPanel();
 
     private final JPanel primaryButtonPanel = new JPanel();
-    private final JButton bOk = new JButton("Ok");
-    private final JButton bCancel = new JButton("Cancel");
+    private final JButton bOk = new JButton("Generate");
+    private final JButton bCancel = new JButton("Close");
 
     private final JPanel nameListButtonPanel = new JPanel();
     private final JButton bOneRandom = new JButton("Select One");
@@ -67,7 +67,7 @@ public class StatsDialog extends JDialog implements ActionListener {
 
         this.setLocation(400, 200);
         this.setSize(1000, 600);
-
+        this.setDefaultCloseOperation(WindowConstants.DO_NOTHING_ON_CLOSE);
 
         this.initialiseTopPanel();
         this.initializeMainPanel();
@@ -213,11 +213,10 @@ public class StatsDialog extends JDialog implements ActionListener {
         JCheckBox randomWalkBox = new JCheckBox("random walk");
         randomWalkBox.setSelected(false);
         StatisticChoice choice = statisticChoiceList.getItemAt(statisticChoiceList.getSelectedIndex());
-        if(!choice.isRandomWalkMeasurePossible()){
+        if (!choice.isRandomWalkMeasurePossible()) {
             randomWalkBox.setEnabled(false);
         }
         this.dataNameList.add(randomWalkBox);
-
 
 
     }
@@ -323,16 +322,16 @@ public class StatsDialog extends JDialog implements ActionListener {
 
             }
 
-            if(!choice.isRandomWalkMeasurePossible()){
-                for(JCheckBox dataName:dataNameList){
-                    if(dataName.getText().equalsIgnoreCase("random walk")){
+            if (!choice.isRandomWalkMeasurePossible()) {
+                for (JCheckBox dataName : dataNameList) {
+                    if (dataName.getText().equalsIgnoreCase("random walk")) {
                         dataName.setSelected(false);
                         dataName.setEnabled(false);
                     }
                 }
-            }else{
-                for(JCheckBox dataName:dataNameList){
-                    if(dataName.getText().equalsIgnoreCase("random walk")){
+            } else {
+                for (JCheckBox dataName : dataNameList) {
+                    if (dataName.getText().equalsIgnoreCase("random walk")) {
                         dataName.setSelected(false);
                         dataName.setEnabled(true);
                     }
@@ -343,7 +342,9 @@ public class StatsDialog extends JDialog implements ActionListener {
         } else if (event.getSource() == bAll) {
 
             for (JCheckBox cBox : dataNameList) {
-                cBox.setSelected(true);
+                if (!cBox.getText().equalsIgnoreCase("random walk")) {
+                    cBox.setSelected(true);
+                }
             }
 
         } else if (event.getSource() == attemptOne) {
@@ -401,10 +402,11 @@ public class StatsDialog extends JDialog implements ActionListener {
 
 
             for (JCheckBox cBox : dataNameList) {
-                if (Math.random() < 0.5)
+                if (Math.random() < 0.5) {
                     cBox.setSelected(false);
-                else
+                } else if (!cBox.getText().equalsIgnoreCase("random walk")) {
                     cBox.setSelected(true);
+                }
             }
         }
     }

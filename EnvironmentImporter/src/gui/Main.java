@@ -107,7 +107,7 @@ public class Main extends JFrame implements ActionListener, MouseListener, Mouse
         this.getContentPane().add(mainPanel, BorderLayout.CENTER);
 
 
-        this.setSize(800, 600);
+        this.setSize(1000, 1000);
     }
 
     private void update() {

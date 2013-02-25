@@ -9,6 +9,8 @@ import stats.StatisticChoice;
 import stats.chartdisplays.VertexVisitChartDisplay;
 import stats.consoledisplays.VertexVisitConsoleDisplay;
 
+import javax.swing.*;
+import java.awt.*;
 import java.util.Collection;
 import java.util.HashMap;
 
@@ -34,41 +36,20 @@ public class VertexVisitCountStatisticHandler extends StatisticsHandler<VertexVi
     public void generateAndDisplayStats(Collection<String> dataNames, Phase phase, StatsDialog.AllOrOne allOrOne, StatsDialog.AggregationType aggregationType) {
         final StatisticChoice choice = StatisticChoice.VERTEX_VISIT_FREQUENCY;
         if (!dataNames.isEmpty()) {
-            if (allOrOne == StatsDialog.AllOrOne.ALL) {
-                HashMap<String, HashMap<String, Number>> dataNameDataMap = new HashMap<String, HashMap<String, Number>>();
-                for (String dataName : dataNames) {
-                    System.out.println("Processing " + dataName + "...");
-                    dataNameDataMap.put(dataName, NetworkModel.instance().getVertexDataFor(dataName, choice, phase));
-
-                }
-
-                Multiset<Double> data = summarizeData(dataNameDataMap, phase);
-
-                System.out.println("Displaying Chart...");
-                this.chartDisplay.setTitle(choice.toString() + " :" + phase.toString());
-                this.chartDisplay.display(data);
-                this.consoleDisplay.display(data);
-            } else {
-                HashMap<String, HashMap<String, Number>> dataNameDataMap = new HashMap<String, HashMap<String, Number>>();
-                for (String dataName : dataNames) {
-                    System.out.println("Processing " + dataName + "...");
-                    dataNameDataMap.put(dataName, NetworkModel.instance().getVertexDataFor(dataName, choice, phase));
-
-                    Multiset<Double> data = summarizeData(dataNameDataMap, phase);
-
-                    this.chartDisplay.setName(dataName);
-                    this.chartDisplay.setTitle(dataName + ":" + choice.toString() + " :" + phase.toString());
-                    this.chartDisplay.display(data);
-                    this.consoleDisplay.display(data);
-                    dataNameDataMap.clear();
-                }
 
 
-            }
+            createProgressBar();
+            GenerateRequiredDataTask task = new GenerateRequiredDataTask(dataNames, choice, phase, allOrOne, aggregationType);
+            task.addPropertyChangeListener(this);
+            task.execute();
+
+
         } else {
 
-            System.out.println("No Data Name selected!");
+            System.out.println("No Data Names selected!");
         }
+
+
     }
 
     private Multiset<Double> summarizeData(HashMap<String, HashMap<String, Number>> dataNameDataMap, Phase phase) {
@@ -89,6 +70,79 @@ public class VertexVisitCountStatisticHandler extends StatisticsHandler<VertexVi
             }
         }
         return result;
+    }
+
+    class GenerateRequiredDataTask extends SwingWorker<Void, Void> {
+        private final Phase phase;
+        private final Collection<String> dataNames;
+        private final StatisticChoice choice;
+        HashMap<String, HashMap<String, Number>> dataNameDataMap = new HashMap<String, HashMap<String, Number>>();
+        private final StatsDialog.AllOrOne allOrOne;
+        private final StatsDialog.AggregationType type;
+
+
+        public GenerateRequiredDataTask(Collection<String> dataNames, StatisticChoice choice, Phase phase, StatsDialog.AllOrOne allOrOne, StatsDialog.AggregationType aggregationType) {
+            this.dataNames = dataNames;
+            this.choice = choice;
+            this.phase = phase;
+            this.allOrOne = allOrOne;
+            this.type = aggregationType;
+        }
+
+        @Override
+        public Void doInBackground() {
+
+
+            setProgress(0);
+            int size = dataNames.size();
+            int i = 1;
+            for (String dataName : dataNames) {
+
+
+                synchronized (NetworkModel.instance()) {
+                    dataNameDataMap.put(dataName, NetworkModel.instance().getVertexDataFor(dataName, choice, phase));
+                }
+
+
+                setProgress((i * 100) / size);
+                taskOutput.append("Processing " + dataName + "...\n");
+                i++;
+
+            }
+            return null;
+
+        }
+
+        @Override
+        public void done() {
+            Toolkit.getDefaultToolkit().beep();
+            frame.dispose();
+            taskOutput.append("Done.");
+            frame.dispose();
+            if (allOrOne == StatsDialog.AllOrOne.EACH) {
+                HashMap<String, HashMap<String, Number>> tempDataNameDataMap = new HashMap<String, HashMap<String, Number>>();
+                for (String dataName : dataNames) {
+                    tempDataNameDataMap.clear();
+                    tempDataNameDataMap.put(dataName, dataNameDataMap.get(dataName));
+
+                    Multiset<Double> data = summarizeData(dataNameDataMap, phase);
+
+                    VertexVisitCountStatisticHandler.this.chartDisplay.setName(dataName);
+                    VertexVisitCountStatisticHandler.this.chartDisplay.setTitle(dataName + ":" + choice.toString() + " :" + phase.toString());
+                    VertexVisitCountStatisticHandler.this.chartDisplay.display(data);
+                    VertexVisitCountStatisticHandler.this.consoleDisplay.display(data);
+
+                }
+            } else {
+
+                Multiset<Double> data = summarizeData(dataNameDataMap, phase);
+
+                VertexVisitCountStatisticHandler.this.chartDisplay.setTitle(choice.toString() + " :" + phase.toString());
+                VertexVisitCountStatisticHandler.this.chartDisplay.display(data);
+                VertexVisitCountStatisticHandler.this.consoleDisplay.display(data);
+            }
+
+        }
     }
 
 
