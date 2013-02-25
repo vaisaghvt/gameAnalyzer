@@ -199,8 +199,9 @@ public class StatsDialog extends JDialog implements ActionListener {
     }
 
     public void initialiseDataNameList() {
-        Collection<String> dataNames = Database.getInstance().getDataNames();
+        List<String> dataNames = new ArrayList(Database.getInstance().getDataNames());
 
+        Collections.sort(dataNames);
         this.dataNameList.clear();
         for (String name : dataNames) {
             JCheckBox cBox = new JCheckBox(name);
@@ -209,6 +210,15 @@ public class StatsDialog extends JDialog implements ActionListener {
 
 
         }
+        JCheckBox randomWalkBox = new JCheckBox("random walk");
+        randomWalkBox.setSelected(false);
+        StatisticChoice choice = statisticChoiceList.getItemAt(statisticChoiceList.getSelectedIndex());
+        if(!choice.isRandomWalkMeasurePossible()){
+            randomWalkBox.setEnabled(false);
+        }
+        this.dataNameList.add(randomWalkBox);
+
+
 
     }
 
@@ -313,6 +323,21 @@ public class StatsDialog extends JDialog implements ActionListener {
 
             }
 
+            if(!choice.isRandomWalkMeasurePossible()){
+                for(JCheckBox dataName:dataNameList){
+                    if(dataName.getText().equalsIgnoreCase("random walk")){
+                        dataName.setSelected(false);
+                        dataName.setEnabled(false);
+                    }
+                }
+            }else{
+                for(JCheckBox dataName:dataNameList){
+                    if(dataName.getText().equalsIgnoreCase("random walk")){
+                        dataName.setSelected(false);
+                        dataName.setEnabled(true);
+                    }
+                }
+            }
 
             this.validate();
         } else if (event.getSource() == bAll) {
@@ -350,7 +375,8 @@ public class StatsDialog extends JDialog implements ActionListener {
             for (JCheckBox cBox : dataNameList) {
                 if (!cBox.getText().contains("1")
                         && !cBox.getText().contains("2")
-                        && !cBox.getText().contains("3")) {
+                        && !cBox.getText().contains("3")
+                        && !cBox.getText().equalsIgnoreCase("random walk")) {
                     cBox.setSelected(true);
                 }
             }

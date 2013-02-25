@@ -240,27 +240,27 @@ public class RandomWalk {
         if (this.randomWalkGraphs == null) {
             return playerMap;
         }
-        HashMap<String, Double> averageOfRandomWalks = calculateAverageRoomVisitFrequency();
+        HashMap<String, Number> averageOfRandomWalks = calculateAverageRoomVisitFrequency();
         return normalizedResult(playerMap, averageOfRandomWalks);
     }
 
-    private HashMap<String, Double> normalizedResult(HashMap<String, Double> playerMap, HashMap<String, Double> averageOfRandomWalks) {
+    private HashMap<String, Double> normalizedResult(HashMap<String, Double> playerMap, HashMap<String, Number> averageOfRandomWalks) {
 
         for (String roomName : playerMap.keySet()) {
-            playerMap.put(roomName, playerMap.get(roomName) - averageOfRandomWalks.get(roomName));
+            playerMap.put(roomName, playerMap.get(roomName) - averageOfRandomWalks.get(roomName).doubleValue());
         }
         return playerMap;
     }
 
-    private HashMap<String, Double> calculateAverageRoomVisitFrequency() {
+    public HashMap<String, Number> calculateAverageRoomVisitFrequency() {
 
-        HashMap<String, Double> result = new HashMap<String, Double>();
+        HashMap<String, Number> result = new HashMap<String, Number>();
         HashMap<String, Integer> roomEdgeCountMapping = NetworkModel.instance().getEdgesForEachRoom();
         for (DirectedGraph<ModelObject, ModelEdge> graph : this.randomWalkGraphs) {
             for (ModelObject vertex : graph.getVertices()) {
                 double count = 0;
                 if (result.containsKey(vertex.toString())) {
-                    count = result.get(vertex.toString());
+                    count = result.get(vertex.toString()).doubleValue();
                 }
                 int numberOfEdges = roomEdgeCountMapping.get(vertex.toString());
 
@@ -271,9 +271,11 @@ public class RandomWalk {
         }
 
         for (String roomName : result.keySet()) {
-            result.put(roomName, result.get(roomName) / this.randomWalkGraphs.size());
+            result.put(roomName, result.get(roomName).doubleValue() / this.randomWalkGraphs.size());
         }
         return result;
 
     }
+
+
 }

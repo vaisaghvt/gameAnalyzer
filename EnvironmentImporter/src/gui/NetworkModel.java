@@ -1365,6 +1365,14 @@ public class NetworkModel extends MainPanel implements ActionListener {
 
     public HashMap<String, Number> getVertexDataFor(String dataName, StatisticChoice choice, Phase phase) {
 
+        if(dataName.equalsIgnoreCase("random walk")){
+            if(choice == VERTEX_VISIT_FREQUENCY && phase == Phase.EXPLORATION){
+                return RandomWalk.instance().calculateAverageRoomVisitFrequency(); }
+            else {
+                System.out.println("Wrong Call to Random Walk");
+                return new HashMap<String, Number>();
+            }
+        }
 
         HashSet<Phase> phases = new HashSet<Phase>();
         HashMap<String, Number> result = new HashMap<String, Number>();
