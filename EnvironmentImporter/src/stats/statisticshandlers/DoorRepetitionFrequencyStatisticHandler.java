@@ -9,6 +9,8 @@ import gui.StatsDialog;
 import stats.chartdisplays.DoorRepetitionFrequencyChartDisplay;
 import stats.consoledisplays.DoorRepetitionFrequencyConsoleDisplay;
 
+import javax.swing.*;
+import java.awt.*;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.Iterator;
@@ -34,33 +36,13 @@ public class DoorRepetitionFrequencyStatisticHandler extends StatisticsHandler<D
 
     @Override
     public void generateAndDisplayStats(Collection<String> dataNames, Phase phase, StatsDialog.AllOrOne allOrOne, StatsDialog.AggregationType aggregationType) {
-        if (allOrOne == StatsDialog.AllOrOne.EACH) {
-            for (String dataName : dataNames) {
-//                String dataName = dataNames.iterator().next();
-                HashMultimap<String, Long> roomVisitTimeMap = NetworkModel.instance().getDoorInTimesFor(dataName);
-
-                HashMap<String, Integer> roomDegree = NetworkModel.instance().getEdgesForEachRoom();
-                Multiset<Double> deltaTToFrequencyMapping = findDeltaTToFrequencyMapping(roomVisitTimeMap, roomDegree);
-
-                this.chartDisplay.setName(dataName);
-                this.chartDisplay.setTitle(dataName);
-                this.chartDisplay.display(deltaTToFrequencyMapping);
-                this.consoleDisplay.display(deltaTToFrequencyMapping);
-            }
+        if (!dataNames.isEmpty()) {
+            createProgressBar();
+            GenerateRequiredDataTask task = new GenerateRequiredDataTask(dataNames, allOrOne, aggregationType);
+            task.addPropertyChangeListener(this);
+            task.execute();
         } else {
-            HashMap<String, Multiset<Double>> nameToData = new HashMap<String, Multiset<Double>>();
-            for (String dataName : dataNames) {
-//                String dataName = dataNames.iterator().next();
-                HashMultimap<String, Long> roomVisitTimeMap = NetworkModel.instance().getDoorInTimesFor(dataName);
-
-                HashMap<String, Integer> roomDegree = NetworkModel.instance().getEdgesForEachRoom();
-                Multiset<Double> deltaTToFrequencyMapping = findDeltaTToFrequencyMapping(roomVisitTimeMap, roomDegree);
-                nameToData.put(dataName, deltaTToFrequencyMapping);
-            }
-            Multiset<Double> result = aggregateFromData(nameToData, aggregationType);
-            this.chartDisplay.setTitle("Time Between Revisits (Door)");
-            this.chartDisplay.display(result);
-            this.consoleDisplay.display(result);
+            System.out.println("No Data Names selected!");
         }
 
     }
@@ -145,5 +127,78 @@ public class DoorRepetitionFrequencyStatisticHandler extends StatisticsHandler<D
 
     }
 
+
+    class GenerateRequiredDataTask extends SwingWorker<Void, Void> {
+        private final Collection<String> dataNames;
+        private HashMap<String, HashMultimap<String, Long>> nameToResultMapping = new HashMap<String, HashMultimap<String, Long>>();
+        private final StatsDialog.AllOrOne allOrOne;
+        private final StatsDialog.AggregationType type;
+        private final HashMap<String, Integer> roomDegree;
+
+        public GenerateRequiredDataTask(Collection<String> dataNames,  StatsDialog.AllOrOne allOrOne, StatsDialog.AggregationType aggregationType) {
+            this.dataNames = dataNames;
+            this.allOrOne = allOrOne;
+            this.type = aggregationType;
+            this.roomDegree = NetworkModel.instance().getEdgesForEachRoom();
+        }
+
+        @Override
+        public Void doInBackground() {
+            setProgress(0);
+            int size = dataNames.size();
+            int i = 1;
+            for (String dataName : dataNames) {
+                taskOutput.append("Processing " + dataName + "...\n");
+                HashMultimap<String, Long> temp;
+                synchronized (NetworkModel.instance()) {
+                    temp = NetworkModel.instance().getDoorInTimesFor(dataName);
+
+                }
+
+
+
+
+
+                nameToResultMapping.put(dataName, temp);
+                setProgress((i * 100) / size);
+
+                i++;
+
+            }
+            return null;
+
+        }
+
+        @Override
+        public void done() {
+            Toolkit.getDefaultToolkit().beep();
+            frame.dispose();
+            taskOutput.append("Done.");
+            frame.dispose();
+            if (allOrOne == StatsDialog.AllOrOne.EACH) {
+                for (String dataName : dataNames) {
+                    Multiset<Double> deltaTToFrequencyMapping = findDeltaTToFrequencyMapping(
+                            nameToResultMapping.get(dataName), roomDegree);
+
+                    chartDisplay.setName(dataName);
+                    chartDisplay.setTitle(dataName);
+                    chartDisplay.display(deltaTToFrequencyMapping);
+                    consoleDisplay.display(deltaTToFrequencyMapping);
+                }
+            } else {
+                HashMap<String, Multiset<Double>> nameToData = new HashMap<String, Multiset<Double>>();
+                for (String dataName : dataNames) {
+                    Multiset<Double> deltaTToFrequencyMapping = findDeltaTToFrequencyMapping(
+                            nameToResultMapping.get(dataName), roomDegree);
+                    nameToData.put(dataName, deltaTToFrequencyMapping);
+                }
+                Multiset<Double> result = aggregateFromData(nameToData, type);
+                chartDisplay.setTitle("Time Between Revisits (Door)");
+                chartDisplay.display(result);
+                consoleDisplay.display(result);
+            }
+
+        }
+    }
 
 }

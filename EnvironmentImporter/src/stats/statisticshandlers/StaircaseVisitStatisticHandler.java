@@ -77,6 +77,7 @@ public class StaircaseVisitStatisticHandler extends StatisticsHandler<StaircaseV
             int size = dataNames.size();
             int i = 1;
             for (String dataName : dataNames) {
+                taskOutput.append("Processing " + dataName + "...\n");
                 YES_NO_CHOICE resultTemp;
                 synchronized (NetworkModel.instance()) {
                     resultTemp = NetworkModel.instance().getStaircaseRelatedMotion(dataName, phase);
@@ -90,7 +91,7 @@ public class StaircaseVisitStatisticHandler extends StatisticsHandler<StaircaseV
                 }
 
                 setProgress((i * 100) / size);
-                taskOutput.append("Processing " + dataName + "...\n");
+
                 i++;
             }
 
@@ -106,10 +107,10 @@ public class StaircaseVisitStatisticHandler extends StatisticsHandler<StaircaseV
             frame.dispose();
             taskOutput.append("Done.");
             frame.dispose();
-            StaircaseVisitStatisticHandler.this.chartDisplay.setTitle(choice.toString() + phase.toString());
-            StaircaseVisitStatisticHandler.this.chartDisplay.setPhase(phase);
-            StaircaseVisitStatisticHandler.this.chartDisplay.display(result);
-            StaircaseVisitStatisticHandler.this.consoleDisplay.display(result);
+            chartDisplay.setTitle(choice.toString() + phase.toString());
+            chartDisplay.setPhase(phase);
+            chartDisplay.display(result);
+            consoleDisplay.display(result);
         }
     }
 

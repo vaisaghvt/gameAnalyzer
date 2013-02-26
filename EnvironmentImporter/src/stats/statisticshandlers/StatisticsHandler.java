@@ -6,6 +6,7 @@ import stats.chartdisplays.ChartDisplay;
 import stats.consoledisplays.ConsoleDisplay;
 
 import javax.swing.*;
+import javax.swing.text.DefaultCaret;
 import java.awt.*;
 import java.beans.PropertyChangeEvent;
 import java.beans.PropertyChangeListener;
@@ -80,6 +81,8 @@ public abstract class StatisticsHandler<T extends ConsoleDisplay, V extends Char
         taskOutput = new JTextArea(5, 20);
         taskOutput.setMargin(new Insets(5, 5, 5, 5));
         taskOutput.setEditable(false);
+        DefaultCaret caret = (DefaultCaret)taskOutput.getCaret();
+        caret.setUpdatePolicy(DefaultCaret.ALWAYS_UPDATE);
         frame = new JFrame("Processing data");
         frame.setLayout(new BorderLayout());
         frame.add(progressBar, BorderLayout.NORTH);

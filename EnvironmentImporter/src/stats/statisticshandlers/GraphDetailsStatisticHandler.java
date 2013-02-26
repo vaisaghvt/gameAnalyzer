@@ -14,7 +14,12 @@ import org.apache.commons.math3.stat.descriptive.moment.Variance;
 import stats.chartdisplays.GraphDetailsChartDisplay;
 import stats.consoledisplays.GraphDetailsConsoleDisplay;
 
-import java.util.*;
+import javax.swing.*;
+import java.awt.*;
+import java.util.Collection;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.List;
 
 /**
  * Created with IntelliJ IDEA.
@@ -37,50 +42,13 @@ public class GraphDetailsStatisticHandler extends StatisticsHandler<GraphDetails
     @Override
     public void generateAndDisplayStats(Collection<String> dataNames, Phase phase, StatsDialog.AllOrOne allOrOne, StatsDialog.AggregationType aggregationType) {
 
-
         if (!dataNames.isEmpty()) {
-            HashSet<Phase> phases = new HashSet<Phase>();
-            for (Phase tempPhase : Phase.values()) {
-                phases.add(tempPhase);
-            }
-
-            HashMap<String, HashMap<String, String>> nameToStatMapping = new HashMap<String, HashMap<String, String>>();
-
-            for (String dataName : dataNames) {
-
-                List<HashMap<String, Number>> movementOfPlayer = NetworkModel.instance().getMovementOfPlayer(dataName, phases);
-                DirectedSparseMultigraph<ModelObject, ModelEdge> graphForPlayer =
-                        NetworkModel.instance().getDirectedGraphOfPlayer(dataName, phases);
-
-                HashMap<String, String> results = new HashMap<String, String>();
-                results = getStatsForMovement(movementOfPlayer, results);
-                results = getStatsForGraph(dataName, graphForPlayer, results);
-
-                nameToStatMapping.put(dataName, results);
-            }
-
-
-            if (allOrOne == StatsDialog.AllOrOne.EACH) {
-                for (String dataName : dataNames) {
-                    this.chartDisplay.setName(dataName);
-                    this.chartDisplay.setTitle(dataName + " : Stats Summary");
-                    this.chartDisplay.display(nameToStatMapping.get(dataName));
-
-                    System.out.println("*************" + dataName + "*************");
-                    this.consoleDisplay.display(nameToStatMapping.get(dataName));
-                }
-
-
-            } else {
-                HashMap<String, String> results = summarizeResults(nameToStatMapping, aggregationType);
-                this.chartDisplay.setTitle("Total Stats Summary - " + aggregationType);
-                this.chartDisplay.display(results);
-                this.consoleDisplay.display(results);
-            }
-
-
+            createProgressBar();
+            GenerateRequiredDataTask task = new GenerateRequiredDataTask(dataNames, allOrOne, aggregationType);
+            task.addPropertyChangeListener(this);
+            task.execute();
         } else {
-            System.out.println("No data selected!");
+            System.out.println("No Data Names selected!");
         }
     }
 
@@ -132,7 +100,6 @@ public class GraphDetailsStatisticHandler extends StatisticsHandler<GraphDetails
                         results.put(key, resultForName.get(key));
                     }
                 } else {
-                    //TODO : Add point
                     System.out.println(resultForName.get(key));
                 }
 
@@ -201,24 +168,24 @@ public class GraphDetailsStatisticHandler extends StatisticsHandler<GraphDetails
         results.put("Vertex Coverage", Integer.toString((graph.getVertexCount() * 100) / totalVertexNumber));
 
 
-        double distanceTraveled = NetworkModel.instance().getDistanceTraveledExploration(Collections.singleton(dataName)).get(dataName);
+        double distanceTraveled = NetworkModel.instance().getDistanceTraveledExploration(dataName);
         results.put("Distance Covered (Exploration)", String.format("%1$.3f", distanceTraveled));
 
 
-        distanceTraveled = NetworkModel.instance().getDistanceTraveledDuringTasks(Collections.singleton(dataName)).get(dataName);
+        distanceTraveled = NetworkModel.instance().getDistanceTraveledDuringTasks(dataName);
         results.put("Distance Covered (Tasks)", String.format("%1$.3f", distanceTraveled));
 
-        double timeTaken = NetworkModel.instance().getTimeTraveledTotal(Collections.singleton(dataName)).get(dataName);
+        double timeTaken = NetworkModel.instance().getTimeTraveledExploration(dataName);
         results.put("Time Taken (Exploration)", String.format("%1$.3f", timeTaken));
 
 
-        timeTaken = NetworkModel.instance().getTimeTraveledDuringTasks(Collections.singleton(dataName)).get(dataName);
+        timeTaken = NetworkModel.instance().getTimeTraveledDuringTasks(dataName);
         results.put("Time Taken (Tasks)", String.format("%1$.3f", timeTaken));
 
-        String task2Path = NetworkModel.instance().getPathDataFor(Collections.singleton(dataName), Phase.TASK_2).keySet().iterator().next();
+        String task2Path = NetworkModel.instance().getPathDataFor(dataName, Phase.TASK_2);
         results.put("Path for task 2", task2Path);
 
-        String task3Path = NetworkModel.instance().getPathDataFor(Collections.singleton(dataName), Phase.TASK_3).keySet().iterator().next();
+        String task3Path = NetworkModel.instance().getPathDataFor(dataName, Phase.TASK_3);
         results.put("Path for task 3", task3Path);
 
 
@@ -285,6 +252,86 @@ public class GraphDetailsStatisticHandler extends StatisticsHandler<GraphDetails
         }
 
         return Math.sqrt(sum / n);
+    }
+
+    class GenerateRequiredDataTask extends SwingWorker<Void, Void> {
+
+        private final Collection<String> dataNames;
+
+        HashMap<String, HashMap<String, String>> nameToStatMapping = new HashMap<String, HashMap<String, String>>();
+        private final StatsDialog.AllOrOne allOrOne;
+        private final StatsDialog.AggregationType type;
+
+
+        public GenerateRequiredDataTask(Collection<String> dataNames, StatsDialog.AllOrOne allOrOne, StatsDialog.AggregationType aggregationType) {
+            this.dataNames = dataNames;
+            this.allOrOne = allOrOne;
+            this.type = aggregationType;
+        }
+
+        @Override
+        public Void doInBackground() {
+            setProgress(0);
+            int size = dataNames.size();
+            int i = 1;
+            HashSet<Phase> phases = new HashSet<Phase>();
+            for (Phase tempPhase : Phase.values()) {
+                phases.add(tempPhase);
+            }
+
+            nameToStatMapping = new HashMap<String, HashMap<String, String>>();
+
+            for (String dataName : dataNames) {
+                taskOutput.append("Processing " + dataName + "...\n");
+                List<HashMap<String, Number>> movementOfPlayer;
+                DirectedSparseMultigraph<ModelObject, ModelEdge> graphForPlayer;
+                synchronized (NetworkModel.instance()) {
+                    movementOfPlayer = NetworkModel.instance().getMovementOfPlayer(dataName, phases);
+                    graphForPlayer =
+                        NetworkModel.instance().getDirectedGraphOfPlayer(dataName, phases);
+                }
+
+                HashMap<String, String> results = new HashMap<String, String>();
+                results = getStatsForMovement(movementOfPlayer, results);
+                results = getStatsForGraph(dataName, graphForPlayer, results);
+
+                nameToStatMapping.put(dataName, results);
+
+                setProgress((i * 100) / size);
+
+                i++;
+            }
+
+
+            return null;
+
+        }
+
+        @Override
+        public void done() {
+            Toolkit.getDefaultToolkit().beep();
+            frame.dispose();
+            taskOutput.append("Done.");
+            frame.dispose();
+            if (allOrOne == StatsDialog.AllOrOne.EACH) {
+                for (String dataName : dataNames) {
+                    chartDisplay.setName(dataName);
+                    chartDisplay.setTitle(dataName + " : Stats Summary");
+                    chartDisplay.display(nameToStatMapping.get(dataName));
+
+                    System.out.println("*************" + dataName + "*************");
+                    consoleDisplay.display(nameToStatMapping.get(dataName));
+                }
+
+
+            } else {
+                HashMap<String, String> results = summarizeResults(nameToStatMapping, type);
+                chartDisplay.setTitle("Total Stats Summary - " + type);
+                chartDisplay.display(results);
+                consoleDisplay.display(results);
+            }
+
+        }
     }
 
 

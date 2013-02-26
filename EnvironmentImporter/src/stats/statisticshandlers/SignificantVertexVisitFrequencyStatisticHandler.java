@@ -1,6 +1,5 @@
 package stats.statisticshandlers;
 
-import com.google.common.collect.Multiset;
 import gui.NetworkModel;
 import gui.Phase;
 import gui.StatsDialog;
@@ -151,14 +150,14 @@ public class SignificantVertexVisitFrequencyStatisticHandler extends StatisticsH
             int i = 1;
             for (String dataName : dataNames) {
 
-
+                taskOutput.append("Processing " + dataName + "...\n");
                 synchronized (NetworkModel.instance()) {
                     dataNameDataMap.put(dataName, NetworkModel.instance().getVertexDataFor(dataName, choice, phase));
                 }
 
 
                 setProgress((i * 100) / size);
-                taskOutput.append("Processing " + dataName + "...\n");
+
                 i++;
 
             }
@@ -176,9 +175,9 @@ public class SignificantVertexVisitFrequencyStatisticHandler extends StatisticsH
                     type);
 
 
-            SignificantVertexVisitFrequencyStatisticHandler.this.chartDisplay.setTitle(choice.toString() + " :" + phase.toString());
-            SignificantVertexVisitFrequencyStatisticHandler.this.chartDisplay.display(data);
-            SignificantVertexVisitFrequencyStatisticHandler.this.consoleDisplay.display(data);
+            chartDisplay.setTitle(choice.toString() + " :" + phase.toString());
+            chartDisplay.display(data);
+            consoleDisplay.display(data);
 
 
         }

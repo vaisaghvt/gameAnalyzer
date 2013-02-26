@@ -588,6 +588,18 @@ public class NetworkModel extends MainPanel implements ActionListener {
 
     }
 
+    public  YES_NO_CHOICE getCorridorRelatedMotion(String dataName, Phase phase) {
+        HashSet<Phase> phases = new HashSet<Phase>();
+        phases.add(phase);
+
+
+        DirectedSparseMultigraph<ModelObject, ModelEdge> localGraph
+                = getDirectedGraphOfPlayer(dataName, phases);
+
+        return prefersCorridors(localGraph, phase);
+
+    }
+
     public YES_NO_CHOICE getStaircaseRelatedMotion(String dataName, Phase phase) {
         HashSet<Phase> phases = new HashSet<Phase>();
         phases.add(phase);
@@ -745,25 +757,19 @@ public class NetworkModel extends MainPanel implements ActionListener {
         return result;
     }
 
-    public HashMultimap<Integer, String> getCoverage(Collection<String> dataNames, Phase phase) {
+    public int getCoverage(String dataName, Phase phase) {
         HashSet<Phase> phases = new HashSet<Phase>();
         HashMultimap<Integer, String> result = HashMultimap.create();
         phases.clear();
         phases.add(phase);
-        for (String dataName : dataNames) {
-            System.out.println("Processing " + dataName + "...");
 
             DirectedSparseMultigraph<ModelObject, ModelEdge> localGraph =
                     getDirectedGraphOfPlayer(dataName, phases);
 
-            int percentageCoverage = findCoverage(localGraph);
-
-            result.put(percentageCoverage, dataName);
-
-        }
 
 
-        return result;
+
+        return findCoverage(localGraph);
     }
 
     private int findCoverage(DirectedSparseMultigraph<ModelObject, ModelEdge> localGraph) {
@@ -776,63 +782,51 @@ public class NetworkModel extends MainPanel implements ActionListener {
         return (count * 100) / completeGraph.getVertexCount();
     }
 
-    public HashMap<String, Double> getDistanceTraveledDuringTasks(Collection<String> dataNames) {
+    public double getDistanceTraveledDuringTasks(String dataName) {
         HashSet<Phase> phases = new HashSet<Phase>();
         phases.clear();
         phases.add(Phase.TASK_2);
         phases.add(Phase.TASK_3);
 
-        HashMap<String, Double> result = new HashMap<String, Double>();
-        for (String dataName : dataNames) {
-            System.out.println("Calculating Distance for " + dataName);
-            List<HashMap<String, Number>> pathPoints = this.getMovementOfPlayer(dataName, phases);
+
+        List<HashMap<String, Number>> pathPoints = this.getMovementOfPlayer(dataName, phases);
 
 
-            double distance = findDistanceTravelled(pathPoints);
-            result.put(dataName, distance);
-        }
-
-
-        return result;
+        return findDistanceTravelled(pathPoints);
 
 
     }
 
-    public HashMap<String, Long> getTimeTraveledDuringTasks(Collection<String> dataNames) {
+    public long getTimeTraveledDuringTasks(String dataName) {
 
-        HashMap<String, Long> result = new HashMap<String, Long>();
-        for (String dataName : dataNames) {
+
 
             System.out.println("Calculating time for " + dataName);
             long time1 = Long.parseLong(Database.getInstance().getPhaseCompleteTime(Phase.TASK_1, dataName));
             long time2 = Long.parseLong(Database.getInstance().getPhaseCompleteTime(Phase.TASK_3, dataName));
 
-            result.put(dataName, time2 - time1);
-        }
+            return (time2 - time1);
 
 
-        return result;
+
     }
 
-    public HashMap<String, Long> getTimeTraveledTotal(Collection<String> dataNames) {
+    public long getTimeTraveledExploration(String dataName) {
 
-        HashMap<String, Long> result = new HashMap<String, Long>();
-        for (String dataName : dataNames) {
+
 
             long time1 = Long.parseLong(Database.getInstance().getPhaseStartTime(Phase.EXPLORATION, dataName));
-            long time2 = Long.parseLong(Database.getInstance().getPhaseCompleteTime(Phase.TASK_3, dataName));
+            long time2 = Long.parseLong(Database.getInstance().getPhaseCompleteTime(Phase.EXPLORATION, dataName));
 
-            result.put(dataName, time2 - time1);
-        }
+            return time2 - time1;
 
 
-        return result;
+
     }
 
-    public HashMap<String, Double> getDistanceTraveledExploration(Collection<String> dataNames) {
+    public double getDistanceTraveledExploration(String dataName) {
 
-        HashMap<String, Double> result = new HashMap<String, Double>();
-        for (String dataName : dataNames) {
+
             HashSet<Phase> phaseSet = new HashSet<Phase>();
 //            for (Phase phase : Phase.values()) {
 //                phaseSet.add(phase);
@@ -841,42 +835,11 @@ public class NetworkModel extends MainPanel implements ActionListener {
             List<HashMap<String, Number>> pathPoints = this.getMovementOfPlayer(dataName, phaseSet);
 
 
-            double distance = findDistanceTravelled(pathPoints);
-            result.put(dataName, distance);
-        }
-
-
-        return result;
-
-
+            return findDistanceTravelled(pathPoints);
     }
 
 
-    public HashMultimap<String, String> getCorridorRelatedMotion(Collection<String> dataNames, Phase phase) {
-        HashSet<Phase> phases = new HashSet<Phase>();
-        HashMultimap<String, String> result = HashMultimap.create();
-        phases.clear();
-        phases.add(phase);
-        for (String dataName : dataNames) {
-            System.out.println("Processing " + dataName + "...");
 
-
-            DirectedSparseMultigraph<ModelObject, ModelEdge> localGraph =
-                    getDirectedGraphOfPlayer(dataName, phases);
-
-            YES_NO_CHOICE resultTemp = prefersCorridors(localGraph, phase);
-            if (resultTemp == YES_NO_CHOICE.YES) {
-                result.put("yes", dataName);
-            } else if (resultTemp == YES_NO_CHOICE.NO) {
-                result.put("no", dataName);
-            } else {
-                result.put("maybe", dataName);
-            }
-
-        }
-
-        return result;
-    }
 
     private YES_NO_CHOICE prefersCorridors(DirectedSparseMultigraph<ModelObject, ModelEdge> localGraph, Phase phase) {
         ModelObject db2 = findRoomByName(completeGraph, "DB2");
@@ -1175,22 +1138,14 @@ public class NetworkModel extends MainPanel implements ActionListener {
         }
     }
 
-    public HashMultimap<String, String> getPathDataFor(Collection<String> dataNames, Phase phase) {
+    public String getPathDataFor(String dataName, Phase phase) {
 
-        HashMap<String, DirectedSparseMultigraph<ModelObject, ModelEdge>> dataNameGraphMap;
-        dataNameGraphMap = new HashMap<String, DirectedSparseMultigraph<ModelObject, ModelEdge>>();
 
         HashSet<Phase> phases = new HashSet<Phase>();
         phases.clear();
         phases.add(phase);
-        HashMultimap<String, String> result = HashMultimap.create();
-        for (String dataName : dataNames) {
-            System.out.println("Processing " + dataName + "...");
 
-            dataNameGraphMap.put(dataName, getDirectedGraphOfPlayer(dataName, phases));
-
-
-        }
+        DirectedSparseMultigraph<ModelObject, ModelEdge> graph = getDirectedGraphOfPlayer(dataName, phases);
 
 
         if (phase == Phase.TASK_3) {
@@ -1202,74 +1157,83 @@ public class NetworkModel extends MainPanel implements ActionListener {
             paths.put(miPath5.getText(), nameToPathMapping.get(miPath5));
             paths.put(miPath6.getText(), nameToPathMapping.get(miPath6));
 
-            for (String name : dataNames) {
-                assert dataNameGraphMap.containsKey(name);
-                boolean added = false;
-                DirectedSparseMultigraph<ModelObject, ModelEdge> graph = dataNameGraphMap.get(name);
-                ModelObject startingRoom = findRoomByName(graph, "Library2");
-                for (String path : paths.keySet()) {
-                    if (graphIsPath(startingRoom, graph, Arrays.asList(paths.get(path)))) {
-                        result.put(path, name);
-                        added = true;
-                    }
-                }
-                if (!added) {
-                    result.put("lost", name);
+
+            boolean added = false;
+
+            ModelObject startingRoom = findRoomByName(graph, "Library2");
+            for (String path : paths.keySet()) {
+                if (graphIsPath(startingRoom, graph, Arrays.asList(paths.get(path)))) {
+                    return path;
+
                 }
             }
+            if (!added) {
+                return "lost";
+            }
 
-            return result;
+
         } else if (phase == Phase.TASK_2) {
 
+            String resultString = "";
             HashMap<String, String[]> pathForFloor3 = new HashMap<String, String[]>();
             pathForFloor3.put(mi3Shortest.getText(), nameToPathMapping.get(mi3Shortest));
             pathForFloor3.put(mi3Norm.getText(), nameToPathMapping.get(mi3Norm));
-            for (String name : dataNames) {
-                assert dataNameGraphMap.containsKey(name);
-                boolean added = false;
-                DirectedSparseMultigraph<ModelObject, ModelEdge> graph = dataNameGraphMap.get(name);
-                ModelObject startingRoom = findRoomByName(graph, "Gallery");
-                for (String path : pathForFloor3.keySet()) {
-                    if (checkFloorPath(startingRoom, graph, Arrays.asList(pathForFloor3.get(path)), 2)) {
-                        result.put(path, name);
-                        added = true;
-                    }
-                }
-                if (!added) {
-                    result.put("3Lost", name);
+
+
+            boolean added = false;
+
+            ModelObject startingRoom = findRoomByName(graph, "Gallery");
+            for (String path : pathForFloor3.keySet()) {
+                if (checkFloorPath(startingRoom, graph, Arrays.asList(pathForFloor3.get(path)), 2)) {
+                    resultString += path;
+                    added = true;
+                    break;
                 }
             }
+            if (!added) {
+                resultString += "3Lost";
+
+            }
+
 
             HashMap<String, String[]> pathForFloor2 = new HashMap<String, String[]>();
             pathForFloor2.put(mi2Perfect.getText(), nameToPathMapping.get(mi2Perfect));
             pathForFloor2.put(mi2Confuse.getText(), nameToPathMapping.get(mi2Confuse));
             pathForFloor2.put(mi2MoreConfuse.getText(), nameToPathMapping.get(mi2MoreConfuse));
             pathForFloor2.put(mi2Weird.getText(), nameToPathMapping.get(mi2Weird));
+            HashMultimap<String, String> result = HashMultimap.create();
 
-            for (String name : dataNames) {
-                assert dataNameGraphMap.containsKey(name);
-                boolean added = false;
-                DirectedSparseMultigraph<ModelObject, ModelEdge> graph = dataNameGraphMap.get(name);
-                ModelObject startingRoom = findRoomByName(graph, "WayToFlr3");
-                for (String path : pathForFloor2.keySet()) {
-                    if (checkFloorPath(startingRoom, graph, Arrays.asList(pathForFloor2.get(path)), 1)) {
-                        result.put(path, name);
-                        added = true;
-                    }
-                }
-                if (!added) {
-                    result.put("2Lost", name);
+
+            added = false;
+
+            startingRoom = findRoomByName(graph, "WayToFlr3");
+            for (String path : pathForFloor2.keySet()) {
+                if (checkFloorPath(startingRoom, graph, Arrays.asList(pathForFloor2.get(path)), 1)) {
+                    result.put(path, dataName);
+                    added = true;
                 }
             }
-            result.get(mi2MoreConfuse.getText()).removeAll(result.get(mi2Confuse.getText()));
-            result.get(mi2Confuse.getText()).removeAll(result.get(mi2Perfect.getText()));
+            if (!added) {
+                result.put("2Lost", dataName);
+            }
 
+            if (result.containsKey(mi2MoreConfuse.getText())) {
+                result.get(mi2MoreConfuse.getText()).remove(result.get(mi2Confuse.getText()));
+            }
+            if (result.containsKey(mi2Confuse.getText())) {
+                result.get(mi2Confuse.getText()).remove(result.get(mi2Perfect.getText()));
+            }
 
-            return result;
-        } else {
+            for (String key : result.keySet()) {
+                if (result.get(key).size() > 0) {
+                    return resultString + "," + result.get(key).iterator().next();
+                }
+            }
 
-            return null;
         }
+        System.out.println("ERROR!!!");
+        return null;
+
     }
 
     private boolean checkFloorPath(ModelObject startingRoom, DirectedSparseMultigraph<ModelObject, ModelEdge> passedGraph, List<String> pathDescription, int level) {

@@ -87,7 +87,7 @@ public class VertexVisitDurationStatisticHandler extends StatisticsHandler<Verte
             int size = dataNames.size();
             int i = 1;
             for (String dataName : dataNames) {
-
+                taskOutput.append("Processing " + dataName + "...\n");
                 HashMap<String, Number> temp;
                 synchronized (NetworkModel.instance()) {
                     temp = NetworkModel.instance().getVertexDataFor(dataName, choice, phase);
@@ -107,7 +107,7 @@ public class VertexVisitDurationStatisticHandler extends StatisticsHandler<Verte
 
                 nameToResultMapping.put(dataName, result);
                 setProgress((i * 100) / size);
-                taskOutput.append("Processing " + dataName + "...\n");
+
                 i++;
 
             }
@@ -124,9 +124,9 @@ public class VertexVisitDurationStatisticHandler extends StatisticsHandler<Verte
             if (allOrOne == StatsDialog.AllOrOne.EACH) {
                 for (String dataName : nameToResultMapping.keySet()) {
                     HashMap<String, Double> result = nameToResultMapping.get(dataName);
-                    VertexVisitDurationStatisticHandler.this.chartDisplay.setTitle(dataName + ":" + choice.toString() + ":" + phase.toString());
-                    VertexVisitDurationStatisticHandler.this.chartDisplay.display(result);
-                    VertexVisitDurationStatisticHandler.this.consoleDisplay.display(result);
+                    chartDisplay.setTitle(dataName + ":" + choice.toString() + ":" + phase.toString());
+                    chartDisplay.display(result);
+                    consoleDisplay.display(result);
                 }
             } else {
 
@@ -140,9 +140,9 @@ public class VertexVisitDurationStatisticHandler extends StatisticsHandler<Verte
 
                 HashMap<String, Double> finalResult = VertexVisitDurationStatisticHandler.this.aggregateData(resultGrouped, type);
 
-                VertexVisitDurationStatisticHandler.this.chartDisplay.setTitle(choice.toString() + ":" + phase.toString());
-                VertexVisitDurationStatisticHandler.this.chartDisplay.display(finalResult);
-                VertexVisitDurationStatisticHandler.this.consoleDisplay.display(finalResult);
+                chartDisplay.setTitle(choice.toString() + ":" + phase.toString());
+                chartDisplay.display(finalResult);
+                consoleDisplay.display(finalResult);
             }
 
         }

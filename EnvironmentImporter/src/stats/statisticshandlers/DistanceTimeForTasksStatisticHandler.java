@@ -7,6 +7,8 @@ import stats.StatisticChoice;
 import stats.chartdisplays.DistanceTimeChartDisplay;
 import stats.consoledisplays.DistanceTimeConsoleDisplay;
 
+import javax.swing.*;
+import java.awt.*;
 import java.util.Collection;
 import java.util.HashMap;
 
@@ -31,15 +33,16 @@ public class DistanceTimeForTasksStatisticHandler extends StatisticsHandler<Dist
     @Override
     public void generateAndDisplayStats(Collection<String> dataNames, Phase phase, StatsDialog.AllOrOne all, StatsDialog.AggregationType itemAt) {
         final StatisticChoice choice = StatisticChoice.DISTANCE_TIME_FOR_TASKS_STATISTIC;
-        HashMap<String, Double> distanceTraveled = NetworkModel.instance().getDistanceTraveledDuringTasks(dataNames);
-        HashMap<String, Long> timeTaken = NetworkModel.instance().getTimeTraveledDuringTasks(dataNames);
+        if (!dataNames.isEmpty()) {
+            createProgressBar();
+            GenerateRequiredDataTask task = new GenerateRequiredDataTask(dataNames, choice);
+            task.addPropertyChangeListener(this);
+            task.execute();
+        } else {
+            System.out.println("No Data Names selected!");
+        }
 
 
-        HashMap<String, HashMap<String, Double>> summary = summarizeDistanceTime(distanceTraveled, timeTaken);
-        this.chartDisplay.setTitle(choice.toString());
-
-        this.chartDisplay.display(summary);
-        this.consoleDisplay.display(summary);
 
     }
 
@@ -57,6 +60,56 @@ public class DistanceTimeForTasksStatisticHandler extends StatisticsHandler<Dist
         }
         return result;
 
+    }
+
+
+    class GenerateRequiredDataTask extends SwingWorker<Void, Void> {
+        private final Collection<String> dataNames;
+        private HashMap<String, Double> distanceTraveled;
+        private HashMap<String, Long> timeTaken;
+        private final StatisticChoice choice;
+
+        public GenerateRequiredDataTask(Collection<String> dataNames,StatisticChoice choice) {
+            this.dataNames = dataNames;
+            this.choice = choice;
+            this.distanceTraveled = new HashMap<String, Double>();
+            this.timeTaken = new HashMap<String, Long>();
+
+        }
+
+        @Override
+        public Void doInBackground() {
+            setProgress(0);
+            int size = dataNames.size();
+            int i = 1;
+            for (String dataName : dataNames) {
+                taskOutput.append("Processing " + dataName + "...\n");
+                synchronized (NetworkModel.instance()) {
+                    distanceTraveled.put(dataName, NetworkModel.instance().getDistanceTraveledDuringTasks(dataName));
+                    timeTaken.put(dataName, NetworkModel.instance().getTimeTraveledDuringTasks(dataName));
+                }
+                setProgress((i * 100) / size);
+
+                i++;
+
+            }
+            return null;
+
+        }
+
+        @Override
+        public void done() {
+            Toolkit.getDefaultToolkit().beep();
+            frame.dispose();
+            taskOutput.append("Done.");
+            frame.dispose();
+            HashMap<String, HashMap<String, Double>> summary = summarizeDistanceTime(distanceTraveled, timeTaken);
+            chartDisplay.setTitle(choice.toString());
+
+            chartDisplay.display(summary);
+            consoleDisplay.display(summary);
+
+        }
     }
 
 

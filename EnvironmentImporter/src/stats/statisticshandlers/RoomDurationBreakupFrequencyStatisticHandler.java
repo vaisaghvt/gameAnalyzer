@@ -10,6 +10,8 @@ import stats.StatisticChoice;
 import stats.chartdisplays.RoomDurationTotalFrequencyChartDisplay;
 import stats.consoledisplays.RoomDurationTotalFrequencyConsoleDisplay;
 
+import javax.swing.*;
+import java.awt.*;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.Set;
@@ -36,57 +38,13 @@ public class RoomDurationBreakupFrequencyStatisticHandler extends StatisticsHand
     public void generateAndDisplayStats(Collection<String> dataNames, Phase phase, StatsDialog.AllOrOne allOrOne, StatsDialog.AggregationType aggregationType) {
 
         if (!dataNames.isEmpty()) {
-            if (allOrOne == StatsDialog.AllOrOne.ALL) {
-                HashMultimap<String, Long> result = HashMultimap.create();
-                for (String dataName : dataNames) {
-                    System.out.println("Processing " + dataName + "...");
-                    HashMap<String, HashMultimap<String, Long>> temp = NetworkModel.instance().
-                            getTimeSpentPerVisit(dataName);
-
-                    for (String roomName : temp.keySet()) {
-//                    int numberOfEdges = roomEdgeCountMapping.get(roomName);
-                        if (temp.get(roomName).get(phase.toString()) != null) {
-                            result.putAll(roomName, temp.get(roomName).get(phase.toString()));
-                        }
-                    }
-
-                }
-
-                Multiset<Long> dataResult = summarize(result);
-
-
-                System.out.println("Displaying Chart...");
-                this.chartDisplay.setTitle(StatisticChoice.ROOM_DURATION_FREQUENCY.toString());
-                this.chartDisplay.display(dataResult);
-                this.consoleDisplay.display(dataResult);
-            } else {
-                for (String dataName : dataNames) {
-                    HashMultimap<String, Long> result = HashMultimap.create();
-                    System.out.println("Processing " + dataName + "...");
-                    HashMap<String, HashMultimap<String, Long>> temp = NetworkModel.instance().
-                            getTimeSpentPerVisit(dataName);
-
-                    for (String roomName : temp.keySet()) {
-//                    int numberOfEdges = roomEdgeCountMapping.get(roomName);
-                        if (temp.get(roomName).get(phase.toString()) != null) {
-                            result.putAll(roomName, temp.get(roomName).get(phase.toString()));
-                        }
-                    }
-                    Multiset<Long> dataResult = summarize(result);
-
-
-                    this.chartDisplay.setName(dataName);
-
-                    this.chartDisplay.setTitle(dataName + StatisticChoice.ROOM_DURATION_FREQUENCY.toString());
-                    this.chartDisplay.display(dataResult);
-                    this.consoleDisplay.display(dataResult);
-
-                }
-
-            }
+            createProgressBar();
+            GenerateRequiredDataTask task = new GenerateRequiredDataTask(dataNames, phase, allOrOne);
+            task.addPropertyChangeListener(this);
+            task.execute();
         } else {
 
-            System.out.println("No Data Name selected!");
+            System.out.println("No Data Names selected!");
         }
     }
 
@@ -103,5 +61,112 @@ public class RoomDurationBreakupFrequencyStatisticHandler extends StatisticsHand
         }
 
         return data;
+    }
+
+
+    class GenerateRequiredDataTask extends SwingWorker<Void, Void> {
+        private final Phase phase;
+        private final Collection<String> dataNames;
+
+        HashMap<String, HashMultimap<String, Long>> dataNameDataMap = new HashMap<String, HashMultimap<String, Long>>();
+
+        private final StatsDialog.AllOrOne allOrOne;
+
+
+
+        public GenerateRequiredDataTask(Collection<String> dataNames, Phase phase, StatsDialog.AllOrOne allOrOne) {
+            this.dataNames = dataNames;
+
+            this.phase = phase;
+            this.allOrOne = allOrOne;
+
+
+
+        }
+
+        @Override
+        public Void doInBackground() {
+
+
+            setProgress(0);
+            int size = dataNames.size();
+            int i = 1;
+            HashMultimap<String, Long> result = HashMultimap.create();
+            for (String dataName : dataNames) {
+                System.out.println("Processing " + dataName + "...");
+                HashMap<String, HashMultimap<String, Long>> temp = NetworkModel.instance().
+                        getTimeSpentPerVisit(dataName);
+
+                for (String roomName : temp.keySet()) {
+//                    int numberOfEdges = roomEdgeCountMapping.get(roomName);
+                    if (temp.get(roomName).get(phase.toString()) != null) {
+                        result.putAll(roomName, temp.get(roomName).get(phase.toString()));
+                    }
+                }
+                dataNameDataMap.put(dataName, result);
+
+                setProgress((i * 100) / size);
+
+                i++;
+            }
+
+
+
+            return null;
+
+        }
+
+        @Override
+        public void done() {
+            Toolkit.getDefaultToolkit().beep();
+            frame.dispose();
+            taskOutput.append("Done.");
+            frame.dispose();
+
+
+            HashMultimap<String, Long> result = HashMultimap.create();
+            if (allOrOne == StatsDialog.AllOrOne.ALL) {
+
+                for (String dataName : dataNameDataMap.keySet()) {
+                    HashMultimap<String, Long> tempResult = dataNameDataMap.get(dataName);
+                    for(String roomName : tempResult.keySet()){
+                        result.putAll(roomName, tempResult.get(roomName));
+                    }
+
+                }
+
+                Multiset<Long> dataResult = summarize(result);
+
+
+
+               chartDisplay.setTitle(StatisticChoice.ROOM_DURATION_FREQUENCY.toString());
+                chartDisplay.display(dataResult);
+                consoleDisplay.display(dataResult);
+            } else {
+                for (String dataName : dataNameDataMap.keySet()) {
+                    HashMultimap<String, Long> tempResult = dataNameDataMap.get(dataName);
+                    for(String roomName : tempResult.keySet()){
+                        result.putAll(roomName, tempResult.get(roomName));
+                    }
+                    Multiset<Long> dataResult = summarize(result);
+                    chartDisplay.setTitle(dataName + StatisticChoice.ROOM_DURATION_FREQUENCY.toString());
+                    chartDisplay.display(dataResult);
+                    consoleDisplay.display(dataResult);
+                    result.clear();
+
+                }
+
+
+
+
+            }
+
+
+
+
+
+
+
+        }
     }
 }

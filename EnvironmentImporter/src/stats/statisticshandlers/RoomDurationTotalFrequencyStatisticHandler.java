@@ -1,6 +1,5 @@
 package stats.statisticshandlers;
 
-import com.google.common.collect.HashMultimap;
 import com.google.common.collect.HashMultiset;
 import com.google.common.collect.Multiset;
 import gui.NetworkModel;
@@ -107,7 +106,7 @@ public class RoomDurationTotalFrequencyStatisticHandler extends StatisticsHandle
             int i = 1;
             for (String dataName : dataNames) {
 
-
+                taskOutput.append("Processing " + dataName + "...\n");
                 HashMap<String, Number> temp;
                 synchronized (NetworkModel.instance()) {
                     temp = NetworkModel.instance().
@@ -123,7 +122,7 @@ public class RoomDurationTotalFrequencyStatisticHandler extends StatisticsHandle
 
 
                 setProgress((i * 100) / size);
-                taskOutput.append("Processing " + dataName + "...\n");
+
                 i++;
 
             }
@@ -143,18 +142,18 @@ public class RoomDurationTotalFrequencyStatisticHandler extends StatisticsHandle
 
 
 
-                RoomDurationTotalFrequencyStatisticHandler.this.chartDisplay.setTitle(StatisticChoice.ROOM_DURATION_FREQUENCY.toString());
-                RoomDurationTotalFrequencyStatisticHandler.this.chartDisplay.display(dataResult);
-                RoomDurationTotalFrequencyStatisticHandler.this.consoleDisplay.display(dataResult);
+                chartDisplay.setTitle(StatisticChoice.ROOM_DURATION_FREQUENCY.toString());
+                chartDisplay.display(dataResult);
+                consoleDisplay.display(dataResult);
             } else {
                 for (String dataName : dataNames) {
                     Multiset<Long> dataResult = summarizeEach(dataNameDataMap.get(dataName));
 
 
-                    RoomDurationTotalFrequencyStatisticHandler.this.chartDisplay.setName(dataName);
-                    RoomDurationTotalFrequencyStatisticHandler.this.chartDisplay.setTitle(dataName + StatisticChoice.ROOM_DURATION_FREQUENCY.toString() + ":Total");
-                    RoomDurationTotalFrequencyStatisticHandler.this.chartDisplay.display(dataResult);
-                    RoomDurationTotalFrequencyStatisticHandler.this.consoleDisplay.display(dataResult);
+                    chartDisplay.setName(dataName);
+                    chartDisplay.setTitle(dataName + StatisticChoice.ROOM_DURATION_FREQUENCY.toString() + ":Total");
+                    chartDisplay.display(dataResult);
+                    consoleDisplay.display(dataResult);
                 }
             }
 

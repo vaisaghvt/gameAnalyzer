@@ -31,8 +31,7 @@ public enum StatisticChoice {
             Phase.TASK_2, Phase.TASK_3),
     DOOR_FREQUENCY("SignificantDoorFrequencyStatisticHandler", "Frequency of use of significant doors", true, true,false,
             Phase.EXPLORATION, Phase.TASK_1, Phase.TASK_2, Phase.TASK_3),
-    PATH_HOP_RELATIONSHIP("PathHopStatisticHandler", "Total number of hops to path taken scatter plot", false, false,false,
-            Phase.TASK_2, Phase.TASK_3),
+
     ROOM_REMEMBERED("RoomRememberedStatisticHandler", "Correlation of vertex visit to survey answer", false, false,false,
             Phase.EXPLORATION, Phase.TASK_1),
     STAIRCASE_VISIT_CHANCE("StaircaseVisitStatisticHandler", "Frequency of taking a staircase in opp direction", false, false,false,

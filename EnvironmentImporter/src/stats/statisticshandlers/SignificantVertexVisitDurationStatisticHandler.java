@@ -149,7 +149,7 @@ public class SignificantVertexVisitDurationStatisticHandler extends StatisticsHa
             int size = dataNames.size();
             int i = 1;
             for (String dataName : dataNames) {
-
+                taskOutput.append("Processing " + dataName + "...\n");
 
                 synchronized (NetworkModel.instance()) {
                     dataNameDataMap.put(dataName, NetworkModel.instance().getVertexDataFor(dataName, choice, phase));
@@ -157,7 +157,7 @@ public class SignificantVertexVisitDurationStatisticHandler extends StatisticsHa
 
 
                 setProgress((i * 100) / size);
-                taskOutput.append("Processing " + dataName + "...\n");
+
                 i++;
 
             }
@@ -175,9 +175,9 @@ public class SignificantVertexVisitDurationStatisticHandler extends StatisticsHa
                     type);
 
 
-            SignificantVertexVisitDurationStatisticHandler.this.chartDisplay.setTitle(choice.toString() + " :" + phase.toString());
-            SignificantVertexVisitDurationStatisticHandler.this.chartDisplay.display(data);
-            SignificantVertexVisitDurationStatisticHandler.this.consoleDisplay.display(data);
+            chartDisplay.setTitle(choice.toString() + " :" + phase.toString());
+            chartDisplay.display(data);
+            consoleDisplay.display(data);
 
 
         }

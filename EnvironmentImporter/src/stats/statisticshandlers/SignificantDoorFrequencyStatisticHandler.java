@@ -146,7 +146,7 @@ public class SignificantDoorFrequencyStatisticHandler extends StatisticsHandler<
             int size = dataNames.size();
             int i = 1;
             for (String dataName : dataNames) {
-
+                taskOutput.append("Processing " + dataName + "...\n");
 
                 synchronized (NetworkModel.instance()) {
                     dataNameDataMap.put(dataName, NetworkModel.instance().getEdgeDataFor(dataName));
@@ -154,7 +154,7 @@ public class SignificantDoorFrequencyStatisticHandler extends StatisticsHandler<
 
 
                 setProgress((i * 100) / size);
-                taskOutput.append("Processing " + dataName + "...\n");
+
                 i++;
 
             }
@@ -172,9 +172,9 @@ public class SignificantDoorFrequencyStatisticHandler extends StatisticsHandler<
 
 
 
-            SignificantDoorFrequencyStatisticHandler.this.chartDisplay.setTitle(choice.toString() + " :" + phase.toString());
-            SignificantDoorFrequencyStatisticHandler.this.chartDisplay.display(data);
-            SignificantDoorFrequencyStatisticHandler.this.consoleDisplay.display(data);
+            chartDisplay.setTitle(choice.toString() + " :" + phase.toString());
+            chartDisplay.display(data);
+            consoleDisplay.display(data);
 
 
         }

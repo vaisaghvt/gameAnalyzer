@@ -179,7 +179,7 @@ public class RoomRememberedStatisticHandler extends StatisticsHandler<RoomRepeti
             int size = dataNames.size();
             int i = 1;
             for (String dataName : dataNames) {
-
+                taskOutput.append("Processing " + dataName + "...\n");
 
                 synchronized (NetworkModel.instance()) {
                     dataNameDataMap.put(dataName, NetworkModel.instance().getVertexDataFor(dataName, StatisticChoice.TIME_SPENT_PER_VERTEX, phase));
@@ -187,7 +187,7 @@ public class RoomRememberedStatisticHandler extends StatisticsHandler<RoomRepeti
 
 
                 setProgress((i * 100) / size);
-                taskOutput.append("Processing " + dataName + "...\n");
+
                 i++;
 
             }
@@ -207,10 +207,10 @@ public class RoomRememberedStatisticHandler extends StatisticsHandler<RoomRepeti
 
 
             HashMap<String, HashMap<String, HashMap<String, String>>> summarizedData = summarizeToHashMap(roomVisitData, rememberedRooms);
-            RoomRememberedStatisticHandler.this.chartDisplay.setTitle(choice.toString());
+            chartDisplay.setTitle(choice.toString());
 
-            RoomRememberedStatisticHandler.this.chartDisplay.display(summarizedData);
-            RoomRememberedStatisticHandler.this.consoleDisplay.display(summarizedData);
+            chartDisplay.display(summarizedData);
+            consoleDisplay.display(summarizedData);
 
 
         }

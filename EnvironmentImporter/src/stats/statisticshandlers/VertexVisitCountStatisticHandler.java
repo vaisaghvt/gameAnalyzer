@@ -97,7 +97,7 @@ public class VertexVisitCountStatisticHandler extends StatisticsHandler<VertexVi
             int size = dataNames.size();
             int i = 1;
             for (String dataName : dataNames) {
-
+                taskOutput.append("Processing " + dataName + "...\n");
 
                 synchronized (NetworkModel.instance()) {
                     dataNameDataMap.put(dataName, NetworkModel.instance().getVertexDataFor(dataName, choice, phase));
@@ -105,7 +105,7 @@ public class VertexVisitCountStatisticHandler extends StatisticsHandler<VertexVi
 
 
                 setProgress((i * 100) / size);
-                taskOutput.append("Processing " + dataName + "...\n");
+
                 i++;
 
             }
@@ -127,19 +127,19 @@ public class VertexVisitCountStatisticHandler extends StatisticsHandler<VertexVi
 
                     Multiset<Double> data = summarizeData(dataNameDataMap, phase);
 
-                    VertexVisitCountStatisticHandler.this.chartDisplay.setName(dataName);
-                    VertexVisitCountStatisticHandler.this.chartDisplay.setTitle(dataName + ":" + choice.toString() + " :" + phase.toString());
-                    VertexVisitCountStatisticHandler.this.chartDisplay.display(data);
-                    VertexVisitCountStatisticHandler.this.consoleDisplay.display(data);
+                    chartDisplay.setName(dataName);
+                    chartDisplay.setTitle(dataName + ":" + choice.toString() + " :" + phase.toString());
+                    chartDisplay.display(data);
+                    consoleDisplay.display(data);
 
                 }
             } else {
 
                 Multiset<Double> data = summarizeData(dataNameDataMap, phase);
 
-                VertexVisitCountStatisticHandler.this.chartDisplay.setTitle(choice.toString() + " :" + phase.toString());
-                VertexVisitCountStatisticHandler.this.chartDisplay.display(data);
-                VertexVisitCountStatisticHandler.this.consoleDisplay.display(data);
+                chartDisplay.setTitle(choice.toString() + " :" + phase.toString());
+                chartDisplay.display(data);
+                consoleDisplay.display(data);
             }
 
         }
