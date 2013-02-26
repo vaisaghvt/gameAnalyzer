@@ -1,5 +1,6 @@
 package stats.statisticshandlers;
 
+import com.google.common.collect.HashMultimap;
 import com.google.common.collect.HashMultiset;
 import com.google.common.collect.Multiset;
 import gui.NetworkModel;
@@ -9,6 +10,8 @@ import stats.StatisticChoice;
 import stats.chartdisplays.RoomDurationTotalFrequencyChartDisplay;
 import stats.consoledisplays.RoomDurationTotalFrequencyConsoleDisplay;
 
+import javax.swing.*;
+import java.awt.*;
 import java.util.Collection;
 import java.util.HashMap;
 
@@ -34,61 +37,19 @@ public class RoomDurationTotalFrequencyStatisticHandler extends StatisticsHandle
     public void generateAndDisplayStats(Collection<String> dataNames, Phase phase, StatsDialog.AllOrOne allOrOne, StatsDialog.AggregationType aggregationType) {
 
         if (!dataNames.isEmpty()) {
-            if (allOrOne == StatsDialog.AllOrOne.ALL) {
-                HashMap<String, Integer> roomEdgeCountMapping = NetworkModel.instance().getEdgesForEachRoom();
-
-                HashMap<String, HashMap<String, Long>> fullResult = new HashMap<String, HashMap<String, Long>>();
-
-                for (String dataName : dataNames) {
-                    System.out.println("Processing " + dataName + "...");
-                    HashMap<String, Number> temp = NetworkModel.instance().
-                            getVertexDataFor(dataName, StatisticChoice.TIME_SPENT_PER_VERTEX, phase);
-                    HashMap<String, Long> result = new HashMap<String, Long>();
-                    for (String roomName : temp.keySet()) {
-                        int numberOfEdges = roomEdgeCountMapping.get(roomName);
-                        long value = temp.get(roomName) == null ? 0 : temp.get(roomName).longValue();
-                        result.put(roomName, value / (numberOfEdges * 1000));
-                    }
-                    fullResult.put(dataName, result);
-                }
-
-                Multiset<Long> dataResult = summarizeAll(fullResult);
 
 
-                System.out.println("Displaying Chart...");
-                this.chartDisplay.setTitle(StatisticChoice.ROOM_DURATION_FREQUENCY.toString());
-                this.chartDisplay.display(dataResult);
-                this.consoleDisplay.display(dataResult);
-            } else {
-                HashMap<String, Integer> roomEdgeCountMapping = NetworkModel.instance().getEdgesForEachRoom();
+            createProgressBar();
+            GenerateRequiredDataTask task = new GenerateRequiredDataTask(dataNames, phase, allOrOne, aggregationType);
+            task.addPropertyChangeListener(this);
+            task.execute();
 
-
-                for (String dataName : dataNames) {
-                    System.out.println("Processing " + dataName + "...");
-                    HashMap<String, Number> temp = NetworkModel.instance().
-                            getVertexDataFor(dataName, StatisticChoice.TIME_SPENT_PER_VERTEX, phase);
-                    HashMap<String, Long> result = new HashMap<String, Long>();
-                    for (String roomName : temp.keySet()) {
-                        int numberOfEdges = roomEdgeCountMapping.get(roomName);
-                        long value = temp.get(roomName) == null ? 0 : temp.get(roomName).longValue();
-                        result.put(roomName, value / (numberOfEdges * 1000));
-                    }
-
-
-                    Multiset<Long> dataResult = summarizeEach(result);
-
-
-                    this.chartDisplay.setName(dataName);
-                    this.chartDisplay.setTitle(dataName + StatisticChoice.ROOM_DURATION_FREQUENCY.toString() + ":Total");
-                    this.chartDisplay.display(dataResult);
-                    this.consoleDisplay.display(dataResult);
-                }
-            }
 
         } else {
 
-            System.out.println("No Data Name selected!");
+            System.out.println("No Data Names selected!");
         }
+
     }
 
     private Multiset<Long> summarizeAll(HashMap<String, HashMap<String, Long>> result) {
@@ -112,6 +73,93 @@ public class RoomDurationTotalFrequencyStatisticHandler extends StatisticsHandle
         }
 
         return data;
+    }
+
+    class GenerateRequiredDataTask extends SwingWorker<Void, Void> {
+        private final Phase phase;
+        private final Collection<String> dataNames;
+
+        HashMap<String, HashMap<String, Long>> dataNameDataMap = new HashMap<String, HashMap<String, Long>>();
+
+        private final StatsDialog.AllOrOne allOrOne;
+        private final StatsDialog.AggregationType type;
+        private final HashMap<String, Integer> roomEdgeCountMapping;
+
+
+        public GenerateRequiredDataTask(Collection<String> dataNames, Phase phase, StatsDialog.AllOrOne allOrOne, StatsDialog.AggregationType aggregationType) {
+            this.dataNames = dataNames;
+
+            this.phase = phase;
+            this.allOrOne = allOrOne;
+            this.type = aggregationType;
+            synchronized (NetworkModel.instance()) {
+                roomEdgeCountMapping = NetworkModel.instance().getEdgesForEachRoom();
+            }
+
+        }
+
+        @Override
+        public Void doInBackground() {
+
+
+            setProgress(0);
+            int size = dataNames.size();
+            int i = 1;
+            for (String dataName : dataNames) {
+
+
+                HashMap<String, Number> temp;
+                synchronized (NetworkModel.instance()) {
+                    temp = NetworkModel.instance().
+                            getVertexDataFor(dataName, StatisticChoice.TIME_SPENT_PER_VERTEX, phase);
+                }
+                HashMap<String, Long> result = new HashMap<String, Long>();
+                for (String roomName : temp.keySet()) {
+                    int numberOfEdges = roomEdgeCountMapping.get(roomName);
+                    long value = temp.get(roomName) == null ? 0 : temp.get(roomName).longValue();
+                    result.put(roomName, value / (numberOfEdges * 1000));
+                }
+                dataNameDataMap.put(dataName, result);
+
+
+                setProgress((i * 100) / size);
+                taskOutput.append("Processing " + dataName + "...\n");
+                i++;
+
+            }
+            return null;
+
+        }
+
+        @Override
+        public void done() {
+            Toolkit.getDefaultToolkit().beep();
+            frame.dispose();
+            taskOutput.append("Done.");
+            frame.dispose();
+
+            if (allOrOne == StatsDialog.AllOrOne.ALL) {
+                Multiset<Long> dataResult = summarizeAll(dataNameDataMap);
+
+
+
+                RoomDurationTotalFrequencyStatisticHandler.this.chartDisplay.setTitle(StatisticChoice.ROOM_DURATION_FREQUENCY.toString());
+                RoomDurationTotalFrequencyStatisticHandler.this.chartDisplay.display(dataResult);
+                RoomDurationTotalFrequencyStatisticHandler.this.consoleDisplay.display(dataResult);
+            } else {
+                for (String dataName : dataNames) {
+                    Multiset<Long> dataResult = summarizeEach(dataNameDataMap.get(dataName));
+
+
+                    RoomDurationTotalFrequencyStatisticHandler.this.chartDisplay.setName(dataName);
+                    RoomDurationTotalFrequencyStatisticHandler.this.chartDisplay.setTitle(dataName + StatisticChoice.ROOM_DURATION_FREQUENCY.toString() + ":Total");
+                    RoomDurationTotalFrequencyStatisticHandler.this.chartDisplay.display(dataResult);
+                    RoomDurationTotalFrequencyStatisticHandler.this.consoleDisplay.display(dataResult);
+                }
+            }
+
+
+        }
     }
 
 

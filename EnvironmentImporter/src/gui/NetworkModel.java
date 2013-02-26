@@ -368,7 +368,6 @@ public class NetworkModel extends MainPanel implements ActionListener {
 //        ((FRLayout2)layout).setRepulsionMultiplier(0.25);
 
 
-
         layout.setSize(new Dimension(1600, 900));
 
         vv = new VisualizationViewer<ModelObject, ModelEdge>(layout);
@@ -388,7 +387,7 @@ public class NetworkModel extends MainPanel implements ActionListener {
 //        gm.add(new PopupVertexEdgeMenuMousePlugin<ModelObject, ModelEdge>());
         vv.getRenderContext().setVertexFillPaintTransformer(new DegreeBasedColorTransformer<ModelObject, Paint>());
         vv.getRenderContext().setVertexShapeTransformer(new VertexRectangleTransformer<ModelObject, Shape>());
-        vv.getRenderContext().setEdgeDrawPaintTransformer(new EdgeDurationColorTransformer<ModelEdge, Paint> ());
+        vv.getRenderContext().setEdgeDrawPaintTransformer(new EdgeDurationColorTransformer<ModelEdge, Paint>());
 //        vv.getRenderContext().setEdgeStrokeTransformer(edgeStrokeTransformer);
         vv.getRenderContext().setVertexLabelTransformer(new ToStringLabeller<ModelObject>());
 //        vv.getRenderContext().setEdgeLabelTransformer(new ToStringLabeller());
@@ -402,7 +401,7 @@ public class NetworkModel extends MainPanel implements ActionListener {
 
     private void scaleToRightAmount(VisualizationViewer<ModelObject, ModelEdge> vv) {
 
-        Point2D ivtfrom = vv.getRenderContext().getMultiLayerTransformer().inverseTransform(Layer.VIEW, new Point2D.Double(vv.getWidth(),vv.getHeight()));
+        Point2D ivtfrom = vv.getRenderContext().getMultiLayerTransformer().inverseTransform(Layer.VIEW, new Point2D.Double(vv.getWidth(), vv.getHeight()));
         MutableTransformer modelTransformer = vv.getRenderContext().getMultiLayerTransformer().getTransformer(Layer.LAYOUT);
         modelTransformer.scale(0.9, 0.9, ivtfrom);
         vv.repaint();
@@ -589,30 +588,17 @@ public class NetworkModel extends MainPanel implements ActionListener {
 
     }
 
-    public HashMultimap<String, String> getStaircaseRelatedMotion(Collection<String> dataNames, Phase phase) {
+    public YES_NO_CHOICE getStaircaseRelatedMotion(String dataName, Phase phase) {
         HashSet<Phase> phases = new HashSet<Phase>();
-        HashMultimap<String, String> result = HashMultimap.create();
-        phases.clear();
         phases.add(phase);
-        for (String dataName : dataNames) {
-            System.out.println("Processing " + dataName + "...");
 
 
-            DirectedSparseMultigraph<ModelObject, ModelEdge> localGraph
-                    = (DirectedSparseMultigraph<ModelObject, ModelEdge>) getDirectedGraphOfPlayer(dataName, phases);
+        DirectedSparseMultigraph<ModelObject, ModelEdge> localGraph
+                = getDirectedGraphOfPlayer(dataName, phases);
 
-            YES_NO_CHOICE resultTemp = usesStaircaseUnusually(localGraph, phase);
-            if (resultTemp == YES_NO_CHOICE.YES) {
-                result.put("yes", dataName);
-            } else if (resultTemp == YES_NO_CHOICE.NO) {
-                result.put("no", dataName);
-            } else {
-                result.put("maybe", dataName);
-            }
+        return usesStaircaseUnusually(localGraph, phase);
 
-        }
 
-        return result;
     }
 
     private YES_NO_CHOICE usesStaircaseUnusually(DirectedSparseMultigraph<ModelObject, ModelEdge> localGraph, Phase phase) {
@@ -1040,24 +1026,20 @@ public class NetworkModel extends MainPanel implements ActionListener {
     private class DegreeBasedColorTransformer<ModelObject, Paint> implements Transformer<ModelObject, Paint> {
         @Override
         public Paint transform(ModelObject obj) {
-            int degree=0;
-            double degreeNormalized =0;
+            int degree = 0;
+            double degreeNormalized = 0;
             Object object;
 
-                object = (Object) obj;
+            object = (Object) obj;
             modelcomponents.ModelObject object1 = (modelcomponents.ModelObject) object;
 
 
-
-
-
-
-            if(NetworkModel.this.currentGraph instanceof DirectedSparseMultigraph){
+            if (NetworkModel.this.currentGraph instanceof DirectedSparseMultigraph) {
                 degree = NetworkModel.this.currentGraph.inDegree(object1);
-                degreeNormalized=(double)degree/(double)(NetworkModel.this.completeGraph.degree(object1));
-                degree-=(NetworkModel.this.completeGraph.degree(object1));
+                degreeNormalized = (double) degree / (double) (NetworkModel.this.completeGraph.degree(object1));
+                degree -= (NetworkModel.this.completeGraph.degree(object1));
 
-            }   else{
+            } else {
                 degree = NetworkModel.this.currentGraph.degree(object1);
             }
 
@@ -1083,23 +1065,22 @@ public class NetworkModel extends MainPanel implements ActionListener {
 //                return (Paint) Color.RED;
 //            }
 
-            if(degreeNormalized <1.0){
+            if (degreeNormalized < 1.0) {
 
-                return (Paint)Color.white;
+                return (Paint) Color.white;
 
-            }
-            else if(degreeNormalized <=1.5){
+            } else if (degreeNormalized <= 1.5) {
                 return (Paint) Color.LIGHT_GRAY;
 
-            }else if(degreeNormalized <=2){
+            } else if (degreeNormalized <= 2) {
 
                 return (Paint) Color.YELLOW;
 
-            }else if(degreeNormalized <=2.5){
+            } else if (degreeNormalized <= 2.5) {
                 return (Paint) Color.GREEN;
-            }else if(degreeNormalized <=3){
+            } else if (degreeNormalized <= 3) {
                 return (Paint) Color.PINK;
-            }else{
+            } else {
                 return (Paint) Color.RED;
             }
 
@@ -1134,17 +1115,17 @@ public class NetworkModel extends MainPanel implements ActionListener {
                 Point3D tempPoint = getCenterOfRoom(room);
                 double x = tempPoint.getX();
                 double y = tempPoint.getY();
-                int floor = (int)tempPoint.getZ();
+                int floor = (int) tempPoint.getZ();
 
 
-                Point p = MapImagePanel.convertToDrawingCoordinate(new Point((int)x, (int)y), floor);
+                Point p = MapImagePanel.convertToDrawingCoordinate(new Point((int) x, (int) y), floor);
 
 
-                p= new Point((int) (p.getX()+
-                        (floor*700)),(int)p.getY());
+                p = new Point((int) (p.getX() +
+                        (floor * 700)), (int) p.getY());
 
 
-                Point2D point =  (Point2D) (new java.awt.geom.Point2D.Double(p.x,p.y));
+                Point2D point = (Point2D) (new java.awt.geom.Point2D.Double(p.x, p.y));
 
 
                 return point;
@@ -1154,7 +1135,7 @@ public class NetworkModel extends MainPanel implements ActionListener {
             double sumX = 0;
             double sumY = 0;
             int n = 0;
-           int floor=0;
+            int floor = 0;
 
             for (int areaId : group.getAreaIds()) {
 
@@ -1167,16 +1148,16 @@ public class NetworkModel extends MainPanel implements ActionListener {
                 sumX += x;
                 sumY += y;
 
-                floor = (int)tempPoint.getZ();
+                floor = (int) tempPoint.getZ();
                 n++;
             }
 
             Point p = MapImagePanel.convertToDrawingCoordinate(
-                    new Point((int)(sumX / n), (int)(sumY / n)), floor);
+                    new Point((int) (sumX / n), (int) (sumY / n)), floor);
 
-            p= new Point((int) (p.getX()+(floor*700)),(int)p.getY());
+            p = new Point((int) (p.getX() + (floor * 700)), (int) p.getY());
 
-            Point2D point =  (Point2D) (new java.awt.geom.Point2D.Double(p.getX(), p.getY()));
+            Point2D point = (Point2D) (new java.awt.geom.Point2D.Double(p.getX(), p.getY()));
 
 
             return point;
@@ -1379,10 +1360,10 @@ public class NetworkModel extends MainPanel implements ActionListener {
 
     public HashMap<String, Number> getVertexDataFor(String dataName, StatisticChoice choice, Phase phase) {
 
-        if(dataName.equalsIgnoreCase("random walk")){
-            if(choice == VERTEX_VISIT_FREQUENCY && phase == Phase.EXPLORATION){
-                return RandomWalk.instance().calculateAverageRoomVisitFrequency(); }
-            else {
+        if (dataName.equalsIgnoreCase("random walk")) {
+            if (choice == VERTEX_VISIT_FREQUENCY && phase == Phase.EXPLORATION) {
+                return RandomWalk.instance().calculateAverageRoomVisitFrequency();
+            } else {
                 System.out.println("Wrong Call to Random Walk");
                 return new HashMap<String, Number>();
             }
@@ -1554,14 +1535,14 @@ public class NetworkModel extends MainPanel implements ActionListener {
             Object obj = (Object) modelEdge;
             modelcomponents.ModelEdge edge = (modelcomponents.ModelEdge) obj;
 
-            if(currentData.equalsIgnoreCase("default")){
+            if (currentData.equalsIgnoreCase("default")) {
                 return (Paint) Color.BLACK;
 
             }
             long time = Long.parseLong(Database.getInstance().getPhaseCompleteTime(Phase.TASK_3, currentData));
-            float value = (float)edge.getTime()/ (float)time ;
+            float value = (float) edge.getTime() / (float) time;
             //value *=255;
-            return (Paint) new Color(1.0f-value, 1.0f-value, 1.0f-value);
+            return (Paint) new Color(1.0f - value, 1.0f - value, 1.0f - value);
 
         }
     }

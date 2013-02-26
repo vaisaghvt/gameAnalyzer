@@ -7,6 +7,8 @@ import stats.StatisticChoice;
 import stats.chartdisplays.SignificantVertexChartDisplay;
 import stats.consoledisplays.SignificantVertexConsoleDisplay;
 
+import javax.swing.*;
+import java.awt.*;
 import java.util.Collection;
 import java.util.HashMap;
 
@@ -34,45 +36,16 @@ public class SignificantVertexVisitDurationStatisticHandler extends StatisticsHa
 
         if (!dataNames.isEmpty()) {
 
-            if (allOrOne == StatsDialog.AllOrOne.EACH) {
 
-                HashMap<String, HashMap<String, Number>> dataNameDataMap = new HashMap<String, HashMap<String, Number>>();
-                for (String dataName : dataNames) {
-                    System.out.println("Processing " + dataName + "...");
-                    dataNameDataMap.put(dataName, NetworkModel.instance().getVertexDataFor(dataName, choice, phase));
+            createProgressBar();
+            GenerateRequiredDataTask task = new GenerateRequiredDataTask(dataNames, choice, phase, allOrOne, aggregationType);
+            task.addPropertyChangeListener(this);
+            task.execute();
 
-                }
-
-                HashMap<String, HashMap<String, Number>> data = summarizeData(dataNameDataMap, null);
-
-
-                this.chartDisplay.setTitle(choice.toString() + " :" + phase.toString());
-                this.chartDisplay.display(data);
-                this.consoleDisplay.display(data);
-            } else {
-                HashMap<String, HashMap<String, Number>> dataNameDataMap = new HashMap<String, HashMap<String, Number>>();
-                for (String dataName : dataNames) {
-                    System.out.println("Processing " + dataName + "...");
-                    dataNameDataMap.put(dataName,
-                            NetworkModel.instance().getVertexDataFor(dataName, choice, phase));
-
-
-                }
-
-                HashMap<String, HashMap<String, Number>> data = summarizeData(dataNameDataMap, aggregationType);
-
-
-                this.chartDisplay.setTitle(choice.toString() + " :" + phase.toString());
-                this.chartDisplay.display(data);
-                this.consoleDisplay.display(data);
-                dataNameDataMap.clear();
-
-
-            }
 
         } else {
 
-            System.out.println("No Data Name selected!");
+            System.out.println("No Data Names selected!");
         }
     }
 
@@ -149,6 +122,65 @@ public class SignificantVertexVisitDurationStatisticHandler extends StatisticsHa
 
         }
         return result;
+    }
+
+    class GenerateRequiredDataTask extends SwingWorker<Void, Void> {
+        private final Phase phase;
+        private final Collection<String> dataNames;
+        private final StatisticChoice choice;
+        HashMap<String, HashMap<String, Number>> dataNameDataMap = new HashMap<String, HashMap<String, Number>>();
+        private final StatsDialog.AllOrOne allOrOne;
+        private final StatsDialog.AggregationType type;
+
+
+        public GenerateRequiredDataTask(Collection<String> dataNames, StatisticChoice choice, Phase phase, StatsDialog.AllOrOne allOrOne, StatsDialog.AggregationType aggregationType) {
+            this.dataNames = dataNames;
+            this.choice = choice;
+            this.phase = phase;
+            this.allOrOne = allOrOne;
+            this.type = aggregationType;
+        }
+
+        @Override
+        public Void doInBackground() {
+
+
+            setProgress(0);
+            int size = dataNames.size();
+            int i = 1;
+            for (String dataName : dataNames) {
+
+
+                synchronized (NetworkModel.instance()) {
+                    dataNameDataMap.put(dataName, NetworkModel.instance().getVertexDataFor(dataName, choice, phase));
+                }
+
+
+                setProgress((i * 100) / size);
+                taskOutput.append("Processing " + dataName + "...\n");
+                i++;
+
+            }
+            return null;
+
+        }
+
+        @Override
+        public void done() {
+            Toolkit.getDefaultToolkit().beep();
+            frame.dispose();
+            taskOutput.append("Done.");
+            frame.dispose();
+            HashMap<String, HashMap<String, Number>> data = summarizeData(dataNameDataMap,
+                    type);
+
+
+            SignificantVertexVisitDurationStatisticHandler.this.chartDisplay.setTitle(choice.toString() + " :" + phase.toString());
+            SignificantVertexVisitDurationStatisticHandler.this.chartDisplay.display(data);
+            SignificantVertexVisitDurationStatisticHandler.this.consoleDisplay.display(data);
+
+
+        }
     }
 
 
