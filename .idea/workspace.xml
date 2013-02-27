@@ -27,17 +27,6 @@
       <change type="MODIFICATION" beforePath="$PROJECT_DIR$/EnvironmentImporter/src/stats/statisticshandlers/VertexVisitCountStatisticHandler.java" afterPath="$PROJECT_DIR$/EnvironmentImporter/src/stats/statisticshandlers/VertexVisitCountStatisticHandler.java" />
       <change type="MODIFICATION" beforePath="$PROJECT_DIR$/EnvironmentImporter/src/stats/statisticshandlers/VertexVisitDurationStatisticHandler.java" afterPath="$PROJECT_DIR$/EnvironmentImporter/src/stats/statisticshandlers/VertexVisitDurationStatisticHandler.java" />
       <change type="MODIFICATION" beforePath="$PROJECT_DIR$/EnvironmentImporter/src/stats/statisticshandlers/VertexVisitFrequencyStatisticHandler.java" afterPath="$PROJECT_DIR$/EnvironmentImporter/src/stats/statisticshandlers/VertexVisitFrequencyStatisticHandler.java" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/.idea/workspace.xml" afterPath="$PROJECT_DIR$/.idea/workspace.xml" />
-    </list>
-    <ignored path="gameAnalyzer.iws" />
-    <ignored path=".idea/workspace.xml" />
-    <file path="/ParallelCoordinatePlotGenerator.java" changelist="fdb44e59-7ecd-4e42-8b92-91ee3fc56ef5" time="1361870367232" ignored="false" />
-    <file path="/GraphDetailsToFile.java" changelist="fdb44e59-7ecd-4e42-8b92-91ee3fc56ef5" time="1361423246384" ignored="false" />
-    <file path="/DistanceTimeConsoleDisplay.java" changelist="fdb44e59-7ecd-4e42-8b92-91ee3fc56ef5" time="1361420684368" ignored="false" />
-    <file path="/StatisticChoice.java" changelist="fdb44e59-7ecd-4e42-8b92-91ee3fc56ef5" time="1361769608292" ignored="false" />
-    <file path="/DistanceTimeTotalStatisticHandler.java" changelist="fdb44e59-7ecd-4e42-8b92-91ee3fc56ef5" time="1361419435249" ignored="false" />
-    <file path="/NetworkModel.java" changelist="fdb44e59-7ecd-4e42-8b92-91ee3fc56ef5" time="1361868481288" ignored="false" />
-    <file path="/fragment.java" changelist="fdb44e59-7ecd-4e42-8b92-91ee3fc56ef5" time="1361770131359" ignored="false" />
     <file path="/Dummy.txt" changelist="fdb44e59-7ecd-4e42-8b92-91ee3fc56ef5" time="1361860663115" ignored="false" />
     <file path="/Document.java" changelist="fdb44e59-7ecd-4e42-8b92-91ee3fc56ef5" time="1361616950071" ignored="false" />
     <file path="/RandomWalk.java" changelist="fdb44e59-7ecd-4e42-8b92-91ee3fc56ef5" time="1361784664044" ignored="false" />
