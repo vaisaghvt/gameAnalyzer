@@ -34,20 +34,8 @@ public class VertexVisitCountStatisticHandler extends StatisticsHandler<VertexVi
 
     @Override
     public void generateAndDisplayStats(Collection<String> dataNames, Phase phase, StatsDialog.AllOrOne allOrOne, StatsDialog.AggregationType aggregationType) {
-        final StatisticChoice choice = StatisticChoice.VERTEX_VISIT_FREQUENCY;
-        if (!dataNames.isEmpty()) {
-
-
-            createProgressBar();
-            GenerateRequiredDataTask task = new GenerateRequiredDataTask(dataNames, choice, phase, allOrOne, aggregationType);
-            task.addPropertyChangeListener(this);
-            task.execute();
-
-
-        } else {
-
-            System.out.println("No Data Names selected!");
-        }
+        GenerateRequiredDataTask task = new GenerateRequiredDataTask(dataNames, StatisticChoice.VERTEX_VISIT_FREQUENCY, phase, allOrOne);
+        super.actualGenerateAndDisplay(task);
 
 
     }
@@ -72,53 +60,30 @@ public class VertexVisitCountStatisticHandler extends StatisticsHandler<VertexVi
         return result;
     }
 
-    class GenerateRequiredDataTask extends SwingWorker<Void, Void> {
+    class GenerateRequiredDataTask extends AbstractTask {
         private final Phase phase;
-        private final Collection<String> dataNames;
         private final StatisticChoice choice;
         HashMap<String, HashMap<String, Number>> dataNameDataMap = new HashMap<String, HashMap<String, Number>>();
         private final StatsDialog.AllOrOne allOrOne;
-        private final StatsDialog.AggregationType type;
 
 
-        public GenerateRequiredDataTask(Collection<String> dataNames, StatisticChoice choice, Phase phase, StatsDialog.AllOrOne allOrOne, StatsDialog.AggregationType aggregationType) {
-            this.dataNames = dataNames;
+        public GenerateRequiredDataTask(Collection<String> dataNames, StatisticChoice choice, Phase phase, StatsDialog.AllOrOne allOrOne) {
+            super(dataNames);
+
             this.choice = choice;
             this.phase = phase;
             this.allOrOne = allOrOne;
-            this.type = aggregationType;
         }
 
         @Override
-        public Void doInBackground() {
-
-
-            setProgress(0);
-            int size = dataNames.size();
-            int i = 1;
-            for (String dataName : dataNames) {
-                taskOutput.append("Processing " + dataName + "...\n");
-
-                synchronized (NetworkModel.instance()) {
-                    dataNameDataMap.put(dataName, NetworkModel.instance().getVertexDataFor(dataName, choice, phase));
-                }
-
-
-                setProgress((i * 100) / size);
-
-                i++;
-
+        protected void doTasks(String dataName) {
+            synchronized (NetworkModel.instance()) {
+                dataNameDataMap.put(dataName, NetworkModel.instance().getVertexDataFor(dataName, choice, phase));
             }
-            return null;
-
         }
 
         @Override
-        public void done() {
-            Toolkit.getDefaultToolkit().beep();
-            frame.dispose();
-            taskOutput.append("Done.");
-            frame.dispose();
+        protected void summarizeAndDisplay() {
             if (allOrOne == StatsDialog.AllOrOne.EACH) {
                 HashMap<String, HashMap<String, Number>> tempDataNameDataMap = new HashMap<String, HashMap<String, Number>>();
                 for (String dataName : dataNames) {
@@ -141,8 +106,8 @@ public class VertexVisitCountStatisticHandler extends StatisticsHandler<VertexVi
                 chartDisplay.display(data);
                 consoleDisplay.display(data);
             }
-
         }
+
     }
 
 

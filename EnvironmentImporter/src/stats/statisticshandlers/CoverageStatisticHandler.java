@@ -32,65 +32,40 @@ public class CoverageStatisticHandler extends StatisticsHandler<CoverageConsoleD
 
     @Override
     public void generateAndDisplayStats(Collection<String> dataNames, Phase phase, StatsDialog.AllOrOne all, StatsDialog.AggregationType itemAt) {
-        final StatisticChoice choice = StatisticChoice.COVERAGE;
 
-        if (!dataNames.isEmpty()) {
-            createProgressBar();
-            GenerateRequiredDataTask task = new GenerateRequiredDataTask(dataNames, choice, phase);
-            task.addPropertyChangeListener(this);
-            task.execute();
-        } else {
-            System.out.println("No Data Names selected!");
-        }
+        GenerateRequiredDataTask task = new GenerateRequiredDataTask(dataNames, StatisticChoice.COVERAGE,phase);
+        super.actualGenerateAndDisplay(task);
+
+
 
     }
 
-    class GenerateRequiredDataTask extends SwingWorker<Void, Void> {
+    class GenerateRequiredDataTask extends AbstractTask {
         private final Phase phase;
-        private final Collection<String> dataNames;
         private final StatisticChoice choice;
         HashMultimap<String, String> result = HashMultimap.create();
         HashMultimap<Integer, String> coverageLevel = HashMultimap.create();
 
 
         public GenerateRequiredDataTask(Collection<String> dataNames, StatisticChoice choice, Phase phase) {
-            this.dataNames = dataNames;
+            super(dataNames);
             this.choice = choice;
             this.phase = phase;
-
-        }
+       }
 
         @Override
-        public Void doInBackground() {
-            setProgress(0);
-            int size = dataNames.size();
-            int i = 1;
-            for (String dataName : dataNames) {
-                taskOutput.append("Processing " + dataName + "...\n");
-
-                synchronized (NetworkModel.instance()) {
-                    coverageLevel.put(NetworkModel.instance().getCoverage(dataName, phase), dataName);
-                }
-                setProgress((i * 100) / size);
-
-                i++;
-
+        protected void doTasks(String dataName) {
+            synchronized (NetworkModel.instance()) {
+                coverageLevel.put(NetworkModel.instance().getCoverage(dataName, phase), dataName);
             }
-            return null;
-
         }
 
         @Override
-        public void done() {
-            Toolkit.getDefaultToolkit().beep();
-            frame.dispose();
-            taskOutput.append("Done.");
-            frame.dispose();
+        protected void summarizeAndDisplay() {
             chartDisplay.setTitle(choice.toString() + phase.toString());
 
             chartDisplay.display(coverageLevel);
             consoleDisplay.display(coverageLevel);
-
         }
     }
 

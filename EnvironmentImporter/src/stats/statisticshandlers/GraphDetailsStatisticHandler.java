@@ -42,14 +42,8 @@ public class GraphDetailsStatisticHandler extends StatisticsHandler<GraphDetails
     @Override
     public void generateAndDisplayStats(Collection<String> dataNames, Phase phase, StatsDialog.AllOrOne allOrOne, StatsDialog.AggregationType aggregationType) {
 
-        if (!dataNames.isEmpty()) {
-            createProgressBar();
-            GenerateRequiredDataTask task = new GenerateRequiredDataTask(dataNames, allOrOne, aggregationType);
-            task.addPropertyChangeListener(this);
-            task.execute();
-        } else {
-            System.out.println("No Data Names selected!");
-        }
+        GenerateRequiredDataTask task = new GenerateRequiredDataTask(dataNames, allOrOne, aggregationType);
+        super.actualGenerateAndDisplay(task);
     }
 
 
@@ -254,65 +248,47 @@ public class GraphDetailsStatisticHandler extends StatisticsHandler<GraphDetails
         return Math.sqrt(sum / n);
     }
 
-    class GenerateRequiredDataTask extends SwingWorker<Void, Void> {
+    class GenerateRequiredDataTask extends AbstractTask {
 
-        private final Collection<String> dataNames;
 
         HashMap<String, HashMap<String, String>> nameToStatMapping = new HashMap<String, HashMap<String, String>>();
         private final StatsDialog.AllOrOne allOrOne;
         private final StatsDialog.AggregationType type;
+        private final HashSet<Phase> phases;
 
 
         public GenerateRequiredDataTask(Collection<String> dataNames, StatsDialog.AllOrOne allOrOne, StatsDialog.AggregationType aggregationType) {
-            this.dataNames = dataNames;
+            super(dataNames);
             this.allOrOne = allOrOne;
             this.type = aggregationType;
-        }
-
-        @Override
-        public Void doInBackground() {
-            setProgress(0);
-            int size = dataNames.size();
-            int i = 1;
-            HashSet<Phase> phases = new HashSet<Phase>();
+            phases = new HashSet<Phase>();
             for (Phase tempPhase : Phase.values()) {
                 phases.add(tempPhase);
             }
 
             nameToStatMapping = new HashMap<String, HashMap<String, String>>();
+        }
 
-            for (String dataName : dataNames) {
-                taskOutput.append("Processing " + dataName + "...\n");
-                List<HashMap<String, Number>> movementOfPlayer;
-                DirectedSparseMultigraph<ModelObject, ModelEdge> graphForPlayer;
-                synchronized (NetworkModel.instance()) {
-                    movementOfPlayer = NetworkModel.instance().getMovementOfPlayer(dataName, phases);
-                    graphForPlayer =
+        @Override
+        protected void doTasks(String dataName) {
+            List<HashMap<String, Number>> movementOfPlayer;
+            DirectedSparseMultigraph<ModelObject, ModelEdge> graphForPlayer;
+            synchronized (NetworkModel.instance()) {
+                movementOfPlayer = NetworkModel.instance().getMovementOfPlayer(dataName, phases);
+                graphForPlayer =
                         NetworkModel.instance().getDirectedGraphOfPlayer(dataName, phases);
-                }
-
-                HashMap<String, String> results = new HashMap<String, String>();
-                results = getStatsForMovement(movementOfPlayer, results);
-                results = getStatsForGraph(dataName, graphForPlayer, results);
-
-                nameToStatMapping.put(dataName, results);
-
-                setProgress((i * 100) / size);
-
-                i++;
             }
 
+            HashMap<String, String> results = new HashMap<String, String>();
+            results = getStatsForMovement(movementOfPlayer, results);
+            results = getStatsForGraph(dataName, graphForPlayer, results);
 
-            return null;
+            nameToStatMapping.put(dataName, results);
 
         }
 
         @Override
-        public void done() {
-            Toolkit.getDefaultToolkit().beep();
-            frame.dispose();
-            taskOutput.append("Done.");
-            frame.dispose();
+        protected void summarizeAndDisplay() {
             if (allOrOne == StatsDialog.AllOrOne.EACH) {
                 for (String dataName : dataNames) {
                     chartDisplay.setName(dataName);
@@ -332,6 +308,7 @@ public class GraphDetailsStatisticHandler extends StatisticsHandler<GraphDetails
             }
 
         }
+
     }
 
 

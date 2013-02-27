@@ -33,76 +33,44 @@ public class CorridorPrefStatisticHandler extends StatisticsHandler<CorridorPref
 
     @Override
     public void generateAndDisplayStats(Collection<String> dataNames, Phase phase, StatsDialog.AllOrOne all, StatsDialog.AggregationType itemAt) {
-        final StatisticChoice choice = StatisticChoice.CORRIDOR_PREFERENCE_MEASURE;
 
-        if (!dataNames.isEmpty()) {
-
-
-            createProgressBar();
-            GenerateRequiredDataTask task = new GenerateRequiredDataTask(dataNames, choice, phase);
-            task.addPropertyChangeListener(this);
-            task.execute();
-
-
-        } else {
-
-            System.out.println("No Data Names selected!");
-        }
+        GenerateRequiredDataTask task = new GenerateRequiredDataTask(dataNames, StatisticChoice.CORRIDOR_PREFERENCE_MEASURE,phase);
+        super.actualGenerateAndDisplay(task);
 
 
     }
 
 
-    class GenerateRequiredDataTask extends SwingWorker<Void, Void> {
+    class GenerateRequiredDataTask extends AbstractTask {
         private final Phase phase;
-        private final Collection<String> dataNames;
         private final StatisticChoice choice;
         HashMultimap<String,String> result = HashMultimap.create();
 
 
 
         public GenerateRequiredDataTask(Collection<String> dataNames, StatisticChoice choice, Phase phase) {
-            this.dataNames = dataNames;
+            super(dataNames);
             this.choice = choice;
             this.phase = phase;
         }
 
         @Override
-        public Void doInBackground() {
-            setProgress(0);
-            int size = dataNames.size();
-            int i = 1;
-            for (String dataName : dataNames) {
-                taskOutput.append("Processing " + dataName + "...\n");
-                YES_NO_CHOICE resultTemp;
-                synchronized (NetworkModel.instance()) {
-                    resultTemp = NetworkModel.instance().getCorridorRelatedMotion(dataName, phase);
-                }
-                if (resultTemp == YES_NO_CHOICE.YES) {
-                    result.put("yes", dataName);
-                } else if (resultTemp == YES_NO_CHOICE.NO) {
-                    result.put("no", dataName);
-                } else {
-                    result.put("maybe", dataName);
-                }
-
-                setProgress((i * 100) / size);
-
-                i++;
+        protected void doTasks(String dataName) {
+            YES_NO_CHOICE resultTemp;
+            synchronized (NetworkModel.instance()) {
+                resultTemp = NetworkModel.instance().getCorridorRelatedMotion(dataName, phase);
             }
-
-
-
-            return null;
-
+            if (resultTemp == YES_NO_CHOICE.YES) {
+                result.put("yes", dataName);
+            } else if (resultTemp == YES_NO_CHOICE.NO) {
+                result.put("no", dataName);
+            } else {
+                result.put("maybe", dataName);
+            }
         }
 
         @Override
-        public void done() {
-            Toolkit.getDefaultToolkit().beep();
-            frame.dispose();
-            taskOutput.append("Done.");
-            frame.dispose();
+        protected void summarizeAndDisplay() {
             chartDisplay.setTitle(choice.toString() + phase.toString());
             chartDisplay.setPhase(phase);
             chartDisplay.display(result);

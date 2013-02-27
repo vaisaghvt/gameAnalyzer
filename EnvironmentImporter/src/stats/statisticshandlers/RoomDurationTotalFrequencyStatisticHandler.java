@@ -35,19 +35,8 @@ public class RoomDurationTotalFrequencyStatisticHandler extends StatisticsHandle
     @Override
     public void generateAndDisplayStats(Collection<String> dataNames, Phase phase, StatsDialog.AllOrOne allOrOne, StatsDialog.AggregationType aggregationType) {
 
-        if (!dataNames.isEmpty()) {
-
-
-            createProgressBar();
-            GenerateRequiredDataTask task = new GenerateRequiredDataTask(dataNames, phase, allOrOne, aggregationType);
-            task.addPropertyChangeListener(this);
-            task.execute();
-
-
-        } else {
-
-            System.out.println("No Data Names selected!");
-        }
+        GenerateRequiredDataTask task = new GenerateRequiredDataTask(dataNames, phase, allOrOne, aggregationType);
+        super.actualGenerateAndDisplay(task);
 
     }
 
@@ -74,9 +63,8 @@ public class RoomDurationTotalFrequencyStatisticHandler extends StatisticsHandle
         return data;
     }
 
-    class GenerateRequiredDataTask extends SwingWorker<Void, Void> {
+    class GenerateRequiredDataTask extends AbstractTask {
         private final Phase phase;
-        private final Collection<String> dataNames;
 
         HashMap<String, HashMap<String, Long>> dataNameDataMap = new HashMap<String, HashMap<String, Long>>();
 
@@ -86,7 +74,7 @@ public class RoomDurationTotalFrequencyStatisticHandler extends StatisticsHandle
 
 
         public GenerateRequiredDataTask(Collection<String> dataNames, Phase phase, StatsDialog.AllOrOne allOrOne, StatsDialog.AggregationType aggregationType) {
-            this.dataNames = dataNames;
+            super(dataNames);
 
             this.phase = phase;
             this.allOrOne = allOrOne;
@@ -98,45 +86,23 @@ public class RoomDurationTotalFrequencyStatisticHandler extends StatisticsHandle
         }
 
         @Override
-        public Void doInBackground() {
-
-
-            setProgress(0);
-            int size = dataNames.size();
-            int i = 1;
-            for (String dataName : dataNames) {
-
-                taskOutput.append("Processing " + dataName + "...\n");
-                HashMap<String, Number> temp;
-                synchronized (NetworkModel.instance()) {
-                    temp = NetworkModel.instance().
-                            getVertexDataFor(dataName, StatisticChoice.TIME_SPENT_PER_VERTEX, phase);
-                }
-                HashMap<String, Long> result = new HashMap<String, Long>();
-                for (String roomName : temp.keySet()) {
-                    int numberOfEdges = roomEdgeCountMapping.get(roomName);
-                    long value = temp.get(roomName) == null ? 0 : temp.get(roomName).longValue();
-                    result.put(roomName, value / (numberOfEdges * 1000));
-                }
-                dataNameDataMap.put(dataName, result);
-
-
-                setProgress((i * 100) / size);
-
-                i++;
-
+        protected void doTasks(String dataName) {
+            HashMap<String, Number> temp;
+            synchronized (NetworkModel.instance()) {
+                temp = NetworkModel.instance().
+                        getVertexDataFor(dataName, StatisticChoice.TIME_SPENT_PER_VERTEX, phase);
             }
-            return null;
-
+            HashMap<String, Long> result = new HashMap<String, Long>();
+            for (String roomName : temp.keySet()) {
+                int numberOfEdges = roomEdgeCountMapping.get(roomName);
+                long value = temp.get(roomName) == null ? 0 : temp.get(roomName).longValue();
+                result.put(roomName, value / (numberOfEdges * 1000));
+            }
+            dataNameDataMap.put(dataName, result);
         }
 
         @Override
-        public void done() {
-            Toolkit.getDefaultToolkit().beep();
-            frame.dispose();
-            taskOutput.append("Done.");
-            frame.dispose();
-
+        protected void summarizeAndDisplay() {
             if (allOrOne == StatsDialog.AllOrOne.ALL) {
                 Multiset<Long> dataResult = summarizeAll(dataNameDataMap);
 
@@ -156,7 +122,6 @@ public class RoomDurationTotalFrequencyStatisticHandler extends StatisticsHandle
                     consoleDisplay.display(dataResult);
                 }
             }
-
 
         }
     }

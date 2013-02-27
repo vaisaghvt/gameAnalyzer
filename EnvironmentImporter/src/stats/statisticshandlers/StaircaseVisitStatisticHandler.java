@@ -9,8 +9,6 @@ import stats.StatisticChoice;
 import stats.chartdisplays.StaircaseVisitChartDisplay;
 import stats.consoledisplays.StaircaseVisitConsoleDisplay;
 
-import javax.swing.*;
-import java.awt.*;
 import java.util.Collection;
 
 
@@ -34,79 +32,43 @@ public class StaircaseVisitStatisticHandler extends StatisticsHandler<StaircaseV
 
     @Override
     public void generateAndDisplayStats(Collection<String> dataNames, Phase phase, StatsDialog.AllOrOne allOrOne, StatsDialog.AggregationType aggregationType) {
-        final StatisticChoice choice = StatisticChoice.STAIRCASE_VISIT_CHANCE;
+        GenerateRequiredDataTask task = new GenerateRequiredDataTask(dataNames, StatisticChoice.STAIRCASE_VISIT_CHANCE, phase);
+        super.actualGenerateAndDisplay(task);
 
-        if (!dataNames.isEmpty()) {
-
-
-            createProgressBar();
-            GenerateRequiredDataTask task = new GenerateRequiredDataTask(dataNames, choice, phase, allOrOne, aggregationType);
-            task.addPropertyChangeListener(this);
-            task.execute();
-
-
-        } else {
-
-            System.out.println("No Data Names selected!");
-        }
 
 
 
     }
 
-    class GenerateRequiredDataTask extends SwingWorker<Void, Void> {
+    class GenerateRequiredDataTask extends AbstractTask {
         private final Phase phase;
-        private final Collection<String> dataNames;
         private final StatisticChoice choice;
         HashMultimap<String,String> result = HashMultimap.create();
-        private final StatsDialog.AllOrOne allOrOne;
-        private final StatsDialog.AggregationType type;
 
 
-        public GenerateRequiredDataTask(Collection<String> dataNames, StatisticChoice choice, Phase phase, StatsDialog.AllOrOne allOrOne, StatsDialog.AggregationType aggregationType) {
-            this.dataNames = dataNames;
+        public GenerateRequiredDataTask(Collection<String> dataNames, StatisticChoice choice, Phase phase) {
+            super(dataNames);
             this.choice = choice;
             this.phase = phase;
-            this.allOrOne = allOrOne;
-            this.type = aggregationType;
         }
 
         @Override
-        public Void doInBackground() {
-            setProgress(0);
-            int size = dataNames.size();
-            int i = 1;
-            for (String dataName : dataNames) {
-                taskOutput.append("Processing " + dataName + "...\n");
-                YES_NO_CHOICE resultTemp;
-                synchronized (NetworkModel.instance()) {
-                    resultTemp = NetworkModel.instance().getStaircaseRelatedMotion(dataName, phase);
-                }
-                if (resultTemp == YES_NO_CHOICE.YES) {
-                    result.put("yes", dataName);
-                } else if (resultTemp == YES_NO_CHOICE.NO) {
-                    result.put("no", dataName);
-                } else {
-                    result.put("maybe", dataName);
-                }
-
-                setProgress((i * 100) / size);
-
-                i++;
+        protected void doTasks(String dataName) {
+            YES_NO_CHOICE resultTemp;
+            synchronized (NetworkModel.instance()) {
+                resultTemp = NetworkModel.instance().getStaircaseRelatedMotion(dataName, phase);
             }
-
-
-
-            return null;
-
+            if (resultTemp == YES_NO_CHOICE.YES) {
+                result.put("yes", dataName);
+            } else if (resultTemp == YES_NO_CHOICE.NO) {
+                result.put("no", dataName);
+            } else {
+                result.put("maybe", dataName);
+            }
         }
 
         @Override
-        public void done() {
-            Toolkit.getDefaultToolkit().beep();
-            frame.dispose();
-            taskOutput.append("Done.");
-            frame.dispose();
+        protected void summarizeAndDisplay() {
             chartDisplay.setTitle(choice.toString() + phase.toString());
             chartDisplay.setPhase(phase);
             chartDisplay.display(result);

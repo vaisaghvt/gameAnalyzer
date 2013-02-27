@@ -2,6 +2,7 @@ package stats.statisticshandlers;
 
 import gui.Phase;
 import gui.StatsDialog;
+import stats.StatisticChoice;
 import stats.chartdisplays.ChartDisplay;
 import stats.consoledisplays.ConsoleDisplay;
 
@@ -26,17 +27,38 @@ public abstract class StatisticsHandler<T extends ConsoleDisplay, V extends Char
     V chartDisplay;
     protected JProgressBar progressBar;
     protected JTextArea taskOutput;
-    protected JFrame frame;
+    protected JFrame progressFrame;
+    protected boolean windows;
+
+
+    protected StatisticChoice choice;
 
     protected StatisticsHandler(V chartDisplay, T consoleDisplay) {
         this.chartDisplay = chartDisplay;
 
         this.consoleDisplay = consoleDisplay;
-
+        String OS = System.getProperty("os.name").toLowerCase();
+        if(OS.indexOf("win") >= 0)  {
+            windows = true;
+        } else {
+            windows = false;
+        }
 
     }
 
     public abstract void generateAndDisplayStats(Collection<String> dataNames, Phase phase, StatsDialog.AllOrOne allOrOne, StatsDialog.AggregationType type);
+
+    public <U extends AbstractTask> void actualGenerateAndDisplay(U task) {
+        if (!task.getDataNames().isEmpty()) {
+            createProgressBar();
+            task.addPropertyChangeListener(this);
+            task.execute();
+        } else {
+            System.out.println("No Data Names selected!");
+        }
+
+    }
+
 
     public static double aggregate(Set<? extends Number> doubles, StatsDialog.AggregationType aggregationType) {
         double result = 0.0;
@@ -83,17 +105,17 @@ public abstract class StatisticsHandler<T extends ConsoleDisplay, V extends Char
         taskOutput.setEditable(false);
         DefaultCaret caret = (DefaultCaret)taskOutput.getCaret();
         caret.setUpdatePolicy(DefaultCaret.ALWAYS_UPDATE);
-        frame = new JFrame("Processing data");
-        frame.setLayout(new BorderLayout());
-        frame.add(progressBar, BorderLayout.NORTH);
-        frame.add(new JScrollPane(taskOutput), BorderLayout.CENTER);
-        frame.setDefaultCloseOperation(WindowConstants.DO_NOTHING_ON_CLOSE);
+        progressFrame = new JFrame("Processing data");
+        progressFrame.setLayout(new BorderLayout());
+        progressFrame.add(progressBar, BorderLayout.NORTH);
+        progressFrame.add(new JScrollPane(taskOutput), BorderLayout.CENTER);
+        progressFrame.setDefaultCloseOperation(WindowConstants.DO_NOTHING_ON_CLOSE);
         Dimension screenSize = Toolkit.getDefaultToolkit().getScreenSize();
         double width = screenSize.getWidth();
         double height = screenSize.getHeight();
-        frame.setLocation((int) Math.floor(width / 2 - 200), (int) Math.floor(height / 2 - 100));
-        frame.setSize(400, 200);
-        frame.setVisible(true);
+        progressFrame.setLocation((int) Math.floor(width / 2 - 200), (int) Math.floor(height / 2 - 100));
+        progressFrame.setSize(400, 200);
+        progressFrame.setVisible(true);
 
     }
     @Override
@@ -106,6 +128,57 @@ public abstract class StatisticsHandler<T extends ConsoleDisplay, V extends Char
 
         }
     }
+
+    abstract class AbstractTask extends SwingWorker<Void, Void> {
+
+        protected final Collection<String> dataNames;
+
+
+        public AbstractTask(Collection<String> dataNames) {
+            this.dataNames = dataNames;
+
+
+        }
+
+        protected abstract void doTasks(String dataName);
+
+        protected abstract void summarizeAndDisplay();
+
+        @Override
+        public final Void doInBackground() {
+            if(!windows){
+                taskOutput.append("Refer to console for progress");
+            }
+            setProgress(0);
+            int size = dataNames.size();
+            int i = 1;
+            for (String dataName : dataNames) {
+                if(windows){
+                    taskOutput.append("Processing " + dataName + "...\n");
+                }else {
+                    System.out.println("Processing " + dataName + "...");
+                }
+                doTasks(dataName);
+                setProgress((i * 100) / size);
+                i++;
+            }
+            return null;
+        }
+
+        @Override
+        public final void done() {
+            Toolkit.getDefaultToolkit().beep();
+            progressFrame.dispose();
+            taskOutput.append("Done.");
+            progressFrame.dispose();
+            summarizeAndDisplay();
+        }
+
+        public Collection<String> getDataNames() {
+            return dataNames;
+        }
+    }
+
 
 
 

@@ -36,16 +36,8 @@ public class NodeRepetitionFrequencyStatisticHandler extends StatisticsHandler<N
 
     @Override
     public void generateAndDisplayStats(Collection<String> dataNames, Phase phase, StatsDialog.AllOrOne allOrOne, StatsDialog.AggregationType aggregationType) {
-
-        if (!dataNames.isEmpty()) {
-            createProgressBar();
-            GenerateRequiredDataTask task = new GenerateRequiredDataTask(dataNames, allOrOne, aggregationType);
-            task.addPropertyChangeListener(this);
-            task.execute();
-        } else {
-            System.out.println("No Data Names selected!");
-        }
-
+        GenerateRequiredDataTask task = new GenerateRequiredDataTask(dataNames, allOrOne, aggregationType);
+        super.actualGenerateAndDisplay(task);
     }
 
     private Multiset<Double> aggregateFromData(HashMap<String, Multiset<Double>> nameToData, StatsDialog.AggregationType aggregationType) {
@@ -128,49 +120,26 @@ public class NodeRepetitionFrequencyStatisticHandler extends StatisticsHandler<N
     }
 
 
-    class GenerateRequiredDataTask extends SwingWorker<Void, Void> {
-        private final Collection<String> dataNames;
+    class GenerateRequiredDataTask extends AbstractTask {
+
         private HashMap<String, HashMultimap<String, Long>> nameToResultMapping = new HashMap<String, HashMultimap<String, Long>>();
         private final StatsDialog.AllOrOne allOrOne;
         private final StatsDialog.AggregationType type;
 
         public GenerateRequiredDataTask(Collection<String> dataNames,  StatsDialog.AllOrOne allOrOne, StatsDialog.AggregationType aggregationType) {
-            this.dataNames = dataNames;
+            super(dataNames);
             this.allOrOne = allOrOne;
             this.type = aggregationType;
         }
 
         @Override
-        public Void doInBackground() {
-            setProgress(0);
-            int size = dataNames.size();
-            int i = 1;
-            for (String dataName : dataNames) {
-//                taskOutput.append("Processing " + dataName + "...\n");
-                HashMultimap<String, Long> temp;
-                temp = NetworkModel.instance().getVertexInTimesFor(dataName);
-
-
-
-
-
-
-                nameToResultMapping.put(dataName, temp);
-                setProgress((i * 100) / size);
-
-                i++;
-
-            }
-            return null;
-
+        protected void doTasks(String dataName) {
+            HashMultimap<String, Long> temp= NetworkModel.instance().getVertexInTimesFor(dataName);
+            nameToResultMapping.put(dataName, temp);
         }
 
         @Override
-        public void done() {
-            Toolkit.getDefaultToolkit().beep();
-            frame.dispose();
-            taskOutput.append("Done.");
-            frame.dispose();
+        protected void summarizeAndDisplay() {
             if (allOrOne == StatsDialog.AllOrOne.EACH) {
                 for (String dataName : dataNames) {
 //                String dataName = dataNames.iterator().next();
@@ -197,6 +166,7 @@ public class NodeRepetitionFrequencyStatisticHandler extends StatisticsHandler<N
             }
 
         }
+
     }
 
 }

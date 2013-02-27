@@ -33,21 +33,8 @@ public class VertexVisitDurationStatisticHandler extends StatisticsHandler<Verte
 
     @Override
     public void generateAndDisplayStats(Collection<String> dataNames, Phase phase, StatsDialog.AllOrOne allOrOne, StatsDialog.AggregationType aggregationType) {
-        final StatisticChoice choice = StatisticChoice.TIME_SPENT_PER_VERTEX;
-        if (!dataNames.isEmpty()) {
-
-
-            createProgressBar();
-            GenerateRequiredDataTask task = new GenerateRequiredDataTask(dataNames, choice, phase, allOrOne, aggregationType);
-            task.addPropertyChangeListener(this);
-            task.execute();
-
-
-        } else {
-
-            System.out.println("No Data Names selected!");
-        }
-
+        GenerateRequiredDataTask task = new GenerateRequiredDataTask(dataNames, StatisticChoice.TIME_SPENT_PER_VERTEX, phase, allOrOne, aggregationType);
+        super.actualGenerateAndDisplay(task);
 
     }
 
@@ -63,64 +50,44 @@ public class VertexVisitDurationStatisticHandler extends StatisticsHandler<Verte
     }
 
 
-    class GenerateRequiredDataTask extends SwingWorker<Void, Void> {
+    class GenerateRequiredDataTask extends AbstractTask {
         private final Phase phase;
-        private final Collection<String> dataNames;
         private final StatisticChoice choice;
         private HashMap<String, HashMap<String, Double>> nameToResultMapping = new HashMap<String, HashMap<String, Double>>();
         private final StatsDialog.AllOrOne allOrOne;
         private final StatsDialog.AggregationType type;
+        private final HashMap<String, Integer> roomEdgeCountMapping;
 
         public GenerateRequiredDataTask(Collection<String> dataNames, StatisticChoice choice, Phase phase, StatsDialog.AllOrOne allOrOne, StatsDialog.AggregationType aggregationType) {
-            this.dataNames = dataNames;
+            super(dataNames);
+
             this.choice = choice;
             this.phase = phase;
             this.allOrOne = allOrOne;
             this.type = aggregationType;
+            this.roomEdgeCountMapping = NetworkModel.instance().getEdgesForEachRoom();
         }
 
         @Override
-        public Void doInBackground() {
-            HashMap<String, Integer> roomEdgeCountMapping = NetworkModel.instance().getEdgesForEachRoom();
-
-            setProgress(0);
-            int size = dataNames.size();
-            int i = 1;
-            for (String dataName : dataNames) {
-                taskOutput.append("Processing " + dataName + "...\n");
-                HashMap<String, Number> temp;
-                synchronized (NetworkModel.instance()) {
-                    temp = NetworkModel.instance().getVertexDataFor(dataName, choice, phase);
-                }
-                HashMap<String, Double> result = new HashMap<String, Double>();
-
-                for (String roomName : temp.keySet()) {
-                    int numberOfEdges = roomEdgeCountMapping.get(roomName);
-                    long value = temp.get(roomName) == null ? 0 : temp.get(roomName).longValue();
-
-                    result.put(roomName, (double) value
-                            / (double) numberOfEdges);
-                }
-
-
-
-
-                nameToResultMapping.put(dataName, result);
-                setProgress((i * 100) / size);
-
-                i++;
-
+        protected void doTasks(String dataName) {
+            HashMap<String, Number> temp;
+            synchronized (NetworkModel.instance()) {
+                temp = NetworkModel.instance().getVertexDataFor(dataName, choice, phase);
             }
-            return null;
+            HashMap<String, Double> result = new HashMap<String, Double>();
 
+            for (String roomName : temp.keySet()) {
+                int numberOfEdges = roomEdgeCountMapping.get(roomName);
+                long value = temp.get(roomName) == null ? 0 : temp.get(roomName).longValue();
+
+                result.put(roomName, (double) value
+                        / (double) numberOfEdges);
+            }
+            nameToResultMapping.put(dataName, result);
         }
 
         @Override
-        public void done() {
-            Toolkit.getDefaultToolkit().beep();
-            frame.dispose();
-            taskOutput.append("Done.");
-            frame.dispose();
+        protected void summarizeAndDisplay() {
             if (allOrOne == StatsDialog.AllOrOne.EACH) {
                 for (String dataName : nameToResultMapping.keySet()) {
                     HashMap<String, Double> result = nameToResultMapping.get(dataName);
@@ -144,7 +111,9 @@ public class VertexVisitDurationStatisticHandler extends StatisticsHandler<Verte
                 chartDisplay.display(finalResult);
                 consoleDisplay.display(finalResult);
             }
-
         }
+
+
+
     }
 }
