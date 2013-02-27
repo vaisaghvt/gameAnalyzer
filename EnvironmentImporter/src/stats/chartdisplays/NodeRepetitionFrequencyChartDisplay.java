@@ -1,6 +1,8 @@
 package stats.chartdisplays;
 
+import com.google.common.collect.HashMultiset;
 import com.google.common.collect.Multiset;
+import gui.SliderMenuItem;
 import org.jfree.chart.ChartFactory;
 import org.jfree.chart.ChartPanel;
 import org.jfree.chart.JFreeChart;
@@ -13,7 +15,14 @@ import org.jfree.data.xy.XYSeries;
 import org.jfree.data.xy.XYSeriesCollection;
 import org.jfree.util.ShapeUtilities;
 
+import javax.swing.*;
+import javax.swing.event.ChangeEvent;
+import javax.swing.event.ChangeListener;
 import java.awt.*;
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
+import java.awt.event.WindowEvent;
+import java.awt.event.WindowListener;
 import java.util.TreeSet;
 
 /**
@@ -23,28 +32,46 @@ import java.util.TreeSet;
  * Time: 1:13 PM
  * To change this template use File | Settings | File Templates.
  */
-public class NodeRepetitionFrequencyChartDisplay extends ChartDisplay<Multiset<Double>> {
+public class NodeRepetitionFrequencyChartDisplay extends ChartDisplay<Multiset<Double>> implements WindowListener, ActionListener {
 
+    private final SliderMenuItem miBinSize = new SliderMenuItem("BIN_SIZE", 1, 60, 1);
+    private final JButton regenerate = new JButton("regenerate");
+    private JFrame binSizeFrame;
+    private Multiset<Double> data;
 
     @Override
     public void display(Multiset<Double> data) {
-        final Dataset dataSet = createDataSet(data);
+
+
+        this.data = data;
+        final Dataset dataSet = createDataSet(data, miBinSize.getValue());
         final JFreeChart chart = createChart(dataSet);
         final ChartPanel chartPanel = new ChartPanel(chart);
         chartPanel.setPreferredSize(new Dimension(500, 270));
         createNewFrameAndSetLocation();
-        currentFrame.setTitle(this.getTitle() + ": deltaT = Time between Door use");
+        currentFrame.setTitle(this.getTitle() + ": deltaT = Time between Room use");
         currentFrame.setContentPane(chartPanel);
         currentFrame.setVisible(true);
         currentFrame.setSize(new Dimension(520, 300));
+        currentFrame.addWindowListener(this);
 
+        miBinSize.setLabelTable(miBinSize.createStandardLabels(5,5));
+        binSizeFrame = new JFrame("Choose bin size:");
+        binSizeFrame.setLayout(new BorderLayout());
+        binSizeFrame.add(miBinSize, BorderLayout.NORTH);
+        binSizeFrame.add(regenerate, BorderLayout.CENTER);
+        regenerate.addActionListener(this);
+
+        binSizeFrame.setLocation(100, 10);
+        binSizeFrame.setSize(300, 200);
+        binSizeFrame.setVisible(true);
     }
 
 
     public JFreeChart createChart(Dataset dataSet) {
         final JFreeChart chart = ChartFactory.createScatterPlot(
-                this.getTitle() + ": deltaT = Time between Door use",
-                "deltaT = Time between Room visits",
+                this.getTitle() + ": deltaT = Time between Room use",
+                "deltaT = Time between Room use",
                 "Frequency",
                 (XYDataset) dataSet,
                 PlotOrientation.VERTICAL,
@@ -60,8 +87,6 @@ public class NodeRepetitionFrequencyChartDisplay extends ChartDisplay<Multiset<D
 
         // set the range axis to display integers only...
         NumberAxis rangeAxis = (NumberAxis) ((XYPlot) chart.getPlot()).getRangeAxis();
-        rangeAxis.setStandardTickUnits(NumberAxis.createIntegerTickUnits());
-
 
 
         return chart;
@@ -69,13 +94,17 @@ public class NodeRepetitionFrequencyChartDisplay extends ChartDisplay<Multiset<D
     }
 
 
-    public Dataset createDataSet(Multiset<Double> data) {
+    public Dataset createDataSet(Multiset<Double> data, int value) {
         final XYSeriesCollection seriesCollection = new XYSeriesCollection();
         final XYSeries series = new XYSeries("blah");
 
         TreeSet<Double> sortedKeys = new TreeSet<Double>();
-        sortedKeys.addAll(data.elementSet());
+
 //        long lastKey =0;
+
+        Multiset<Double> resizedBins = resizeBins(data, value);
+
+        sortedKeys.addAll(resizedBins.elementSet());
         for (Double key : sortedKeys) {
 //            while(lastKey<key){
 //                series.add(0, lastKey);
@@ -93,5 +122,68 @@ public class NodeRepetitionFrequencyChartDisplay extends ChartDisplay<Multiset<D
         return seriesCollection;
     }
 
+    private Multiset<Double> resizeBins(Multiset<Double> data, int value) {
+        if (value == 1) {
+            return data;
+        } else {
+            Multiset<Double> result = HashMultiset.create();
+            for (Double key : data.elementSet()) {
+                double newValue = Math.floor(key / value);
+                result.add(newValue, data.count(key));
 
+            }
+            return result;
+        }
+    }
+
+
+    @Override
+    public void windowOpened(WindowEvent e) {
+        //To change body of implemented methods use File | Settings | File Templates.
+    }
+
+    @Override
+    public void windowClosing(WindowEvent e) {
+        //To change body of implemented methods use File | Settings | File Templates.
+    }
+
+    @Override
+    public void windowClosed(WindowEvent e) {
+        binSizeFrame.dispose();
+    }
+
+    @Override
+    public void windowIconified(WindowEvent e) {
+        //To change body of implemented methods use File | Settings | File Templates.
+    }
+
+    @Override
+    public void windowDeiconified(WindowEvent e) {
+        //To change body of implemented methods use File | Settings | File Templates.
+    }
+
+    @Override
+    public void windowActivated(WindowEvent e) {
+        //To change body of implemented methods use File | Settings | File Templates.
+    }
+
+    @Override
+    public void windowDeactivated(WindowEvent e) {
+        //To change body of implemented methods use File | Settings | File Templates.
+    }
+
+
+    @Override
+    public void actionPerformed(ActionEvent e) {
+        if (e.getSource() == regenerate) {
+            int value = miBinSize.getValue();
+            final Dataset dataSet = createDataSet(data, value);
+            final JFreeChart chart = createChart(dataSet);
+            final ChartPanel chartPanel = new ChartPanel(chart);
+            chartPanel.setPreferredSize(new Dimension(500, 270));
+
+            currentFrame.setContentPane(chartPanel);
+            currentFrame.revalidate();
+        }
+    }
 }

@@ -111,7 +111,7 @@ public class NodeRepetitionFrequencyStatisticHandler extends StatisticsHandler<N
                     if (difference / 1000 > 0) {
 //                            && difference/1000 <300){
 
-                        result.add((double) (difference / 10000));
+                        result.add((double) (difference / 1000));
 
 //                    }else if(difference/1000 >=300){
 //                        result.add((Math.log(300)));
@@ -146,11 +146,10 @@ public class NodeRepetitionFrequencyStatisticHandler extends StatisticsHandler<N
             int size = dataNames.size();
             int i = 1;
             for (String dataName : dataNames) {
-                taskOutput.append("Processing " + dataName + "...\n");
+//                taskOutput.append("Processing " + dataName + "...\n");
                 HashMultimap<String, Long> temp;
-                synchronized (NetworkModel.instance()) {
-                    temp = NetworkModel.instance().getVertexInTimesFor(dataName);
-                }
+                temp = NetworkModel.instance().getVertexInTimesFor(dataName);
+
 
 
 

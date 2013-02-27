@@ -15,7 +15,7 @@ import java.awt.event.MouseEvent;
  * Time: 5:17 PM
  * To change this template use File | Settings | File Templates.
  */
-class SliderMenuItem extends JSlider implements MenuElement {
+public class SliderMenuItem extends JSlider implements MenuElement {
 
     public SliderMenuItem(String label, int min, int max, int value) {
         super(min, max, value);
@@ -25,7 +25,7 @@ class SliderMenuItem extends JSlider implements MenuElement {
         setMajorTickSpacing((max - min) / 4);
         setMinorTickSpacing(1);
         setSnapToTicks(true);
-        setLabelTable(createStandardLabels(min, 1));
+        setLabelTable(createStandardLabels(1, min));
         setPaintLabels(true);
         setPaintTicks(true);
 

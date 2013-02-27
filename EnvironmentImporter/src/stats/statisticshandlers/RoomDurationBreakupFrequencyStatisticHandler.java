@@ -136,9 +136,6 @@ public class RoomDurationBreakupFrequencyStatisticHandler extends StatisticsHand
                 }
 
                 Multiset<Long> dataResult = summarize(result);
-
-
-
                chartDisplay.setTitle(StatisticChoice.ROOM_DURATION_FREQUENCY.toString());
                 chartDisplay.display(dataResult);
                 consoleDisplay.display(dataResult);
@@ -156,16 +153,7 @@ public class RoomDurationBreakupFrequencyStatisticHandler extends StatisticsHand
 
                 }
 
-
-
-
             }
-
-
-
-
-
-
 
         }
     }

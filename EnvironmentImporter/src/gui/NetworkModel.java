@@ -408,7 +408,7 @@ public class NetworkModel extends MainPanel implements ActionListener {
     }
 
 
-    public static NetworkModel instance() {
+    public static synchronized NetworkModel instance() {
         if (instance == null)
             instance = new NetworkModel();
 

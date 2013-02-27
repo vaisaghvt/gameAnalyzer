@@ -111,12 +111,10 @@ public class DoorRepetitionFrequencyStatisticHandler extends StatisticsHandler<D
                     if (difference / 1000 > 0) {
 //                            && difference/1000 <300){
 
-                        result.add((double) (difference / 10000));
+                        result.add((difference / 1000.0));
 
 //                    }else if(difference/1000 >=300){
 //                        result.add((Math.log(300)));
-                    } else {
-                        System.out.println(second + "," + first);
                     }
                     first = second;
 
@@ -139,7 +137,10 @@ public class DoorRepetitionFrequencyStatisticHandler extends StatisticsHandler<D
             this.dataNames = dataNames;
             this.allOrOne = allOrOne;
             this.type = aggregationType;
-            this.roomDegree = NetworkModel.instance().getEdgesForEachRoom();
+            synchronized (NetworkModel.instance()){
+                this.roomDegree = NetworkModel.instance().getEdgesForEachRoom();
+            }
+
         }
 
         @Override
@@ -148,12 +149,12 @@ public class DoorRepetitionFrequencyStatisticHandler extends StatisticsHandler<D
             int size = dataNames.size();
             int i = 1;
             for (String dataName : dataNames) {
-                taskOutput.append("Processing " + dataName + "...\n");
+//                taskOutput.append("Processing " + dataName + "...\n");
                 HashMultimap<String, Long> temp;
-                synchronized (NetworkModel.instance()) {
-                    temp = NetworkModel.instance().getDoorInTimesFor(dataName);
 
-                }
+                temp = NetworkModel.instance().getDoorInTimesFor(dataName);
+
+
 
 
 
