@@ -63,6 +63,7 @@ public class StatsDialog extends JFrame implements ActionListener {
 
 
         this.dataNameList = new ArrayList<JCheckBox>();
+
         this.setTitle("Vertex Statistics Options");
 
         this.setLocation(400, 200);
@@ -256,131 +257,168 @@ public class StatsDialog extends JFrame implements ActionListener {
 //            this.getStatistics();
 //            this.setVisible(false);
 //            this.dispose();
-            StatisticChoice choice = statisticChoiceList.getItemAt(statisticChoiceList.getSelectedIndex());
-            Collection<String> dataNames = new HashSet<String>();
-            for (JCheckBox box : dataNameList) {
-                if (box.isSelected()) {
-                    dataNames.add(box.getText());
-                }
-            }
-            if (choice.getStatisticsHandler() != null) {
-                int index = phaseChoiceList.getSelectedIndex();
-                Phase phase = null;
-                if (index != -1) {
-                    phase = phaseChoiceList.getItemAt(index);
-                }
-                if (allOrOneComboBox.getItemAt(allOrOneComboBox.getSelectedIndex()) == AllOrOne.EACH) {
-                    choice.getStatisticsHandler().generateAndDisplayStats(dataNames, phase, AllOrOne.EACH, null);
-                } else {
-                    choice.getStatisticsHandler().generateAndDisplayStats(dataNames, phase, AllOrOne.ALL,
-                            aggregationTypeComboBox.getItemAt(aggregationTypeComboBox.getSelectedIndex()));
-                }
+            SwingUtilities.invokeLater(new Runnable() {
+                @Override
+                public void run() {
+                    StatisticChoice choice = statisticChoiceList.getItemAt(statisticChoiceList.getSelectedIndex());
+                    Collection<String> dataNames = new HashSet<String>();
+                    for (JCheckBox box : dataNameList) {
+                        if (box.isSelected()) {
+                            dataNames.add(box.getText());
+                        }
+                    }
+                    if (choice.getStatisticsHandler() != null) {
+                        int index = phaseChoiceList.getSelectedIndex();
+                        Phase phase = null;
+                        if (index != -1) {
+                            phase = phaseChoiceList.getItemAt(index);
+                        }
+                        if (allOrOneComboBox.getItemAt(allOrOneComboBox.getSelectedIndex()) == AllOrOne.EACH) {
+                            choice.getStatisticsHandler().generateAndDisplayStats(dataNames, phase, AllOrOne.EACH, null);
+                        } else {
+                            choice.getStatisticsHandler().generateAndDisplayStats(dataNames, phase, AllOrOne.ALL,
+                                    aggregationTypeComboBox.getItemAt(aggregationTypeComboBox.getSelectedIndex()));
+                        }
 
-            } else {
-                JOptionPane.showMessageDialog(this, "ERROR: That analysis cannot be done.", "An Error Occured", JOptionPane.ERROR_MESSAGE);
-            }
+                    } else {
+                        JOptionPane.showMessageDialog(new JFrame(), "ERROR: That analysis cannot be done.", "An Error Occured", JOptionPane.ERROR_MESSAGE);
+                    }
+                }
+            });
+
         } else if (event.getSource() == bCancel) {
             this.setVisible(false);
             this.dispose();
         } else if (event.getSource() == allOrOneComboBox) {
-            AllOrOne choice = this.allOrOneComboBox.getItemAt(allOrOneComboBox.getSelectedIndex());
-            this.aggregationTypeComboBox.removeAllItems();
-            if (choice == AllOrOne.ALL && statisticChoiceList.getItemAt(statisticChoiceList.getSelectedIndex()).hasAggregationChoice()) {
-                aggregationTypeComboBox.setEnabled(true);
-                for (AggregationType type : AggregationType.values()) {
-                    this.aggregationTypeComboBox.addItem(type);
+            SwingUtilities.invokeLater(new Runnable() {
+                @Override
+                public void run() {
+                    AllOrOne choice = allOrOneComboBox.getItemAt(allOrOneComboBox.getSelectedIndex());
+                    aggregationTypeComboBox.removeAllItems();
+                    if (choice == AllOrOne.ALL && statisticChoiceList.getItemAt(statisticChoiceList.getSelectedIndex()).hasAggregationChoice()) {
+                        aggregationTypeComboBox.setEnabled(true);
+                        for (AggregationType type : AggregationType.values()) {
+                            aggregationTypeComboBox.addItem(type);
+                        }
+                        aggregationTypeComboBox.setSelectedIndex(0);
+                    } else {
+                        aggregationTypeComboBox.setEnabled(false);
+                    }
+//
+//                    this.validate();
                 }
-                aggregationTypeComboBox.setSelectedIndex(0);
-            } else {
-                aggregationTypeComboBox.setEnabled(false);
-            }
+            });
 
-            this.validate();
         } else if (event.getSource() == statisticChoiceList) {
-            StatisticChoice choice = statisticChoiceList.getItemAt(statisticChoiceList.getSelectedIndex());
-            this.phaseChoiceList.removeAllItems();
-            for (Phase phase : choice.getPhases()) {
-                phaseChoiceList.addItem(phase);
-            }
-            if (choice.getPhases().size() > 0) {
-                phaseChoiceList.setEnabled(true);
-                phaseChoiceList.setSelectedIndex(0);
-            } else {
-                phaseChoiceList.setEnabled(false);
-            }
-
-            if (!choice.canAggregate()) {
-                this.allOrOneComboBox.setEnabled(false);
-                this.aggregationTypeComboBox.setEnabled(false);
-            } else {
-                this.allOrOneComboBox.setEnabled(true);
-                if (choice.hasAggregationChoice() && allOrOneComboBox.getItemAt(allOrOneComboBox.getSelectedIndex()) == AllOrOne.ALL) {
-                    this.aggregationTypeComboBox.setEnabled(true);
-                } else {
-                    this.aggregationTypeComboBox.setEnabled(false);
-                }
-
-            }
-
-            if (!choice.isRandomWalkMeasurePossible()) {
-                for (JCheckBox dataName : dataNameList) {
-                    if (dataName.getText().equalsIgnoreCase("random walk")) {
-                        dataName.setSelected(false);
-                        dataName.setEnabled(false);
+            SwingUtilities.invokeLater(new Runnable() {
+                @Override
+                public void run() {
+                    StatisticChoice choice = statisticChoiceList.getItemAt(statisticChoiceList.getSelectedIndex());
+                    phaseChoiceList.removeAllItems();
+                    for (Phase phase : choice.getPhases()) {
+                        phaseChoiceList.addItem(phase);
                     }
-                }
-            } else {
-                for (JCheckBox dataName : dataNameList) {
-                    if (dataName.getText().equalsIgnoreCase("random walk")) {
-                        dataName.setSelected(false);
-                        dataName.setEnabled(true);
+                    if (choice.getPhases().size() > 0) {
+                        phaseChoiceList.setEnabled(true);
+                        phaseChoiceList.setSelectedIndex(0);
+                    } else {
+                        phaseChoiceList.setEnabled(false);
                     }
-                }
-            }
 
-            this.validate();
+                    if (!choice.canAggregate()) {
+                        allOrOneComboBox.setEnabled(false);
+                        aggregationTypeComboBox.setEnabled(false);
+                    } else {
+                        allOrOneComboBox.setEnabled(true);
+                        if (choice.hasAggregationChoice() && allOrOneComboBox.getItemAt(allOrOneComboBox.getSelectedIndex()) == AllOrOne.ALL) {
+                            aggregationTypeComboBox.setEnabled(true);
+                        } else {
+                            aggregationTypeComboBox.setEnabled(false);
+                        }
+
+                    }
+
+                    if (!choice.isRandomWalkMeasurePossible()) {
+                        for (JCheckBox dataName : dataNameList) {
+                            if (dataName.getText().equalsIgnoreCase("random walk")) {
+                                dataName.setSelected(false);
+                                dataName.setEnabled(false);
+                            }
+                        }
+                    } else {
+                        for (JCheckBox dataName : dataNameList) {
+                            if (dataName.getText().equalsIgnoreCase("random walk")) {
+                                dataName.setSelected(false);
+                                dataName.setEnabled(true);
+                            }
+                        }
+                    }
+//
+//                    this.validate();
+                }
+            });
         } else if (event.getSource() == bAll) {
-
-            for (JCheckBox cBox : dataNameList) {
-                if (!cBox.getText().equalsIgnoreCase("random walk")) {
-                    cBox.setSelected(true);
+            SwingUtilities.invokeLater(new Runnable() {
+                @Override
+                public void run() {
+                    for (JCheckBox cBox : dataNameList) {
+                        if (!cBox.getText().equalsIgnoreCase("random walk")) {
+                            cBox.setSelected(true);
+                        }
+                    }
                 }
-            }
+            });
 
         } else if (event.getSource() == attemptOne) {
-
-            for (JCheckBox cBox : dataNameList) {
-                if (cBox.getText().contains("1")) {
-                    cBox.setSelected(true);
+            SwingUtilities.invokeLater(new Runnable() {
+                @Override
+                public void run() {
+                    for (JCheckBox cBox : dataNameList) {
+                        if (cBox.getText().contains("1")) {
+                            cBox.setSelected(true);
+                        }
+                    }
                 }
-            }
+            });
 
         } else if (event.getSource() == attemptTwo) {
-
-            for (JCheckBox cBox : dataNameList) {
-                if (cBox.getText().contains("2")) {
-                    cBox.setSelected(true);
+            SwingUtilities.invokeLater(new Runnable() {
+                @Override
+                public void run() {
+                    for (JCheckBox cBox : dataNameList) {
+                        if (cBox.getText().contains("2")) {
+                            cBox.setSelected(true);
+                        }
+                    }
                 }
-            }
+            });
 
         } else if (event.getSource() == attemptThree) {
-
-            for (JCheckBox cBox : dataNameList) {
-                if (cBox.getText().contains("3")) {
-                    cBox.setSelected(true);
+            SwingUtilities.invokeLater(new Runnable() {
+                @Override
+                public void run() {
+                    for (JCheckBox cBox : dataNameList) {
+                        if (cBox.getText().contains("3")) {
+                            cBox.setSelected(true);
+                        }
+                    }
                 }
-            }
+            });
 
         } else if (event.getSource() == attemptHigher) {
-
-            for (JCheckBox cBox : dataNameList) {
-                if (!cBox.getText().contains("1")
-                        && !cBox.getText().contains("2")
-                        && !cBox.getText().contains("3")
-                        && !cBox.getText().equalsIgnoreCase("random walk")) {
-                    cBox.setSelected(true);
+            SwingUtilities.invokeLater(new Runnable() {
+                @Override
+                public void run() {
+                    for (JCheckBox cBox : dataNameList) {
+                        if (!cBox.getText().contains("1")
+                                && !cBox.getText().contains("2")
+                                && !cBox.getText().contains("3")
+                                && !cBox.getText().equalsIgnoreCase("random walk")) {
+                            cBox.setSelected(true);
+                        }
+                    }
                 }
-            }
+            });
 
         } else if (event.getSource() == bNone) {
 
@@ -390,24 +428,32 @@ public class StatsDialog extends JFrame implements ActionListener {
 
         } else if (event.getSource() == bOneRandom) {
 
-
-            for (JCheckBox cBox : dataNameList) {
-                cBox.setSelected(false);
-            }
-            int i = (int) Math.floor(Math.random() * dataNameList.size());
-            JCheckBox cBox = this.dataNameList.get(i);
-            cBox.setSelected(true);
+            SwingUtilities.invokeLater(new Runnable() {
+                @Override
+                public void run() {
+                    for (JCheckBox cBox : dataNameList) {
+                        cBox.setSelected(false);
+                    }
+                    int i = (int) Math.floor(Math.random() * dataNameList.size());
+                    JCheckBox cBox = dataNameList.get(i);
+                    cBox.setSelected(true);
+                }
+            });
 
         } else if (event.getSource() == bNRandom) {
 
-
-            for (JCheckBox cBox : dataNameList) {
-                if (Math.random() < 0.5) {
-                    cBox.setSelected(false);
-                } else if (!cBox.getText().equalsIgnoreCase("random walk")) {
-                    cBox.setSelected(true);
+            SwingUtilities.invokeLater(new Runnable() {
+                @Override
+                public void run() {
+                    for (JCheckBox cBox : dataNameList) {
+                        if (Math.random() < 0.5) {
+                            cBox.setSelected(false);
+                        } else if (!cBox.getText().equalsIgnoreCase("random walk")) {
+                            cBox.setSelected(true);
+                        }
+                    }
                 }
-            }
+            });
         }
     }
 

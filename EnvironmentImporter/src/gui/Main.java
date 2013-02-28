@@ -418,7 +418,7 @@ public class Main extends JFrame implements ActionListener, MouseListener, Mouse
                 this.update();
             } catch (Exception e) {
                 JOptionPane.showMessageDialog(this, "ERROR: the file '" + file.getName() + "' could not be opened!", "An Error Occured", JOptionPane.ERROR_MESSAGE);
-                e.printStackTrace();
+//                e.printStackTrace();
             }
         }
     }
@@ -432,121 +432,194 @@ public class Main extends JFrame implements ActionListener, MouseListener, Mouse
     public void actionPerformed(ActionEvent event) {
 
         if (event.getSource() == miNew) {
-            this.tryToCreateNew();
+            SwingUtilities.invokeLater(new Runnable() {
+                @Override
+                public void run() {
+                    tryToCreateNew();
+                }
+            });
         } else if (event.getSource() == miOpen) {
-            this.tryToOpen();
+            SwingUtilities.invokeLater(new Runnable() {
+                @Override
+                public void run() {
+                    tryToOpen();
+                }
+            });
         } else if (event.getSource() == miSave) {
-            this.tryToSave();
+            SwingUtilities.invokeLater(new Runnable() {
+                @Override
+                public void run() {
+                    tryToSave();
+                }
+            });
         } else if (event.getSource() == miClose) {
             assert (current != null);
-
-            this.tryToClose();
+            SwingUtilities.invokeLater(new Runnable() {
+                @Override
+                public void run() {
+                    tryToClose();
+                }
+            });
         } else if (event.getSource() == miExit) {
-            if (current != null && current.hasUnsavedChanges()) {
-                if (this.handleUnsavedChanges()) {
-                    System.exit(0);
+            SwingUtilities.invokeLater(new Runnable() {
+                @Override
+                public void run() {
+                    if (current != null && current.hasUnsavedChanges()) {
+                        if (handleUnsavedChanges()) {
+                            System.exit(0);
+                        }
+                    } else {
+                        System.exit(0);
+                    }
                 }
-            } else {
-                System.exit(0);
-            }
+            });
         } else if (event.getSource() == miStatistics) {
-            StatsDialog dialog = new StatsDialog();
-            dialog.setVisible(true);
-        } else if (event.getSource() == miNetworkView) {
-            if (miNetworkView.isSelected()) {
-                assert miNetworkView.isSelected() && !miRoomView.isSelected();
-                if (!(mainPanel instanceof NetworkModel) && current != null) {
-                    changePanel("network");
-
-
+            SwingUtilities.invokeLater(new Runnable() {
+                @Override
+                public void run() {
+                    StatsDialog dialog = new StatsDialog();
+                    dialog.setVisible(true);
                 }
+            });
+        } else if (event.getSource() == miNetworkView) {
+            SwingUtilities.invokeLater(new Runnable() {
+                @Override
+                public void run() {
+                    if (miNetworkView.isSelected()) {
+                        assert miNetworkView.isSelected() && !miRoomView.isSelected();
+                        if (!(mainPanel instanceof NetworkModel) && current != null) {
+                            changePanel("network");
 
 
-            }
+                        }
+
+
+                    }
+                }
+            });
 
         } else if (event.getSource() == miRoomView) {
-            if (miRoomView.isSelected()) {
+            SwingUtilities.invokeLater(new Runnable() {
+                @Override
+                public void run() {
+                    if (miRoomView.isSelected()) {
 
-                assert !miNetworkView.isSelected() && miRoomView.isSelected();
-                if (!(mainPanel instanceof MapImagePanel) && current != null) {
-                    changePanel("map");
+                        assert !miNetworkView.isSelected() && miRoomView.isSelected();
+                        if (!(mainPanel instanceof MapImagePanel) && current != null) {
+                            changePanel("map");
 
+                        }
+                    }
                 }
-            }
+            });
         } else if (event.getSource() == miViewImage) {
-            assert mainPanel instanceof MapImagePanel;
-            if (miViewImage.isSelected()) {
-                ((MapImagePanel) mainPanel).enableImageView();
-            } else {
-                ((MapImagePanel) mainPanel).disableImageView();
-            }
-            invalidateImagePanel();
+            SwingUtilities.invokeLater(new Runnable() {
+                @Override
+                public void run() {
+                    assert mainPanel instanceof MapImagePanel;
+                    if (miViewImage.isSelected()) {
+                        ((MapImagePanel) mainPanel).enableImageView();
+                    } else {
+                        ((MapImagePanel) mainPanel).disableImageView();
+                    }
+                    invalidateImagePanel();
+                }
+            });
         } else if (event.getSource() == miViewRooms) {
-            assert mainPanel instanceof MapImagePanel;
-            if (miViewRooms.isSelected()) {
-                ((MapImagePanel) mainPanel).enableRoomView();
 
-            } else {
-                ((MapImagePanel) mainPanel).disableRoomView();
-            }
-            invalidateImagePanel();
+            SwingUtilities.invokeLater(new Runnable() {
+                @Override
+                public void run() {
+                    assert mainPanel instanceof MapImagePanel;
+                    if (miViewRooms.isSelected()) {
+                        ((MapImagePanel) mainPanel).enableRoomView();
+
+                    } else {
+                        ((MapImagePanel) mainPanel).disableRoomView();
+                    }
+                    invalidateImagePanel();
+                }
+            });
         } else if (dataNameItems != null && dataNameItems.contains(event.getSource())) {
-            JMenuItem item = (JMenuItem) event.getSource();
+            final JMenuItem item = (JMenuItem) event.getSource();
+            SwingUtilities.invokeLater(new Runnable() {
+                @Override
+                public void run() {
+
+                    ((NetworkModel) mainPanel).setDisplay(item.getText(), false);
+                    setTitle(item.getText() + " - Network Display");
+                    if (item.getText().equalsIgnoreCase("default")) {
+                        mChoosePhase.setEnabled(false);
+                        menuBar.add(((NetworkModel) mainPanel).getContextMenu());
+                        ((NetworkModel) mainPanel).getContextMenu().setEnabled(true);
+                        ((NetworkModel) mainPanel).getContextMenu().setVisible(true);
+                        menuBar.revalidate();
+                    } else {
+                        mChoosePhase.setEnabled(true);
+                        miExplorationPhase.setSelected(true);
+                        miTask1.setSelected(true);
+                        miTask2.setSelected(true);
+                        miTask3.setSelected(true);
+                        menuBar.remove(((NetworkModel) mainPanel).getContextMenu());
+                        menuBar.revalidate();
+
+                    }
 
 
-            ((NetworkModel) mainPanel).setDisplay(item.getText(), false);
-            this.setTitle(item.getText() + " - Network Display");
-            if (item.getText().equalsIgnoreCase("default")) {
-                mChoosePhase.setEnabled(false);
-                this.menuBar.add(((NetworkModel) mainPanel).getContextMenu());
-                ((NetworkModel) mainPanel).getContextMenu().setEnabled(true);
-                ((NetworkModel) mainPanel).getContextMenu().setVisible(true);
-                this.menuBar.revalidate();
-            } else {
-                mChoosePhase.setEnabled(true);
-                miExplorationPhase.setSelected(true);
-                miTask1.setSelected(true);
-                miTask2.setSelected(true);
-                miTask3.setSelected(true);
-                this.menuBar.remove(((NetworkModel) mainPanel).getContextMenu());
-                this.menuBar.revalidate();
-
-            }
-
-
-            this.invalidateImagePanel();
-
+                    invalidateImagePanel();
+                }
+            });
         } else if (event.getSource() == miExplorationPhase) {
-            if (miExplorationPhase.isSelected()) {
-                ((NetworkModel) mainPanel).switchOnPhase(Phase.EXPLORATION);
-            } else {
-                ((NetworkModel) mainPanel).switchOffPhase(Phase.EXPLORATION);
+            SwingUtilities.invokeLater(new Runnable() {
+                @Override
+                public void run() {
+                    if (miExplorationPhase.isSelected()) {
+                        ((NetworkModel) mainPanel).switchOnPhase(Phase.EXPLORATION);
+                    } else {
+                        ((NetworkModel) mainPanel).switchOffPhase(Phase.EXPLORATION);
 
-            }
+                    }
+                }
+            });
 //            ((NetworkModel) mainPanel).recreateContextMenu();
         } else if (event.getSource() == miTask1) {
-            if (miTask1.isSelected()) {
-                ((NetworkModel) mainPanel).switchOnPhase(Phase.TASK_1);
-            } else {
-                ((NetworkModel) mainPanel).switchOffPhase(Phase.TASK_1);
+            SwingUtilities.invokeLater(new Runnable() {
+                @Override
+                public void run() {
+                    if (miTask1.isSelected()) {
+                        ((NetworkModel) mainPanel).switchOnPhase(Phase.TASK_1);
+                    } else {
+                        ((NetworkModel) mainPanel).switchOffPhase(Phase.TASK_1);
 
-            }
+                    }
+                }
+            });
 //            ((NetworkModel) mainPanel).recreateContextMenu();
         } else if (event.getSource() == miTask2) {
-            if (miTask2.isSelected()) {
-                ((NetworkModel) mainPanel).switchOnPhase(Phase.TASK_2);
-            } else {
-                ((NetworkModel) mainPanel).switchOffPhase(Phase.TASK_2);
+            SwingUtilities.invokeLater(new Runnable() {
+                @Override
+                public void run() {
+                    if (miTask2.isSelected()) {
+                        ((NetworkModel) mainPanel).switchOnPhase(Phase.TASK_2);
+                    } else {
+                        ((NetworkModel) mainPanel).switchOffPhase(Phase.TASK_2);
 
-            }
+                    }
+                }
+            });
 //            ((NetworkModel) mainPanel).recreateContextMenu();
         } else if (event.getSource() == miTask3) {
-            if (miTask3.isSelected()) {
-                ((NetworkModel) mainPanel).switchOnPhase(Phase.TASK_3);
-            } else {
-                ((NetworkModel) mainPanel).switchOffPhase(Phase.TASK_3);
+            SwingUtilities.invokeLater(new Runnable() {
+                @Override
+                public void run() {
+                    if (miTask3.isSelected()) {
+                        ((NetworkModel) mainPanel).switchOnPhase(Phase.TASK_3);
+                    } else {
+                        ((NetworkModel) mainPanel).switchOffPhase(Phase.TASK_3);
 
-            }
+                    }
+                }
+            });
 //            ((NetworkModel) mainPanel).recreateContextMenu();
         } else {
             assert mainPanel instanceof MapImagePanel;
@@ -557,60 +630,206 @@ public class Main extends JFrame implements ActionListener, MouseListener, Mouse
             actualX2 = actualPoint.x;
             actualY2 = actualPoint.y;
             if (event.getSource() == miAddRoom) {
-                current.addRoom(actualX1, actualY1, actualX2, actualY2);
-                unsetMouseSelection();
-                this.invalidateImagePanel();
+                SwingWorker<Void, Void> worker = new SwingWorker<Void, Void>() {
+                    @Override
+                    public final Void doInBackground() {
+                        current.addRoom(actualX1, actualY1, actualX2, actualY2);
+                        return null;
+                    }
+
+                    public final void done() {
+                        invalidateImagePanel();
+                    }
+
+
+                };
+                worker.execute();
+                SwingUtilities.invokeLater(new Runnable() {
+                    @Override
+                    public void run() {
+                        unsetMouseSelection();
+                    }
+                });
+
             } else if (event.getSource() == miAddLink) {
-                current.addLink(actualX1, actualY1, actualX2, actualY2);
-                unsetMouseSelection();
-                this.invalidateImagePanel();
+                SwingWorker<Void, Void> worker = new SwingWorker<Void, Void>() {
+                    @Override
+                    public final Void doInBackground() {
+                        current.addLink(actualX1, actualY1, actualX2, actualY2);
+                        return null;
+                    }
+
+                    public final void done() {
+                        invalidateImagePanel();
+                    }
+
+
+                };
+
+                worker.execute();
+
+                SwingUtilities.invokeLater(new Runnable() {
+                    @Override
+                    public void run() {
+                        unsetMouseSelection();
+                    }
+                });
             } else if (event.getSource() == miAddStaircase) {
-                current.addStaircase(actualX1, actualY1, actualX2, actualY2);
-                unsetMouseSelection();
-                this.invalidateImagePanel();
+                SwingWorker<Void, Void> worker = new SwingWorker<Void, Void>() {
+                    @Override
+                    public final Void doInBackground() {
+                        current.addStaircase(actualX1, actualY1, actualX2, actualY2);
+                        return null;
+                    }
+
+                    public final void done() {
+                        invalidateImagePanel();
+                    }
+
+
+                };
+
+                worker.execute();
+
+                SwingUtilities.invokeLater(new Runnable() {
+                    @Override
+                    public void run() {
+                        unsetMouseSelection();
+                    }
+                });
+
+
             } else if (event.getSource() == miEditStaircaseGroup) {
-                ObjectPanelStaircaseGroup dialog = new ObjectPanelStaircaseGroup(current);
-                dialog.setVisible(true);
+                SwingUtilities.invokeLater(new Runnable() {
+                    @Override
+                    public void run() {
+                        ObjectPanelStaircaseGroup dialog = new ObjectPanelStaircaseGroup(current);
+                        dialog.setVisible(true);
+                    }
+                });
 
             } else if (event.getSource() == miRemoveSelection) {
-                current.removeSelected();
-                unsetMouseSelection();
-                this.invalidateImagePanel();
+                SwingWorker<Void, Void> worker = new SwingWorker<Void, Void>() {
+                    @Override
+                    public final Void doInBackground() {
+                        current.removeSelected();
+                        return null;
+                    }
+
+                    public final void done() {
+                        invalidateImagePanel();
+                    }
+
+
+                };
+
+                worker.execute();
+
+                SwingUtilities.invokeLater(new Runnable() {
+                    @Override
+                    public void run() {
+                        unsetMouseSelection();
+                    }
+                });
+
+
             } else if (event.getSource() == miCreateGroup) {
-                String newName = JOptionPane.showInternalInputDialog(
-                        this.getContentPane(),
-                        "What's the name of this group?",
-                        "Name group",
-                        JOptionPane.QUESTION_MESSAGE);
+                SwingWorker<Void, Void> worker = new SwingWorker<Void, Void>() {
+                    @Override
+                    public final Void doInBackground() {
+                        String newName = JOptionPane.showInternalInputDialog(
+                                getContentPane(),
+                                "What's the name of this group?",
+                                "Name group",
+                                JOptionPane.QUESTION_MESSAGE);
 
-                current.createGroup(newName);
-                this.invalidateImagePanel();
+                        current.createGroup(newName);
+                        return null;
+                    }
+
+                    public final void done() {
+                        invalidateImagePanel();
+                    }
+
+
+                };
+
+                worker.execute();
+
+
             } else if (event.getSource() == miRemoveGroup) {
-                current.removeGroup();
-                this.invalidateImagePanel();
-            } else if (event.getSource() == miRenameArea) {
-                if (current.selected() != null && !current.selected().isEmpty() && current.selected().size() == 1) {
-                    String newName = JOptionPane.showInternalInputDialog(
-                            this.getContentPane(),
-                            "New name for room?",
-                            "Rename " + current.selected().iterator().next().getName(),
-                            JOptionPane.QUESTION_MESSAGE);
-                    current.renameSelected(newName);
-                    unsetMouseSelection();
-                    this.invalidateImagePanel();
-                }
-            } else if (floorItems != null && floorItems.contains(event.getSource())) {
-                JMenuItem item = (JMenuItem) event.getSource();
-                String t1 = item.getText();
-                String t2 = t1.substring(t1.indexOf("#") + 1);
-                int idx = Integer.parseInt(t2);
-                if (current != null) {
-                    current.selectFloor(idx);
-                }
-                ((MapImagePanel) mainPanel).selectFloor(idx);
-                unsetMouseSelection();
+                SwingWorker<Void, Void> worker = new SwingWorker<Void, Void>() {
+                    @Override
+                    public final Void doInBackground() {
+                        current.removeGroup();
+                        return null;
+                    }
 
-                this.invalidateImagePanel();
+                    public final void done() {
+                        invalidateImagePanel();
+                    }
+
+
+                };
+
+                worker.execute();
+
+
+            } else if (event.getSource() == miRenameArea) {
+                SwingWorker<Void, Void> worker = new SwingWorker<Void, Void>() {
+                    @Override
+                    public final Void doInBackground() {
+                        if (current.selected() != null && !current.selected().isEmpty() && current.selected().size() == 1) {
+                            String newName = JOptionPane.showInternalInputDialog(
+                                    getContentPane(),
+                                    "New name for room?",
+                                    "Rename " + current.selected().iterator().next().getName(),
+                                    JOptionPane.QUESTION_MESSAGE);
+                            current.renameSelected(newName);
+                            unsetMouseSelection();
+                            invalidateImagePanel();
+                        }
+                        return null;
+                    }
+
+                };
+
+                worker.execute();
+
+            } else if (floorItems != null && floorItems.contains(event.getSource())) {
+                final JMenuItem item = (JMenuItem) event.getSource();
+                SwingWorker<Void, Void> worker = new SwingWorker<Void, Void>() {
+
+                    @Override
+                    public final Void doInBackground() {
+
+                        String t1 = item.getText();
+                        String t2 = t1.substring(t1.indexOf("#") + 1);
+                        int idx = Integer.parseInt(t2);
+                        if (current != null) {
+                            current.selectFloor(idx);
+                        }
+                        ((MapImagePanel) mainPanel).selectFloor(idx);
+                        return null;
+                    }
+
+                    public final void done() {
+                        invalidateImagePanel();
+                    }
+
+
+                };
+
+                worker.execute();
+
+
+                SwingUtilities.invokeLater(new Runnable() {
+                    @Override
+                    public void run() {
+                        unsetMouseSelection();
+                    }
+                });
+
 
             }
         }
@@ -620,70 +839,105 @@ public class Main extends JFrame implements ActionListener, MouseListener, Mouse
 
         this.getContentPane().remove(mainPanel);
         if (type.equals("network")) {
-            this.setTitle("default - Network Display");
+
             mainPanel = NetworkModel.instance();
-            mainPanel.setDocument(current);
-            invalidateImagePanel();
-            miViewImage.setEnabled(false);
-            miViewRooms.setEnabled(false);
-            miZoom.setEnabled(false);
 
-            //update the floors
-            mViewDataFor.removeAll();
+            SwingWorker<Void, Void> worker = new SwingWorker<Void, Void>() {
+                @Override
+                public final Void doInBackground() {
+                    SwingUtilities.invokeLater(new Runnable() {
+                        @Override
+                        public void run() {
+                            setTitle("processing network...");
+                        }
+                    });
+                    NetworkModel.instance().setDocument(current);
+
+                    return null;
+                }
+
+                public final void done() {
+                    invalidateImagePanel();
+                    SwingUtilities.invokeLater(new Runnable() {
+                        @Override
+                        public void run() {
+                            setTitle("default - Network Display");
+                            miViewImage.setEnabled(false);
+                            miViewRooms.setEnabled(false);
+                            miZoom.setEnabled(false);
+
+                            //update the floors
+                            mViewDataFor.removeAll();
 
 
-            dataNameItems = null;
+                            dataNameItems = null;
 
 
-            ButtonGroup radioGroup = new ButtonGroup();
-            dataNameItems = new HashSet<JRadioButtonMenuItem>();
-            JRadioButtonMenuItem item = new JRadioButtonMenuItem("default");
-            dataNameItems.add(item);
-            item.addActionListener(this);
-            mViewDataFor.add(item);
-            dataNameItems.add(item);
-            radioGroup.add(item);
-            item.setSelected(true);
+                            ButtonGroup radioGroup = new ButtonGroup();
+                            dataNameItems = new HashSet<JRadioButtonMenuItem>();
+                            JRadioButtonMenuItem item = new JRadioButtonMenuItem("default");
+                            dataNameItems.add(item);
+                            item.addActionListener(Main.this);
+                            mViewDataFor.add(item);
+                            dataNameItems.add(item);
+                            radioGroup.add(item);
+                            item.setSelected(true);
 
-            Collection<String> dataNames = Database.getInstance().getDataNames();
+                            Collection<String> dataNames = Database.getInstance().getDataNames();
 
-            for (String dataName : dataNames) {
-                item = new JRadioButtonMenuItem(dataName);
-                item.addActionListener(this);
-                mViewDataFor.add(item);
-                dataNameItems.add(item);
-                radioGroup.add(item);
-            }
-            mViewDataFor.setEnabled(true);
-            mAnalysis.setEnabled(true);
+                            for (String dataName : dataNames) {
+                                item = new JRadioButtonMenuItem(dataName);
+                                item.addActionListener(Main.this);
+                                mViewDataFor.add(item);
+                                dataNameItems.add(item);
+                                radioGroup.add(item);
+                            }
+                            mViewDataFor.setEnabled(true);
+                            mAnalysis.setEnabled(true);
 
-            this.menuBar.add(((NetworkModel) mainPanel).getContextMenu());
-            ((NetworkModel) mainPanel).getContextMenu().setEnabled(true);
-            ((NetworkModel) mainPanel).getContextMenu().setVisible(true);
-            this.menuBar.revalidate();
+                            menuBar.add(((NetworkModel) mainPanel).getContextMenu());
+                            ((NetworkModel) mainPanel).getContextMenu().setEnabled(true);
+                            ((NetworkModel) mainPanel).getContextMenu().setVisible(true);
+                            menuBar.revalidate();
+                            getContentPane().add(mainPanel, BorderLayout.CENTER);
+                        }
+                    });
+                }
+
+
+            };
+            worker.execute();
+
 
         } else if (type.equals("map")) {
-            this.menuBar.remove(((NetworkModel) mainPanel).getContextMenu());
-            this.menuBar.revalidate();
-            mainPanel = MapImagePanel.instance();
-            mainPanel.setDocument(current);
-            invalidateImagePanel();
-            miViewImage.setEnabled(true);
-            miViewRooms.setEnabled(true);
-            miZoom.setEnabled(true);
-            mViewDataFor.setEnabled(false);
-            mAnalysis.setEnabled(false);
-            mChoosePhase.setEnabled(false);
+            SwingUtilities.invokeLater(new Runnable() {
+                @Override
+                public void run() {
+                    menuBar.remove(((NetworkModel) mainPanel).getContextMenu());
+                    menuBar.revalidate();
+                    mainPanel = MapImagePanel.instance();
+                    mainPanel.setDocument(current);
+                    invalidateImagePanel();
+                    miViewImage.setEnabled(true);
+                    miViewRooms.setEnabled(true);
+                    miZoom.setEnabled(true);
+                    mViewDataFor.setEnabled(false);
+                    mAnalysis.setEnabled(false);
+                    mChoosePhase.setEnabled(false);
 
-            this.setTitle(current.name() + " - " + APPLICATION_TITLE);
+                    setTitle(current.name() + " - " + APPLICATION_TITLE);
+                    getContentPane().add(mainPanel, BorderLayout.CENTER);
+                }
+            });
 
 //            ((NetworkModel)mainPanel).getContextMenu().setEnabled(true);
 //            ((NetworkModel)mainPanel).getContextMenu().setVisible(true);
         } else {
         }
-        this.getContentPane().add(mainPanel, BorderLayout.CENTER);
-        mainPanel.revalidate();
-        mainPanel.repaint();
+
+
+//        mainPanel.revalidate();
+//        mainPanel.repaint();
 
     }
 

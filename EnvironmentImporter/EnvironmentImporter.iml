@@ -7,6 +7,13 @@
     </content>
     <orderEntry type="inheritedJdk" />
     <orderEntry type="sourceFolder" forTests="false" />
+    <orderEntry type="library" name="collections-generic-4.01" level="project" />
+    <orderEntry type="library" name="mysql-connector-java-5.1.22-bin" level="project" />
+    <orderEntry type="library" name="gnujaxp" level="project" />
+    <orderEntry type="library" name="guava-14.0-rc1" level="project" />
+    <orderEntry type="library" name="ec" level="project" />
+    <orderEntry type="library" name="commons-lang3-3.1" level="project" />
+    <orderEntry type="library" name="commons-math3-3.1.1" level="project" />
   </component>
 </module>
 

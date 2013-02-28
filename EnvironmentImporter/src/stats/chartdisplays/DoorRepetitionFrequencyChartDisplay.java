@@ -16,8 +16,6 @@ import org.jfree.data.xy.XYSeriesCollection;
 import org.jfree.util.ShapeUtilities;
 
 import javax.swing.*;
-import javax.swing.event.ChangeEvent;
-import javax.swing.event.ChangeListener;
 import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
@@ -38,6 +36,7 @@ public class DoorRepetitionFrequencyChartDisplay extends ChartDisplay<Multiset<D
     private final JButton regenerate = new JButton("regenerate");
     private JFrame binSizeFrame;
     private Multiset<Double> data;
+    private JLabel statusLabel = new JLabel();
 
     @Override
     public void display(Multiset<Double> data) {
@@ -55,11 +54,17 @@ public class DoorRepetitionFrequencyChartDisplay extends ChartDisplay<Multiset<D
         currentFrame.setSize(new Dimension(520, 300));
         currentFrame.addWindowListener(this);
 
-        miBinSize.setLabelTable(miBinSize.createStandardLabels(5,5));
+        miBinSize.setLabelTable(miBinSize.createStandardLabels(5, 5));
         binSizeFrame = new JFrame("Choose bin size:");
         binSizeFrame.setLayout(new BorderLayout());
         binSizeFrame.add(miBinSize, BorderLayout.NORTH);
-        binSizeFrame.add(regenerate, BorderLayout.CENTER);
+
+        statusLabel.setHorizontalAlignment(SwingConstants.CENTER);
+        statusLabel.setText("Current bin size:" + miBinSize.getValue() + " sec");
+        binSizeFrame.add(statusLabel, BorderLayout.CENTER);
+
+        binSizeFrame.add(regenerate, BorderLayout.SOUTH);
+
         regenerate.addActionListener(this);
 
         binSizeFrame.setLocation(100, 10);
@@ -176,7 +181,10 @@ public class DoorRepetitionFrequencyChartDisplay extends ChartDisplay<Multiset<D
     @Override
     public void actionPerformed(ActionEvent e) {
         if (e.getSource() == regenerate) {
+
             int value = miBinSize.getValue();
+
+            statusLabel.setText("Current bin size:" + value + " sec");
             final Dataset dataSet = createDataSet(data, value);
             final JFreeChart chart = createChart(dataSet);
             final ChartPanel chartPanel = new ChartPanel(chart);

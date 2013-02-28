@@ -183,13 +183,15 @@ public class NetworkModel extends MainPanel implements ActionListener {
         }
     }
 
-    public void setDisplay(String dataName, boolean b) {
-        if (!b)
+    public void setDisplay(String dataName, boolean clearHighlightedVertices) {
+        if (!clearHighlightedVertices)
             highlightedVertices.clear();
         if (dataName.equalsIgnoreCase("default")) {
             currentGraph = completeGraph;
             this.recreateContextMenu();
             selectedPhases.clear();
+            currentData = dataName;
+            redrawPanel();
         } else {
 
 
@@ -199,10 +201,27 @@ public class NetworkModel extends MainPanel implements ActionListener {
             selectedPhases.add(Phase.TASK_2);
             selectedPhases.add(Phase.TASK_3);
 
-            currentGraph = getDirectedGraphOfPlayer(dataName, selectedPhases);
+            final String finalDataName = dataName;
+            SwingWorker<Void, Void> worker = new SwingWorker<Void, Void>() {
+                @Override
+                public final Void doInBackground() {
+                    currentGraph = getDirectedGraphOfPlayer(finalDataName, selectedPhases);
+                    return null;
+                }
+
+                public final void done() {
+                    System.out.println(finalDataName + "Network loading complete");
+                    currentData = finalDataName;
+                    redrawPanel();
+                }
+
+
+            };
+            worker.execute();
+
+
         }
-        currentData = dataName;
-        redrawPanel();
+
     }
 
 
@@ -359,44 +378,50 @@ public class NetworkModel extends MainPanel implements ActionListener {
 
     private void redrawPanel() {
         this.removeAll();
-        Transformer<ModelObject, Point2D> areaToPointTransformer = new areaToLocationTransformer<ModelObject, Point2D>();
-        Layout<ModelObject, ModelEdge> layout = new StaticLayout<ModelObject, ModelEdge>(this.currentGraph,
-                areaToPointTransformer);
+        SwingUtilities.invokeLater(new Runnable() {
+            @Override
+            public void run() {
+                Transformer<ModelObject, Point2D> areaToPointTransformer = new areaToLocationTransformer<ModelObject, Point2D>();
+                Layout<ModelObject, ModelEdge> layout = new StaticLayout<ModelObject, ModelEdge>(currentGraph,
+                        areaToPointTransformer);
 //        Layout<ModelObject, ModelEdge> layout = new SpringLayout2<ModelObject, ModelEdge>(this.currentGraph);
 ////        ((FRLayout2)layout).setMaxIterations(3000);
 //        ((FRLayout2)layout).setAttractionMultiplier(2);
 //        ((FRLayout2)layout).setRepulsionMultiplier(0.25);
 
 
-        layout.setSize(new Dimension(1600, 900));
+                layout.setSize(new Dimension(1600, 900));
 
-        vv = new VisualizationViewer<ModelObject, ModelEdge>(layout);
-        vv.setPreferredSize(new Dimension(1700, 900));
-        scaleToRightAmount(vv);
+                vv = new VisualizationViewer<ModelObject, ModelEdge>(layout);
+                vv.setPreferredSize(new Dimension(1700, 900));
+                scaleToRightAmount(vv);
 
-        // Setup up a new vertex to paint transformer...
+                // Setup up a new vertex to paint transformer...
 
 
-        // Create a graph mouse and add it to the visualization component
-        DefaultModalGraphMouse gm = new DefaultModalGraphMouse();
-        gm.setMode(ModalGraphMouse.Mode.PICKING);
-        vv.setGraphMouse(gm);
+                // Create a graph mouse and add it to the visualization component
+                DefaultModalGraphMouse gm = new DefaultModalGraphMouse();
+                gm.setMode(ModalGraphMouse.Mode.PICKING);
+                vv.setGraphMouse(gm);
 
 
 //        PluggableGraphMouse gm = new PluggableGraphMouse();
 //        gm.add(new PopupVertexEdgeMenuMousePlugin<ModelObject, ModelEdge>());
-        vv.getRenderContext().setVertexFillPaintTransformer(new DegreeBasedColorTransformer<ModelObject, Paint>());
-        vv.getRenderContext().setVertexShapeTransformer(new VertexRectangleTransformer<ModelObject, Shape>());
-        vv.getRenderContext().setEdgeDrawPaintTransformer(new EdgeDurationColorTransformer<ModelEdge, Paint>());
+                vv.getRenderContext().setVertexFillPaintTransformer(new DegreeBasedColorTransformer<ModelObject, Paint>());
+                vv.getRenderContext().setVertexShapeTransformer(new VertexRectangleTransformer<ModelObject, Shape>());
+                vv.getRenderContext().setEdgeDrawPaintTransformer(new EdgeDurationColorTransformer<ModelEdge, Paint>());
 //        vv.getRenderContext().setEdgeStrokeTransformer(edgeStrokeTransformer);
-        vv.getRenderContext().setVertexLabelTransformer(new ToStringLabeller<ModelObject>());
+                vv.getRenderContext().setVertexLabelTransformer(new ToStringLabeller<ModelObject>());
 //        vv.getRenderContext().setEdgeLabelTransformer(new ToStringLabeller());
-        vv.getRenderer().getVertexLabelRenderer().setPosition(Renderer.VertexLabel.Position.CNTR);
+                vv.getRenderer().getVertexLabelRenderer().setPosition(Renderer.VertexLabel.Position.CNTR);
 
 
-        this.add(vv);
-        vv.revalidate();
-        this.revalidate();
+               add(vv);
+                vv.revalidate();
+                revalidate();
+            }
+        });
+
     }
 
     private void scaleToRightAmount(VisualizationViewer<ModelObject, ModelEdge> vv) {
@@ -415,20 +440,44 @@ public class NetworkModel extends MainPanel implements ActionListener {
         return instance;
     }
 
-    public void switchOnPhase(Phase phase) {
+    public void switchOnPhase(final Phase phase) {
         selectedPhases.add(phase);
+        SwingWorker<Void, Void> worker = new SwingWorker<Void, Void>() {
+            @Override
+            public final Void doInBackground() {
+                currentGraph = getDirectedGraphOfPlayer(currentData, selectedPhases);
+                return null;
+            }
 
-//        System.out.println(pathPoints.size());
-        this.currentGraph = getDirectedGraphOfPlayer(currentData, selectedPhases);
-        redrawPanel();
+            public final void done() {
+                System.out.println(phase + "removed");
+
+                redrawPanel();
+            }
+
+
+        };
+        worker.execute();
     }
 
-    public void switchOffPhase(Phase phase) {
+    public void switchOffPhase(final Phase phase) {
         selectedPhases.remove(phase);
-        this.currentGraph = getDirectedGraphOfPlayer(currentData, selectedPhases);
-//        System.out.println(currentGraph.getVertexCount());
+        SwingWorker<Void, Void> worker = new SwingWorker<Void, Void>() {
+            @Override
+            public final Void doInBackground() {
+                currentGraph = getDirectedGraphOfPlayer(currentData, selectedPhases);
+                return null;
+            }
 
-        redrawPanel();
+            public final void done() {
+                System.out.println(phase + "removed");
+
+                redrawPanel();
+            }
+
+
+        };
+        worker.execute();
     }
 
 
@@ -588,7 +637,7 @@ public class NetworkModel extends MainPanel implements ActionListener {
 
     }
 
-    public  YES_NO_CHOICE getCorridorRelatedMotion(String dataName, Phase phase) {
+    public YES_NO_CHOICE getCorridorRelatedMotion(String dataName, Phase phase) {
         HashSet<Phase> phases = new HashSet<Phase>();
         phases.add(phase);
 
@@ -763,10 +812,8 @@ public class NetworkModel extends MainPanel implements ActionListener {
         phases.clear();
         phases.add(phase);
 
-            DirectedSparseMultigraph<ModelObject, ModelEdge> localGraph =
-                    getDirectedGraphOfPlayer(dataName, phases);
-
-
+        DirectedSparseMultigraph<ModelObject, ModelEdge> localGraph =
+                getDirectedGraphOfPlayer(dataName, phases);
 
 
         return findCoverage(localGraph);
@@ -800,13 +847,11 @@ public class NetworkModel extends MainPanel implements ActionListener {
     public long getTimeTraveledDuringTasks(String dataName) {
 
 
+        System.out.println("Calculating time for " + dataName);
+        long time1 = Long.parseLong(Database.getInstance().getPhaseCompleteTime(Phase.TASK_1, dataName));
+        long time2 = Long.parseLong(Database.getInstance().getPhaseCompleteTime(Phase.TASK_3, dataName));
 
-            System.out.println("Calculating time for " + dataName);
-            long time1 = Long.parseLong(Database.getInstance().getPhaseCompleteTime(Phase.TASK_1, dataName));
-            long time2 = Long.parseLong(Database.getInstance().getPhaseCompleteTime(Phase.TASK_3, dataName));
-
-            return (time2 - time1);
-
+        return (time2 - time1);
 
 
     }
@@ -814,12 +859,10 @@ public class NetworkModel extends MainPanel implements ActionListener {
     public long getTimeTraveledExploration(String dataName) {
 
 
+        long time1 = Long.parseLong(Database.getInstance().getPhaseStartTime(Phase.EXPLORATION, dataName));
+        long time2 = Long.parseLong(Database.getInstance().getPhaseCompleteTime(Phase.EXPLORATION, dataName));
 
-            long time1 = Long.parseLong(Database.getInstance().getPhaseStartTime(Phase.EXPLORATION, dataName));
-            long time2 = Long.parseLong(Database.getInstance().getPhaseCompleteTime(Phase.EXPLORATION, dataName));
-
-            return time2 - time1;
-
+        return time2 - time1;
 
 
     }
@@ -827,18 +870,16 @@ public class NetworkModel extends MainPanel implements ActionListener {
     public double getDistanceTraveledExploration(String dataName) {
 
 
-            HashSet<Phase> phaseSet = new HashSet<Phase>();
+        HashSet<Phase> phaseSet = new HashSet<Phase>();
 //            for (Phase phase : Phase.values()) {
 //                phaseSet.add(phase);
 //            }
-            phaseSet.add(Phase.EXPLORATION);
-            List<HashMap<String, Number>> pathPoints = this.getMovementOfPlayer(dataName, phaseSet);
+        phaseSet.add(Phase.EXPLORATION);
+        List<HashMap<String, Number>> pathPoints = this.getMovementOfPlayer(dataName, phaseSet);
 
 
-            return findDistanceTravelled(pathPoints);
+        return findDistanceTravelled(pathPoints);
     }
-
-
 
 
     private YES_NO_CHOICE prefersCorridors(DirectedSparseMultigraph<ModelObject, ModelEdge> localGraph, Phase phase) {
@@ -884,7 +925,7 @@ public class NetworkModel extends MainPanel implements ActionListener {
             phases.clear();
             phases.add(phase);
 
-            phaseGraphMap.put(phase, (DirectedSparseMultigraph<ModelObject, ModelEdge>) getDirectedGraphOfPlayer(dataName, phases));
+            phaseGraphMap.put(phase, getDirectedGraphOfPlayer(dataName, phases));
 
         }
 
@@ -987,6 +1028,7 @@ public class NetworkModel extends MainPanel implements ActionListener {
     }
 
     private class DegreeBasedColorTransformer<ModelObject, Paint> implements Transformer<ModelObject, Paint> {
+
         @Override
         public Paint transform(ModelObject obj) {
             int degree = 0;
@@ -998,10 +1040,14 @@ public class NetworkModel extends MainPanel implements ActionListener {
 
 
             if (NetworkModel.this.currentGraph instanceof DirectedSparseMultigraph) {
-                degree = NetworkModel.this.currentGraph.inDegree(object1);
-                degreeNormalized = (double) degree / (double) (NetworkModel.this.completeGraph.degree(object1));
+                try{
+                degree = currentGraph.inDegree(object1);
+                degreeNormalized = (double) degree / (double) completeGraph.degree(object1);
                 degree -= (NetworkModel.this.completeGraph.degree(object1));
-
+                }catch(NullPointerException e){
+                    // Called at the wrong point of time...
+                    return ((Paint) Color.BLACK);
+                }
             } else {
                 degree = NetworkModel.this.currentGraph.degree(object1);
             }

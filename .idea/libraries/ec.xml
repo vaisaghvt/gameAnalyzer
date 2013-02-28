@@ -1,0 +1,11 @@
+<component name="libraryTable">
+  <library name="ec">
+    <CLASSES>
+      <root url="jar://$USER_HOME$/Documents/NetBeansProjects/ec/dist/ec.jar!/" />
+    </CLASSES>
+    <JAVADOC>
+      <root url="http://cs.gmu.edu/~eclab/projects/mason/docs/classdocs/index.html" />
+    </JAVADOC>
+    <SOURCES />
+  </library>
+</component>

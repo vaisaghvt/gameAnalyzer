@@ -28,7 +28,6 @@ public abstract class StatisticsHandler<T extends ConsoleDisplay, V extends Char
     protected JProgressBar progressBar;
     protected JTextArea taskOutput;
     protected JFrame progressFrame;
-    protected boolean windows;
 
 
     protected StatisticChoice choice;
@@ -38,11 +37,6 @@ public abstract class StatisticsHandler<T extends ConsoleDisplay, V extends Char
 
         this.consoleDisplay = consoleDisplay;
         String OS = System.getProperty("os.name").toLowerCase();
-        if(OS.indexOf("win") >= 0)  {
-            windows = true;
-        } else {
-            windows = false;
-        }
 
     }
 
@@ -103,7 +97,7 @@ public abstract class StatisticsHandler<T extends ConsoleDisplay, V extends Char
         taskOutput = new JTextArea(5, 20);
         taskOutput.setMargin(new Insets(5, 5, 5, 5));
         taskOutput.setEditable(false);
-        DefaultCaret caret = (DefaultCaret)taskOutput.getCaret();
+        DefaultCaret caret = (DefaultCaret) taskOutput.getCaret();
         caret.setUpdatePolicy(DefaultCaret.ALWAYS_UPDATE);
         progressFrame = new JFrame("Processing data");
         progressFrame.setLayout(new BorderLayout());
@@ -118,6 +112,7 @@ public abstract class StatisticsHandler<T extends ConsoleDisplay, V extends Char
         progressFrame.setVisible(true);
 
     }
+
     @Override
     public void propertyChange(PropertyChangeEvent event) {
         if ("progress".equals(event.getPropertyName())) {
@@ -146,18 +141,26 @@ public abstract class StatisticsHandler<T extends ConsoleDisplay, V extends Char
 
         @Override
         public final Void doInBackground() {
-            if(!windows){
-                taskOutput.append("Refer to console for progress");
-            }
+//            if(!windows){
+//               SwingUtilities.invokeLater(new Runnable() {
+//                   @Override
+//                   public void run() {
+//                       taskOutput.append("Refer to console for progress");
+//                   }
+//               });
+//
+//            }
             setProgress(0);
             int size = dataNames.size();
             int i = 1;
             for (String dataName : dataNames) {
-                if(windows){
-                    taskOutput.append("Processing " + dataName + "...\n");
-                }else {
-                    System.out.println("Processing " + dataName + "...");
-                }
+                final String tempDataName = dataName;
+                SwingUtilities.invokeLater(new Runnable() {
+                    @Override
+                    public void run() {
+                        taskOutput.append("Processing " + tempDataName + "...\n");
+                    }
+                });
                 doTasks(dataName);
                 setProgress((i * 100) / size);
                 i++;
@@ -168,9 +171,15 @@ public abstract class StatisticsHandler<T extends ConsoleDisplay, V extends Char
         @Override
         public final void done() {
             Toolkit.getDefaultToolkit().beep();
-            progressFrame.dispose();
-            taskOutput.append("Done.");
-            progressFrame.dispose();
+            SwingUtilities.invokeLater(new Runnable() {
+                @Override
+                public void run() {
+                    progressFrame.dispose();
+                    taskOutput.append("Done.");
+                }
+            });
+
+
             summarizeAndDisplay();
         }
 
@@ -178,8 +187,6 @@ public abstract class StatisticsHandler<T extends ConsoleDisplay, V extends Char
             return dataNames;
         }
     }
-
-
 
 
 }
