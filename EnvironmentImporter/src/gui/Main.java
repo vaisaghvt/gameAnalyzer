@@ -550,9 +550,7 @@ public class Main extends JFrame implements ActionListener, MouseListener, Mouse
                     setTitle(item.getText() + " - Network Display");
                     if (item.getText().equalsIgnoreCase("default")) {
                         mChoosePhase.setEnabled(false);
-                        menuBar.add(((NetworkModel) mainPanel).getContextMenu());
-                        ((NetworkModel) mainPanel).getContextMenu().setEnabled(true);
-                        ((NetworkModel) mainPanel).getContextMenu().setVisible(true);
+
                         menuBar.revalidate();
                     } else {
                         mChoosePhase.setEnabled(true);
@@ -560,7 +558,7 @@ public class Main extends JFrame implements ActionListener, MouseListener, Mouse
                         miTask1.setSelected(true);
                         miTask2.setSelected(true);
                         miTask3.setSelected(true);
-                        menuBar.remove(((NetworkModel) mainPanel).getContextMenu());
+
                         menuBar.revalidate();
 
                     }
@@ -849,6 +847,7 @@ public class Main extends JFrame implements ActionListener, MouseListener, Mouse
                         @Override
                         public void run() {
                             setTitle("processing network...");
+                            setCursor(Cursor.getPredefinedCursor(Cursor.WAIT_CURSOR));
                         }
                     });
                     NetworkModel.instance().setDocument(current);
@@ -861,6 +860,7 @@ public class Main extends JFrame implements ActionListener, MouseListener, Mouse
                     SwingUtilities.invokeLater(new Runnable() {
                         @Override
                         public void run() {
+                            setCursor(Cursor.getPredefinedCursor(Cursor.DEFAULT_CURSOR));
                             setTitle("default - Network Display");
                             miViewImage.setEnabled(false);
                             miViewRooms.setEnabled(false);
@@ -895,9 +895,7 @@ public class Main extends JFrame implements ActionListener, MouseListener, Mouse
                             mViewDataFor.setEnabled(true);
                             mAnalysis.setEnabled(true);
 
-                            menuBar.add(((NetworkModel) mainPanel).getContextMenu());
-                            ((NetworkModel) mainPanel).getContextMenu().setEnabled(true);
-                            ((NetworkModel) mainPanel).getContextMenu().setVisible(true);
+
                             menuBar.revalidate();
                             getContentPane().add(mainPanel, BorderLayout.CENTER);
                         }
@@ -913,7 +911,7 @@ public class Main extends JFrame implements ActionListener, MouseListener, Mouse
             SwingUtilities.invokeLater(new Runnable() {
                 @Override
                 public void run() {
-                    menuBar.remove(((NetworkModel) mainPanel).getContextMenu());
+
                     menuBar.revalidate();
                     mainPanel = MapImagePanel.instance();
                     mainPanel.setDocument(current);
@@ -1050,8 +1048,32 @@ public class Main extends JFrame implements ActionListener, MouseListener, Mouse
     }
 
     public static void main(String[] args) {
-        Main main = new Main();
-        main.setVisible(true);
+        SwingUtilities.invokeLater(new Runnable() {
+            @Override
+            public void run() {
+                try {
+                    // Set cross-platform Java L&F (also called "Metal")
+                    UIManager.setLookAndFeel(
+                            UIManager.getSystemLookAndFeelClassName());
+                }
+                catch (UnsupportedLookAndFeelException e) {
+                    // handle exception
+                }
+                catch (ClassNotFoundException e) {
+                    // handle exception
+                }
+                catch (InstantiationException e) {
+                    // handle exception
+                }
+                catch (IllegalAccessException e) {
+                    // handle exception
+                }
+
+                Main main = new Main();
+                main.setVisible(true);
+            }
+        });
+
     }
 
     @Override

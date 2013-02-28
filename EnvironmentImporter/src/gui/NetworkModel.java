@@ -102,7 +102,7 @@ public class NetworkModel extends MainPanel implements ActionListener {
 
         currentData = null;
         selectedPhases = new HashSet<Phase>();
-        this.recreateContextMenu();
+
 
     }
 
@@ -169,7 +169,7 @@ public class NetworkModel extends MainPanel implements ActionListener {
             sortedRoomNames.add(area.toString());
         }
 
-        this.recreateContextMenu();
+
         redrawPanel();
     }
 
@@ -188,7 +188,7 @@ public class NetworkModel extends MainPanel implements ActionListener {
             highlightedVertices.clear();
         if (dataName.equalsIgnoreCase("default")) {
             currentGraph = completeGraph;
-            this.recreateContextMenu();
+
             selectedPhases.clear();
             currentData = dataName;
             redrawPanel();
@@ -202,17 +202,32 @@ public class NetworkModel extends MainPanel implements ActionListener {
             selectedPhases.add(Phase.TASK_3);
 
             final String finalDataName = dataName;
+            SwingUtilities.invokeLater(new Runnable() {
+                @Override
+                public void run() {
+                    getRootPane().setCursor(Cursor.getPredefinedCursor(Cursor.WAIT_CURSOR));
+                }
+            });
             SwingWorker<Void, Void> worker = new SwingWorker<Void, Void>() {
                 @Override
                 public final Void doInBackground() {
+                    removeAll();
+
                     currentGraph = getDirectedGraphOfPlayer(finalDataName, selectedPhases);
                     return null;
                 }
 
                 public final void done() {
-                    System.out.println(finalDataName + "Network loading complete");
+
+
                     currentData = finalDataName;
                     redrawPanel();
+                    SwingUtilities.invokeLater(new Runnable() {
+                        @Override
+                        public void run() {
+                            getRootPane().setCursor(Cursor.getPredefinedCursor(Cursor.DEFAULT_CURSOR));
+                        }
+                    });;
                 }
 
 
@@ -445,11 +460,13 @@ public class NetworkModel extends MainPanel implements ActionListener {
         SwingWorker<Void, Void> worker = new SwingWorker<Void, Void>() {
             @Override
             public final Void doInBackground() {
+                setCursor(Cursor.getPredefinedCursor(Cursor.WAIT_CURSOR));
                 currentGraph = getDirectedGraphOfPlayer(currentData, selectedPhases);
                 return null;
             }
 
             public final void done() {
+                setCursor(Cursor.getPredefinedCursor(Cursor.DEFAULT_CURSOR));
                 System.out.println(phase + "removed");
 
                 redrawPanel();
@@ -465,11 +482,13 @@ public class NetworkModel extends MainPanel implements ActionListener {
         SwingWorker<Void, Void> worker = new SwingWorker<Void, Void>() {
             @Override
             public final Void doInBackground() {
+                setCursor(Cursor.getPredefinedCursor(Cursor.WAIT_CURSOR));
                 currentGraph = getDirectedGraphOfPlayer(currentData, selectedPhases);
                 return null;
             }
 
             public final void done() {
+                setCursor(Cursor.getPredefinedCursor(Cursor.DEFAULT_CURSOR));
                 System.out.println(phase + "removed");
 
                 redrawPanel();
@@ -1493,47 +1512,8 @@ public class NetworkModel extends MainPanel implements ActionListener {
 
     }
 
-    public JMenu getContextMenu() {
-        return this.menu;
-    }
-
-    void recreateContextMenu() {
-        //context menu
-        menu.removeAll();
 
 
-        menu.add(mi3Shortest);
-        menu.add(mi3Norm);
-
-        menu.add(mi2Perfect);
-        menu.add(mi2Confuse);
-        menu.add(mi2MoreConfuse);
-        menu.add(mi2Weird);
-
-        mi3Shortest.addActionListener(this);
-        mi3Norm.addActionListener(this);
-        mi2Perfect.addActionListener(this);
-        mi2Confuse.addActionListener(this);
-        mi2MoreConfuse.addActionListener(this);
-        mi2Weird.addActionListener(this);
-
-
-        menu.add(miPath1);
-        menu.add(miPath2);
-        menu.add(miPath3);
-        menu.add(miPath4);
-        menu.add(miPath5);
-        menu.add(miPath6);
-
-        miPath1.addActionListener(this);
-        miPath2.addActionListener(this);
-        miPath3.addActionListener(this);
-        miPath4.addActionListener(this);
-        miPath5.addActionListener(this);
-        miPath6.addActionListener(this);
-
-
-    }
 
     public int getFloorForArea(ModelArea area) {
         return this.areaFloorMapping.get(area);

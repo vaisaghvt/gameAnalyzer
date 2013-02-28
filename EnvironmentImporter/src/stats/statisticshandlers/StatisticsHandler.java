@@ -36,7 +36,7 @@ public abstract class StatisticsHandler<T extends ConsoleDisplay, V extends Char
         this.chartDisplay = chartDisplay;
 
         this.consoleDisplay = consoleDisplay;
-        String OS = System.getProperty("os.name").toLowerCase();
+//        String OS = System.getProperty("os.name").toLowerCase();
 
     }
 
