@@ -87,7 +87,6 @@ public class VertexVisitFrequencyStatisticHandler extends StatisticsHandler<Vert
             this.allOrOne = allOrOne;
             this.type = aggregationType;
 
-            progressFrame.setTitle("processing "+choice.toString());
         }
 
 

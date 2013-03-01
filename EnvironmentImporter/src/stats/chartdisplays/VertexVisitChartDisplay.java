@@ -66,6 +66,7 @@ public class VertexVisitChartDisplay extends ChartDisplay<Multiset<Double>> {
         );
 
 
+
         return chart;
     }
 
