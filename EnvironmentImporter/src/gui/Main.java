@@ -37,6 +37,7 @@ public class Main extends JFrame implements ActionListener, MouseListener, Mouse
     private final JMenu mView = new JMenu("View");
     private final JMenuItem miViewImage = new JCheckBoxMenuItem("View Image");
     private final JMenuItem miViewRooms = new JCheckBoxMenuItem("View Rooms");
+    private final JMenuItem miViewLinks = new JCheckBoxMenuItem("View Links");
     private final JMenuItem miNetworkView = new JRadioButtonMenuItem("Network View");
     private final JMenuItem miRoomView = new JRadioButtonMenuItem("Room View");
     private static final int MIN_ZOOM = 1;
@@ -176,10 +177,12 @@ public class Main extends JFrame implements ActionListener, MouseListener, Mouse
 
         miViewImage.setSelected(true);
         miViewRooms.setSelected(true);
+        miViewLinks.setSelected(true);
 
         mView.addSeparator();
         mView.add(this.miViewImage);
         mView.add(this.miViewRooms);
+        mView.add(this.miViewLinks);
 
         mView.addSeparator();
         mView.add(this.miZoom);
@@ -200,6 +203,7 @@ public class Main extends JFrame implements ActionListener, MouseListener, Mouse
         miRoomView.addActionListener(this);
         miViewImage.addActionListener(this);
         miViewRooms.addActionListener(this);
+        miViewLinks.addActionListener(this);
         miZoom.addChangeListener(this);
         miExplorationPhase.addActionListener(this);
         miTask1.addActionListener(this);
@@ -540,7 +544,21 @@ public class Main extends JFrame implements ActionListener, MouseListener, Mouse
                     invalidateImagePanel();
                 }
             });
-        } else if (dataNameItems != null && dataNameItems.contains(event.getSource())) {
+        } else if (event.getSource() == miViewLinks) {
+
+            SwingUtilities.invokeLater(new Runnable() {
+                @Override
+                public void run() {
+                    assert mainPanel instanceof MapImagePanel;
+                    if (miViewLinks.isSelected()) {
+                        ((MapImagePanel) mainPanel).enableLinkView();
+                    } else {
+                        ((MapImagePanel) mainPanel).disableLinkView();
+                    }
+                    invalidateImagePanel();
+                }
+            });
+        }else if (dataNameItems != null && dataNameItems.contains(event.getSource())) {
             final JMenuItem item = (JMenuItem) event.getSource();
             SwingUtilities.invokeLater(new Runnable() {
                 @Override
@@ -732,9 +750,9 @@ public class Main extends JFrame implements ActionListener, MouseListener, Mouse
 
 
             } else if (event.getSource() == miCreateGroup) {
-                SwingWorker<Void, Void> worker = new SwingWorker<Void, Void>() {
-                    @Override
-                    public final Void doInBackground() {
+//                SwingWorker<Void, Void> worker = new SwingWorker<Void, Void>() {
+//                    @Override
+//                    public final Void doInBackground() {
                         String newName = JOptionPane.showInternalInputDialog(
                                 getContentPane(),
                                 "What's the name of this group?",
@@ -742,17 +760,17 @@ public class Main extends JFrame implements ActionListener, MouseListener, Mouse
                                 JOptionPane.QUESTION_MESSAGE);
 
                         current.createGroup(newName);
-                        return null;
-                    }
+//                        return null;
+//                    }
 
-                    public final void done() {
+//                    public final void done() {
                         invalidateImagePanel();
-                    }
+//                    }
 
 
-                };
+//                };
 
-                worker.execute();
+//                worker.execute();
 
 
             } else if (event.getSource() == miRemoveGroup) {
@@ -774,9 +792,9 @@ public class Main extends JFrame implements ActionListener, MouseListener, Mouse
 
 
             } else if (event.getSource() == miRenameArea) {
-                SwingWorker<Void, Void> worker = new SwingWorker<Void, Void>() {
-                    @Override
-                    public final Void doInBackground() {
+//                SwingWorker<Void, Void> worker = new SwingWorker<Void, Void>() {
+//                    @Override
+//                    public final Void doInBackground() {
                         if (current.selected() != null && !current.selected().isEmpty() && current.selected().size() == 1) {
                             String newName = JOptionPane.showInternalInputDialog(
                                     getContentPane(),
@@ -787,12 +805,12 @@ public class Main extends JFrame implements ActionListener, MouseListener, Mouse
                             unsetMouseSelection();
                             invalidateImagePanel();
                         }
-                        return null;
-                    }
+//                        return null;
+//                    }
 
-                };
+//                };
 
-                worker.execute();
+//                worker.execute();
 
             } else if (floorItems != null && floorItems.contains(event.getSource())) {
                 final JMenuItem item = (JMenuItem) event.getSource();
@@ -864,6 +882,7 @@ public class Main extends JFrame implements ActionListener, MouseListener, Mouse
                             setTitle("default - Network Display");
                             miViewImage.setEnabled(false);
                             miViewRooms.setEnabled(false);
+                            miViewLinks.setEnabled(false);
                             miZoom.setEnabled(false);
 
                             //update the floors
@@ -918,6 +937,7 @@ public class Main extends JFrame implements ActionListener, MouseListener, Mouse
                     invalidateImagePanel();
                     miViewImage.setEnabled(true);
                     miViewRooms.setEnabled(true);
+                    miViewLinks.setEnabled(true);
                     miZoom.setEnabled(true);
                     mViewDataFor.setEnabled(false);
                     mAnalysis.setEnabled(false);

@@ -29,6 +29,7 @@ public class MapImagePanel extends MainPanel {
     private boolean viewRooms = true;
     private static boolean zoomChanged = false;
     private static MapImagePanel instance;
+    private boolean viewLinks =true;
 
     private MapImagePanel() {
         currentFloor = 0;
@@ -72,7 +73,7 @@ public class MapImagePanel extends MainPanel {
 
         }
         if (viewRooms) {
-            g = document.image(g);
+            g = document.image(g, viewLinks);
         }
 
         if (hasSelection) {
@@ -124,6 +125,13 @@ public class MapImagePanel extends MainPanel {
         this.viewRooms = false;
     }
 
+    public void enableLinkView() {
+        this.viewLinks = true;
+    }
+    public void disableLinkView() {
+        this.viewLinks = false;
+    }
+
     public void selectFloor(int idx) {
         this.currentFloor = idx;
     }
@@ -168,5 +176,7 @@ public class MapImagePanel extends MainPanel {
 
         return instance;
     }
+
+
 }
 

@@ -14,5 +14,10 @@ public class VertexConsoleDisplay extends ConsoleDisplay<HashMap<String, ? exten
 
     @Override
     public void display(HashMap<String, ? extends Number> data) {
+        for(String roomName: data.keySet()){
+            if(data.get(roomName).doubleValue()==0){
+                System.out.println(roomName);
+            }
+        }
     }
 }

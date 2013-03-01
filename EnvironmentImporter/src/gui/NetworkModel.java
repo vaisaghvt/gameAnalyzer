@@ -159,9 +159,9 @@ public class NetworkModel extends MainPanel implements ActionListener {
         currentData = "default";
         currentGraph = completeGraph;
 
-
+        //TODO : Fix this for to find actual start.
         RandomWalk.instance().generateRandomWalkCollection(completeGraph,
-                this.findRoomByName(completeGraph, "StartingRoom"));
+                this.findRoomByName("Start"));
 
 
         sortedRoomNames = new TreeSet<String>();
@@ -227,7 +227,8 @@ public class NetworkModel extends MainPanel implements ActionListener {
                         public void run() {
                             getRootPane().setCursor(Cursor.getPredefinedCursor(Cursor.DEFAULT_CURSOR));
                         }
-                    });;
+                    });
+                    ;
                 }
 
 
@@ -431,7 +432,7 @@ public class NetworkModel extends MainPanel implements ActionListener {
                 vv.getRenderer().getVertexLabelRenderer().setPosition(Renderer.VertexLabel.Position.CNTR);
 
 
-               add(vv);
+                add(vv);
                 vv.revalidate();
                 revalidate();
             }
@@ -684,28 +685,29 @@ public class NetworkModel extends MainPanel implements ActionListener {
     private YES_NO_CHOICE usesStaircaseUnusually(DirectedSparseMultigraph<ModelObject, ModelEdge> localGraph, Phase phase) {
 
         if (phase == Phase.TASK_1) {
-            ModelObject b2staircaseRoom = findRoomByName(completeGraph, "BToDown");
-            ModelObject ac2staircaseRoom = findRoomByName(completeGraph, "ACToDown");
-            ModelObject secondFloorLib = findRoomByName(completeGraph, "Library2");
+            ModelObject b2staircaseRoom = findRoomByName("BToDown");
+            ModelObject ac2staircaseRoom = findRoomByName("ACToDown");
+            ModelObject secondFloorLib = findRoomByName("Library2");
 //            ModelObject l3staircaseRoom = findRoomByName(localGraph, "S3StaircaseRoom");
             boolean beenHere = false;
 
             if (localGraph.containsVertex(ac2staircaseRoom)) {
                 beenHere = true;
-                if (localGraph.getSuccessors(ac2staircaseRoom).contains(findRoomByName(completeGraph, "left 2 stair")) || localGraph.getSuccessors(ac2staircaseRoom).contains(findRoomByName(completeGraph, "right 2 stair"))) {
+                if (localGraph.getSuccessors(ac2staircaseRoom).contains(findRoomByName("left 2 stair")) ||
+                        localGraph.getSuccessors(ac2staircaseRoom).contains(findRoomByName("right 2 stair"))) {
                     return YES_NO_CHOICE.YES;
                 }
             }
             if (localGraph.containsVertex(b2staircaseRoom)) {
                 beenHere = true;
-                if (localGraph.getSuccessors(b2staircaseRoom).contains(findRoomByName(completeGraph, "B2 Stairs"))) {
+                if (localGraph.getSuccessors(b2staircaseRoom).contains(findRoomByName("B2 Stairs"))) {
                     return YES_NO_CHOICE.YES;
                 }
             }
 
             if (localGraph.containsVertex(secondFloorLib)) {
                 beenHere = true;
-                if (localGraph.getSuccessors(secondFloorLib).contains(findRoomByName(completeGraph, "LibraryG"))) {
+                if (localGraph.getSuccessors(secondFloorLib).contains(findRoomByName("LibraryG"))) {
                     return YES_NO_CHOICE.YES;
                 }
             }
@@ -723,25 +725,26 @@ public class NetworkModel extends MainPanel implements ActionListener {
 
 
         } else if (phase == Phase.TASK_2) {
-            ModelObject b2staircaseRoom = findRoomByName(completeGraph, "BToDown");
-            ModelObject ac2staircaseRoom = findRoomByName(completeGraph, "ACToDown");
-            ModelObject secondFloorLib = findRoomByName(completeGraph, "Library2");
+            ModelObject b2staircaseRoom = findRoomByName("BToDown");
+            ModelObject ac2staircaseRoom = findRoomByName("ACToDown");
+            ModelObject secondFloorLib = findRoomByName("Library2");
             boolean beenHere = false;
             if (localGraph.containsVertex(ac2staircaseRoom)) {
                 beenHere = true;
-                if (localGraph.getSuccessors(ac2staircaseRoom).contains(findRoomByName(completeGraph, "left 2 stair")) || localGraph.getSuccessors(ac2staircaseRoom).contains(findRoomByName(completeGraph, "right 2 stair"))) {
+                if (localGraph.getSuccessors(ac2staircaseRoom).contains(findRoomByName("left 2 stair")) ||
+                        localGraph.getSuccessors(ac2staircaseRoom).contains(findRoomByName("right 2 stair"))) {
                     return YES_NO_CHOICE.YES;
                 }
             }
             if (localGraph.containsVertex(b2staircaseRoom)) {
                 beenHere = true;
-                if (localGraph.getSuccessors(b2staircaseRoom).contains(findRoomByName(completeGraph, "B2 Stairs"))) {
+                if (localGraph.getSuccessors(b2staircaseRoom).contains(findRoomByName("B2 Stairs"))) {
                     return YES_NO_CHOICE.YES;
                 }
             }
             if (localGraph.containsVertex(secondFloorLib)) {
                 beenHere = true;
-                if (localGraph.getSuccessors(secondFloorLib).contains(findRoomByName(completeGraph, "LibraryG"))) {
+                if (localGraph.getSuccessors(secondFloorLib).contains(findRoomByName("LibraryG"))) {
                     return YES_NO_CHOICE.YES;
                 }
             }
@@ -758,10 +761,10 @@ public class NetworkModel extends MainPanel implements ActionListener {
             return YES_NO_CHOICE.NO;
 
         } else if (phase == Phase.TASK_3) {
-            ModelObject secondFloorLib = findRoomByName(completeGraph, "Library2");
+            ModelObject secondFloorLib = findRoomByName("Library2");
 
             if (localGraph.containsVertex(secondFloorLib)) {
-                if (!localGraph.getSuccessors(secondFloorLib).contains(findRoomByName(completeGraph, "LibraryG"))) {
+                if (!localGraph.getSuccessors(secondFloorLib).contains(findRoomByName("LibraryG"))) {
                     return YES_NO_CHOICE.YES;
                 } else {
                     return YES_NO_CHOICE.NO;
@@ -902,14 +905,14 @@ public class NetworkModel extends MainPanel implements ActionListener {
 
 
     private YES_NO_CHOICE prefersCorridors(DirectedSparseMultigraph<ModelObject, ModelEdge> localGraph, Phase phase) {
-        ModelObject db2 = findRoomByName(completeGraph, "DB2");
-        ModelObject mb1 = findRoomByName(completeGraph, "MB1");
-        ModelObject mb3 = findRoomByName(completeGraph, "MB3");
-        ModelObject theLounge = findRoomByName(completeGraph, "TheLounge");
-        ModelObject gallery = findRoomByName(completeGraph, "Gallery");
-        ModelObject study1 = findRoomByName(completeGraph, "Study1");
-        ModelObject mr = findRoomByName(completeGraph, "MR");
-        ModelObject study3 = findRoomByName(completeGraph, "Study3");
+        ModelObject db2 = findRoomByName("DB2");
+        ModelObject mb1 = findRoomByName("MB1");
+        ModelObject mb3 = findRoomByName("MB3");
+        ModelObject theLounge = findRoomByName("TheLounge");
+        ModelObject gallery = findRoomByName("Gallery");
+        ModelObject study1 = findRoomByName("Study1");
+        ModelObject mr = findRoomByName("MR");
+        ModelObject study3 = findRoomByName("Study3");
 
         if (localGraph.containsVertex(db2) && localGraph.containsVertex(mb1) &&
                 localGraph.isNeighbor(db2, mb1)) {
@@ -999,8 +1002,44 @@ public class NetworkModel extends MainPanel implements ActionListener {
     }
 
     public Collection<String> getSortedRooms() {
+
         if (completeGraph != null) {
             return sortedRoomNames;
+        } else {
+            return null;
+        }
+    }
+
+    public Collection<String> getFloorSortedRooms() {
+
+        if (completeGraph != null) {
+
+            ArrayList<String>[] floorRooms = new ArrayList[3];
+            for (int i = 0; i < 3; i++) {
+                floorRooms[i] = new ArrayList<String>();
+            }
+
+
+            for (String name : sortedRoomNames) {
+                ModelObject vertex = NetworkModel.instance().findRoomByName(name);
+                int floor = -1;
+                if (vertex instanceof ModelArea) {
+                    floor = NetworkModel.instance().getFloorForArea((ModelArea) vertex);
+                } else {
+                    ModelArea room = NetworkModel.instance().getRoomForId(((ModelGroup) vertex).getAreaIds().iterator().next());
+                    floor = NetworkModel.instance().getFloorForArea(room);
+                }
+
+                if (floor != -1) {
+                    floorRooms[floor].add(name);
+                }
+            }
+            ArrayList<String> finalList = new ArrayList<String>();
+            for (ArrayList<String> list : floorRooms) {
+                finalList.addAll(list);
+            }
+
+            return finalList;
         } else {
             return null;
         }
@@ -1059,11 +1098,11 @@ public class NetworkModel extends MainPanel implements ActionListener {
 
 
             if (NetworkModel.this.currentGraph instanceof DirectedSparseMultigraph) {
-                try{
-                degree = currentGraph.inDegree(object1);
-                degreeNormalized = (double) degree / (double) completeGraph.degree(object1);
-                degree -= (NetworkModel.this.completeGraph.degree(object1));
-                }catch(NullPointerException e){
+                try {
+                    degree = currentGraph.inDegree(object1);
+                    degreeNormalized = (double) degree / (double) completeGraph.degree(object1);
+                    degree -= (NetworkModel.this.completeGraph.degree(object1));
+                } catch (NullPointerException e) {
                     // Called at the wrong point of time...
                     return ((Paint) Color.BLACK);
                 }
@@ -1225,7 +1264,7 @@ public class NetworkModel extends MainPanel implements ActionListener {
 
             boolean added = false;
 
-            ModelObject startingRoom = findRoomByName(graph, "Library2");
+            ModelObject startingRoom = findRoomByName("Library2");
             for (String path : paths.keySet()) {
                 if (graphIsPath(startingRoom, graph, Arrays.asList(paths.get(path)))) {
                     return path;
@@ -1247,7 +1286,7 @@ public class NetworkModel extends MainPanel implements ActionListener {
 
             boolean added = false;
 
-            ModelObject startingRoom = findRoomByName(graph, "Gallery");
+            ModelObject startingRoom = findRoomByName("Gallery");
             for (String path : pathForFloor3.keySet()) {
                 if (checkFloorPath(startingRoom, graph, Arrays.asList(pathForFloor3.get(path)), 2)) {
                     resultString += path;
@@ -1271,7 +1310,7 @@ public class NetworkModel extends MainPanel implements ActionListener {
 
             added = false;
 
-            startingRoom = findRoomByName(graph, "WayToFlr3");
+            startingRoom = findRoomByName("WayToFlr3");
             for (String path : pathForFloor2.keySet()) {
                 if (checkFloorPath(startingRoom, graph, Arrays.asList(pathForFloor2.get(path)), 1)) {
                     result.put(path, dataName);
@@ -1329,7 +1368,7 @@ public class NetworkModel extends MainPanel implements ActionListener {
 
         List<String> pathVertices = new ArrayList<String>(pathDescription);
         for (String vertexName : pathDescription) {
-            ModelObject vertex = findRoomByName(completeGraph, vertexName);
+            ModelObject vertex = findRoomByName(vertexName);
 //            System.out.println("Removing " + vertex + "from" + graph);
             if (graph.removeVertex(vertex)) {
                 pathVertices.remove(vertexName);
@@ -1375,8 +1414,9 @@ public class NetworkModel extends MainPanel implements ActionListener {
 
     }
 
-    private ModelObject findRoomByName(Graph<ModelObject, ModelEdge> graph, String roomName) {
-        for (ModelObject vertex : graph.getVertices()) {
+    public ModelObject findRoomByName(String roomName) {
+
+        for (ModelObject vertex : completeGraph.getVertices()) {
             if (vertex.toString().equalsIgnoreCase(roomName)) {
                 return vertex;
             }
@@ -1511,8 +1551,6 @@ public class NetworkModel extends MainPanel implements ActionListener {
         return set.pollFirst() + "to" + set.pollLast();
 
     }
-
-
 
 
     public int getFloorForArea(ModelArea area) {

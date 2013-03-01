@@ -310,7 +310,7 @@ public class Document {
     }
 
 
-    public Graphics image(Graphics g) {
+    public Graphics image(Graphics g, boolean viewLinks) {
         try {
             if (currentFloor != null) {
 
@@ -327,16 +327,18 @@ public class Document {
                     }
                 }
 
-                for (ModelArea link : currentFloor.getLinks()) {
-                    if ((selected() != null && selected().contains(link))) {
-                        this.fillArea(g, link, Color.RED);
-                        g.setColor(Color.RED);
-                    } else {
-                        this.fillArea(g, link, Color.CYAN);
-                        g.setColor(Color.CYAN);
+                if (viewLinks) {
+                    for (ModelArea link : currentFloor.getLinks()) {
+                        if ((selected() != null && selected().contains(link))) {
+                            this.fillArea(g, link, Color.RED);
+                            g.setColor(Color.RED);
+                        } else {
+                            this.fillArea(g, link, Color.CYAN);
+                            g.setColor(Color.CYAN);
+                        }
+
+
                     }
-
-
                 }
 
 
@@ -373,7 +375,7 @@ public class Document {
                 drawingCorner1.x - drawingCorner0.x, drawingCorner1.y - drawingCorner0.y);
         if (drawLabel) {
 //            completeGraph.setColor(Color.BLACK);
-            g.drawString(area.toString(), (drawingCorner0.x + drawingCorner1.x) / 2, (drawingCorner0.y + drawingCorner1.y) / 2);
+            g.drawString(area.toString(), (drawingCorner0.x + drawingCorner1.x) / 2 - ((area.toString().length()*5) / 2), (drawingCorner0.y + drawingCorner1.y) / 2);
 //            System.out.println("Here");
         }
     }
