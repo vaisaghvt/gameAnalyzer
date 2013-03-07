@@ -43,7 +43,6 @@ import static stats.StatisticChoice.VERTEX_VISIT_FREQUENCY;
 public class NetworkModel extends MainPanel implements ActionListener {
 
 
-    private final JMenu menu = new JMenu("Select Path");
     Graph<ModelObject, ModelEdge> completeGraph;
     Graph<ModelObject, ModelEdge> currentGraph;
     HashMap<Integer, ModelArea> idAreaMapping;
@@ -74,6 +73,7 @@ public class NetworkModel extends MainPanel implements ActionListener {
     private Collection<String> sortedRoomNames;
     private HashMap<String, HashMap<Integer, DirectedSparseMultigraph<ModelObject, ModelEdge>>> cachedGraph =
             new HashMap<String, HashMap<Integer, DirectedSparseMultigraph<ModelObject, ModelEdge>>>();
+    private Collection<String> floorDegreeSortedRooms;
 
     /**
      * Creates a new instance of SimpleGraphView
@@ -160,8 +160,12 @@ public class NetworkModel extends MainPanel implements ActionListener {
         currentGraph = completeGraph;
 
         //TODO : Fix this for to find actual start.
+        ModelObject startingNode = this.findRoomByName("Start");
+        if (startingNode == null) {
+            startingNode = this.findRoomByName("StartingRoom");
+        }
         RandomWalk.instance().generateRandomWalkCollection(completeGraph,
-                this.findRoomByName("Start"));
+                startingNode);
 
 
         sortedRoomNames = new TreeSet<String>();
@@ -1010,6 +1014,55 @@ public class NetworkModel extends MainPanel implements ActionListener {
         }
     }
 
+    public Collection<String> getFloorDegreeSortedRooms() {
+        TreeSet<String> degreeSortedRoomNames = new TreeSet<String>(new Comparator<String>(){
+
+            @Override
+            public int compare(String roomName1, String roomName2) {
+                ModelObject room1 = findRoomByName(roomName1);
+                ModelObject room2 = findRoomByName(roomName2);
+                if(completeGraph.degree(room1)!=completeGraph.degree(room2)){
+                    return completeGraph.degree(room1)- completeGraph.degree(room2);
+                }else{
+                    return roomName1.compareTo(roomName2);
+                }
+            }
+        });
+        degreeSortedRoomNames.addAll(sortedRoomNames);
+
+        if (completeGraph != null) {
+
+            ArrayList<String>[] floorRooms = new ArrayList[3];
+            for (int i = 0; i < 3; i++) {
+                floorRooms[i] = new ArrayList<String>();
+            }
+
+
+            for (String name : degreeSortedRoomNames) {
+                ModelObject vertex = NetworkModel.instance().findRoomByName(name);
+                int floor;
+                if (vertex instanceof ModelArea) {
+                    floor = NetworkModel.instance().getFloorForArea((ModelArea) vertex);
+                } else {
+                    ModelArea room = NetworkModel.instance().getRoomForId(((ModelGroup) vertex).getAreaIds().iterator().next());
+                    floor = NetworkModel.instance().getFloorForArea(room);
+                }
+
+
+                floorRooms[floor].add(name);
+
+            }
+            ArrayList<String> finalList = new ArrayList<String>();
+            for (ArrayList<String> list : floorRooms) {
+                finalList.addAll(list);
+            }
+
+            return finalList;
+        } else {
+            return null;
+        }
+    }
+
     public Collection<String> getFloorSortedRooms() {
 
         if (completeGraph != null) {
@@ -1022,7 +1075,7 @@ public class NetworkModel extends MainPanel implements ActionListener {
 
             for (String name : sortedRoomNames) {
                 ModelObject vertex = NetworkModel.instance().findRoomByName(name);
-                int floor = -1;
+                int floor;
                 if (vertex instanceof ModelArea) {
                     floor = NetworkModel.instance().getFloorForArea((ModelArea) vertex);
                 } else {
@@ -1030,9 +1083,9 @@ public class NetworkModel extends MainPanel implements ActionListener {
                     floor = NetworkModel.instance().getFloorForArea(room);
                 }
 
-                if (floor != -1) {
-                    floorRooms[floor].add(name);
-                }
+
+                floorRooms[floor].add(name);
+
             }
             ArrayList<String> finalList = new ArrayList<String>();
             for (ArrayList<String> list : floorRooms) {
@@ -1051,6 +1104,12 @@ public class NetworkModel extends MainPanel implements ActionListener {
         } else
             return -1;
 
+    }
+
+
+
+    public void setFloorDegreeSortedRooms(Collection<String> floorDegreeSortedRooms) {
+        this.floorDegreeSortedRooms = floorDegreeSortedRooms;
     }
 
 

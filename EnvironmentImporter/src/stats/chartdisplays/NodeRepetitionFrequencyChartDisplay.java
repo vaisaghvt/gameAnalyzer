@@ -72,7 +72,18 @@ public class NodeRepetitionFrequencyChartDisplay extends ChartDisplay<Multiset<D
 
 
     public JFreeChart createChart(Dataset dataSet) {
-        final JFreeChart chart = ChartFactory.createScatterPlot(
+//        final JFreeChart chart = ChartFactory.createScatterPlot(
+//                this.getTitle() + ": deltaT = Time between Room use",
+//                "deltaT = Time between Room use",
+//                "Frequency",
+//                (XYDataset) dataSet,
+//                PlotOrientation.VERTICAL,
+//                false,
+//                true,
+//                false
+//        );
+
+        final JFreeChart chart = ChartFactory.createXYLineChart(
                 this.getTitle() + ": deltaT = Time between Room use",
                 "deltaT = Time between Room use",
                 "Frequency",

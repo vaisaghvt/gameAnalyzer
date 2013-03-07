@@ -8,8 +8,6 @@ import stats.StatisticChoice;
 import stats.chartdisplays.VertexChartDisplay;
 import stats.consoledisplays.VertexConsoleDisplay;
 
-import javax.swing.*;
-import java.awt.*;
 import java.util.Collection;
 import java.util.HashMap;
 
