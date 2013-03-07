@@ -23,6 +23,8 @@ public enum StatisticChoice {
             Phase.EXPLORATION, Phase.TASK_1, Phase.TASK_2, Phase.TASK_3),
     VERTEX_VISIT_FREQUENCY("VertexVisitFrequencyStatisticHandler", "Frequency of visit for each room"
             , true, true,true,  Phase.EXPLORATION, Phase.TASK_1, Phase.TASK_2, Phase.TASK_3),
+    DOOR_USE_FREQUENCY("DoorUseFrequencyStatisticHandler", "Frequency of use of each door"
+            , true, true,true,  Phase.EXPLORATION, Phase.TASK_1, Phase.TASK_2, Phase.TASK_3),
     TIME_SPENT_PER_VERTEX("VertexVisitDurationStatisticHandler", "Time spent in each room", true, true, false,
             Phase.EXPLORATION, Phase.TASK_1, Phase.TASK_2, Phase.TASK_3),
     VERTEX_VISIT_TIMES("", "Time at which each vertex was visited - Only for internal use", false, false,false,

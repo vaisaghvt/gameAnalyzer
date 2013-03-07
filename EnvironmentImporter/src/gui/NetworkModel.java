@@ -541,7 +541,7 @@ public class NetworkModel extends MainPanel implements ActionListener {
         return result;
     }
 
-    public DirectedSparseMultigraph<ModelObject, ModelEdge> getDirectedGraphOfPlayer(String dataName, HashSet<Phase> phases) {
+    public DirectedSparseMultigraph<ModelObject, ModelEdge> getDirectedGraphOfPlayer(String dataName, Collection<Phase> phases) {
         DirectedSparseMultigraph<ModelObject, ModelEdge> result = getCachedGraph(dataName, phases);
         if (result == null) {
             List<HashMap<String, Number>> resultList = getMovementOfPlayer(dataName, phases);
@@ -594,7 +594,7 @@ public class NetworkModel extends MainPanel implements ActionListener {
 
     }
 
-    private DirectedSparseMultigraph<ModelObject, ModelEdge> getCachedGraph(String dataName, HashSet<Phase> phases) {
+    private DirectedSparseMultigraph<ModelObject, ModelEdge> getCachedGraph(String dataName, Collection<Phase> phases) {
         if (!cachedGraph.containsKey(dataName)) {
             return null;
         }
@@ -607,7 +607,7 @@ public class NetworkModel extends MainPanel implements ActionListener {
         }
     }
 
-    private void cacheGraph(String dataName, HashSet<Phase> phases, DirectedSparseMultigraph<ModelObject, ModelEdge> result) {
+    private void cacheGraph(String dataName, Collection<Phase> phases, DirectedSparseMultigraph<ModelObject, ModelEdge> result) {
         if (!cachedGraph.containsKey(dataName)) {
             cachedGraph.put(dataName, new HashMap<Integer, DirectedSparseMultigraph<ModelObject, ModelEdge>>());
         }
@@ -623,7 +623,7 @@ public class NetworkModel extends MainPanel implements ActionListener {
 
     }
 
-    public List<HashMap<String, Number>> getMovementOfPlayer(String dataName, HashSet<Phase> phases) {
+    public List<HashMap<String, Number>> getMovementOfPlayer(String dataName, Collection<Phase> phases) {
         List<HashMap<String, Number>> result;
         int code = findCode(phases);
         if (!nameToPhaseToMovementMap.containsKey(dataName) || !nameToPhaseToMovementMap.get(dataName).containsKey(code)) {
@@ -642,7 +642,7 @@ public class NetworkModel extends MainPanel implements ActionListener {
         return result;
     }
 
-    private int findCode(HashSet<Phase> phases) {
+    private int findCode(Collection<Phase> phases) {
 
         TreeSet<Phase> phasesSorted = new TreeSet<Phase>(new Comparator<Phase>() {
             @Override
@@ -1561,6 +1561,32 @@ public class NetworkModel extends MainPanel implements ActionListener {
         return result;
     }
 
+    public HashMap<String, Integer> getEdgeDataFor(String dataName, Phase phase) {
+
+
+        DirectedSparseMultigraph<ModelObject, ModelEdge> graph
+                = getDirectedGraphOfPlayer(dataName, Collections.singleton(phase));
+        HashMap<String,Integer> result = new HashMap<String, Integer>();
+        for (ModelEdge edge : graph.getEdges()) {
+            String edgeStringRepresentation = edgeToString(graph.getEndpoints(edge));
+
+
+
+            Integer previousNumber = result.get(edgeStringRepresentation);
+            if (previousNumber == null) {
+                result.put(edgeStringRepresentation, 0);
+            } else {
+                result.put(edgeStringRepresentation, previousNumber.intValue() + 1);
+            }
+
+
+
+        }
+
+
+        return result;
+    }
+
 
     public HashMap<String, HashMap<String, Number>> getEdgeDataFor(String dataName) {
 
@@ -1603,14 +1629,31 @@ public class NetworkModel extends MainPanel implements ActionListener {
         return result;
     }
 
-    private String edgeToString(Pair<ModelObject> endpoints) {
+    public static String edgeToString(Pair<ModelObject> endpoints) {
         TreeSet<String> set = new TreeSet<String>();
         set.add(endpoints.getFirst().toString());
         set.add(endpoints.getSecond().toString());
-        return set.pollFirst() + "to" + set.pollLast();
 
+
+
+        int floorOfFirst = instance().getFloorForVertex(endpoints.getFirst());
+        int floorOfSecond = instance().getFloorForVertex(endpoints.getSecond());
+        if(floorOfFirst == floorOfSecond)
+            return floorOfFirst+":"+set.pollFirst() + "to" + set.pollLast();
+        else
+            return "Staircase:"+set.pollFirst() + "to" + set.pollLast();
     }
 
+    public int getFloorForVertex(ModelObject vertex){
+        int floor;
+        if (vertex instanceof ModelArea) {
+            floor = NetworkModel.instance().getFloorForArea((ModelArea) vertex);
+        } else {
+            ModelArea room = NetworkModel.instance().getRoomForId(((ModelGroup) vertex).getAreaIds().iterator().next());
+            floor = NetworkModel.instance().getFloorForArea(room);
+        }
+        return floor;
+    }
 
     public int getFloorForArea(ModelArea area) {
         return this.areaFloorMapping.get(area);
