@@ -185,10 +185,12 @@ public class ParallelCoordinatePlotGenerator extends StatisticsHandler<GraphDeta
             DirectedSparseMultigraph<ModelObject, ModelEdge> graphForPlayer;
             synchronized (NetworkModel.instance()) {
                 movementOfPlayer = NetworkModel.instance().getMovementOfPlayer(dataName, phases);
+
+            }
+            synchronized (NetworkModel.instance()) {
                 graphForPlayer =
                         NetworkModel.instance().getDirectedGraphOfPlayer(dataName, phases);
             }
-
             HashMap<String, String> results = new HashMap<String, String>();
             results = getStatsForMovement(movementOfPlayer, results);
             results = getStatsForGraph(dataName, graphForPlayer, results);
@@ -204,8 +206,6 @@ public class ParallelCoordinatePlotGenerator extends StatisticsHandler<GraphDeta
         }
 
     }
-
-
 
 
 }

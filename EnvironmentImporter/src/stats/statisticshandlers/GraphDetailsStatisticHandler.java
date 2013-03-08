@@ -275,6 +275,9 @@ public class GraphDetailsStatisticHandler extends StatisticsHandler<GraphDetails
             DirectedSparseMultigraph<ModelObject, ModelEdge> graphForPlayer;
             synchronized (NetworkModel.instance()) {
                 movementOfPlayer = NetworkModel.instance().getMovementOfPlayer(dataName, phases);
+
+            }
+            synchronized (NetworkModel.instance()) {
                 graphForPlayer =
                         NetworkModel.instance().getDirectedGraphOfPlayer(dataName, phases);
             }

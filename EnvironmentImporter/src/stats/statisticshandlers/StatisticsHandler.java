@@ -117,7 +117,7 @@ public abstract class StatisticsHandler<T extends ConsoleDisplay, V extends Char
     public void propertyChange(PropertyChangeEvent event) {
         if ("progress".equals(event.getPropertyName())) {
             int progress = (Integer) event.getNewValue();
-            progressBar.setIndeterminate(false);
+//            progressBar.setIndeterminate(false);
             progressBar.setValue(progress);
 
 
@@ -151,7 +151,7 @@ public abstract class StatisticsHandler<T extends ConsoleDisplay, V extends Char
 //
 //            }
             setProgress(0);
-            int size = dataNames.size();
+            final int size = dataNames.size();
             int i = 1;
             for (String dataName : dataNames) {
                 final String tempDataName = dataName;
@@ -162,7 +162,13 @@ public abstract class StatisticsHandler<T extends ConsoleDisplay, V extends Char
                     }
                 });
                 doTasks(dataName);
-                setProgress((i * 100) / size);
+                final int currentProgress = i;
+                SwingUtilities.invokeLater(new Runnable() {
+                    @Override
+                    public void run() {
+                        setProgress((currentProgress * 100) / size);
+                    }
+                });
                 i++;
             }
             return null;
