@@ -40,12 +40,15 @@ public class VertexChartDisplay extends ChartDisplay<HashMap<String, ? extends N
     public CategoryDataset createDataSet(HashMap<String, ? extends Number> data) {
 
 
-        Collection<String> sortedRoomNames = NetworkModel.instance().getSortedRooms();
+//        Collection<String> sortedRoomNames = NetworkModel.instance().getFloorSortedRooms();
+        Collection<String> sortedRoomNames = NetworkModel.instance().getFloorDegreeSortedRooms();
+
         final DefaultCategoryDataset dataSet = new DefaultCategoryDataset();
         for (String roomName : sortedRoomNames) {
+
             if (data.containsKey(roomName)) {
                 dataSet.addValue(data.get(roomName), roomName, "");
-            } else {
+            }else {
                 dataSet.addValue(0, roomName, "");
             }
         }
@@ -67,7 +70,6 @@ public class VertexChartDisplay extends ChartDisplay<HashMap<String, ? extends N
                 true,                     // tooltips?
                 false                     // URLs?
         );
-
 
         return chart;
     }

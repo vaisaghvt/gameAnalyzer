@@ -266,7 +266,7 @@ public class RandomWalk {
 //                int numberOfEdges = roomEdgeCountMapping.get(vertex.toString());
 
 //                result.put(vertex.toString(), (graph.inDegree(vertex) / numberOfEdges) + count);
-                 result.put(vertex.toString(), (graph.inDegree(vertex)+count));
+                result.put(vertex.toString(), (graph.inDegree(vertex) + count));
 
             }
         }
@@ -303,4 +303,27 @@ public class RandomWalk {
 
     }
 
+    public HashMap<String, Number> calculateAverageDoorUseFrequency() {
+        HashMap<String, Number> result = new HashMap<String, Number>();
+//        HashMap<String, Integer> roomEdgeCountMapping = NetworkModel.instance().getEdgesForEachRoom();
+        for (DirectedGraph<ModelObject, ModelEdge> graph : this.randomWalkGraphs) {
+
+            for (ModelEdge edge : graph.getEdges()) {
+                String edgeStringRepresentation = NetworkModel.edgeToString(graph.getEndpoints(edge));
+
+
+
+                if (!result.containsKey(edgeStringRepresentation)) {
+                    result.put(edgeStringRepresentation, 0);
+                } else {
+                    result.put(edgeStringRepresentation, result.get(edgeStringRepresentation).longValue() + 1);
+                }
+            }
+        }
+
+        for (String edgeName : result.keySet()) {
+            result.put(edgeName, result.get(edgeName).doubleValue() / this.randomWalkGraphs.size());
+        }
+        return result;
+    }
 }

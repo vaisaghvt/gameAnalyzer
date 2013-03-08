@@ -1,10 +1,10 @@
 <component name="libraryTable">
   <library name="commons-lang3-3.1">
     <CLASSES>
-      <root url="jar://$USER_HOME$/Downloads/commons-lang3-3.1-bin/commons-lang3-3.1/commons-lang3-3.1.jar!/" />
+      <root url="jar://$PROJECT_DIR$/commons-lang3-3.1-bin/commons-lang3-3.1/commons-lang3-3.1.jar!/" />
     </CLASSES>
     <JAVADOC>
-      <root url="jar://$USER_HOME$/Downloads/commons-lang3-3.1-bin/commons-lang3-3.1/commons-lang3-3.1-javadoc.jar!/" />
+      <root url="jar://$PROJECT_DIR$/commons-lang3-3.1-bin/commons-lang3-3.1/commons-lang3-3.1-javadoc.jar!/" />
     </JAVADOC>
     <SOURCES />
   </library>

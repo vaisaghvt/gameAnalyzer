@@ -74,7 +74,7 @@ public class DoorRepetitionFrequencyChartDisplay extends ChartDisplay<Multiset<D
 
 
     public JFreeChart createChart(Dataset dataSet) {
-        final JFreeChart chart = ChartFactory.createScatterPlot(
+        final JFreeChart chart = ChartFactory.createXYLineChart(
                 this.getTitle() + ": deltaT = Time between Door use",
                 "deltaT = Time between Door use",
                 "Frequency",

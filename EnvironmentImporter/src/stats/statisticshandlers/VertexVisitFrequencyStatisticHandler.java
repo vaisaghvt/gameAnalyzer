@@ -9,8 +9,6 @@ import stats.StatisticChoice;
 import stats.chartdisplays.VertexChartDisplay;
 import stats.consoledisplays.VertexConsoleDisplay;
 
-import javax.swing.*;
-import java.awt.*;
 import java.util.Collection;
 import java.util.HashMap;
 
@@ -27,15 +25,14 @@ public class VertexVisitFrequencyStatisticHandler extends StatisticsHandler<Vert
         super(new VertexChartDisplay(),
                 new VertexConsoleDisplay()
         );
-
     }
+
     @Override
     public void generateAndDisplayStats(Collection<String> dataNames, Phase phase, StatsDialog.AllOrOne allOrOne, StatsDialog.AggregationType aggregationType) {
         GenerateRequiredDataTask task = new GenerateRequiredDataTask(dataNames, StatisticChoice.VERTEX_VISIT_FREQUENCY, phase, allOrOne, aggregationType);
         super.actualGenerateAndDisplay(task);
 
     }
-
 
 
     private HashMap<String, Double> normalizeResult(HashMap<String, Double> personData) {
@@ -86,7 +83,6 @@ public class VertexVisitFrequencyStatisticHandler extends StatisticsHandler<Vert
             this.phase = phase;
             this.allOrOne = allOrOne;
             this.type = aggregationType;
-
         }
 
 
@@ -129,7 +125,7 @@ public class VertexVisitFrequencyStatisticHandler extends StatisticsHandler<Vert
                     }
                 }
 
-                HashMap<String, Double> finalResult = VertexVisitFrequencyStatisticHandler.this.aggregateData(resultGrouped, type);
+                HashMap<String, Double> finalResult = aggregateData(resultGrouped, type);
 
                 chartDisplay.setTitle(choice.toString() + ":" + phase.toString());
                 chartDisplay.display(finalResult);
