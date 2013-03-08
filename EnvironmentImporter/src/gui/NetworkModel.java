@@ -444,7 +444,7 @@ public class NetworkModel extends MainPanel implements ActionListener {
 
     }
 
-    private void scaleToRightAmount(VisualizationViewer<ModelObject, ModelEdge> vv) {
+    public static void scaleToRightAmount(VisualizationViewer<ModelObject, ModelEdge> vv) {
 
         Point2D ivtfrom = vv.getRenderContext().getMultiLayerTransformer().inverseTransform(Layer.VIEW, new Point2D.Double(vv.getWidth(), vv.getHeight()));
         MutableTransformer modelTransformer = vv.getRenderContext().getMultiLayerTransformer().getTransformer(Layer.LAYOUT);
@@ -452,6 +452,13 @@ public class NetworkModel extends MainPanel implements ActionListener {
         vv.repaint();
     }
 
+    public static void scaleToRightAmount(VisualizationViewer<ModelObject, ModelEdge> vv, double value) {
+
+        Point2D ivtfrom = vv.getRenderContext().getMultiLayerTransformer().inverseTransform(Layer.VIEW, new Point2D.Double(vv.getWidth()/2, vv.getHeight()/2));
+        MutableTransformer modelTransformer = vv.getRenderContext().getMultiLayerTransformer().getTransformer(Layer.LAYOUT);
+        modelTransformer.scale(value, value, ivtfrom);
+        vv.repaint();
+    }
 
     public static synchronized NetworkModel instance() {
         if (instance == null)
@@ -1110,6 +1117,10 @@ public class NetworkModel extends MainPanel implements ActionListener {
 
     public void setFloorDegreeSortedRooms(Collection<String> floorDegreeSortedRooms) {
         this.floorDegreeSortedRooms = floorDegreeSortedRooms;
+    }
+
+    public Graph<ModelObject, ModelEdge> getCompleteGraph() {
+        return completeGraph;
     }
 
 

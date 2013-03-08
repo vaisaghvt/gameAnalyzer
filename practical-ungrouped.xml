@@ -1002,13 +1002,6 @@
 			<connectingArea>130</connectingArea>
 		</link>
 		<link>
-			<id>302</id>
-			<corner0 y="-114" x="-114"/>
-			<corner1 y="-114" x="-102"/>
-			<connectingArea>117</connectingArea>
-			<connectingArea>116</connectingArea>
-		</link>
-		<link>
 			<id>147</id>
 			<corner0 y="-83" x="-114"/>
 			<corner1 y="-78" x="-111"/>

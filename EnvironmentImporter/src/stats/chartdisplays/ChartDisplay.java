@@ -42,6 +42,7 @@ public abstract class ChartDisplay<T> implements StatisticsDisplay<T>, Component
 
     protected void createNewFrameAndSetLocation() {
 
+
         if (name != null) {
             if (cachedFrameLocation.containsKey(name)) {
                 currentFrame = new JFrame();
