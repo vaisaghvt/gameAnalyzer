@@ -114,7 +114,7 @@ public class DoorUseFrequencyStatisticHandler extends StatisticsHandler<DoorUseC
             if (allOrOne == StatsDialog.AllOrOne.EACH) {
                 for (String dataName : nameToResultMapping.keySet()) {
                     HashMap<String, Double> result = nameToResultMapping.get(dataName);
-                    chartDisplay.setTitle(dataName + ":" + choice.toString() + ":" + phase.toString());
+                    chartDisplay.setTitle(dataName + ": Door use :" + phase.toString());
                     chartDisplay.display(result);
                     consoleDisplay.display(result);
                 }
@@ -130,7 +130,7 @@ public class DoorUseFrequencyStatisticHandler extends StatisticsHandler<DoorUseC
 
                 HashMap<String, Double> finalResult = aggregateData(resultGrouped, type);
 
-                chartDisplay.setTitle(choice.toString() + ":" + phase.toString());
+                chartDisplay.setTitle("Door use:" + phase.toString());
                 chartDisplay.display(finalResult);
                 consoleDisplay.display(finalResult);
             }

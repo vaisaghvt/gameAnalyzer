@@ -62,7 +62,7 @@ public class DoorUseChartDisplay extends ChartDisplay<HashMap<String, ? extends 
         // create the chart...
         final JFreeChart chart = ChartFactory.createBarChart(
                 this.getTitle(),         // chart title
-                "Room",               // domain axis label
+                "Door Name",               // domain axis label
                 "Value",                  // range axis label
                 dataSet,                  // data
                 PlotOrientation.VERTICAL, // orientation
