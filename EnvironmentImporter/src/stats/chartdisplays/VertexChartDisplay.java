@@ -131,10 +131,10 @@ public class VertexChartDisplay extends ChartDisplay<HashMap<String, ? extends N
 //        ((FRLayout2)layout).setRepulsionMultiplier(0.25);
 
 
-                layout.setSize(new Dimension(1600, 900));
+                layout.setSize(new Dimension(1800, 1000));
 
                 VisualizationViewer<ModelObject, ModelEdge> vv = new VisualizationViewer<ModelObject, ModelEdge>(layout);
-                vv.setPreferredSize(new Dimension(1700, 900));
+                vv.setPreferredSize(new Dimension(1900, 1000));
                 NetworkModel.scaleToRightAmount(vv, 0.9);
 
                 // Setup up a new vertex to paint transformer...
@@ -265,8 +265,10 @@ public class VertexChartDisplay extends ChartDisplay<HashMap<String, ? extends N
         public Shape transform(ModelObject modelObject) {
 
             int width = DEFAULT_WIDTH;
-            width *= data.get(modelObject.toString()).doubleValue();
-
+            if(data.containsKey(modelObject.toString()))
+                width *= data.get(modelObject.toString()).doubleValue();
+            else
+                width *= 0;
 
             return (Shape) new Ellipse2D.Double(-width/2,-width/2, width, width);
 
@@ -278,17 +280,17 @@ public class VertexChartDisplay extends ChartDisplay<HashMap<String, ? extends N
 
         @Override
         public Paint transform(ModelObject modelObject) {
-//            double value = data.get(modelObject.toString()).doubleValue();
-//            if(value >1.05){
-//                value-=1.05;
-//                return (Paint)Color.getHSBColor(0f, 1.0f, (float)Math.min(1.0, value));
+            double value = data.get(modelObject.toString()).doubleValue();
+            if(value >1.05){
+
+                return  (Paint) Color.red;
 ////                return (Paint)new Color((int)Math.min(255, value*255),255, 255);
-//            } else if(value <0.95){
+            } else if(value <0.95){
 //
-//                return (Paint)Color.getHSBColor(1f, 1.0f, (float)value);
-//            } else {
+                return  (Paint) Color.green;
+            } else {
                 return (Paint)Color.white;
-//            }
+            }
         }
     }
 }

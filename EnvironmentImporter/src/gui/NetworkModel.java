@@ -26,6 +26,7 @@ import javax.swing.*;
 import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.awt.geom.Ellipse2D;
 import java.awt.geom.Point2D;
 import java.util.*;
 import java.util.List;
@@ -410,10 +411,10 @@ public class NetworkModel extends MainPanel implements ActionListener {
 //        ((FRLayout2)layout).setRepulsionMultiplier(0.25);
 
 
-                layout.setSize(new Dimension(1600, 900));
+                layout.setSize(new Dimension(1800, 1000));
 
                 vv = new VisualizationViewer<ModelObject, ModelEdge>(layout);
-                vv.setPreferredSize(new Dimension(1700, 900));
+                vv.setPreferredSize(new Dimension(1900, 1000));
                 scaleToRightAmount(vv);
 
                 // Setup up a new vertex to paint transformer...
@@ -428,7 +429,7 @@ public class NetworkModel extends MainPanel implements ActionListener {
 //        PluggableGraphMouse gm = new PluggableGraphMouse();
 //        gm.add(new PopupVertexEdgeMenuMousePlugin<ModelObject, ModelEdge>());
                 vv.getRenderContext().setVertexFillPaintTransformer(new DegreeBasedColorTransformer<ModelObject, Paint>());
-                vv.getRenderContext().setVertexShapeTransformer(new VertexRectangleTransformer<ModelObject, Shape>());
+                vv.getRenderContext().setVertexShapeTransformer(new VertexEllipseTransformer<ModelObject, Shape>());
                 vv.getRenderContext().setEdgeDrawPaintTransformer(new EdgeDurationColorTransformer<ModelEdge, Paint>());
 //        vv.getRenderContext().setEdgeStrokeTransformer(edgeStrokeTransformer);
                 vv.getRenderContext().setVertexLabelTransformer(new ToStringLabeller<ModelObject>());
@@ -1687,6 +1688,21 @@ public class NetworkModel extends MainPanel implements ActionListener {
 
         }
     }
+
+    private class VertexEllipseTransformer<ModelObject, Shape> implements Transformer<ModelObject, Shape> {
+
+        @Override
+        public Shape transform(ModelObject modelObject) {
+
+            int width = 40;
+
+
+            return (Shape) new Ellipse2D.Double(-width/2,-width/2, width, width);
+
+
+        }
+    }
+
 }
 
 

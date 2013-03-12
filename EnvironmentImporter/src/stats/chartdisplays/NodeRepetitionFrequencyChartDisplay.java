@@ -10,9 +10,7 @@ import org.jfree.chart.axis.NumberAxis;
 import org.jfree.chart.plot.PlotOrientation;
 import org.jfree.chart.plot.XYPlot;
 import org.jfree.data.general.Dataset;
-import org.jfree.data.xy.XYDataset;
-import org.jfree.data.xy.XYSeries;
-import org.jfree.data.xy.XYSeriesCollection;
+import org.jfree.data.xy.*;
 import org.jfree.util.ShapeUtilities;
 
 import javax.swing.*;
@@ -83,11 +81,12 @@ public class NodeRepetitionFrequencyChartDisplay extends ChartDisplay<Multiset<D
 //                false
 //        );
 
-        final JFreeChart chart = ChartFactory.createXYLineChart(
+        final JFreeChart chart = ChartFactory.createXYBarChart(
                 this.getTitle() + ": deltaT = Time between Room use",
                 "deltaT = Time between Room use",
+                false,
                 "Frequency",
-                (XYDataset) dataSet,
+                (IntervalXYDataset) dataSet,
                 PlotOrientation.VERTICAL,
                 false,
                 true,
@@ -142,7 +141,7 @@ public class NodeRepetitionFrequencyChartDisplay extends ChartDisplay<Multiset<D
         } else {
             Multiset<Double> result = HashMultiset.create();
             for (Double key : data.elementSet()) {
-                double newValue = Math.floor(key / value);
+                double newValue = Math.floor(key / value)* value;
                 result.add(newValue, data.count(key));
 
             }

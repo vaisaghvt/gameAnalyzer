@@ -34,6 +34,25 @@ public class VertexVisitFrequencyStatisticHandler extends StatisticsHandler<Vert
 
     }
 
+    private HashMap<String, Double> normalizeResultForRandomWalk(HashMap<String, Double> personData) {
+        HashMap<String, Double> result = new HashMap<String, Double>();
+
+        int NRandom = 0;
+
+        for (String room : personData.keySet()) {
+            NRandom += personData.get(room).intValue();
+        }
+
+        for (String room : personData.keySet()) {
+            double originalValueForRoom = personData.get(room).doubleValue();
+            double scaledValue = originalValueForRoom / NRandom;
+//            double normalizedValue = scaledValue / randomWalkData.get(room).doubleValue();
+            result.put(room, scaledValue);
+        }
+
+        return result;
+    }
+
 
     private HashMap<String, Double> normalizeResult(HashMap<String, Double> personData) {
 
@@ -100,7 +119,11 @@ public class VertexVisitFrequencyStatisticHandler extends StatisticsHandler<Vert
                 result.put(roomName, (double) value);
 
             }
-            result = normalizeResult(result);
+            if(dataName.equals("random walk")){
+                result = normalizeResultForRandomWalk(result);
+            }else{
+                result = normalizeResult(result);
+            }
             nameToResultMapping.put(dataName, result);
         }
 
