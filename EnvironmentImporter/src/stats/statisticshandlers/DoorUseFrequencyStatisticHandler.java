@@ -39,7 +39,7 @@ public class DoorUseFrequencyStatisticHandler extends StatisticsHandler<DoorUseC
     private HashMap<String, Double> normalizeResult(HashMap<String, Double> personData) {
 
         HashMap<String, Double> result = new HashMap<String, Double>();
-        HashMap<String, Number> randomWalkData = RandomWalk.instance().calculateAverageDoorUseFrequency();
+        HashMap<String, Number> randomWalkData = RandomWalk.calculateAverageDoorUseFrequency();
         int NRandom = 0, NPerson = 0;
         for (String room : randomWalkData.keySet()) {
             NRandom += randomWalkData.get(room).intValue();

@@ -57,7 +57,7 @@ public class VertexVisitFrequencyStatisticHandler extends StatisticsHandler<Vert
     private HashMap<String, Double> normalizeResult(HashMap<String, Double> personData) {
 
         HashMap<String, Double> result = new HashMap<String, Double>();
-        HashMap<String, Number> randomWalkData = RandomWalk.instance().calculateAverageRoomVisitFrequency();
+        HashMap<String, Number> randomWalkData = RandomWalk.calculateAverageRoomVisitFrequency();
         int NRandom = 0, NPerson = 0;
         for (String room : randomWalkData.keySet()) {
             NRandom += randomWalkData.get(room).intValue();

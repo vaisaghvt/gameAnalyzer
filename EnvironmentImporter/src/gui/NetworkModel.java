@@ -165,8 +165,8 @@ public class NetworkModel extends MainPanel implements ActionListener {
         if (startingNode == null) {
             startingNode = this.findRoomByName("StartingRoom");
         }
-        RandomWalk.instance().generateRandomWalkCollection(completeGraph,
-                startingNode);
+
+        RandomWalk.setRandomWalkParameters(completeGraph, startingNode);
 
 
         sortedRoomNames = new TreeSet<String>();
@@ -1502,7 +1502,7 @@ public class NetworkModel extends MainPanel implements ActionListener {
 
         if (dataName.equalsIgnoreCase("random walk")) {
             if (choice == VERTEX_VISIT_FREQUENCY && phase == Phase.EXPLORATION) {
-                return RandomWalk.instance().calculateAverageRoomVisitFrequency();
+                return RandomWalk.calculateAverageRoomVisitFrequency();
             } else {
                 System.out.println("Wrong Call to Random Walk");
                 return new HashMap<String, Number>();

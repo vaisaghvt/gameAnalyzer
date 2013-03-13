@@ -5,6 +5,7 @@ import database.Database;
 import javax.swing.*;
 import javax.swing.event.ChangeEvent;
 import javax.swing.event.ChangeListener;
+import javax.swing.filechooser.FileNameExtensionFilter;
 import java.awt.*;
 import java.awt.event.*;
 import java.io.File;
@@ -411,8 +412,11 @@ public class Main extends JFrame implements ActionListener, MouseListener, Mouse
         }
 
         //open an existing file...
-        JFileChooser chooser = new JFileChooser();
+        JFileChooser chooser = new JFileChooser(new File("."));
         chooser.setDialogTitle("Select model file");
+        chooser.setFileFilter(new FileNameExtensionFilter(
+                "Only xml files","xml"
+        ));
 
         int result = chooser.showOpenDialog(this);
         if (result == JFileChooser.APPROVE_OPTION) {

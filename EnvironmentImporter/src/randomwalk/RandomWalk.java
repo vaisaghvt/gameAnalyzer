@@ -15,7 +15,11 @@ import org.apache.commons.collections15.buffer.CircularFifoBuffer;
 import org.apache.commons.math3.stat.descriptive.moment.Mean;
 import org.apache.commons.math3.stat.descriptive.moment.Variance;
 
+import javax.swing.*;
+import javax.swing.text.DefaultCaret;
 import java.awt.*;
+import java.text.DecimalFormat;
+import java.text.NumberFormat;
 import java.util.*;
 import java.util.List;
 
@@ -31,50 +35,100 @@ public class RandomWalk {
     private final static MersenneTwister random = new MersenneTwister();
     private static CircularFifoBuffer<Double> varianceList = new CircularFifoBuffer<Double>(5);
     private static final double EPSILON = 0.0000001;
-    private Collection<DirectedGraph<ModelObject, ModelEdge>> randomWalkGraphs;
+    private static Collection<DirectedGraph<ModelObject, ModelEdge>> randomWalkGraphs;
     private static RandomWalk randomWalkInstance;
+    private static Graph<ModelObject, ModelEdge> completeGraph = null;
+    private static ModelObject startingLocation = null;
+    private static JTextArea taskOutput;
+    private static double stabilityValue;
+    private static JFrame progressFrame;
 
     private RandomWalk() {
     }
 
-    public static RandomWalk instance() {
-        if (randomWalkInstance == null) {
-            randomWalkInstance = new RandomWalk();
-        }
-        return randomWalkInstance;
 
+    public static void setRandomWalkParameters(Graph<ModelObject, ModelEdge> completeGraph, ModelObject startingLocation) {
+        RandomWalk.completeGraph = completeGraph;
+        RandomWalk.startingLocation = startingLocation;
     }
 
-    public void generateRandomWalkCollection(Graph<ModelObject, ModelEdge> graph, ModelObject startingLocation, int numberOfGraphsToGenerate) {
-        Collection<DirectedGraph<ModelObject, ModelEdge>> resultSet = new HashSet<DirectedGraph<ModelObject, ModelEdge>>();
 
-        for (int i = 0; i < numberOfGraphsToGenerate; i++) {
-            resultSet.add(generateRandomWalk(graph, startingLocation));
+    private static void generateRandomWalkCollection() {
+        if (completeGraph == null || startingLocation == null) {
+            throw new NullPointerException();
         }
 
-        this.randomWalkGraphs = resultSet;
-
-    }
-
-    public void generateRandomWalkCollection(Graph<ModelObject, ModelEdge> graph, ModelObject startingLocation) {
         varianceList.clear();
         Collection<DirectedGraph<ModelObject, ModelEdge>> resultSet = new HashSet<DirectedGraph<ModelObject, ModelEdge>>();
         List<Double> listOfGyrationRadius = new ArrayList<Double>();
-
+        createProgressBar();
+        int count = 0;
         while (true) {
 
-            DirectedGraph<ModelObject, ModelEdge> tempGraph = generateRandomWalk(graph, startingLocation);
+            DirectedGraph<ModelObject, ModelEdge> tempGraph = generateRandomWalk(completeGraph, startingLocation);
             resultSet.add(tempGraph);
             listOfGyrationRadius.add(calculateRadiusOfGyration(tempGraph, startingLocation));
             if (isStable(listOfGyrationRadius)) {
+
                 break;
+            } else{
+                count++;
+                if(count%50==0){
+                    NumberFormat doubleFormat = new DecimalFormat("##.000000");
+                    final String  lastStabilityValue = doubleFormat.format(stabilityValue);
+                    NumberFormat integerFormat = new DecimalFormat("0000");
+                    final String lastCount = integerFormat.format(count);
+                    SwingUtilities.invokeLater(new Runnable() {
+                        @Override
+                        public void run() {
+
+
+
+                            taskOutput.append((lastCount) + " : " + lastStabilityValue + "\n");
+                            progressFrame.revalidate();
+                        }
+                    });
+                }
             }
 
 
 //            System.out.println(resultSet.size());
         }
+        SwingUtilities.invokeLater(new Runnable() {
+            @Override
+            public void run() {
+                progressFrame.dispose();
+            }
+        });
 
-        this.randomWalkGraphs = resultSet;
+        randomWalkGraphs = resultSet;
+    }
+
+    private static void createProgressBar() {
+        SwingUtilities.invokeLater(new Runnable() {
+            @Override
+            public void run() {
+                JProgressBar progressBar = new JProgressBar();
+                progressBar.setIndeterminate(true);
+
+
+                taskOutput = new JTextArea(5, 20);
+                taskOutput.setMargin(new Insets(5, 5, 5, 5));
+                taskOutput.setEditable(false);
+                DefaultCaret caret = (DefaultCaret) taskOutput.getCaret();
+                caret.setUpdatePolicy(DefaultCaret.ALWAYS_UPDATE);
+                progressFrame = new JFrame("Generating random walk data");
+                progressFrame.setLayout(new BorderLayout());
+                progressFrame.add(progressBar, BorderLayout.NORTH);
+                progressFrame.add(new JScrollPane(taskOutput), BorderLayout.CENTER);
+                progressFrame.setDefaultCloseOperation(WindowConstants.DO_NOTHING_ON_CLOSE);
+                Dimension screenSize = Toolkit.getDefaultToolkit().getScreenSize();
+
+                progressFrame.setLocation(25, 25);
+                progressFrame.setSize(400, 200);
+                progressFrame.setVisible(true);
+            }
+        });
     }
 
     private static boolean isStable(List<Double> listOfGyrationRadius) {
@@ -106,8 +160,8 @@ public class RandomWalk {
         }
 
         mean = meanEvaluator.evaluate(primitiveVariance);
-
-        if (varianceEvaluator.evaluate(primitiveVariance, mean) < EPSILON) {
+        stabilityValue = varianceEvaluator.evaluate(primitiveVariance, mean);
+        if (stabilityValue < EPSILON) {
             return true;
         } else {
             return false;
@@ -237,27 +291,15 @@ public class RandomWalk {
         return (count * 100) / completeGraph.getVertexCount();
     }
 
-    public HashMap<String, Double> subtractRandomWalkFromRoomToVisitMapping(HashMap<String, Double> playerMap) {
-        if (this.randomWalkGraphs == null) {
-            return playerMap;
+
+    public static HashMap<String, Number> calculateAverageRoomVisitFrequency() {
+        if (randomWalkGraphs == null || randomWalkGraphs.isEmpty()) {
+            generateRandomWalkCollection();
         }
-        HashMap<String, Number> averageOfRandomWalks = calculateAverageRoomVisitFrequency();
-        return normalizedResult(playerMap, averageOfRandomWalks);
-    }
-
-    private HashMap<String, Double> normalizedResult(HashMap<String, Double> playerMap, HashMap<String, Number> averageOfRandomWalks) {
-
-        for (String roomName : playerMap.keySet()) {
-            playerMap.put(roomName, playerMap.get(roomName) - averageOfRandomWalks.get(roomName).doubleValue());
-        }
-        return playerMap;
-    }
-
-    public HashMap<String, Number> calculateAverageRoomVisitFrequency() {
 
         HashMap<String, Number> result = new HashMap<String, Number>();
 //        HashMap<String, Integer> roomEdgeCountMapping = NetworkModel.instance().getEdgesForEachRoom();
-        for (DirectedGraph<ModelObject, ModelEdge> graph : this.randomWalkGraphs) {
+        for (DirectedGraph<ModelObject, ModelEdge> graph : randomWalkGraphs) {
             for (ModelObject vertex : graph.getVertices()) {
                 double count = 0;
                 if (result.containsKey(vertex.toString())) {
@@ -272,45 +314,24 @@ public class RandomWalk {
         }
 
         for (String roomName : result.keySet()) {
-            result.put(roomName, result.get(roomName).doubleValue() / this.randomWalkGraphs.size());
+            result.put(roomName, result.get(roomName).doubleValue() / randomWalkGraphs.size());
         }
         return result;
 
     }
 
-    public HashMap<String, Number> calculateNormalizedAverageRoomVisitFrequency() {
 
-        HashMap<String, Number> result = new HashMap<String, Number>();
-        HashMap<String, Integer> roomEdgeCountMapping = NetworkModel.instance().getEdgesForEachRoom();
-        for (DirectedGraph<ModelObject, ModelEdge> graph : this.randomWalkGraphs) {
-            for (ModelObject vertex : graph.getVertices()) {
-                double count = 0;
-                if (result.containsKey(vertex.toString())) {
-                    count = result.get(vertex.toString()).doubleValue();
-                }
-                int numberOfEdges = roomEdgeCountMapping.get(vertex.toString());
-
-                result.put(vertex.toString(), (graph.inDegree(vertex) / numberOfEdges) + count);
-
-
-            }
+    public static HashMap<String, Number> calculateAverageDoorUseFrequency() {
+        if (randomWalkGraphs == null || randomWalkGraphs.isEmpty()) {
+            generateRandomWalkCollection();
         }
 
-        for (String roomName : result.keySet()) {
-            result.put(roomName, result.get(roomName).doubleValue() / this.randomWalkGraphs.size());
-        }
-        return result;
-
-    }
-
-    public HashMap<String, Number> calculateAverageDoorUseFrequency() {
         HashMap<String, Number> result = new HashMap<String, Number>();
 //        HashMap<String, Integer> roomEdgeCountMapping = NetworkModel.instance().getEdgesForEachRoom();
-        for (DirectedGraph<ModelObject, ModelEdge> graph : this.randomWalkGraphs) {
+        for (DirectedGraph<ModelObject, ModelEdge> graph : randomWalkGraphs) {
 
             for (ModelEdge edge : graph.getEdges()) {
                 String edgeStringRepresentation = NetworkModel.edgeToString(graph.getEndpoints(edge));
-
 
 
                 if (!result.containsKey(edgeStringRepresentation)) {
@@ -322,7 +343,7 @@ public class RandomWalk {
         }
 
         for (String edgeName : result.keySet()) {
-            result.put(edgeName, result.get(edgeName).doubleValue() / this.randomWalkGraphs.size());
+            result.put(edgeName, result.get(edgeName).doubleValue() / randomWalkGraphs.size());
         }
         return result;
     }

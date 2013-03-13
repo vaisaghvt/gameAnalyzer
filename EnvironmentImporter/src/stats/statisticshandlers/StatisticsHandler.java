@@ -2,7 +2,6 @@ package stats.statisticshandlers;
 
 import gui.Phase;
 import gui.StatsDialog;
-import stats.StatisticChoice;
 import stats.chartdisplays.ChartDisplay;
 import stats.consoledisplays.ConsoleDisplay;
 
@@ -30,7 +29,6 @@ public abstract class StatisticsHandler<T extends ConsoleDisplay, V extends Char
     protected JFrame progressFrame;
 
 
-    protected StatisticChoice choice;
 
     protected StatisticsHandler(V chartDisplay, T consoleDisplay) {
         this.chartDisplay = chartDisplay;
