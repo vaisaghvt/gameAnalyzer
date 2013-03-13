@@ -792,12 +792,12 @@ public class NetworkModel extends MainPanel implements ActionListener {
 
     }
 
-    public HashMultimap<String, Long> getVertexInTimesFor(String dataName) {
+    public HashMultimap<String, Long> getVertexInTimesFor(String dataName, Phase phase) {
         HashMultimap<String, Long> result = HashMultimap.create();
 
         HashSet<Phase> phases = new HashSet<Phase>();
         phases.clear();
-        phases.add(Phase.EXPLORATION);
+        phases.add(phase);
         DirectedSparseMultigraph<ModelObject, ModelEdge> localGraph
                 = getDirectedGraphOfPlayer(dataName, phases);
         for (ModelObject vertex : localGraph.getVertices()) {

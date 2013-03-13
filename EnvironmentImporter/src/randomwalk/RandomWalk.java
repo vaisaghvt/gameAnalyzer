@@ -30,7 +30,7 @@ import java.util.List;
 public class RandomWalk {
     private final static MersenneTwister random = new MersenneTwister();
     private static CircularFifoBuffer<Double> varianceList = new CircularFifoBuffer<Double>(5);
-    private static final double EPSILON = 0.0001;
+    private static final double EPSILON = 0.0000001;
     private Collection<DirectedGraph<ModelObject, ModelEdge>> randomWalkGraphs;
     private static RandomWalk randomWalkInstance;
 

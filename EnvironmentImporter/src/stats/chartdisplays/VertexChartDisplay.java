@@ -41,8 +41,7 @@ public class VertexChartDisplay extends ChartDisplay<HashMap<String, ? extends N
 
     private static final int DEFAULT_WIDTH = 40;
     private JFrame mapFrame;
-    private HashMap<String, ? extends Number> data
-            ;
+    private HashMap<String, ? extends Number> data;
 
     @Override
     public void display(HashMap<String, ? extends Number> data) {
@@ -280,6 +279,9 @@ public class VertexChartDisplay extends ChartDisplay<HashMap<String, ? extends N
 
         @Override
         public Paint transform(ModelObject modelObject) {
+            if(!data.containsKey(modelObject.toString())){
+                return (Paint) Color.black;
+            }
             double value = data.get(modelObject.toString()).doubleValue();
             if(value >1.05){
 
