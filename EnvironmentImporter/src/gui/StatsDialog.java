@@ -195,9 +195,9 @@ public class StatsDialog extends JFrame implements ActionListener {
 
         //Create the combo box, select item at index 4.
         //Indices start at 0, so 4 specifies the pig.
-        if(!choice.getPhases().isEmpty()){
+        if (!choice.getPhases().isEmpty()) {
             phaseChoiceList.setSelectedIndex(0);
-        }else{
+        } else {
             phaseChoiceList.setEnabled(false);
         }
         phaseChoiceList.addActionListener(this);
@@ -426,10 +426,15 @@ public class StatsDialog extends JFrame implements ActionListener {
             });
 
         } else if (event.getSource() == bNone) {
+            SwingUtilities.invokeLater(new Runnable() {
+                @Override
+                public void run() {
 
-            for (JCheckBox cBox : dataNameList) {
-                cBox.setSelected(false);
-            }
+                    for (JCheckBox cBox : dataNameList) {
+                        cBox.setSelected(false);
+                    }
+                }
+            });
 
         } else if (event.getSource() == bOneRandom) {
 
