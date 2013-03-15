@@ -382,7 +382,7 @@ public class Main extends JFrame implements ActionListener, MouseListener, Mouse
 
 
         //select a directory name
-        JFileChooser chooser = new JFileChooser();
+        JFileChooser chooser = new JFileChooser(new File("."));
         chooser.setDialogTitle("Select scenario file destination");
         chooser.setFileSelectionMode(JFileChooser.DIRECTORIES_ONLY);
 
