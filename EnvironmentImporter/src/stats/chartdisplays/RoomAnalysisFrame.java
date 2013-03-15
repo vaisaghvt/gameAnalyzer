@@ -1,11 +1,8 @@
 package stats.chartdisplays;
-import database.Database;
+
 import edu.uci.ics.jung.algorithms.layout.Layout;
 import edu.uci.ics.jung.algorithms.layout.SpringLayout2;
-import edu.uci.ics.jung.algorithms.util.SelfLoopEdgePredicate;
 import edu.uci.ics.jung.graph.DirectedSparseMultigraph;
-import edu.uci.ics.jung.graph.Graph;
-import edu.uci.ics.jung.graph.util.Context;
 import edu.uci.ics.jung.visualization.VisualizationViewer;
 import edu.uci.ics.jung.visualization.control.DefaultModalGraphMouse;
 import edu.uci.ics.jung.visualization.control.ModalGraphMouse;
@@ -15,14 +12,16 @@ import gui.Phase;
 import modelcomponents.ModelEdge;
 import modelcomponents.ModelObject;
 import org.apache.commons.collections15.Transformer;
-import org.apache.commons.collections15.functors.NotPredicate;
 
+import javax.imageio.ImageIO;
 import javax.swing.*;
+import javax.swing.filechooser.FileFilter;
 import javax.swing.text.DefaultCaret;
 import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
-import java.awt.geom.Ellipse2D;
+import java.awt.image.BufferedImage;
+import java.io.File;
 import java.text.DecimalFormat;
 import java.util.*;
 import java.util.concurrent.ExecutionException;
@@ -52,14 +51,17 @@ public class RoomAnalysisFrame extends JFrame {
     private JButton popOutButton = new JButton("Pop-out");
     private Collection<String> dataNameList;
 
+
+    private JButton saveAsImageButton = new JButton("Save as...");
+
     private ActionListener roomDataListener;
     private VisualizationViewer<ModelObject, ? extends ModelEdge> currentVisualizationViewer;
+    private String currentTitle;
 
     public RoomAnalysisFrame(Collection<String> dataNames) {
         roomDataListener = new RoomDataListener();
         this.dataNameList = dataNames;
         initializeRoomList();
-
 
 
         SwingUtilities.invokeLater(new Runnable() {
@@ -72,7 +74,7 @@ public class RoomAnalysisFrame extends JFrame {
                 setContentPane(dataPanel);
                 setVisible(true);
                 setSize(new Dimension(1200, 500));
-                setLocation(100,100);
+                setLocation(100, 100);
                 setDefaultCloseOperation(WindowConstants.DO_NOTHING_ON_CLOSE);
             }
         });
@@ -92,9 +94,15 @@ public class RoomAnalysisFrame extends JFrame {
     private JPanel createLeftPanel() {
         JPanel panel = new JPanel(new BorderLayout());
 //        updateChartPanel();
+        JPanel bottomPanel = new JPanel(new GridLayout(1, 2));
+
+        bottomPanel.add(popOutButton);
+        bottomPanel.add(saveAsImageButton);
+
+        saveAsImageButton.addActionListener(roomDataListener);
         popOutButton.addActionListener(roomDataListener);
         panel.add(chartDisplayPanel, BorderLayout.CENTER);
-        panel.add(popOutButton, BorderLayout.SOUTH);
+        panel.add(bottomPanel, BorderLayout.SOUTH);
 
         return panel;
     }
@@ -177,6 +185,7 @@ public class RoomAnalysisFrame extends JFrame {
                 @Override
                 protected Void doInBackground() throws Exception {
                     System.out.println("Generating name to graph mapping");
+                    createCurrentTitle(room, type, selectedPhases);
 
                     HashMap<String, DirectedSparseMultigraph<ModelObject, ModelEdge>> nameToGraphMap = generateRelevantGraphToNameMap(dataNameList, selectedPhases);
                     switch (type) {
@@ -218,6 +227,25 @@ public class RoomAnalysisFrame extends JFrame {
 
     }
 
+    private void createCurrentTitle(String room, DisplayType type, HashSet<Phase> selectedPhases) {
+
+        currentTitle = room +":"+ type+":";
+
+        if (selectedPhases.contains(Phase.EXPLORATION)) {
+            currentTitle += "E";
+        }
+        if (selectedPhases.contains(Phase.TASK_1)) {
+            currentTitle += "1";
+        }
+        if (selectedPhases.contains(Phase.TASK_2)) {
+            currentTitle += "2";
+        }
+        if (selectedPhases.contains(Phase.TASK_3)) {
+            currentTitle += "3";
+        }
+        setTitle(currentTitle);
+    }
+
     private void generateStats(HashMap<String, DirectedSparseMultigraph<ModelObject, ModelEdge>> nameToGraphMap, String room) {
 
 
@@ -234,16 +262,16 @@ public class RoomAnalysisFrame extends JFrame {
             localGraph.addVertex(node);
         }
 
-        for(String name: nameToGraphMap.keySet()){
+        for (String name : nameToGraphMap.keySet()) {
             DirectedSparseMultigraph<ModelObject, ModelEdge> tempGraph = nameToGraphMap.get(name);
 
-            if(!tempGraph.containsVertex(mainNode)){
+            if (!tempGraph.containsVertex(mainNode)) {
                 continue;
             }
 
             Collection<ModelEdge> edgeCollection = tempGraph.getInEdges(mainNode);
 
-            for(ModelEdge edge: edgeCollection){
+            for (ModelEdge edge : edgeCollection) {
 
                 localGraph.addEdge(new ModelEdge(), tempGraph.getOpposite(mainNode, edge),
                         mainNode);
@@ -253,13 +281,12 @@ public class RoomAnalysisFrame extends JFrame {
 
             edgeCollection = tempGraph.getOutEdges(mainNode);
 
-            for(ModelEdge edge: edgeCollection){
+            for (ModelEdge edge : edgeCollection) {
 
                 localGraph.addEdge(new ModelEdge(), mainNode, tempGraph.getOpposite(mainNode, edge));
             }
 
         }
-
 
 
         final DirectedSparseMultigraph<ModelObject, ModelEdge> graphToDraw = localGraph;
@@ -279,17 +306,17 @@ public class RoomAnalysisFrame extends JFrame {
             localGraph.addVertex(node);
         }
 
-        for(String name: nameToGraphMap.keySet()){
+        for (String name : nameToGraphMap.keySet()) {
             DirectedSparseMultigraph<ModelObject, ModelEdge> tempGraph = nameToGraphMap.get(name);
 
-            if(!tempGraph.containsVertex(mainNode)){
+            if (!tempGraph.containsVertex(mainNode)) {
                 continue;
             }
 
             TreeSet<ModelEdge> edgeCollection = new TreeSet<ModelEdge>(new Comparator<ModelEdge>() {
                 @Override
                 public int compare(ModelEdge o1, ModelEdge o2) {
-                    return (int) (o1.getTime()-o2.getTime());
+                    return (int) (o1.getTime() - o2.getTime());
                 }
             });
 
@@ -304,7 +331,7 @@ public class RoomAnalysisFrame extends JFrame {
                 localGraph.addEdge(new ModelEdge(),
                         tempGraph.getOpposite(mainNode, lonelyEdge),
                         mainNode
-                        );
+                );
 
             } else if (tempGraph.inDegree(mainNode) < tempGraph.outDegree(mainNode)) {
                 //First Vertex;
@@ -319,62 +346,48 @@ public class RoomAnalysisFrame extends JFrame {
 
             }
 
-            if(lonelyEdge!=null){
-
-            }
-
-
-
             for (int i = 0; i < edgeCollection.size() / 2; i++) {
                 ModelEdge incoming = edgeCollection.pollFirst();
                 ModelEdge outgoing = edgeCollection.pollFirst();
                 ModelObject from = tempGraph.getOpposite(mainNode, incoming);
                 ModelObject to = tempGraph.getOpposite(mainNode, outgoing);
                 localGraph.addEdge(new ModelEdge(), from, to);
-
-
             }
-
-
-
-
-
-
         }
 
 
         HashMap<ModelObject, HashMap<ModelObject, Integer>> nodeToNodeTravelFrequency = new HashMap<ModelObject, HashMap<ModelObject, Integer>>();
 
-        for(ModelEdge edge : localGraph.getEdges()){
+        for (ModelEdge edge : localGraph.getEdges()) {
             ModelObject source = localGraph.getSource(edge);
             ModelObject destination = localGraph.getDest(edge);
-            if(source.toString().equals(destination.toString())){
+            if (source.toString().equals(destination.toString())) {
                 System.out.println("Cycle detected");
             }
 
-            if(!nodeToNodeTravelFrequency.containsKey(source)){
+            if (!nodeToNodeTravelFrequency.containsKey(source)) {
                 nodeToNodeTravelFrequency.put(source, new HashMap<ModelObject, Integer>());
             }
-            if(!nodeToNodeTravelFrequency.get(source).containsKey(destination)){
+            if (!nodeToNodeTravelFrequency.get(source).containsKey(destination)) {
                 nodeToNodeTravelFrequency.get(source).put(destination, 0);
             }
 
             int currentValue = nodeToNodeTravelFrequency.get(source).get(destination).intValue();
-            nodeToNodeTravelFrequency.get(source).put(destination, currentValue+1);
+            nodeToNodeTravelFrequency.get(source).put(destination, currentValue + 1);
 
         }
 
         HashMap<ModelObject, HashMap<ModelObject, Double>> nodeToNodeProbabilities = new HashMap<ModelObject, HashMap<ModelObject, Double>>();
 
-        for(ModelObject source : nodeToNodeTravelFrequency.keySet()){
+        for (ModelObject source : nodeToNodeTravelFrequency.keySet()) {
             nodeToNodeProbabilities.put(source, new HashMap<ModelObject, Double>());
-            double totalNumberOfOutEdges =0.0;
-            for(ModelObject dest: nodeToNodeTravelFrequency.get(source).keySet()){
+            double totalNumberOfOutEdges = 0.0;
+            for (ModelObject dest : nodeToNodeTravelFrequency.get(source).keySet()) {
                 totalNumberOfOutEdges += nodeToNodeTravelFrequency.get(source).get(dest);
             }
-            for(ModelObject dest: nodeToNodeTravelFrequency.get(source).keySet()){
+            for (ModelObject dest : nodeToNodeTravelFrequency.get(source).keySet()) {
 
-                nodeToNodeProbabilities.get(source).put(dest, (double)nodeToNodeTravelFrequency.get(source).get(dest)/totalNumberOfOutEdges);
+                nodeToNodeProbabilities.get(source).put(dest, (double) nodeToNodeTravelFrequency.get(source).get(dest) / totalNumberOfOutEdges);
             }
 
 
@@ -382,17 +395,17 @@ public class RoomAnalysisFrame extends JFrame {
 
 
         DirectedSparseMultigraph<ModelObject, ProbabilityEdge> summarizedGraph = new DirectedSparseMultigraph<ModelObject, ProbabilityEdge>();
-        for(ModelObject vertex: localGraph.getVertices()){
+        for (ModelObject vertex : localGraph.getVertices()) {
             summarizedGraph.addVertex(vertex);
         }
-        for(ModelObject source : nodeToNodeProbabilities.keySet()){
+        for (ModelObject source : nodeToNodeProbabilities.keySet()) {
 
-            for(ModelObject dest: nodeToNodeProbabilities.get(source).keySet()){
-                if(source.toString().equals(dest.toString())){
+            for (ModelObject dest : nodeToNodeProbabilities.get(source).keySet()) {
+                if (source.toString().equals(dest.toString())) {
                     System.out.println("Cycle");
                 }
 
-                summarizedGraph.addEdge(new ProbabilityEdge(nodeToNodeProbabilities.get(source).get(dest)),source, dest);
+                summarizedGraph.addEdge(new ProbabilityEdge(nodeToNodeProbabilities.get(source).get(dest)), source, dest);
 
             }
 
@@ -404,7 +417,7 @@ public class RoomAnalysisFrame extends JFrame {
 
     }
 
-    private <T extends ModelEdge> void renderGraphPanel(final DirectedSparseMultigraph<ModelObject, T> graphToDraw, final ModelObject mainNode, final DisplayType simpleNumberingStyle) {
+    private <T extends ModelEdge> void renderGraphPanel(final DirectedSparseMultigraph<ModelObject, T> graphToDraw, final ModelObject mainNode, final DisplayType style) {
         SwingUtilities.invokeLater(new Runnable() {
             @Override
             public void run() {
@@ -440,12 +453,13 @@ public class RoomAnalysisFrame extends JFrame {
 
                 currentVisualizationViewer.getRenderContext().setVertexShapeTransformer(new VertexEllipseTransformer<ModelObject, Shape>());
 
+
                 currentVisualizationViewer.getRenderContext().setVertexLabelTransformer(new ToStringLabeller<ModelObject>());
                 currentVisualizationViewer.getRenderer().getVertexLabelRenderer().setPosition(edu.uci.ics.jung.visualization.renderers.Renderer.VertexLabel.Position.CNTR);
 
-
-                currentVisualizationViewer.getRenderContext().setEdgeLabelTransformer(new ToStringLabeller());
-
+                if (style.equals(DisplayType.PATH_PROBABILITIES)) {
+                    currentVisualizationViewer.getRenderContext().setEdgeLabelTransformer(new ToStringLabeller());
+                }
 
 
                 chartDisplayPanel.add(currentVisualizationViewer);
@@ -482,7 +496,7 @@ public class RoomAnalysisFrame extends JFrame {
                             taskOutput.append("Processing " + tempDataName + "...\n");
                         }
                     });
-                    synchronized (NetworkModel.instance()){
+                    synchronized (NetworkModel.instance()) {
                         result.put(dataName, NetworkModel.instance().getDirectedGraphOfPlayer(dataName, selectedPhases));
                     }
                     final int currentProgress = i;
@@ -550,7 +564,6 @@ public class RoomAnalysisFrame extends JFrame {
     }
 
 
-
     public JComboBox<String> getRoomButtonComboBox() {
         roomButtonComboBox = new JComboBox<String>();
         synchronized (roomList) {
@@ -575,9 +588,19 @@ public class RoomAnalysisFrame extends JFrame {
 
 
     public enum DisplayType {
-        PATH_PROBABILITIES,
-        SIMPLE_COMPLETE_DIRECTED_GRAPH,
-        STAT_DISPLAY;
+        PATH_PROBABILITIES("path prob."),
+        SIMPLE_COMPLETE_DIRECTED_GRAPH("complete graph"),
+        STAT_DISPLAY("stat summary");
+        private final String name;
+
+        DisplayType(String s) {
+            name = s;
+        }
+
+        @Override
+        public String toString() {
+            return name;
+        }
     }
 
     private void initializeRoomList() {
@@ -606,6 +629,7 @@ public class RoomAnalysisFrame extends JFrame {
 
     private class RoomDataListener implements ActionListener {
 
+
         @Override
         public void actionPerformed(ActionEvent event) {
             if (event.getSource() == closeButton) {
@@ -630,16 +654,60 @@ public class RoomAnalysisFrame extends JFrame {
                                 poppedOutFrame.setSize(chartDisplayPanel.getSize());
                                 poppedOutFrame.add(currentVisualizationViewer);
                                 poppedOutFrame.setVisible(true);
+                                poppedOutFrame.setTitle(currentTitle);
                                 poppedOutFrames.add(poppedOutFrame);
 
                             }
                         });
             } else if (event.getSource() == generateButton) {
                 updateChartPanel();
+            } else if (event.getSource() == saveAsImageButton) {
+
+
+                if (currentVisualizationViewer != null) {
+                    JFileChooser jfc = new JFileChooser(new File("."+File.separatorChar + "SavedGraphs"));
+//                    jfc.addChoosableFileFilter(new PngFileFilter());
+
+                    int result = jfc.showSaveDialog(RoomAnalysisFrame.this);
+                    if (result == JFileChooser.CANCEL_OPTION)
+                        return;
+                    File file = jfc.getSelectedFile();
+
+
+                    writeToDisk(file);
+                }  else {
+
+                    JOptionPane.showMessageDialog(RoomAnalysisFrame.this,"No graph to save","Export error", JOptionPane.ERROR_MESSAGE);
+                }
+
             }
 
         }
     }
+
+    public void writeToDisk(File file) {
+        //Dimension loDims = getGraphLayout().getSize();
+        Dimension vsDims = currentVisualizationViewer.getSize();
+
+        int width = vsDims.width;
+        int height = vsDims.height;
+        Color bg = currentVisualizationViewer.getBackground();
+
+        BufferedImage im = new BufferedImage(width, height, BufferedImage.TYPE_INT_BGR);
+        Graphics2D graphics = im.createGraphics();
+        graphics.setColor(bg);
+        graphics.fillRect(0, 0, width, height);
+
+
+        currentVisualizationViewer.paint(graphics);
+
+        try {
+            ImageIO.write(im, "png", file);
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+    }
+
 
     private class ProbabilityEdge extends ModelEdge {
         private final Double value;
@@ -649,10 +717,29 @@ public class RoomAnalysisFrame extends JFrame {
         }
 
         @Override
-        public String toString(){
+        public String toString() {
             return new DecimalFormat("#.000").format(value);
         }
     }
 
 
+    private class PngFileFilter extends FileFilter {
+        public boolean accept(File f)
+        {
+            if (f.isDirectory())
+            {
+                return false;
+            }
+
+            String s = f.getName();
+
+            return s.endsWith(".png")||s.endsWith(".PNG");
+        }
+
+        public String getDescription()
+        {
+            return "*.png,*.PNG";
+        }
+
+    }
 }
