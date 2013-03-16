@@ -2,12 +2,12 @@
 <project version="4">
   <component name="ChangeListManager">
     <list default="true" id="1a8d5762-3820-4d06-a7d2-ae74b759bb18" name="Default" comment="">
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/EnvironmentImporter/src/gui/Main.java" afterPath="$PROJECT_DIR$/EnvironmentImporter/src/gui/Main.java" />
       <change type="MODIFICATION" beforePath="$PROJECT_DIR$/EnvironmentImporter/src/stats/chartdisplays/RoomAnalysisFrame.java" afterPath="$PROJECT_DIR$/EnvironmentImporter/src/stats/chartdisplays/RoomAnalysisFrame.java" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/.idea/workspace.xml" afterPath="$PROJECT_DIR$/.idea/workspace.xml" />
     </list>
     <ignored path="gameAnalyzer.iws" />
     <ignored path=".idea/workspace.xml" />
-    <file path="/Dummy.txt" changelist="1a8d5762-3820-4d06-a7d2-ae74b759bb18" time="1363328939078" ignored="false" />
+    <file path="/Dummy.txt" changelist="1a8d5762-3820-4d06-a7d2-ae74b759bb18" time="1363418512670" ignored="false" />
     <file path="/fragment.java" changelist="1a8d5762-3820-4d06-a7d2-ae74b759bb18" time="1363230621113" ignored="false" />
     <file path="/VertexChartDisplay.java" changelist="1a8d5762-3820-4d06-a7d2-ae74b759bb18" time="1363159128806" ignored="false" />
     <file path="/ChartDisplay.java" changelist="1a8d5762-3820-4d06-a7d2-ae74b759bb18" time="1362743829096" ignored="false" />
@@ -24,7 +24,7 @@
     <file path="/RandomWalk.java" changelist="1a8d5762-3820-4d06-a7d2-ae74b759bb18" time="1363178040258" ignored="false" />
     <file path="/RoomInfoConsoleDisplay.java" changelist="1a8d5762-3820-4d06-a7d2-ae74b759bb18" time="1363179174929" ignored="false" />
     <file path="/a.dummy" changelist="1a8d5762-3820-4d06-a7d2-ae74b759bb18" time="1363227422928" ignored="false" />
-    <file path="/RoomAnalysisFrame.java" changelist="1a8d5762-3820-4d06-a7d2-ae74b759bb18" time="1363333962662" ignored="false" />
+    <file path="/RoomAnalysisFrame.java" changelist="1a8d5762-3820-4d06-a7d2-ae74b759bb18" time="1363418727112" ignored="false" />
     <option name="TRACKING_ENABLED" value="true" />
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -73,6 +73,7 @@
         <option name="LOG_MESSAGE" value="" />
       </breakpoint>
     </breakpoint_any>
+    <ui_properties default_suspend_policy="SuspendAll" default_condition_enabled="true" />
     <line_breakpoints default_suspend_policy="SuspendAll" default_condition_enabled="true">
       <breakpoint url="file://$PROJECT_DIR$/EnvironmentImporter/src/stats/chartdisplays/RoomInfoChartDisplay.java" line="0" class="RoomInfoChartDisplay.java" package="">
         <option name="ENABLED" value="true" />
@@ -89,7 +90,6 @@
         <option name="LOG_MESSAGE" value="" />
       </breakpoint>
     </line_breakpoints>
-    <ui_properties default_suspend_policy="SuspendAll" default_condition_enabled="true" />
     <breakpoint_rules />
     <ui_properties />
   </component>
@@ -111,48 +111,20 @@
       <file leaf-file-name="RoomAnalysisFrame.java" pinned="false" current="true" current-in-tab="true">
         <entry file="file://$PROJECT_DIR$/EnvironmentImporter/src/stats/chartdisplays/RoomAnalysisFrame.java">
           <provider selected="true" editor-type-id="text-editor">
-            <state line="669" column="59" selection-start="25770" selection-end="25770" vertical-scroll-proportion="0.5009862">
+            <state line="730" column="1" selection-start="27490" selection-end="27490" vertical-scroll-proportion="3.867826">
               <folding>
                 <element signature="imports" expanded="true" />
-                <element signature="e#1350#1358#0" expanded="true" />
-                <element signature="e#1906#1914#0" expanded="true" />
-                <element signature="e#2567#3002#0" expanded="true" />
-                <element signature="e#2991#2992#0" expanded="true" />
-                <element signature="e#5148#5289#0" expanded="true" />
-                <element signature="e#5278#5279#0" expanded="true" />
-                <element signature="e#5350#5357#0" expanded="true" />
-                <element signature="e#6056#6245#0" expanded="true" />
-                <element signature="e#6230#6231#0" expanded="true" />
-                <element signature="e#7507#7938#0" expanded="true" />
-                <element signature="e#7915#7916#0" expanded="true" />
-                <element signature="e#9317#9341#0" expanded="true" />
-                <element signature="e#10880#10904#0" expanded="true" />
-                <element signature="e#11357#11368#0" expanded="true" />
-                <element signature="e#11369#11585#0" expanded="true" />
-                <element signature="e#11570#11571#0" expanded="true" />
-                <element signature="e#13049#13093#0" expanded="true" />
-                <element signature="e#14052#14095#0" expanded="true" />
-                <element signature="e#14864#14894#0" expanded="true" />
-                <element signature="e#15851#17989#0" expanded="true" />
-                <element signature="e#15989#16005#0" expanded="true" />
-                <element signature="e#16420#16850#0" expanded="true" />
-                <element signature="e#16831#16832#0" expanded="true" />
-                <element signature="e#17976#17977#0" expanded="true" />
-                <element signature="e#18876#18934#0" expanded="true" />
-                <element signature="e#19173#19402#0" expanded="true" />
-                <element signature="e#19379#19380#0" expanded="true" />
-                <element signature="e#19708#19932#0" expanded="true" />
-                <element signature="e#19909#19910#0" expanded="true" />
-                <element signature="e#20177#20404#0" expanded="true" />
-                <element signature="e#20385#20386#0" expanded="true" />
-                <element signature="e#20546#22054#0" expanded="true" />
-                <element signature="e#22035#22036#0" expanded="true" />
-                <element signature="e#22427#22886#0" expanded="true" />
-                <element signature="e#22859#22860#0" expanded="true" />
-                <element signature="e#24275#24634#0" expanded="true" />
-                <element signature="e#24607#24608#0" expanded="true" />
-                <element signature="e#24766#25366#0" expanded="true" />
-                <element signature="e#25339#25340#0" expanded="true" />
+                <element signature="e#1307#1315#0" expanded="true" />
+                <element signature="e#1863#1871#0" expanded="true" />
+                <element signature="e#5307#5314#0" expanded="true" />
+                <element signature="e#9274#9298#0" expanded="true" />
+                <element signature="e#10690#10734#0" expanded="true" />
+                <element signature="e#11693#11736#0" expanded="true" />
+                <element signature="e#12505#12535#0" expanded="true" />
+                <element signature="e#13566#13590#0" expanded="true" />
+                <element signature="e#14043#14054#0" expanded="true" />
+                <element signature="e#16189#16205#0" expanded="true" />
+                <element signature="e#19080#19138#0" expanded="true" />
               </folding>
             </state>
           </provider>
@@ -259,8 +231,10 @@
     </option>
   </component>
   <component name="ProjectFrameBounds">
-    <option name="width" value="1344" />
-    <option name="height" value="1040" />
+    <option name="x" value="-8" />
+    <option name="y" value="-8" />
+    <option name="width" value="1936" />
+    <option name="height" value="1056" />
   </component>
   <component name="ProjectLevelVcsManager" settingsEditedManually="false">
     <OptionsSetting value="true" id="Add" />
@@ -288,7 +262,6 @@
       <sortByType />
     </navigator>
     <panes>
-      <pane id="Scope" />
       <pane id="PackagesPane" />
       <pane id="ProjectPane">
         <subPane>
@@ -462,20 +435,21 @@
           </PATH>
         </subPane>
       </pane>
+      <pane id="Scope" />
     </panes>
   </component>
   <component name="PropertiesComponent">
     <property name="GoToFile.includeJavaFiles" value="false" />
-    <property name="OverrideImplement.combined" value="false" />
     <property name="GoToClass.toSaveIncludeLibraries" value="false" />
-    <property name="recentsLimit" value="5" />
+    <property name="OverrideImplement.combined" value="false" />
     <property name="MemberChooser.sorted" value="false" />
+    <property name="recentsLimit" value="5" />
     <property name="restartRequiresConfirmation" value="true" />
-    <property name="FullScreen" value="true" />
     <property name="MemberChooser.showClasses" value="true" />
+    <property name="FullScreen" value="true" />
     <property name="GoToClass.includeLibraries" value="false" />
-    <property name="dynamic.classpath" value="false" />
     <property name="MemberChooser.copyJavadoc" value="false" />
+    <property name="dynamic.classpath" value="false" />
   </component>
   <component name="RecentsManager">
     <key name="CopyClassDialog.RECENTS_KEY">
@@ -500,6 +474,19 @@
       <option name="SHMEM_ADDRESS" value="javadebug" />
       <option name="HOST" value="localhost" />
       <option name="PORT" value="5005" />
+      <method />
+    </configuration>
+    <configuration default="true" type="Applet" factoryName="Applet">
+      <module name="" />
+      <option name="MAIN_CLASS_NAME" />
+      <option name="HTML_FILE_NAME" />
+      <option name="HTML_USED" value="false" />
+      <option name="WIDTH" value="400" />
+      <option name="HEIGHT" value="300" />
+      <option name="POLICY_FILE" value="$APPLICATION_HOME_DIR$/bin/appletviewer.policy" />
+      <option name="VM_PARAMETERS" />
+      <option name="ALTERNATIVE_JRE_PATH_ENABLED" value="false" />
+      <option name="ALTERNATIVE_JRE_PATH" />
       <method />
     </configuration>
     <configuration default="true" type="TestNG" factoryName="TestNG">
@@ -527,19 +514,6 @@
       <envs />
       <properties />
       <listeners />
-      <method />
-    </configuration>
-    <configuration default="true" type="Applet" factoryName="Applet">
-      <module name="" />
-      <option name="MAIN_CLASS_NAME" />
-      <option name="HTML_FILE_NAME" />
-      <option name="HTML_USED" value="false" />
-      <option name="WIDTH" value="400" />
-      <option name="HEIGHT" value="300" />
-      <option name="POLICY_FILE" value="$APPLICATION_HOME_DIR$/bin/appletviewer.policy" />
-      <option name="VM_PARAMETERS" />
-      <option name="ALTERNATIVE_JRE_PATH_ENABLED" value="false" />
-      <option name="ALTERNATIVE_JRE_PATH" />
       <method />
     </configuration>
     <configuration default="true" type="Application" factoryName="Application">
@@ -637,32 +611,27 @@
     <servers />
   </component>
   <component name="ToolWindowManager">
-    <frame x="0" y="0" width="1344" height="1040" extended-state="0" />
-    <editor active="false" />
+    <frame x="-8" y="-8" width="1936" height="1056" extended-state="6" />
+    <editor active="true" />
     <layout>
       <window_info id="Changes" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.33" sideWeight="0.5" order="7" side_tool="false" content_ui="tabs" />
       <window_info id="JetGradle" active="false" anchor="right" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.33" sideWeight="0.5" order="5" side_tool="true" content_ui="tabs" />
       <window_info id="Palette" active="false" anchor="right" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.33" sideWeight="0.5" order="3" side_tool="false" content_ui="tabs" />
-      <window_info id="Find" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.29139072" sideWeight="0.5" order="1" side_tool="false" content_ui="tabs" />
       <window_info id="Ant Build" active="false" anchor="right" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.25" sideWeight="0.5" order="1" side_tool="false" content_ui="tabs" />
       <window_info id="Debug" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.22606924" sideWeight="0.5" order="3" side_tool="false" content_ui="tabs" />
       <window_info id="Event Log" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.33" sideWeight="0.5" order="7" side_tool="true" content_ui="tabs" />
       <window_info id="Favorites" active="false" anchor="left" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.33" sideWeight="0.5" order="2" side_tool="true" content_ui="tabs" />
       <window_info id="Version Control" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.33" sideWeight="0.5" order="7" side_tool="false" content_ui="tabs" />
-      <window_info id="Messages" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.6655629" sideWeight="0.5" order="7" side_tool="false" content_ui="tabs" />
+      <window_info id="Messages" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.664859" sideWeight="0.5" order="7" side_tool="false" content_ui="tabs" />
       <window_info id="TODO" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.33" sideWeight="0.5" order="6" side_tool="false" content_ui="tabs" />
-      <window_info id="Structure" active="false" anchor="left" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="true" weight="0.13650545" sideWeight="0.48233995" order="1" side_tool="true" content_ui="tabs" />
+      <window_info id="Structure" active="false" anchor="left" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="true" weight="0.21184632" sideWeight="0.54989153" order="1" side_tool="true" content_ui="tabs" />
       <window_info id="Maven Projects" active="false" anchor="right" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.33" sideWeight="0.5" order="4" side_tool="false" content_ui="tabs" />
       <window_info id="Commander" active="false" anchor="right" auto_hide="false" internal_type="SLIDING" type="SLIDING" visible="false" weight="0.4" sideWeight="0.5" order="0" side_tool="false" content_ui="tabs" />
-<<<<<<< HEAD
-      <window_info id="Project" active="false" anchor="left" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="true" weight="0.1670224" sideWeight="0.2545825" order="0" side_tool="false" content_ui="combo" />
-      <window_info id="Run" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.11303462" sideWeight="0.9669725" order="2" side_tool="false" content_ui="tabs" />
-=======
-      <window_info id="Project" active="false" anchor="left" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="true" weight="0.13650545" sideWeight="0.16335541" order="0" side_tool="false" content_ui="combo" />
-      <window_info id="Run" active="true" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="true" weight="0.34657836" sideWeight="0.99921995" order="2" side_tool="false" content_ui="tabs" />
->>>>>>> origin/master
+      <window_info id="Project" active="false" anchor="left" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="true" weight="0.21184632" sideWeight="0.10845987" order="0" side_tool="false" content_ui="combo" />
+      <window_info id="Run" active="true" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="true" weight="0.3340564" sideWeight="0.99921995" order="2" side_tool="false" content_ui="tabs" />
       <window_info id="Cvs" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.25" sideWeight="0.5" order="4" side_tool="false" content_ui="tabs" />
       <window_info id="Message" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.33" sideWeight="0.5" order="0" side_tool="false" content_ui="tabs" />
+      <window_info id="Find" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.29139072" sideWeight="0.5" order="1" side_tool="false" content_ui="tabs" />
       <window_info id="Hierarchy" active="false" anchor="right" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.25" sideWeight="0.5" order="2" side_tool="false" content_ui="combo" />
       <window_info id="Inspection" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.4" sideWeight="0.5" order="5" side_tool="false" content_ui="tabs" />
     </layout>
@@ -828,48 +797,20 @@
     </entry>
     <entry file="file://$PROJECT_DIR$/EnvironmentImporter/src/stats/chartdisplays/RoomAnalysisFrame.java">
       <provider selected="true" editor-type-id="text-editor">
-        <state line="669" column="59" selection-start="25770" selection-end="25770" vertical-scroll-proportion="0.5009862">
+        <state line="730" column="1" selection-start="27490" selection-end="27490" vertical-scroll-proportion="3.867826">
           <folding>
             <element signature="imports" expanded="true" />
-            <element signature="e#1350#1358#0" expanded="true" />
-            <element signature="e#1906#1914#0" expanded="true" />
-            <element signature="e#2567#3002#0" expanded="true" />
-            <element signature="e#2991#2992#0" expanded="true" />
-            <element signature="e#5148#5289#0" expanded="true" />
-            <element signature="e#5278#5279#0" expanded="true" />
-            <element signature="e#5350#5357#0" expanded="true" />
-            <element signature="e#6056#6245#0" expanded="true" />
-            <element signature="e#6230#6231#0" expanded="true" />
-            <element signature="e#7507#7938#0" expanded="true" />
-            <element signature="e#7915#7916#0" expanded="true" />
-            <element signature="e#9317#9341#0" expanded="true" />
-            <element signature="e#10880#10904#0" expanded="true" />
-            <element signature="e#11357#11368#0" expanded="true" />
-            <element signature="e#11369#11585#0" expanded="true" />
-            <element signature="e#11570#11571#0" expanded="true" />
-            <element signature="e#13049#13093#0" expanded="true" />
-            <element signature="e#14052#14095#0" expanded="true" />
-            <element signature="e#14864#14894#0" expanded="true" />
-            <element signature="e#15851#17989#0" expanded="true" />
-            <element signature="e#15989#16005#0" expanded="true" />
-            <element signature="e#16420#16850#0" expanded="true" />
-            <element signature="e#16831#16832#0" expanded="true" />
-            <element signature="e#17976#17977#0" expanded="true" />
-            <element signature="e#18876#18934#0" expanded="true" />
-            <element signature="e#19173#19402#0" expanded="true" />
-            <element signature="e#19379#19380#0" expanded="true" />
-            <element signature="e#19708#19932#0" expanded="true" />
-            <element signature="e#19909#19910#0" expanded="true" />
-            <element signature="e#20177#20404#0" expanded="true" />
-            <element signature="e#20385#20386#0" expanded="true" />
-            <element signature="e#20546#22054#0" expanded="true" />
-            <element signature="e#22035#22036#0" expanded="true" />
-            <element signature="e#22427#22886#0" expanded="true" />
-            <element signature="e#22859#22860#0" expanded="true" />
-            <element signature="e#24275#24634#0" expanded="true" />
-            <element signature="e#24607#24608#0" expanded="true" />
-            <element signature="e#24766#25366#0" expanded="true" />
-            <element signature="e#25339#25340#0" expanded="true" />
+            <element signature="e#1307#1315#0" expanded="true" />
+            <element signature="e#1863#1871#0" expanded="true" />
+            <element signature="e#5307#5314#0" expanded="true" />
+            <element signature="e#9274#9298#0" expanded="true" />
+            <element signature="e#10690#10734#0" expanded="true" />
+            <element signature="e#11693#11736#0" expanded="true" />
+            <element signature="e#12505#12535#0" expanded="true" />
+            <element signature="e#13566#13590#0" expanded="true" />
+            <element signature="e#14043#14054#0" expanded="true" />
+            <element signature="e#16189#16205#0" expanded="true" />
+            <element signature="e#19080#19138#0" expanded="true" />
           </folding>
         </state>
       </provider>

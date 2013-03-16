@@ -15,7 +15,6 @@ import org.apache.commons.collections15.Transformer;
 
 import javax.imageio.ImageIO;
 import javax.swing.*;
-import javax.swing.filechooser.FileFilter;
 import javax.swing.text.DefaultCaret;
 import java.awt.*;
 import java.awt.event.ActionEvent;
@@ -289,10 +288,71 @@ public class RoomAnalysisFrame extends JFrame {
         }
 
 
-        final DirectedSparseMultigraph<ModelObject, ModelEdge> graphToDraw = localGraph;
+
+        final DirectedSparseMultigraph<ModelObject, ProbabilityEdge> graphToDraw = convertToProbabilities(localGraph);
+
         renderGraphPanel(graphToDraw, mainNode, DisplayType.SIMPLE_COMPLETE_DIRECTED_GRAPH);
 
 
+    }
+
+    private DirectedSparseMultigraph<ModelObject, ProbabilityEdge> convertToProbabilities(DirectedSparseMultigraph<ModelObject, ModelEdge> localGraph) {
+        HashMap<ModelObject, HashMap<ModelObject, Integer>> nodeToNodeTravelFrequency = new HashMap<ModelObject, HashMap<ModelObject, Integer>>();
+
+        for (ModelEdge edge : localGraph.getEdges()) {
+            ModelObject source = localGraph.getSource(edge);
+            ModelObject destination = localGraph.getDest(edge);
+            if (source.toString().equals(destination.toString())) {
+                System.out.println("Cycle detected");
+            }
+
+            if (!nodeToNodeTravelFrequency.containsKey(source)) {
+                nodeToNodeTravelFrequency.put(source, new HashMap<ModelObject, Integer>());
+            }
+            if (!nodeToNodeTravelFrequency.get(source).containsKey(destination)) {
+                nodeToNodeTravelFrequency.get(source).put(destination, 0);
+            }
+
+            int currentValue = nodeToNodeTravelFrequency.get(source).get(destination).intValue();
+            nodeToNodeTravelFrequency.get(source).put(destination, currentValue + 1);
+
+        }
+
+        HashMap<ModelObject, HashMap<ModelObject, Double>> nodeToNodeProbabilities = new HashMap<ModelObject, HashMap<ModelObject, Double>>();
+
+        for (ModelObject source : nodeToNodeTravelFrequency.keySet()) {
+            nodeToNodeProbabilities.put(source, new HashMap<ModelObject, Double>());
+            double totalNumberOfOutEdges = 0.0;
+            for (ModelObject dest : nodeToNodeTravelFrequency.get(source).keySet()) {
+                totalNumberOfOutEdges += nodeToNodeTravelFrequency.get(source).get(dest);
+            }
+            for (ModelObject dest : nodeToNodeTravelFrequency.get(source).keySet()) {
+
+                nodeToNodeProbabilities.get(source).put(dest, (double) nodeToNodeTravelFrequency.get(source).get(dest) / totalNumberOfOutEdges);
+            }
+
+
+        }
+
+
+        DirectedSparseMultigraph<ModelObject, ProbabilityEdge> summarizedGraph = new DirectedSparseMultigraph<ModelObject, ProbabilityEdge>();
+        for (ModelObject vertex : localGraph.getVertices()) {
+            summarizedGraph.addVertex(vertex);
+        }
+        for (ModelObject source : nodeToNodeProbabilities.keySet()) {
+
+            for (ModelObject dest : nodeToNodeProbabilities.get(source).keySet()) {
+                if (source.toString().equals(dest.toString())) {
+                    System.out.println("Cycle");
+                }
+
+                summarizedGraph.addEdge(new ProbabilityEdge(nodeToNodeProbabilities.get(source).get(dest)), source, dest);
+
+            }
+
+
+        }
+        return summarizedGraph;
     }
 
 
@@ -356,63 +416,8 @@ public class RoomAnalysisFrame extends JFrame {
         }
 
 
-        HashMap<ModelObject, HashMap<ModelObject, Integer>> nodeToNodeTravelFrequency = new HashMap<ModelObject, HashMap<ModelObject, Integer>>();
 
-        for (ModelEdge edge : localGraph.getEdges()) {
-            ModelObject source = localGraph.getSource(edge);
-            ModelObject destination = localGraph.getDest(edge);
-            if (source.toString().equals(destination.toString())) {
-                System.out.println("Cycle detected");
-            }
-
-            if (!nodeToNodeTravelFrequency.containsKey(source)) {
-                nodeToNodeTravelFrequency.put(source, new HashMap<ModelObject, Integer>());
-            }
-            if (!nodeToNodeTravelFrequency.get(source).containsKey(destination)) {
-                nodeToNodeTravelFrequency.get(source).put(destination, 0);
-            }
-
-            int currentValue = nodeToNodeTravelFrequency.get(source).get(destination).intValue();
-            nodeToNodeTravelFrequency.get(source).put(destination, currentValue + 1);
-
-        }
-
-        HashMap<ModelObject, HashMap<ModelObject, Double>> nodeToNodeProbabilities = new HashMap<ModelObject, HashMap<ModelObject, Double>>();
-
-        for (ModelObject source : nodeToNodeTravelFrequency.keySet()) {
-            nodeToNodeProbabilities.put(source, new HashMap<ModelObject, Double>());
-            double totalNumberOfOutEdges = 0.0;
-            for (ModelObject dest : nodeToNodeTravelFrequency.get(source).keySet()) {
-                totalNumberOfOutEdges += nodeToNodeTravelFrequency.get(source).get(dest);
-            }
-            for (ModelObject dest : nodeToNodeTravelFrequency.get(source).keySet()) {
-
-                nodeToNodeProbabilities.get(source).put(dest, (double) nodeToNodeTravelFrequency.get(source).get(dest) / totalNumberOfOutEdges);
-            }
-
-
-        }
-
-
-        DirectedSparseMultigraph<ModelObject, ProbabilityEdge> summarizedGraph = new DirectedSparseMultigraph<ModelObject, ProbabilityEdge>();
-        for (ModelObject vertex : localGraph.getVertices()) {
-            summarizedGraph.addVertex(vertex);
-        }
-        for (ModelObject source : nodeToNodeProbabilities.keySet()) {
-
-            for (ModelObject dest : nodeToNodeProbabilities.get(source).keySet()) {
-                if (source.toString().equals(dest.toString())) {
-                    System.out.println("Cycle");
-                }
-
-                summarizedGraph.addEdge(new ProbabilityEdge(nodeToNodeProbabilities.get(source).get(dest)), source, dest);
-
-            }
-
-
-        }
-
-        final DirectedSparseMultigraph<ModelObject, ProbabilityEdge> graphToDraw = summarizedGraph;
+        final DirectedSparseMultigraph<ModelObject, ProbabilityEdge> graphToDraw = convertToProbabilities(localGraph);
         renderGraphPanel(graphToDraw, mainNode, DisplayType.PATH_PROBABILITIES);
 
     }
@@ -457,9 +462,9 @@ public class RoomAnalysisFrame extends JFrame {
                 currentVisualizationViewer.getRenderContext().setVertexLabelTransformer(new ToStringLabeller<ModelObject>());
                 currentVisualizationViewer.getRenderer().getVertexLabelRenderer().setPosition(edu.uci.ics.jung.visualization.renderers.Renderer.VertexLabel.Position.CNTR);
 
-                if (style.equals(DisplayType.PATH_PROBABILITIES)) {
+//                if (style.equals(DisplayType.PATH_PROBABILITIES)) {
                     currentVisualizationViewer.getRenderContext().setEdgeLabelTransformer(new ToStringLabeller());
-                }
+//                }
 
 
                 chartDisplayPanel.add(currentVisualizationViewer);
@@ -588,8 +593,8 @@ public class RoomAnalysisFrame extends JFrame {
 
 
     public enum DisplayType {
-        PATH_PROBABILITIES("path prob."),
-        SIMPLE_COMPLETE_DIRECTED_GRAPH("complete graph"),
+        PATH_PROBABILITIES("2nd order markov"),
+        SIMPLE_COMPLETE_DIRECTED_GRAPH("1st order markov"),
         STAT_DISPLAY("stat summary");
         private final String name;
 
@@ -723,23 +728,5 @@ public class RoomAnalysisFrame extends JFrame {
     }
 
 
-    private class PngFileFilter extends FileFilter {
-        public boolean accept(File f)
-        {
-            if (f.isDirectory())
-            {
-                return false;
-            }
 
-            String s = f.getName();
-
-            return s.endsWith(".png")||s.endsWith(".PNG");
-        }
-
-        public String getDescription()
-        {
-            return "*.png,*.PNG";
-        }
-
-    }
 }
