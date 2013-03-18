@@ -34,7 +34,7 @@ import java.util.List;
 public class RandomWalk {
     private final static MersenneTwister random = new MersenneTwister();
     private static CircularFifoBuffer<Double> varianceList = new CircularFifoBuffer<Double>(5);
-    private static final double EPSILON = 0.0000001;
+    private static final double EPSILON = 0.000001;
     private static Collection<DirectedSparseMultigraph<ModelObject, ModelEdge>> randomWalkGraphs;
     private static RandomWalk randomWalkInstance;
     private static Graph<ModelObject, ModelEdge> completeGraph = null;
@@ -350,9 +350,11 @@ public class RandomWalk {
     }
 
     public static Collection<DirectedSparseMultigraph<ModelObject,ModelEdge>> getAllRandomWalkGraphs() {
+        System.out.println("Creating random walks");
         if (randomWalkGraphs == null || randomWalkGraphs.isEmpty()) {
             generateRandomWalkCollection();
         }
+        System.out.println("genreated "+randomWalkGraphs.size()+ " graphs");
         return randomWalkGraphs;
     }
 }

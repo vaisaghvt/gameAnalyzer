@@ -47,7 +47,7 @@ public class PathHeatMapHandler extends StatisticsHandler<PathHeatMapConsoleDisp
             super(dataNames);
             this.phase = phase;
             this.allOrOne = allOrOne;
-            if(allOrOne == StatsDialog.AllOrOne.ALL){
+            if (allOrOne == StatsDialog.AllOrOne.ALL) {
                 dataNames.remove("random walk");
 
             }
@@ -55,15 +55,17 @@ public class PathHeatMapHandler extends StatisticsHandler<PathHeatMapConsoleDisp
 
         @Override
         protected void doTasks(String dataName) {
-            synchronized (NetworkModel.instance()) {
-                dataNameDataMap.put(dataName, NetworkModel.instance().getDirectedGraphOfPlayer(dataName, Collections.singleton(phase)));
+            if (!dataName.equals("random walk")) {
+                synchronized (NetworkModel.instance()) {
+                    dataNameDataMap.put(dataName, NetworkModel.instance().getDirectedGraphOfPlayer(dataName, Collections.singleton(phase)));
+                }
             }
         }
 
         @Override
         protected void summarizeAndDisplay() {
             HashMap<String, HashMap<String, Double>> data;
-
+            System.out.println("Done");
             switch (allOrOne) {
 
                 case ALL:
@@ -76,19 +78,19 @@ public class PathHeatMapHandler extends StatisticsHandler<PathHeatMapConsoleDisp
                     HashMap<String, DirectedSparseMultigraph<ModelObject, ModelEdge>> tempDataNameDataMap
                             = new HashMap<String, DirectedSparseMultigraph<ModelObject, ModelEdge>>();
                     for (String name : dataNames) {
-                        if(name.equals("random walk")){
+                        if (name.equals("random walk")) {
                             Collection<DirectedSparseMultigraph<ModelObject, ModelEdge>> collectionOfGraphs
-                                     = RandomWalk.getAllRandomWalkGraphs();
-                            int count=0;
-                            for(DirectedSparseMultigraph<ModelObject, ModelEdge> graph : collectionOfGraphs){
+                                    = RandomWalk.getAllRandomWalkGraphs();
+                            int count = 0;
+                            for (DirectedSparseMultigraph<ModelObject, ModelEdge> graph : collectionOfGraphs) {
 
-                                tempDataNameDataMap.put(name+(count++), graph);
+                                tempDataNameDataMap.put(name + (count++), graph);
 
                             }
-                        }else{
+                        } else {
                             tempDataNameDataMap.put(name, dataNameDataMap.get(name));
                         }
-                        data = getSecondOrderMarkovData(dataNameDataMap);
+                        data = getSecondOrderMarkovData(tempDataNameDataMap);
                         chartDisplay.setTitle("Visit order heat map :" + name + ":" + phase.toString());
                         chartDisplay.display(data);
                         consoleDisplay.display(data);
@@ -101,7 +103,6 @@ public class PathHeatMapHandler extends StatisticsHandler<PathHeatMapConsoleDisp
 
         private HashMap<String, HashMap<String, Double>> getSecondOrderMarkovData(
                 HashMap<String, DirectedSparseMultigraph<ModelObject, ModelEdge>> dataNameDataMap) {
-
 
 
             HashMap<String, HashMap<String, Integer>> nodeToNodeFrequencyTable = new HashMap<String, HashMap<String, Integer>>();

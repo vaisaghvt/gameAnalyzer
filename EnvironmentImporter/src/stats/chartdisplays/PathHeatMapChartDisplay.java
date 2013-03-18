@@ -77,6 +77,7 @@ public class PathHeatMapChartDisplay extends ChartDisplay<HashMap<String, HashMa
         }
 
 
+        System.out.println("Room size = "+ roomToCodeMapping.keySet().size());
         return new MatrixSeriesCollection(series);
     }
 
@@ -100,6 +101,7 @@ public class PathHeatMapChartDisplay extends ChartDisplay<HashMap<String, HashMa
         XYBlockRenderer xyblockrenderer = new XYBlockRenderer();
         GrayPaintScale graypaintscale = new GrayPaintScale(-2D, 1.0D);
         xyblockrenderer.setPaintScale(graypaintscale);
+
         XYPlot xyplot = new XYPlot(xyzDataSet, numberAxis, numberAxis1, xyblockrenderer);
         xyplot.setBackgroundPaint(Color.lightGray);
         xyplot.setDomainGridlinesVisible(false);
