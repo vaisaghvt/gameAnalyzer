@@ -57,7 +57,9 @@ public enum StatisticChoice {
     TIME_SPENT_PER_VISIT("RoomDurationBreakupFrequencyStatisticHandler", "Frequency of time spent per visit", true, false,false,
             Phase.EXPLORATION, Phase.TASK_1, Phase.TASK_2, Phase.TASK_3),
     STAT_SUMMARY("GraphDetailsStatisticHandler", "Detailed statistics of each agent", true, true, false),
-    PARALLEL_COORDINATE_PLOT("ParallelCoordinatePlotGenerator", "Plot on a parallel coordinate plot", false, false,false),;
+    PARALLEL_COORDINATE_PLOT("ParallelCoordinatePlotGenerator", "Plot on a parallel coordinate plot", false, false,false),
+    STATISTIC_HEAT_MAP("PathHeatMapHandler", "Plot a heat map of second order markov probabilities from rooms", true, true,false,
+            Phase.EXPLORATION, Phase.TASK_1, Phase.TASK_2, Phase.TASK_3),;
 
 
     private List<Phase> phases;

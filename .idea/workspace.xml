@@ -2,17 +2,39 @@
 <project version="4">
   <component name="ChangeListManager">
     <list default="true" id="1a8d5762-3820-4d06-a7d2-ae74b759bb18" name="Default" comment="">
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/EnvironmentImporter/src/stats/chartdisplays/RoomAnalysisFrame.java" afterPath="$PROJECT_DIR$/EnvironmentImporter/src/stats/chartdisplays/RoomAnalysisFrame.java" />
+      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/EnvironmentImporter/src/stats/chartdisplays/PathHeatMapChartDisplay.java" />
+      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/EnvironmentImporter/src/stats/consoledisplays/PathHeatMapConsoleDisplay.java" />
+      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/EnvironmentImporter/src/stats/statisticshandlers/PathHeatMapHandler.java" />
+      <change type="DELETED" beforePath="C:\Users\vaisagh\IdeaProjects\gameAnalyzer\SavedGraphs\3Corr2-Prob-Exploration.png" afterPath="" />
+      <change type="DELETED" beforePath="C:\Users\vaisagh\IdeaProjects\gameAnalyzer\SavedGraphs\Task 1 patterns\going to floor 2 at least" afterPath="" />
+      <change type="DELETED" beforePath="C:\Users\vaisagh\IdeaProjects\gameAnalyzer\SavedGraphs\Task 1 patterns\going to floor 2 at least -2" afterPath="" />
+      <change type="DELETED" beforePath="C:\Users\vaisagh\IdeaProjects\gameAnalyzer\SavedGraphs\Task 1 patterns\minor problem of not going to floor 2" afterPath="" />
+      <change type="DELETED" beforePath="C:\Users\vaisagh\IdeaProjects\gameAnalyzer\SavedGraphs\Task 2 patterns\2CorrA42nd order" afterPath="" />
+      <change type="DELETED" beforePath="C:\Users\vaisagh\IdeaProjects\gameAnalyzer\SavedGraphs\Task 2 patterns\2CorrC1-1st order" afterPath="" />
+      <change type="DELETED" beforePath="C:\Users\vaisagh\IdeaProjects\gameAnalyzer\SavedGraphs\Task 2 patterns\2CorrC1-2nd order" afterPath="" />
+      <change type="DELETED" beforePath="C:\Users\vaisagh\IdeaProjects\gameAnalyzer\SavedGraphs\Task 2 patterns\2CorrMain-Some Confusion" afterPath="" />
+      <change type="DELETED" beforePath="C:\Users\vaisagh\IdeaProjects\gameAnalyzer\SavedGraphs\Task 2 patterns\Dorm corridor confusion" afterPath="" />
+      <change type="DELETED" beforePath="C:\Users\vaisagh\IdeaProjects\gameAnalyzer\SavedGraphs\Task 2 patterns\Most people well oriented" afterPath="" />
+      <change type="DELETED" beforePath="C:\Users\vaisagh\IdeaProjects\gameAnalyzer\SavedGraphs\Task 3 patterns\better2CorrMain" afterPath="" />
+      <change type="DELETED" beforePath="C:\Users\vaisagh\IdeaProjects\gameAnalyzer\SavedGraphs\Task 3 patterns\from library2" afterPath="" />
+      <change type="DELETED" beforePath="C:\Users\vaisagh\IdeaProjects\gameAnalyzer\SavedGraphs\Task 3 patterns\library1 1storder" afterPath="" />
+      <change type="DELETED" beforePath="C:\Users\vaisagh\IdeaProjects\gameAnalyzer\SavedGraphs\Task 3 patterns\library1 2ndorder" afterPath="" />
+      <change type="DELETED" beforePath="C:\Users\vaisagh\IdeaProjects\gameAnalyzer\SavedGraphs\Task 3 patterns\more lost" afterPath="" />
+      <change type="DELETED" beforePath="C:\Users\vaisagh\IdeaProjects\gameAnalyzer\SavedGraphs\Task 3 patterns\not completely lost" afterPath="" />
+      <change type="DELETED" beforePath="C:\Users\vaisagh\IdeaProjects\gameAnalyzer\SavedGraphs\Task 3 patterns\someSmartPeople" afterPath="" />
+      <change type="DELETED" beforePath="C:\Users\vaisagh\IdeaProjects\gameAnalyzer\SavedGraphs\Task 3 patterns\visible stair preference" afterPath="" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/EnvironmentImporter/src/stats/StatisticChoice.java" afterPath="$PROJECT_DIR$/EnvironmentImporter/src/stats/StatisticChoice.java" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/.idea/libraries/gnujaxp.xml" afterPath="$PROJECT_DIR$/.idea/libraries/gnujaxp.xml" />
       <change type="MODIFICATION" beforePath="$PROJECT_DIR$/.idea/workspace.xml" afterPath="$PROJECT_DIR$/.idea/workspace.xml" />
     </list>
     <ignored path="gameAnalyzer.iws" />
     <ignored path=".idea/workspace.xml" />
     <file path="/Dummy.txt" changelist="1a8d5762-3820-4d06-a7d2-ae74b759bb18" time="1363418512670" ignored="false" />
-    <file path="/fragment.java" changelist="1a8d5762-3820-4d06-a7d2-ae74b759bb18" time="1363230621113" ignored="false" />
+    <file path="/fragment.java" changelist="1a8d5762-3820-4d06-a7d2-ae74b759bb18" time="1363602530217" ignored="false" />
     <file path="/VertexChartDisplay.java" changelist="1a8d5762-3820-4d06-a7d2-ae74b759bb18" time="1363159128806" ignored="false" />
     <file path="/ChartDisplay.java" changelist="1a8d5762-3820-4d06-a7d2-ae74b759bb18" time="1362743829096" ignored="false" />
     <file path="/NetworkModel.java" changelist="1a8d5762-3820-4d06-a7d2-ae74b759bb18" time="1363176458218" ignored="false" />
-    <file path="/StatisticChoice.java" changelist="1a8d5762-3820-4d06-a7d2-ae74b759bb18" time="1363173132864" ignored="false" />
+    <file path="/StatisticChoice.java" changelist="1a8d5762-3820-4d06-a7d2-ae74b759bb18" time="1363609688013" ignored="false" />
     <file path="/NodeRepetitionFrequencyChartDisplay.java" changelist="1a8d5762-3820-4d06-a7d2-ae74b759bb18" time="1363111703654" ignored="false" />
     <file path="/VertexVisitCountStatisticHandler.java" changelist="1a8d5762-3820-4d06-a7d2-ae74b759bb18" time="1363112765265" ignored="false" />
     <file path="/VertexVisitFrequencyStatisticHandler.java" changelist="1a8d5762-3820-4d06-a7d2-ae74b759bb18" time="1363113107941" ignored="false" />
@@ -25,6 +47,9 @@
     <file path="/RoomInfoConsoleDisplay.java" changelist="1a8d5762-3820-4d06-a7d2-ae74b759bb18" time="1363179174929" ignored="false" />
     <file path="/a.dummy" changelist="1a8d5762-3820-4d06-a7d2-ae74b759bb18" time="1363227422928" ignored="false" />
     <file path="/RoomAnalysisFrame.java" changelist="1a8d5762-3820-4d06-a7d2-ae74b759bb18" time="1363418727112" ignored="false" />
+    <file path="/PathHeatMapHandler.java" changelist="1a8d5762-3820-4d06-a7d2-ae74b759bb18" time="1363610483118" ignored="false" />
+    <file path="/PathHeatMapChartDisplay.java" changelist="1a8d5762-3820-4d06-a7d2-ae74b759bb18" time="1363608772277" ignored="false" />
+    <file path="/PathHeatMapConsoleDisplay.java" changelist="1a8d5762-3820-4d06-a7d2-ae74b759bb18" time="1363609265378" ignored="false" />
     <option name="TRACKING_ENABLED" value="true" />
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -99,19 +124,10 @@
   </component>
   <component name="FileEditorManager">
     <leaf>
-      <file leaf-file-name="RoomInfoChartDisplay.java" pinned="false" current="false" current-in-tab="false">
-        <entry file="file://$PROJECT_DIR$/EnvironmentImporter/src/stats/chartdisplays/RoomInfoChartDisplay.java">
-          <provider selected="true" editor-type-id="text-editor">
-            <state line="5" column="42" selection-start="64" selection-end="64" vertical-scroll-proportion="0.0">
-              <folding />
-            </state>
-          </provider>
-        </entry>
-      </file>
-      <file leaf-file-name="RoomAnalysisFrame.java" pinned="false" current="true" current-in-tab="true">
+      <file leaf-file-name="RoomAnalysisFrame.java" pinned="false" current="false" current-in-tab="false">
         <entry file="file://$PROJECT_DIR$/EnvironmentImporter/src/stats/chartdisplays/RoomAnalysisFrame.java">
           <provider selected="true" editor-type-id="text-editor">
-            <state line="730" column="1" selection-start="27490" selection-end="27490" vertical-scroll-proportion="3.867826">
+            <state line="287" column="16" selection-start="9447" selection-end="10212" vertical-scroll-proportion="0.0">
               <folding>
                 <element signature="imports" expanded="true" />
                 <element signature="e#1307#1315#0" expanded="true" />
@@ -130,64 +146,54 @@
           </provider>
         </entry>
       </file>
-      <file leaf-file-name="JOptionPane.class" pinned="false" current="false" current-in-tab="false">
-        <entry file="jar://C:/Program Files/Java/jdk1.7.0_07/jre/lib/rt.jar!/javax/swing/JOptionPane.class">
+      <file leaf-file-name="PathHeatMapHandler.java" pinned="false" current="true" current-in-tab="true">
+        <entry file="file://$PROJECT_DIR$/EnvironmentImporter/src/stats/statisticshandlers/PathHeatMapHandler.java">
           <provider selected="true" editor-type-id="text-editor">
-            <state line="59" column="23" selection-start="3510" selection-end="3510" vertical-scroll-proportion="0.0">
+            <state line="196" column="39" selection-start="7826" selection-end="7826" vertical-scroll-proportion="1.265625">
+              <folding>
+                <element signature="e#1297#1355#0" expanded="true" />
+                <element signature="e#2563#2621#0" expanded="true" />
+                <element signature="e#3423#3456#0" expanded="true" />
+                <element signature="e#4434#4468#0" expanded="true" />
+                <element signature="e#6805#6829#0" expanded="true" />
+              </folding>
+            </state>
+          </provider>
+        </entry>
+      </file>
+      <file leaf-file-name="StatisticsHandler.java" pinned="false" current="false" current-in-tab="false">
+        <entry file="file://$PROJECT_DIR$/EnvironmentImporter/src/stats/statisticshandlers/StatisticsHandler.java">
+          <provider selected="true" editor-type-id="text-editor">
+            <state line="31" column="15" selection-start="814" selection-end="814" vertical-scroll-proportion="0.0">
               <folding />
             </state>
           </provider>
         </entry>
       </file>
-      <file leaf-file-name="ModelEdge.java" pinned="false" current="false" current-in-tab="false">
-        <entry file="file://$PROJECT_DIR$/EnvironmentImporter/src/modelcomponents/ModelEdge.java">
+      <file leaf-file-name="StatisticChoice.java" pinned="false" current="false" current-in-tab="false">
+        <entry file="file://$PROJECT_DIR$/EnvironmentImporter/src/stats/StatisticChoice.java">
           <provider selected="true" editor-type-id="text-editor">
-            <state line="16" column="0" selection-start="258" selection-end="258" vertical-scroll-proportion="0.0">
+            <state line="61" column="12" selection-start="4366" selection-end="4366" vertical-scroll-proportion="0.0">
               <folding />
             </state>
           </provider>
         </entry>
       </file>
-      <file leaf-file-name="StatsDialog.java" pinned="false" current="false" current-in-tab="false">
-        <entry file="file://$PROJECT_DIR$/EnvironmentImporter/src/gui/StatsDialog.java">
+      <file leaf-file-name="PathHeatMapChartDisplay.java" pinned="false" current="false" current-in-tab="false">
+        <entry file="file://$PROJECT_DIR$/EnvironmentImporter/src/stats/chartdisplays/PathHeatMapChartDisplay.java">
           <provider selected="true" editor-type-id="text-editor">
-            <state line="441" column="15" selection-start="16512" selection-end="16512" vertical-scroll-proportion="0.0">
-              <folding />
+            <state line="104" column="49" selection-start="3773" selection-end="3773" vertical-scroll-proportion="0.0">
+              <folding>
+                <element signature="e#1758#1775#0" expanded="true" />
+              </folding>
             </state>
           </provider>
         </entry>
       </file>
-      <file leaf-file-name="ModelArea.java" pinned="false" current="false" current-in-tab="false">
-        <entry file="file://$PROJECT_DIR$/EnvironmentImporter/src/modelcomponents/ModelArea.java">
+      <file leaf-file-name="PathHeatMapConsoleDisplay.java" pinned="false" current="false" current-in-tab="false">
+        <entry file="file://$PROJECT_DIR$/EnvironmentImporter/src/stats/consoledisplays/PathHeatMapConsoleDisplay.java">
           <provider selected="true" editor-type-id="text-editor">
-            <state line="66" column="0" selection-start="1403" selection-end="1403" vertical-scroll-proportion="0.0">
-              <folding />
-            </state>
-          </provider>
-        </entry>
-      </file>
-      <file leaf-file-name="NetworkModel.java" pinned="false" current="false" current-in-tab="false">
-        <entry file="file://$PROJECT_DIR$/EnvironmentImporter/src/gui/NetworkModel.java">
-          <provider selected="true" editor-type-id="text-editor">
-            <state line="1234" column="36" selection-start="46383" selection-end="46383" vertical-scroll-proportion="0.0">
-              <folding />
-            </state>
-          </provider>
-        </entry>
-      </file>
-      <file leaf-file-name="Document.java" pinned="false" current="false" current-in-tab="false">
-        <entry file="file://$PROJECT_DIR$/EnvironmentImporter/src/gui/Document.java">
-          <provider selected="true" editor-type-id="text-editor">
-            <state line="398" column="16" selection-start="14549" selection-end="14549" vertical-scroll-proportion="0.0">
-              <folding />
-            </state>
-          </provider>
-        </entry>
-      </file>
-      <file leaf-file-name="Main.java" pinned="false" current="false" current-in-tab="false">
-        <entry file="file://$PROJECT_DIR$/EnvironmentImporter/src/gui/Main.java">
-          <provider selected="true" editor-type-id="text-editor">
-            <state line="384" column="61" selection-start="12274" selection-end="12274" vertical-scroll-proportion="0.0">
+            <state line="27" column="15" selection-start="863" selection-end="863" vertical-scroll-proportion="0.0">
               <folding />
             </state>
           </provider>
@@ -211,11 +217,7 @@
   <component name="IdeDocumentHistory">
     <option name="changedFiles">
       <list>
-        <option value="$PROJECT_DIR$/EnvironmentImporter/src/stats/chartdisplays/NodeRepetitionFrequencyChartDisplay.java" />
-        <option value="$PROJECT_DIR$/EnvironmentImporter/src/stats/statisticshandlers/VertexVisitCountStatisticHandler.java" />
-        <option value="$PROJECT_DIR$/EnvironmentImporter/src/stats/chartdisplays/VertexChartDisplay.java" />
         <option value="$PROJECT_DIR$/EnvironmentImporter/src/stats/statisticshandlers/NodeRepetitionFrequencyStatisticHandler.java" />
-        <option value="$PROJECT_DIR$/EnvironmentImporter/src/stats/StatisticChoice.java" />
         <option value="$PROJECT_DIR$/EnvironmentImporter/src/stats/statisticshandlers/StatisticsHandler.java" />
         <option value="$PROJECT_DIR$/EnvironmentImporter/src/gui/NetworkModel.java" />
         <option value="$PROJECT_DIR$/EnvironmentImporter/src/stats/statisticshandlers/VertexVisitFrequencyStatisticHandler.java" />
@@ -227,6 +229,10 @@
         <option value="$PROJECT_DIR$/EnvironmentImporter/src/gui/StatsDialog.java" />
         <option value="$PROJECT_DIR$/EnvironmentImporter/src/gui/Main.java" />
         <option value="$PROJECT_DIR$/EnvironmentImporter/src/stats/chartdisplays/RoomAnalysisFrame.java" />
+        <option value="$PROJECT_DIR$/EnvironmentImporter/src/stats/consoledisplays/PathHeatMapConsoleDisplay.java" />
+        <option value="$PROJECT_DIR$/EnvironmentImporter/src/stats/StatisticChoice.java" />
+        <option value="$PROJECT_DIR$/EnvironmentImporter/src/stats/statisticshandlers/PathHeatMapHandler.java" />
+        <option value="$PROJECT_DIR$/EnvironmentImporter/src/stats/chartdisplays/PathHeatMapChartDisplay.java" />
       </list>
     </option>
   </component>
@@ -270,33 +276,15 @@
               <option name="myItemId" value="gameAnalyzer" />
               <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.ProjectViewProjectNode" />
             </PATH_ELEMENT>
-          </PATH>
-          <PATH>
             <PATH_ELEMENT>
-              <option name="myItemId" value="gameAnalyzer" />
-              <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.ProjectViewProjectNode" />
-            </PATH_ELEMENT>
-            <PATH_ELEMENT>
-              <option name="myItemId" value="EnvironmentImporter" />
-              <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.PsiDirectoryNode" />
+              <option name="myItemId" value="External Libraries" />
+              <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.ExternalLibrariesNode" />
             </PATH_ELEMENT>
           </PATH>
           <PATH>
             <PATH_ELEMENT>
               <option name="myItemId" value="gameAnalyzer" />
               <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.ProjectViewProjectNode" />
-            </PATH_ELEMENT>
-            <PATH_ELEMENT>
-              <option name="myItemId" value="EnvironmentImporter" />
-              <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.PsiDirectoryNode" />
-            </PATH_ELEMENT>
-            <PATH_ELEMENT>
-              <option name="myItemId" value="src" />
-              <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.PsiDirectoryNode" />
-            </PATH_ELEMENT>
-            <PATH_ELEMENT>
-              <option name="myItemId" value="stats" />
-              <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.PsiDirectoryNode" />
             </PATH_ELEMENT>
           </PATH>
           <PATH>
@@ -306,116 +294,6 @@
             </PATH_ELEMENT>
             <PATH_ELEMENT>
               <option name="myItemId" value="EnvironmentImporter" />
-              <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.PsiDirectoryNode" />
-            </PATH_ELEMENT>
-            <PATH_ELEMENT>
-              <option name="myItemId" value="src" />
-              <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.PsiDirectoryNode" />
-            </PATH_ELEMENT>
-            <PATH_ELEMENT>
-              <option name="myItemId" value="stats" />
-              <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.PsiDirectoryNode" />
-            </PATH_ELEMENT>
-            <PATH_ELEMENT>
-              <option name="myItemId" value="statisticshandlers" />
-              <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.PsiDirectoryNode" />
-            </PATH_ELEMENT>
-          </PATH>
-          <PATH>
-            <PATH_ELEMENT>
-              <option name="myItemId" value="gameAnalyzer" />
-              <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.ProjectViewProjectNode" />
-            </PATH_ELEMENT>
-            <PATH_ELEMENT>
-              <option name="myItemId" value="EnvironmentImporter" />
-              <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.PsiDirectoryNode" />
-            </PATH_ELEMENT>
-            <PATH_ELEMENT>
-              <option name="myItemId" value="src" />
-              <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.PsiDirectoryNode" />
-            </PATH_ELEMENT>
-            <PATH_ELEMENT>
-              <option name="myItemId" value="stats" />
-              <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.PsiDirectoryNode" />
-            </PATH_ELEMENT>
-            <PATH_ELEMENT>
-              <option name="myItemId" value="consoledisplays" />
-              <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.PsiDirectoryNode" />
-            </PATH_ELEMENT>
-          </PATH>
-          <PATH>
-            <PATH_ELEMENT>
-              <option name="myItemId" value="gameAnalyzer" />
-              <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.ProjectViewProjectNode" />
-            </PATH_ELEMENT>
-            <PATH_ELEMENT>
-              <option name="myItemId" value="EnvironmentImporter" />
-              <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.PsiDirectoryNode" />
-            </PATH_ELEMENT>
-            <PATH_ELEMENT>
-              <option name="myItemId" value="src" />
-              <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.PsiDirectoryNode" />
-            </PATH_ELEMENT>
-            <PATH_ELEMENT>
-              <option name="myItemId" value="stats" />
-              <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.PsiDirectoryNode" />
-            </PATH_ELEMENT>
-            <PATH_ELEMENT>
-              <option name="myItemId" value="chartdisplays" />
-              <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.PsiDirectoryNode" />
-            </PATH_ELEMENT>
-          </PATH>
-          <PATH>
-            <PATH_ELEMENT>
-              <option name="myItemId" value="gameAnalyzer" />
-              <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.ProjectViewProjectNode" />
-            </PATH_ELEMENT>
-            <PATH_ELEMENT>
-              <option name="myItemId" value="EnvironmentImporter" />
-              <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.PsiDirectoryNode" />
-            </PATH_ELEMENT>
-            <PATH_ELEMENT>
-              <option name="myItemId" value="src" />
-              <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.PsiDirectoryNode" />
-            </PATH_ELEMENT>
-            <PATH_ELEMENT>
-              <option name="myItemId" value="randomwalk" />
-              <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.PsiDirectoryNode" />
-            </PATH_ELEMENT>
-          </PATH>
-          <PATH>
-            <PATH_ELEMENT>
-              <option name="myItemId" value="gameAnalyzer" />
-              <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.ProjectViewProjectNode" />
-            </PATH_ELEMENT>
-            <PATH_ELEMENT>
-              <option name="myItemId" value="EnvironmentImporter" />
-              <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.PsiDirectoryNode" />
-            </PATH_ELEMENT>
-            <PATH_ELEMENT>
-              <option name="myItemId" value="src" />
-              <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.PsiDirectoryNode" />
-            </PATH_ELEMENT>
-            <PATH_ELEMENT>
-              <option name="myItemId" value="modelcomponents" />
-              <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.PsiDirectoryNode" />
-            </PATH_ELEMENT>
-          </PATH>
-          <PATH>
-            <PATH_ELEMENT>
-              <option name="myItemId" value="gameAnalyzer" />
-              <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.ProjectViewProjectNode" />
-            </PATH_ELEMENT>
-            <PATH_ELEMENT>
-              <option name="myItemId" value="EnvironmentImporter" />
-              <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.PsiDirectoryNode" />
-            </PATH_ELEMENT>
-            <PATH_ELEMENT>
-              <option name="myItemId" value="src" />
-              <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.PsiDirectoryNode" />
-            </PATH_ELEMENT>
-            <PATH_ELEMENT>
-              <option name="myItemId" value="gui" />
               <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.PsiDirectoryNode" />
             </PATH_ELEMENT>
           </PATH>
@@ -440,15 +318,19 @@
   </component>
   <component name="PropertiesComponent">
     <property name="GoToFile.includeJavaFiles" value="false" />
-    <property name="GoToClass.toSaveIncludeLibraries" value="false" />
+    <property name="project.structure.last.edited" value="Libraries" />
+    <property name="project.structure.proportion" value="0.15" />
     <property name="OverrideImplement.combined" value="false" />
-    <property name="MemberChooser.sorted" value="false" />
     <property name="recentsLimit" value="5" />
-    <property name="restartRequiresConfirmation" value="true" />
-    <property name="MemberChooser.showClasses" value="true" />
-    <property name="FullScreen" value="true" />
-    <property name="GoToClass.includeLibraries" value="false" />
+    <property name="MemberChooser.sorted" value="false" />
+    <property name="last_opened_file_path" value="$PROJECT_DIR$/JFreeChart.jar!/" />
+    <property name="project.structure.side.proportion" value="0.2" />
     <property name="MemberChooser.copyJavadoc" value="false" />
+    <property name="GoToClass.toSaveIncludeLibraries" value="false" />
+    <property name="restartRequiresConfirmation" value="true" />
+    <property name="FullScreen" value="true" />
+    <property name="MemberChooser.showClasses" value="true" />
+    <property name="GoToClass.includeLibraries" value="false" />
     <property name="dynamic.classpath" value="false" />
   </component>
   <component name="RecentsManager">
@@ -611,27 +493,27 @@
     <servers />
   </component>
   <component name="ToolWindowManager">
-    <frame x="-8" y="-8" width="1936" height="1056" extended-state="6" />
+    <frame x="-8" y="-8" width="1936" height="1056" extended-state="7" />
     <editor active="true" />
     <layout>
       <window_info id="Changes" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.33" sideWeight="0.5" order="7" side_tool="false" content_ui="tabs" />
       <window_info id="JetGradle" active="false" anchor="right" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.33" sideWeight="0.5" order="5" side_tool="true" content_ui="tabs" />
       <window_info id="Palette" active="false" anchor="right" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.33" sideWeight="0.5" order="3" side_tool="false" content_ui="tabs" />
+      <window_info id="Find" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.29139072" sideWeight="0.5" order="1" side_tool="false" content_ui="tabs" />
       <window_info id="Ant Build" active="false" anchor="right" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.25" sideWeight="0.5" order="1" side_tool="false" content_ui="tabs" />
       <window_info id="Debug" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.22606924" sideWeight="0.5" order="3" side_tool="false" content_ui="tabs" />
       <window_info id="Event Log" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.33" sideWeight="0.5" order="7" side_tool="true" content_ui="tabs" />
       <window_info id="Favorites" active="false" anchor="left" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.33" sideWeight="0.5" order="2" side_tool="true" content_ui="tabs" />
       <window_info id="Version Control" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.33" sideWeight="0.5" order="7" side_tool="false" content_ui="tabs" />
-      <window_info id="Messages" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.664859" sideWeight="0.5" order="7" side_tool="false" content_ui="tabs" />
+      <window_info id="Messages" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.66445917" sideWeight="0.5" order="7" side_tool="false" content_ui="tabs" />
       <window_info id="TODO" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.33" sideWeight="0.5" order="6" side_tool="false" content_ui="tabs" />
-      <window_info id="Structure" active="false" anchor="left" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="true" weight="0.21184632" sideWeight="0.54989153" order="1" side_tool="true" content_ui="tabs" />
+      <window_info id="Structure" active="false" anchor="left" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="true" weight="0.19583778" sideWeight="0.04338395" order="1" side_tool="true" content_ui="tabs" />
       <window_info id="Maven Projects" active="false" anchor="right" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.33" sideWeight="0.5" order="4" side_tool="false" content_ui="tabs" />
       <window_info id="Commander" active="false" anchor="right" auto_hide="false" internal_type="SLIDING" type="SLIDING" visible="false" weight="0.4" sideWeight="0.5" order="0" side_tool="false" content_ui="tabs" />
-      <window_info id="Project" active="false" anchor="left" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="true" weight="0.21184632" sideWeight="0.10845987" order="0" side_tool="false" content_ui="combo" />
-      <window_info id="Run" active="true" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="true" weight="0.3340564" sideWeight="0.99921995" order="2" side_tool="false" content_ui="tabs" />
+      <window_info id="Project" active="false" anchor="left" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="true" weight="0.19583778" sideWeight="0.94902384" order="0" side_tool="false" content_ui="combo" />
+      <window_info id="Run" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.5140998" sideWeight="0.99921995" order="2" side_tool="false" content_ui="tabs" />
       <window_info id="Cvs" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.25" sideWeight="0.5" order="4" side_tool="false" content_ui="tabs" />
       <window_info id="Message" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.33" sideWeight="0.5" order="0" side_tool="false" content_ui="tabs" />
-      <window_info id="Find" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.29139072" sideWeight="0.5" order="1" side_tool="false" content_ui="tabs" />
       <window_info id="Hierarchy" active="false" anchor="right" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.25" sideWeight="0.5" order="2" side_tool="false" content_ui="combo" />
       <window_info id="Inspection" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.4" sideWeight="0.5" order="5" side_tool="false" content_ui="tabs" />
     </layout>
@@ -696,77 +578,6 @@
     <option name="FILTER_TARGETS" value="false" />
   </component>
   <component name="editorHistoryManager">
-    <entry file="file://$PROJECT_DIR$/EnvironmentImporter/src/randomwalk/RandomWalk.java">
-      <provider selected="true" editor-type-id="text-editor">
-        <state line="339" column="53" selection-start="12413" selection-end="12413" vertical-scroll-proportion="0.0">
-          <folding />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/EnvironmentImporter/src/stats/statisticshandlers/StatisticsHandler.java">
-      <provider selected="true" editor-type-id="text-editor">
-        <state line="121" column="0" selection-start="3935" selection-end="5989" vertical-scroll-proportion="0.0">
-          <folding />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/EnvironmentImporter/src/stats/chartdisplays/VertexChartDisplay.java">
-      <provider selected="true" editor-type-id="text-editor">
-        <state line="247" column="0" selection-start="8665" selection-end="8991" vertical-scroll-proportion="0.0">
-          <folding />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/EnvironmentImporter/src/stats/chartdisplays/ChartDisplay.java">
-      <provider selected="true" editor-type-id="text-editor">
-        <state line="41" column="38" selection-start="967" selection-end="967" vertical-scroll-proportion="0.0">
-          <folding />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/EnvironmentImporter/src/gui/StatsDialog.java">
-      <provider selected="true" editor-type-id="text-editor">
-        <state line="441" column="15" selection-start="16512" selection-end="16512" vertical-scroll-proportion="0.0">
-          <folding />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/EnvironmentImporter/src/modelcomponents/ModelArea.java">
-      <provider selected="true" editor-type-id="text-editor">
-        <state line="66" column="0" selection-start="1403" selection-end="1403" vertical-scroll-proportion="0.0">
-          <folding />
-        </state>
-      </provider>
-    </entry>
-    <entry file="jar://$USER_HOME$/Downloads/jung2-2_0_1/jung-api-2.0.1.jar!/edu/uci/ics/jung/graph/util/Pair.class">
-      <provider selected="true" editor-type-id="text-editor">
-        <state line="18" column="13" selection-start="548" selection-end="548" vertical-scroll-proportion="-5.76" />
-      </provider>
-    </entry>
-    <entry file="jar://$USER_HOME$/Downloads/jung2-2_0_1/jung-graph-impl-2.0.1.jar!/edu/uci/ics/jung/graph/DirectedSparseMultigraph.class">
-      <provider selected="true" editor-type-id="text-editor">
-        <state line="42" column="35" selection-start="1838" selection-end="1838" vertical-scroll-proportion="-5.44" />
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/EnvironmentImporter/src/modelcomponents/ModelEdge.java">
-      <provider selected="true" editor-type-id="text-editor">
-        <state line="16" column="0" selection-start="258" selection-end="258" vertical-scroll-proportion="0.0">
-          <folding />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/EnvironmentImporter/src/stats/chartdisplays/RoomInfoChartDisplay.java">
-      <provider selected="true" editor-type-id="text-editor">
-        <state line="5" column="42" selection-start="64" selection-end="64" vertical-scroll-proportion="0.0">
-          <folding />
-        </state>
-      </provider>
-    </entry>
-    <entry file="jar://$USER_HOME$/Downloads/jung2-2_0_1/jung-visualization-2.0.1.jar!/edu/uci/ics/jung/visualization/decorators/ToStringLabeller.class">
-      <provider selected="true" editor-type-id="text-editor">
-        <state line="7" column="11" selection-start="295" selection-end="295" vertical-scroll-proportion="-3.6" />
-      </provider>
-    </entry>
     <entry file="file://$PROJECT_DIR$/EnvironmentImporter/src/gui/Document.java">
       <provider selected="true" editor-type-id="text-editor">
         <state line="398" column="16" selection-start="14549" selection-end="14549" vertical-scroll-proportion="0.0">
@@ -795,9 +606,30 @@
         </state>
       </provider>
     </entry>
+    <entry file="file://$PROJECT_DIR$/EnvironmentImporter/src/stats/StatisticChoice.java">
+      <provider selected="true" editor-type-id="text-editor">
+        <state line="61" column="12" selection-start="4366" selection-end="4366" vertical-scroll-proportion="0.0">
+          <folding />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/EnvironmentImporter/src/stats/statisticshandlers/StatisticsHandler.java">
+      <provider selected="true" editor-type-id="text-editor">
+        <state line="31" column="15" selection-start="814" selection-end="814" vertical-scroll-proportion="0.0">
+          <folding />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/EnvironmentImporter/src/stats/consoledisplays/PathHeatMapConsoleDisplay.java">
+      <provider selected="true" editor-type-id="text-editor">
+        <state line="27" column="15" selection-start="863" selection-end="863" vertical-scroll-proportion="0.0">
+          <folding />
+        </state>
+      </provider>
+    </entry>
     <entry file="file://$PROJECT_DIR$/EnvironmentImporter/src/stats/chartdisplays/RoomAnalysisFrame.java">
       <provider selected="true" editor-type-id="text-editor">
-        <state line="730" column="1" selection-start="27490" selection-end="27490" vertical-scroll-proportion="3.867826">
+        <state line="287" column="16" selection-start="9447" selection-end="10212" vertical-scroll-proportion="0.0">
           <folding>
             <element signature="imports" expanded="true" />
             <element signature="e#1307#1315#0" expanded="true" />
@@ -815,6 +647,147 @@
         </state>
       </provider>
     </entry>
+    <entry file="file://$PROJECT_DIR$/EnvironmentImporter/src/stats/chartdisplays/PathHeatMapChartDisplay.java">
+      <provider selected="true" editor-type-id="text-editor">
+        <state line="104" column="49" selection-start="3773" selection-end="3773" vertical-scroll-proportion="0.0">
+          <folding>
+            <element signature="e#1758#1775#0" expanded="true" />
+          </folding>
+        </state>
+      </provider>
+    </entry>
+    <entry file="jar://$PROJECT_DIR$/jfreechart-1.0.1.jar!/org/jfree/chart/renderer/AbstractRenderer.class">
+      <provider selected="true" editor-type-id="text-editor">
+        <state line="12" column="23" selection-start="556" selection-end="561" vertical-scroll-proportion="0.24727273">
+          <folding>
+            <element signature="e#0#17692#0" expanded="true" />
+          </folding>
+        </state>
+      </provider>
+    </entry>
+    <entry file="jar://$PROJECT_DIR$/jfreechart-1.0.1.jar!/org/jfree/chart/renderer/xy/AbstractXYItemRenderer.class">
+      <provider selected="true" editor-type-id="text-editor">
+        <state line="6" column="89" selection-start="246" selection-end="246" vertical-scroll-proportion="0.09860789">
+          <folding />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/EnvironmentImporter/src/stats/chartdisplays/ChartDisplay.java">
+      <provider selected="true" editor-type-id="text-editor">
+        <state line="34" column="16" selection-start="842" selection-end="842" vertical-scroll-proportion="0.3169643">
+          <folding />
+        </state>
+      </provider>
+    </entry>
+    <entry file="jar://$PROJECT_DIR$/jfreechart-1.0.14/jfreechart-1.0.14/lib/jfreechart-1.0.14.jar!/org/jfree/chart/renderer/AbstractRenderer.class">
+      <provider selected="true" editor-type-id="text-editor">
+        <state line="6" column="22" selection-start="176" selection-end="176" vertical-scroll-proportion="-2.12">
+          <folding />
+        </state>
+      </provider>
+    </entry>
+    <entry file="jar://$PROJECT_DIR$/jfreechart-1.0.14/jfreechart-1.0.14/lib/jfreechart-1.0.14.jar!/org/jfree/chart/renderer/xy/AbstractXYItemRenderer.class">
+      <provider selected="true" editor-type-id="text-editor">
+        <state line="6" column="91" selection-start="248" selection-end="248" vertical-scroll-proportion="0.0990676">
+          <folding />
+        </state>
+      </provider>
+    </entry>
+    <entry file="jar://$PROJECT_DIR$/jfreechart-1.0.14/jfreechart-1.0.14/lib/jfreechart-1.0.14.jar!/org/jfree/chart/renderer/xy/XYBlockRenderer.class">
+      <provider selected="true" editor-type-id="text-editor">
+        <state line="6" column="81" selection-start="238" selection-end="238" vertical-scroll-proportion="0.0990676">
+          <folding />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/EnvironmentImporter/src/stats/statisticshandlers/PathHeatMapHandler.java">
+      <provider selected="true" editor-type-id="text-editor">
+        <state line="196" column="39" selection-start="7826" selection-end="7826" vertical-scroll-proportion="1.265625">
+          <folding>
+            <element signature="e#1297#1355#0" expanded="true" />
+            <element signature="e#2563#2621#0" expanded="true" />
+            <element signature="e#3423#3456#0" expanded="true" />
+            <element signature="e#4434#4468#0" expanded="true" />
+            <element signature="e#6805#6829#0" expanded="true" />
+          </folding>
+        </state>
+      </provider>
+    </entry>
+  </component>
+  <component name="masterDetails">
+    <states>
+      <state key="ArtifactsStructureConfigurable.UI">
+        <settings>
+          <artifact-editor />
+          <splitter-proportions>
+            <option name="proportions">
+              <list>
+                <option value="0.2" />
+              </list>
+            </option>
+          </splitter-proportions>
+        </settings>
+      </state>
+      <state key="FacetStructureConfigurable.UI">
+        <settings>
+          <last-edited>No facets are configured</last-edited>
+          <splitter-proportions>
+            <option name="proportions">
+              <list>
+                <option value="0.2" />
+              </list>
+            </option>
+          </splitter-proportions>
+        </settings>
+      </state>
+      <state key="GlobalLibrariesConfigurable.UI">
+        <settings>
+          <splitter-proportions>
+            <option name="proportions">
+              <list>
+                <option value="0.2" />
+              </list>
+            </option>
+          </splitter-proportions>
+        </settings>
+      </state>
+      <state key="JdkListConfigurable.UI">
+        <settings>
+          <last-edited>1.7</last-edited>
+          <splitter-proportions>
+            <option name="proportions">
+              <list>
+                <option value="0.2" />
+              </list>
+            </option>
+          </splitter-proportions>
+        </settings>
+      </state>
+      <state key="ModuleStructureConfigurable.UI">
+        <settings>
+          <last-edited>EnvironmentImporter</last-edited>
+          <splitter-proportions>
+            <option name="proportions">
+              <list>
+                <option value="0.2" />
+              </list>
+            </option>
+          </splitter-proportions>
+        </settings>
+      </state>
+      <state key="ProjectLibrariesConfigurable.UI">
+        <settings>
+          <last-edited>gnujaxp</last-edited>
+          <splitter-proportions>
+            <option name="proportions">
+              <list>
+                <option value="0.2" />
+              </list>
+            </option>
+          </splitter-proportions>
+        </settings>
+      </state>
+    </states>
   </component>
 </project>
 
