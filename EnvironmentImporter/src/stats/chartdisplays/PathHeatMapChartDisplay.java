@@ -47,9 +47,10 @@ public class PathHeatMapChartDisplay extends ChartDisplay<HashMap<String, HashMa
 
     private HashMap<String, Integer> generateNewRoomToCodeMapping(
             HashMap<String, HashMap<String, Double>> data) {
-        int i=0;
+        int i = 0;
+        //Graph<ModelObject, ModelEdge> graph = NetworkModel.instance().getCompleteGraph();
         HashMap<String, Integer> nameToCodeMapping = new HashMap<String, Integer>();
-        for(String name:data.keySet()){
+        for (String name : data.keySet()) {
             nameToCodeMapping.put(name, i++);
         }
         return nameToCodeMapping;
@@ -57,25 +58,27 @@ public class PathHeatMapChartDisplay extends ChartDisplay<HashMap<String, HashMa
 
     private XYZDataset createDataSet(HashMap<String, HashMap<String, Double>> data) {
 
-        MatrixSeries series = new MatrixSeries("DataTable",data.keySet().size(),data.keySet().size());
+        MatrixSeries series = new MatrixSeries("DataTable", data.keySet().size(), data.keySet().size());
 
-        for(String source: data.keySet()){
+        for (String source : roomToCodeMapping.keySet()) {
             Integer sourceId = roomToCodeMapping.get(source);
 
-            for(String destination : data.get(source).keySet()){
+
+            for (String destination : roomToCodeMapping.keySet()) {
+
                 Integer destinationId = roomToCodeMapping.get(destination);
-                series.update(sourceId, destinationId, data.get(source).get(destination));
+                if (!data.containsKey(source) || !data.get(source).containsKey(destination)) {
+                    series.update(sourceId, destinationId, 0);
+                } else {
+                    series.update(sourceId, destinationId, data.get(source).get(destination));
+                }
             }
 
         }
 
 
-
-
         return new MatrixSeriesCollection(series);
     }
-
-
 
 
     private JFreeChart createChart(XYZDataset xyzDataSet) {
@@ -126,7 +129,6 @@ public class PathHeatMapChartDisplay extends ChartDisplay<HashMap<String, HashMa
 //        ChartUtilities.applyCurrentTheme(jfreechart);
         return jfreechart;
     }
-
 
 
 }

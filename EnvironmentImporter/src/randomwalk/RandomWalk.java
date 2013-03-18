@@ -35,7 +35,7 @@ public class RandomWalk {
     private final static MersenneTwister random = new MersenneTwister();
     private static CircularFifoBuffer<Double> varianceList = new CircularFifoBuffer<Double>(5);
     private static final double EPSILON = 0.0000001;
-    private static Collection<DirectedGraph<ModelObject, ModelEdge>> randomWalkGraphs;
+    private static Collection<DirectedSparseMultigraph<ModelObject, ModelEdge>> randomWalkGraphs;
     private static RandomWalk randomWalkInstance;
     private static Graph<ModelObject, ModelEdge> completeGraph = null;
     private static ModelObject startingLocation = null;
@@ -59,13 +59,14 @@ public class RandomWalk {
         }
 
         varianceList.clear();
-        Collection<DirectedGraph<ModelObject, ModelEdge>> resultSet = new HashSet<DirectedGraph<ModelObject, ModelEdge>>();
+        Collection<DirectedSparseMultigraph<ModelObject, ModelEdge>> resultSet =
+            new HashSet<DirectedSparseMultigraph<ModelObject, modelcomponents.ModelEdge>>();
         List<Double> listOfGyrationRadius = new ArrayList<Double>();
         createProgressBar();
         int count = 0;
         while (true) {
 
-            DirectedGraph<ModelObject, ModelEdge> tempGraph = generateRandomWalk(completeGraph, startingLocation);
+            DirectedSparseMultigraph<ModelObject, ModelEdge> tempGraph = generateRandomWalk(completeGraph, startingLocation);
             resultSet.add(tempGraph);
             listOfGyrationRadius.add(calculateRadiusOfGyration(tempGraph, startingLocation));
             if (isStable(listOfGyrationRadius)) {
@@ -257,9 +258,9 @@ public class RandomWalk {
     }
 
 
-    private static DirectedGraph<ModelObject, ModelEdge> generateRandomWalk(Graph<ModelObject, ModelEdge> graph, ModelObject startingLocation) {
+    private static DirectedSparseMultigraph<ModelObject, ModelEdge> generateRandomWalk(Graph<ModelObject, ModelEdge> graph, ModelObject startingLocation) {
 
-        DirectedGraph<ModelObject, ModelEdge> currentGraph = new DirectedSparseMultigraph<ModelObject, ModelEdge>();
+        DirectedSparseMultigraph<ModelObject, ModelEdge> currentGraph = new DirectedSparseMultigraph<ModelObject, ModelEdge>();
         int coverage = calculateCoverage(graph, currentGraph);
         int time = 0;
         ModelObject currentLocation = startingLocation;
@@ -346,5 +347,12 @@ public class RandomWalk {
             result.put(edgeName, result.get(edgeName).doubleValue() / randomWalkGraphs.size());
         }
         return result;
+    }
+
+    public static Collection<DirectedSparseMultigraph<ModelObject,ModelEdge>> getAllRandomWalkGraphs() {
+        if (randomWalkGraphs == null || randomWalkGraphs.isEmpty()) {
+            generateRandomWalkCollection();
+        }
+        return randomWalkGraphs;
     }
 }

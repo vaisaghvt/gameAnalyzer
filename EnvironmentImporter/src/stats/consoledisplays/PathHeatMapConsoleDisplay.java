@@ -14,18 +14,22 @@ public class PathHeatMapConsoleDisplay extends ConsoleDisplay<HashMap<String, Ha
 
     @Override
     public void display(HashMap<String, HashMap<String, Double>> data) {
-        System.out.print("Destination:\t");
-        for(String roomName : data.keySet()){
-            System.out.print(roomName+"\t");
-        }
-        System.out.println();
+        HashMap<String, Double> sumOfProbs = new HashMap<String, Double>();
         for(String source : data.keySet()){
             System.out.print(source +"\t");
+
+            double sum =0;
             for(String destination: data.get(source).keySet()){
                 System.out.print(
-                        data.get(source).get(destination)+"\t");
+                        "To "+destination+":"+data.get(source).get(destination)+"\t");
+                sum+= data.get(source).get(destination);
             }
+            sumOfProbs.put(source, sum);
             System.out.println();
+        }
+
+        for(String source: sumOfProbs.keySet()){
+            System.out.println(source+"="+ sumOfProbs.get(source));
         }
     }
 }
