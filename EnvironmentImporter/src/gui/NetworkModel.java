@@ -74,7 +74,6 @@ public class NetworkModel extends MainPanel implements ActionListener {
     private Collection<String> sortedRoomNames;
     private HashMap<String, HashMap<Integer, DirectedSparseMultigraph<ModelObject, ModelEdge>>> cachedGraph =
             new HashMap<String, HashMap<Integer, DirectedSparseMultigraph<ModelObject, ModelEdge>>>();
-    private Collection<String> floorDegreeSortedRooms;
 
     /**
      * Creates a new instance of SimpleGraphView
@@ -1116,12 +1115,101 @@ public class NetworkModel extends MainPanel implements ActionListener {
 
 
 
-    public void setFloorDegreeSortedRooms(Collection<String> floorDegreeSortedRooms) {
-        this.floorDegreeSortedRooms = floorDegreeSortedRooms;
-    }
 
     public Graph<ModelObject, ModelEdge> getCompleteGraph() {
         return completeGraph;
+    }
+
+    public Collection<String> getFloorNeighbourSortedRooms() {
+
+
+        if (completeGraph != null) {
+
+            ArrayList<String>[] floorRooms = new ArrayList[3];
+            for (int i = 0; i < 3; i++) {
+                floorRooms[i] = new ArrayList<String>();
+            }
+
+
+            for (String name : sortedRoomNames) {
+                ModelObject vertex = NetworkModel.instance().findRoomByName(name);
+                int floor;
+                if (vertex instanceof ModelArea) {
+                    floor = NetworkModel.instance().getFloorForArea((ModelArea) vertex);
+                } else {
+                    ModelArea room = NetworkModel.instance().getRoomForId(((ModelGroup) vertex).getAreaIds().iterator().next());
+                    floor = NetworkModel.instance().getFloorForArea(room);
+                }
+
+
+                floorRooms[floor].add(name);
+
+            }
+            for(int i=0;i<floorRooms.length;i++){
+                floorRooms[i] = sortByConnections(floorRooms[i]);
+            }
+
+            ArrayList<String> finalList = new ArrayList<String>();
+            for (ArrayList<String> list : floorRooms) {
+                finalList.addAll(list);
+            }
+
+            return finalList;
+        } else {
+            return null;
+        }
+    }
+
+    private ArrayList<String> sortByConnections(ArrayList<String> floorRoom) {
+        ArrayList<String> connectionSortedRooms = new ArrayList<String>();
+        ArrayList<String> listOfRooms = new ArrayList<String>();
+        ArrayList<String> toBeProcessed = new ArrayList<String>();
+
+        listOfRooms.addAll(floorRoom);
+
+        while(!listOfRooms.isEmpty()){
+            String room = listOfRooms.remove(0);
+
+            if(!connectionSortedRooms.contains(room)){
+                connectionSortedRooms.add(room);
+
+            }
+            for(ModelObject neighbour : completeGraph.getNeighbors(findRoomByName(room))){
+                if(!connectionSortedRooms.contains(neighbour.toString())){
+                    toBeProcessed.add(neighbour.toString());
+                }
+            }
+            while(!toBeProcessed.isEmpty()){
+                room = toBeProcessed.remove(0);
+                boolean removalStatus = listOfRooms.remove(room);
+
+                if(!removalStatus){
+                    if(floorRoom.contains(floorRoom.contains(room))){
+                        System.out.println("in trouble");
+                    }else {
+                        continue;
+                    }
+                }
+
+                if(!connectionSortedRooms.contains(room)){
+                    connectionSortedRooms.add(room);
+
+                }
+                for(ModelObject neighbour : completeGraph.getNeighbors(findRoomByName(room))){
+                    if(!connectionSortedRooms.contains(neighbour.toString())){
+                        toBeProcessed.add(neighbour.toString());
+                    }
+                }
+
+
+            }
+        }
+        if(connectionSortedRooms.size()!= floorRoom.size()){
+            System.out.println("Size mismatch");
+        }
+        return connectionSortedRooms;
+
+
     }
 
 

@@ -164,9 +164,7 @@ public abstract class StatisticsHandler<T extends ConsoleDisplay, V extends Char
                         taskOutput.append("Processing " + tempDataName + "...\n");
                     }
                 });
-                System.out.println("Processing" + tempDataName);
                 doTasks(dataName);
-                System.out.println("Processed");
                 final int currentProgress = i;
                 SwingUtilities.invokeLater(new Runnable() {
                     @Override

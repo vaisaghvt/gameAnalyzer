@@ -1,6 +1,7 @@
 package stats.statisticshandlers;
 
 import edu.uci.ics.jung.graph.DirectedSparseMultigraph;
+import edu.uci.ics.jung.graph.util.EdgeType;
 import gui.NetworkModel;
 import gui.Phase;
 import gui.StatsDialog;
@@ -19,10 +20,10 @@ import java.util.*;
  * Time: 12:46 PM
  * To change this template use File | Settings | File Templates.
  */
-public class PathHeatMapHandler extends StatisticsHandler<PathHeatMapConsoleDisplay, PathHeatMapChartDisplay> {
+public class FirstOrderPathHeatMapHandler extends StatisticsHandler<PathHeatMapConsoleDisplay, PathHeatMapChartDisplay> {
 
 
-    public PathHeatMapHandler() {
+    public FirstOrderPathHeatMapHandler() {
         super(new PathHeatMapChartDisplay(),
                 new PathHeatMapConsoleDisplay()
         );
@@ -69,8 +70,8 @@ public class PathHeatMapHandler extends StatisticsHandler<PathHeatMapConsoleDisp
             switch (allOrOne) {
 
                 case ALL:
-                    data = getSecondOrderMarkovData(dataNameDataMap);
-                    chartDisplay.setTitle("Visit order heat map :" + phase.toString());
+                    data = getFirstOrderMarkovData(dataNameDataMap);
+                    chartDisplay.setTitle("First order heat map :" + phase.toString());
                     chartDisplay.display(data);
                     consoleDisplay.display(data);
                     break;
@@ -90,8 +91,8 @@ public class PathHeatMapHandler extends StatisticsHandler<PathHeatMapConsoleDisp
                         } else {
                             tempDataNameDataMap.put(name, dataNameDataMap.get(name));
                         }
-                        data = getSecondOrderMarkovData(tempDataNameDataMap);
-                        chartDisplay.setTitle("Visit order heat map :" + name + ":" + phase.toString());
+                        data = getFirstOrderMarkovData(tempDataNameDataMap);
+                        chartDisplay.setTitle("First order heat map :" + name + ":" + phase.toString());
                         chartDisplay.display(data);
                         consoleDisplay.display(data);
                         tempDataNameDataMap.clear();
@@ -101,7 +102,7 @@ public class PathHeatMapHandler extends StatisticsHandler<PathHeatMapConsoleDisp
 
         }
 
-        private HashMap<String, HashMap<String, Double>> getSecondOrderMarkovData(
+        private HashMap<String, HashMap<String, Double>> getFirstOrderMarkovData(
                 HashMap<String, DirectedSparseMultigraph<ModelObject, ModelEdge>> dataNameDataMap) {
 
 
@@ -189,46 +190,9 @@ public class PathHeatMapHandler extends StatisticsHandler<PathHeatMapConsoleDisp
                     continue;
                 }
 
-                TreeSet<ModelEdge> edgeCollection = new TreeSet<ModelEdge>(new Comparator<ModelEdge>() {
-                    @Override
-                    public int compare(ModelEdge o1, ModelEdge o2) {
-                        return (int) (o1.getTime() - o2.getTime());
-                    }
-                });
-
-                edgeCollection.addAll(tempGraph.getIncidentEdges(mainNode));
-
-                if (tempGraph.inDegree(mainNode) > tempGraph.outDegree(mainNode)) {
-//                    //Ending Vertex;
-                    edgeCollection.pollLast();
-//
-//                    localGraph.addVertex(mainNode);
-//                    localGraph.addEdge(new ModelEdge(),
-//                            tempGraph.getOpposite(mainNode, lonelyEdge),
-//                            mainNode
-//                    );
-
-                } else if (tempGraph.inDegree(mainNode) < tempGraph.outDegree(mainNode)) {
-                    //First Vertex;
-                    edgeCollection.pollFirst();
-//
-//
-//                    localGraph.addVertex(mainNode);
-//                    localGraph.addEdge(new ModelEdge(),
-//                            mainNode,
-//                            tempGraph.getOpposite(mainNode, lonelyEdge)
-//                    );
-
+                for(ModelEdge inEdge : tempGraph.getIncidentEdges(mainNode)){
+                    localGraph.addEdge(inEdge, tempGraph.getSource(inEdge), tempGraph.getDest(inEdge));
                 }
-
-                for (int i = 0; i < edgeCollection.size() / 2; i++) {
-                    ModelEdge incoming = edgeCollection.pollFirst();
-                    ModelEdge outgoing = edgeCollection.pollFirst();
-                    ModelObject from = tempGraph.getOpposite(mainNode, incoming);
-                    ModelObject to = tempGraph.getOpposite(mainNode, outgoing);
-                    localGraph.addEdge(new ModelEdge(), from, to);
-                }
-
             }
             return localGraph;
         }

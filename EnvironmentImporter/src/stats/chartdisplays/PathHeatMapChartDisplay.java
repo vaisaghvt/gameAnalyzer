@@ -1,5 +1,6 @@
 package stats.chartdisplays;
 
+import gui.NetworkModel;
 import org.jfree.chart.ChartPanel;
 import org.jfree.chart.JFreeChart;
 import org.jfree.chart.axis.AxisLocation;
@@ -15,6 +16,7 @@ import org.jfree.ui.RectangleEdge;
 import org.jfree.ui.RectangleInsets;
 
 import java.awt.*;
+import java.util.Collection;
 import java.util.HashMap;
 
 /**
@@ -37,20 +39,21 @@ public class PathHeatMapChartDisplay extends ChartDisplay<HashMap<String, HashMa
         final XYZDataset dataSet = createDataSet(data);
         final JFreeChart chart = createChart(dataSet);
         final ChartPanel chartPanel = new ChartPanel(chart);
-        chartPanel.setPreferredSize(new Dimension(500, 270));
+        chartPanel.setPreferredSize(new Dimension(1000, 540));
         createNewFrameAndSetLocation();
         currentFrame.setTitle(this.getTitle());
         currentFrame.setContentPane(chartPanel);
         currentFrame.setVisible(true);
-        currentFrame.setSize(new Dimension(520, 300));
+        currentFrame.setSize(new Dimension(1020, 560));
     }
 
     private HashMap<String, Integer> generateNewRoomToCodeMapping(
             HashMap<String, HashMap<String, Double>> data) {
         int i = 0;
         //Graph<ModelObject, ModelEdge> graph = NetworkModel.instance().getCompleteGraph();
+        Collection<String> rooms= NetworkModel.instance().getFloorNeighbourSortedRooms();
         HashMap<String, Integer> nameToCodeMapping = new HashMap<String, Integer>();
-        for (String name : data.keySet()) {
+        for (String name : rooms) {
             nameToCodeMapping.put(name, i++);
         }
         return nameToCodeMapping;
@@ -58,7 +61,7 @@ public class PathHeatMapChartDisplay extends ChartDisplay<HashMap<String, HashMa
 
     private XYZDataset createDataSet(HashMap<String, HashMap<String, Double>> data) {
 
-        MatrixSeries series = new MatrixSeries("DataTable", data.keySet().size(), data.keySet().size());
+        MatrixSeries series = new MatrixSeries("DataTable", roomToCodeMapping.keySet().size(), roomToCodeMapping.keySet().size());
 
         for (String source : roomToCodeMapping.keySet()) {
             Integer sourceId = roomToCodeMapping.get(source);
@@ -99,7 +102,7 @@ public class PathHeatMapChartDisplay extends ChartDisplay<HashMap<String, HashMa
 
 
         XYBlockRenderer xyblockrenderer = new XYBlockRenderer();
-        GrayPaintScale graypaintscale = new GrayPaintScale(-2D, 1.0D);
+        GrayPaintScale graypaintscale = new GrayPaintScale(0.0D, 1.0D);
         xyblockrenderer.setPaintScale(graypaintscale);
 
         XYPlot xyplot = new XYPlot(xyzDataSet, numberAxis, numberAxis1, xyblockrenderer);
@@ -109,7 +112,7 @@ public class PathHeatMapChartDisplay extends ChartDisplay<HashMap<String, HashMa
         xyplot.setAxisOffset(new RectangleInsets(5D, 5D, 5D, 5D));
         xyplot.setOutlinePaint(Color.blue);
 
-        JFreeChart jfreechart = new JFreeChart("2nd Order path visit heat map", xyplot);
+        JFreeChart jfreechart = new JFreeChart("heat map", xyplot);
         jfreechart.removeLegend();
 
         NumberAxis numberAxis2 = new NumberAxis("Scale");
