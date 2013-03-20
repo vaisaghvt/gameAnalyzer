@@ -188,9 +188,12 @@ public class PathPredictionFrame extends JFrame {
                 }
 
                 protected void done() {
+                    double total =0.0;
                     for(String roomName: result.keySet()){
                         System.out.println(roomName+":"+ result.get(roomName));
+                        total+=result.get(roomName);
                     }
+                    System.out.println("total probabilities="+total);
 
                     SwingUtilities.invokeLater(new Runnable() {
                         @Override
@@ -215,7 +218,9 @@ public class PathPredictionFrame extends JFrame {
 
     private HashMap<String, Double> predictPath(HashMap<String, DirectedSparseMultigraph<ModelObject, ModelEdge>> nameToGraphMap, int pathLength, String startRoom) {
 
-        HashMap<String, Double> results = new HashMap<String, Double>();
+
+
+
 
         HashMap<String, Double> firstOrderProbabilities = calculateFirstOrderProbForNeighbouringRooms(nameToGraphMap, startRoom);
 
@@ -225,16 +230,95 @@ public class PathPredictionFrame extends JFrame {
 
 
         for (String room : firstOrderProbabilities.keySet()) {
-            results.put(room, firstOrderProbabilities.get(room));
             currentHistories.put(room, startRoom);
 
+
+//            results.put(room, firstOrderProbabilities.get(room));
+
+        }
+        HashMap<String, HashMap<String, Double>> results = calculateFirstHop(nameToGraphMap, firstOrderProbabilities, currentHistories, secondOrderProbabilities);
+
+
+
+
+
+        for (int hops = 2; hops < pathLength; hops++) {
+            addNextHop(nameToGraphMap, results, currentHistories, secondOrderProbabilities);
         }
 
-        for (int hops = 1; hops < pathLength; hops++) {
-            addNextHop(results, currentHistories, secondOrderProbabilities);
+        HashMap<String, Double> finalResult = new HashMap<String, Double>();
+        for(String finalLocation:results.keySet()){
+            double value =0.0;
+            for(String penultimateLocation:results.get(finalLocation).keySet()){
+                value+= results.get(finalLocation).get(penultimateLocation);
+            }
+            finalResult.put(finalLocation, value);
         }
 
-        return results;
+        return finalResult;
+    }
+
+    private void addNextHop(HashMap<String, DirectedSparseMultigraph<ModelObject, ModelEdge>> nameToGraphMap, HashMap<String, HashMap<String, Double>> results, HashMultimap<String, String> currentHistories, HashMap<String, HashMap<String, HashMap<String, Double>>> secondOrderProbabilities) {
+
+        HashMultimap<String, String> futureHistories = HashMultimap.create();
+        HashMap<String, HashMap<String, Double>> newResults = new HashMap<String, HashMap<String, Double>>();
+
+        for(String currentLocation:currentHistories.keySet()){       // For each of the possible current locations
+
+
+            HashMap<String, HashMap<String, Double>> currentLocationSecondOrderProbabilities = secondOrderProbabilities.get(currentLocation);
+            // The probability of reaching a destination by going through that room.
+            for(String prevLocation: currentHistories.get(currentLocation)) {
+                double priorProbability = results.get(currentLocation).get(prevLocation);  // THe prabability of being in that current location.
+
+
+                HashMap<String, Double> secondOrderProbabilitiesForConsideration = currentLocationSecondOrderProbabilities.containsKey(prevLocation)?
+                        currentLocationSecondOrderProbabilities.get(prevLocation):
+                        calculateFirstOrderProbForNeighbouringRooms(nameToGraphMap,currentLocation);
+                // Given a previous location the probability of reaching a particular destination on passing through current location
+
+
+
+                for(String possibleDestination: secondOrderProbabilitiesForConsideration.keySet()){
+                    if(!newResults.containsKey(possibleDestination)){
+                        newResults.put(possibleDestination, new HashMap<String, Double>());
+                    }
+                    HashMap<String, Double> newResultsForPossibleDestination = newResults.get(possibleDestination);
+
+
+
+                    double secondOrderValue = secondOrderProbabilitiesForConsideration.get(possibleDestination).doubleValue();
+
+                    double probabilityToWrite = Math.exp(Math.log(priorProbability) +Math.log(secondOrderValue));
+                    if(newResultsForPossibleDestination.containsKey(currentLocation)){
+                        double newValue = newResultsForPossibleDestination.get(currentLocation)+probabilityToWrite;
+                        newResultsForPossibleDestination.put(currentLocation, newValue);
+
+
+                    }else{
+                        newResultsForPossibleDestination.put(currentLocation,probabilityToWrite );
+                    }
+
+
+                    futureHistories.put(possibleDestination, currentLocation);
+                    newResults.put(possibleDestination, newResultsForPossibleDestination);
+                }
+            }
+
+
+
+        }
+
+        currentHistories.clear();
+        currentHistories.putAll(futureHistories);
+
+        results.clear();
+        results.putAll(newResults);
+
+        if(!newResults.keySet().containsAll(futureHistories.keySet()) || ! futureHistories.keySet().containsAll(newResults.keySet())){
+            System.out.println("Calculation Mistake.");
+        }
+
     }
 
     private HashMap<String, HashMap<String, HashMap<String, Double>>> calculateSecondOrderProb(
@@ -245,44 +329,70 @@ public class PathPredictionFrame extends JFrame {
             result.put(room,
                     calculateSecondOrderProbForNeighbouringRooms(nameToGraphMap, room));
 
+
         }
 
         return result;
     }
 
-    private void addNextHop(HashMap<String, Double> results,
-            HashMultimap<String, String> currentHistories,
-            HashMap<String, HashMap<String, HashMap<String, Double>>> secondOrderProbabilities) {
-        HashMultimap<String, String> futureHistories = HashMultimap.create();
-        HashMap<String, Double> newResult = new HashMap<String, Double>();
+    private HashMap<String, HashMap<String, Double>> calculateFirstHop(HashMap<String, DirectedSparseMultigraph<ModelObject, ModelEdge>> nameToGraphMap, HashMap<String, Double> results,
+                                                                       HashMultimap<String, String> currentHistories,
+                                                                       HashMap<String, HashMap<String, HashMap<String, Double>>> secondOrderProbabilities) {
 
-        for(String currentLocation:currentHistories.keySet()){
-            double priorProbability = results.get(currentLocation);
+        HashMultimap<String, String> futureHistories = HashMultimap.create();
+        HashMap<String, HashMap<String, Double>> newResult = new HashMap<String, HashMap<String, Double>>();
+
+        for(String currentLocation:currentHistories.keySet()){       // For each of the possible current locations
+            double priorProbability = results.get(currentLocation);  // THe prabability of being in that current location.
+
+
             HashMap<String, HashMap<String, Double>> currentLocationSecondOrderProbabilities = secondOrderProbabilities.get(currentLocation);
+                                                                     // The probability of reaching a destination by going through that room.
             for(String prevLocation: currentHistories.get(currentLocation)) {
-                HashMap<String, Double> secondOrderProbabilitiesForConsideration = currentLocationSecondOrderProbabilities.get(prevLocation);
+                HashMap<String, Double> secondOrderProbabilitiesForConsideration = currentLocationSecondOrderProbabilities.containsKey(prevLocation)?
+                        currentLocationSecondOrderProbabilities.get(prevLocation):
+                        calculateFirstOrderProbForNeighbouringRooms(nameToGraphMap,currentLocation);
+
+
+
                 for(String possibleDestination: secondOrderProbabilitiesForConsideration.keySet()){
+                    if(!newResult.containsKey(possibleDestination)){
+                        newResult.put(possibleDestination, new HashMap<String, Double>());
+                    }
+                    HashMap<String, Double> newResultsForPossibleDestination = newResult.get(possibleDestination);
+
+
+
                     double secondOrderValue = secondOrderProbabilitiesForConsideration.get(possibleDestination).doubleValue();
 
-                    double probabilityToWrite = priorProbability *secondOrderValue;
-                    if(newResult.containsKey(possibleDestination)){
-                        double newProbability = newResult.get(possibleDestination)+probabilityToWrite
-                                ;
-                        newResult.put(possibleDestination,newProbability );
+                    double probabilityToWrite = Math.exp(Math.log(priorProbability) +Math.log(secondOrderValue));
+                    if(newResultsForPossibleDestination.containsKey(currentLocation)){
+                        System.out.println("HOW???");
+
+
                     }else{
-                        newResult.put(possibleDestination,probabilityToWrite );
+                        newResultsForPossibleDestination.put(currentLocation, probabilityToWrite);
                     }
+
+
+                    newResult.put(possibleDestination, newResultsForPossibleDestination);
                     futureHistories.put(possibleDestination, currentLocation);
                 }
             }
+
+
 
         }
 
         currentHistories.clear();
         currentHistories.putAll(futureHistories);
 
-        results.clear();
-        results.putAll(newResult);
+
+
+        if(!newResult.keySet().containsAll(futureHistories.keySet()) || ! futureHistories.keySet().containsAll(newResult.keySet())){
+            System.out.println("Calculation Mistake.");
+        }
+        return newResult;
     }
 
     private HashMap<String, HashMap<String, Double>> calculateSecondOrderProbForNeighbouringRooms(
