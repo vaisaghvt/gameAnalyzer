@@ -22,6 +22,7 @@ import java.text.DecimalFormat;
 import java.text.NumberFormat;
 import java.util.*;
 import java.util.List;
+import java.util.concurrent.ExecutionException;
 
 
 /**
@@ -34,7 +35,7 @@ import java.util.List;
 public class RandomWalk {
     private final static MersenneTwister random = new MersenneTwister();
     private static CircularFifoBuffer<Double> varianceList = new CircularFifoBuffer<Double>(5);
-    private static final double EPSILON = 0.0000001;
+    private static final double EPSILON = 0.00001;
     private static Collection<DirectedSparseMultigraph<ModelObject, ModelEdge>> randomWalkGraphs;
     private static RandomWalk randomWalkInstance;
     private static Graph<ModelObject, ModelEdge> completeGraph = null;
@@ -53,7 +54,7 @@ public class RandomWalk {
     }
 
 
-    private static void generateRandomWalkCollection() {
+    private static Collection<DirectedSparseMultigraph<ModelObject, ModelEdge>> generateRandomWalkCollection() {
         if (completeGraph == null || startingLocation == null) {
             throw new NullPointerException();
         }
@@ -103,6 +104,7 @@ public class RandomWalk {
         });
 
         randomWalkGraphs = resultSet;
+        return randomWalkGraphs;
     }
 
     private static void createProgressBar() {
@@ -350,9 +352,26 @@ public class RandomWalk {
     }
 
     public static Collection<DirectedSparseMultigraph<ModelObject,ModelEdge>> getAllRandomWalkGraphs() {
+        System.out.println("Creating random walks");
+
         if (randomWalkGraphs == null || randomWalkGraphs.isEmpty()) {
-            generateRandomWalkCollection();
+            SwingWorker<Collection<DirectedSparseMultigraph<ModelObject, ModelEdge>>, Void> worker = new SwingWorker<Collection<DirectedSparseMultigraph<ModelObject, ModelEdge>>, Void>() {
+                @Override
+                protected Collection<DirectedSparseMultigraph<ModelObject, ModelEdge>> doInBackground() throws Exception {
+                    return generateRandomWalkCollection();
+                }
+            };
+
+            worker.execute();
+            try {
+                worker.get();
+            } catch (InterruptedException e) {
+                e.printStackTrace();  //To change body of catch statement use File | Settings | File Templates.
+            } catch (ExecutionException e) {
+                e.printStackTrace();  //To change body of catch statement use File | Settings | File Templates.
+            }
         }
+        System.out.println("generated "+randomWalkGraphs.size()+ " graphs");
         return randomWalkGraphs;
     }
 }

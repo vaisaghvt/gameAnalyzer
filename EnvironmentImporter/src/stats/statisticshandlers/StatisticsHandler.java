@@ -29,7 +29,6 @@ public abstract class StatisticsHandler<T extends ConsoleDisplay, V extends Char
     protected JFrame progressFrame;
 
 
-
     protected StatisticsHandler(V chartDisplay, T consoleDisplay) {
         this.chartDisplay = chartDisplay;
 
@@ -114,11 +113,16 @@ public abstract class StatisticsHandler<T extends ConsoleDisplay, V extends Char
     @Override
     public void propertyChange(PropertyChangeEvent event) {
         if ("progress".equals(event.getPropertyName())) {
-            int progress = (Integer) event.getNewValue();
+            final int progress = (Integer) event.getNewValue();
 //            progressBar.setIndeterminate(false);
-            progressBar.setValue(progress);
+            SwingUtilities.invokeLater(new Runnable() {
+                @Override
+                public void run() {
+                    progressBar.setValue(progress);
+                }
 
 
+            });
         }
     }
 
@@ -148,6 +152,7 @@ public abstract class StatisticsHandler<T extends ConsoleDisplay, V extends Char
 //               });
 //
 //            }
+
             setProgress(0);
             final int size = dataNames.size();
             int i = 1;

@@ -1,38 +1,30 @@
 package stats.chartdisplays;
 
-import edu.uci.ics.jung.algorithms.layout.Layout;
-import edu.uci.ics.jung.algorithms.layout.SpringLayout2;
+import com.google.common.collect.HashMultimap;
 import edu.uci.ics.jung.graph.DirectedSparseMultigraph;
 import edu.uci.ics.jung.visualization.VisualizationViewer;
-import edu.uci.ics.jung.visualization.control.DefaultModalGraphMouse;
-import edu.uci.ics.jung.visualization.control.ModalGraphMouse;
-import edu.uci.ics.jung.visualization.decorators.ToStringLabeller;
 import gui.NetworkModel;
 import gui.Phase;
 import modelcomponents.ModelEdge;
 import modelcomponents.ModelObject;
-import org.apache.commons.collections15.Transformer;
 
-import javax.imageio.ImageIO;
 import javax.swing.*;
 import javax.swing.text.DefaultCaret;
 import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
-import java.awt.image.BufferedImage;
 import java.io.File;
-import java.text.DecimalFormat;
 import java.util.*;
 import java.util.concurrent.ExecutionException;
 
 /**
  * Created with IntelliJ IDEA.
  * User: vaisagh
- * Date: 14/3/13
- * Time: 11:10 AM
+ * Date: 19/3/13
+ * Time: 4:50 PM
  * To change this template use File | Settings | File Templates.
  */
-public class RoomAnalysisFrame extends JFrame {
+public class PathPredictionFrame extends JFrame {
     private JPanel dataPanel;
     private JPanel chartDisplayPanel = new JPanel();
     private Collection<JFrame> poppedOutFrames = new HashSet<JFrame>();
@@ -43,9 +35,10 @@ public class RoomAnalysisFrame extends JFrame {
     private JCheckBox task3CheckBox = new JCheckBox("Task 3");
     private JButton closeButton = new JButton("Close");
     private JButton generateButton = new JButton("Generate");
-    private JComboBox<DisplayType> displayTypeJComboBox;
+    private JComboBox<Integer> pathLengthComboBox;
     private JComboBox<String> roomButtonComboBox;
     private Collection<String> roomList = new ArrayList<String>();
+    private HashMap<String, DirectedSparseMultigraph<ModelObject, ModelEdge>> data;
     private JButton popOutButton = new JButton("Pop-out");
     private Collection<String> dataNameList;
 
@@ -56,7 +49,7 @@ public class RoomAnalysisFrame extends JFrame {
     private VisualizationViewer<ModelObject, ? extends ModelEdge> currentVisualizationViewer;
     private String currentTitle;
 
-    public RoomAnalysisFrame(Collection<String> dataNames) {
+    public PathPredictionFrame(Collection<String> dataNames) {
         roomDataListener = new RoomDataListener();
         this.dataNameList = dataNames;
         initializeRoomList();
@@ -111,16 +104,16 @@ public class RoomAnalysisFrame extends JFrame {
 
         generateButton.addActionListener(roomDataListener);
         closeButton.addActionListener(roomDataListener);
-        displayTypeJComboBox = new JComboBox<DisplayType>();
-        displayTypeJComboBox.addItem(DisplayType.PATH_PROBABILITIES);
-        displayTypeJComboBox.addItem(DisplayType.SIMPLE_COMPLETE_DIRECTED_GRAPH);
-        displayTypeJComboBox.addItem(DisplayType.STAT_DISPLAY);
-        displayTypeJComboBox.setEditable(false);
+        pathLengthComboBox = new JComboBox<Integer>();
+        for (int i = 1; i < 21; i++) {
+            pathLengthComboBox.addItem(new Integer(i));
+        }
+        pathLengthComboBox.setEditable(false);
 
 
         JPanel buttonPanel = new JPanel(new GridLayout(7, 2));
 
-        buttonPanel.add(new JLabel("Choose room :"));
+        buttonPanel.add(new JLabel("Choose Starting location :"));
         buttonPanel.add(getRoomButtonComboBox());
 
         buttonPanel.add(new JLabel("Select phases"));
@@ -135,8 +128,8 @@ public class RoomAnalysisFrame extends JFrame {
         buttonPanel.add(new JLabel());
         buttonPanel.add(task3CheckBox);
 
-        buttonPanel.add(new JLabel("Display type:"));
-        buttonPanel.add(displayTypeJComboBox);
+        buttonPanel.add(new JLabel("Path hop length:"));
+        buttonPanel.add(pathLengthComboBox);
 
 
         buttonPanel.add(generateButton);
@@ -170,7 +163,7 @@ public class RoomAnalysisFrame extends JFrame {
             selectedPhases.add(Phase.TASK_3);
         }
         if (!selectedPhases.isEmpty()) {
-            final DisplayType type = displayTypeJComboBox.getItemAt(displayTypeJComboBox.getSelectedIndex());
+            final int pathLength = pathLengthComboBox.getItemAt(pathLengthComboBox.getSelectedIndex()).intValue();
             final String room = roomButtonComboBox.getItemAt(roomButtonComboBox.getSelectedIndex());
 
             SwingUtilities.invokeLater(new Runnable() {
@@ -180,34 +173,29 @@ public class RoomAnalysisFrame extends JFrame {
                 }
             });
             SwingWorker<Void, Void> tempWorker = new SwingWorker<Void, Void>() {
+                public HashMap<String, Double> result;
+
                 @Override
                 protected Void doInBackground() throws Exception {
                     System.out.println("Generating name to graph mapping");
-                    createCurrentTitle(room, type, selectedPhases);
+                    createCurrentTitle(room, pathLength, selectedPhases);
 
                     HashMap<String, DirectedSparseMultigraph<ModelObject, ModelEdge>> nameToGraphMap = generateRelevantGraphToNameMap(dataNameList, selectedPhases);
-                    switch (type) {
 
-                        case PATH_PROBABILITIES:
-                            generateProbabilityStyleData(nameToGraphMap, room);
-                            break;
-                        case SIMPLE_COMPLETE_DIRECTED_GRAPH:
+                    result = predictPath(nameToGraphMap, pathLength, room);
 
-                            System.out.println("Calling simple complete directed graph");
-                            generateSimpleNumberedStyleData(nameToGraphMap, room);
-                            break;
-                        case STAT_DISPLAY:
-                            generateStats(nameToGraphMap, room);
-                            break;
-                    }
                     return null;
                 }
 
                 protected void done() {
+                    for(String roomName: result.keySet()){
+                        System.out.println(roomName+":"+ result.get(roomName));
+                    }
+
                     SwingUtilities.invokeLater(new Runnable() {
                         @Override
                         public void run() {
-                            setTitle(room + ":" + type);
+                            setTitle(room + ": path length =" + pathLength);
                             chartDisplayPanel.setBorder(BorderFactory.createLineBorder(Color.BLACK));
                             validate();
                             setCursor(Cursor.getPredefinedCursor(Cursor.DEFAULT_CURSOR));
@@ -225,138 +213,81 @@ public class RoomAnalysisFrame extends JFrame {
 
     }
 
-    private void createCurrentTitle(String room, DisplayType type, HashSet<Phase> selectedPhases) {
+    private HashMap<String, Double> predictPath(HashMap<String, DirectedSparseMultigraph<ModelObject, ModelEdge>> nameToGraphMap, int pathLength, String startRoom) {
 
-        currentTitle = room +":"+ type+":";
+        HashMap<String, Double> results = new HashMap<String, Double>();
 
-        if (selectedPhases.contains(Phase.EXPLORATION)) {
-            currentTitle += "E";
+        HashMap<String, Double> firstOrderProbabilities = calculateFirstOrderProbForNeighbouringRooms(nameToGraphMap, startRoom);
+
+        HashMap<String, HashMap<String, HashMap<String, Double>>> secondOrderProbabilities = calculateSecondOrderProb(nameToGraphMap);
+
+        HashMultimap<String, String> currentHistories = HashMultimap.create();
+
+
+        for (String room : firstOrderProbabilities.keySet()) {
+            results.put(room, firstOrderProbabilities.get(room));
+            currentHistories.put(room, startRoom);
+
         }
-        if (selectedPhases.contains(Phase.TASK_1)) {
-            currentTitle += "1";
+
+        for (int hops = 1; hops < pathLength; hops++) {
+            addNextHop(results, currentHistories, secondOrderProbabilities);
         }
-        if (selectedPhases.contains(Phase.TASK_2)) {
-            currentTitle += "2";
-        }
-        if (selectedPhases.contains(Phase.TASK_3)) {
-            currentTitle += "3";
-        }
-        setTitle(currentTitle);
+
+        return results;
     }
 
-    private void generateStats(HashMap<String, DirectedSparseMultigraph<ModelObject, ModelEdge>> nameToGraphMap, String room) {
+    private HashMap<String, HashMap<String, HashMap<String, Double>>> calculateSecondOrderProb(
+            HashMap<String, DirectedSparseMultigraph<ModelObject, ModelEdge>> nameToGraphMap) {
 
+        HashMap<String, HashMap<String, HashMap<String, Double>>> result = new HashMap<String, HashMap<String, HashMap<String, Double>>>();
+        for(String room:roomList){
+            result.put(room,
+                    calculateSecondOrderProbForNeighbouringRooms(nameToGraphMap, room));
 
+        }
+
+        return result;
     }
 
-    private void generateSimpleNumberedStyleData(HashMap<String, DirectedSparseMultigraph<ModelObject, ModelEdge>> nameToGraphMap, String room) {
+    private void addNextHop(HashMap<String, Double> results,
+            HashMultimap<String, String> currentHistories,
+            HashMap<String, HashMap<String, HashMap<String, Double>>> secondOrderProbabilities) {
+        HashMultimap<String, String> futureHistories = HashMultimap.create();
+        HashMap<String, Double> newResult = new HashMap<String, Double>();
 
-        ModelObject mainNode = NetworkModel.instance().findRoomByName(room);
-        Collection<ModelObject> neighbours = NetworkModel.instance().getCompleteGraph().getNeighbors(mainNode);
-        DirectedSparseMultigraph<ModelObject, ModelEdge> localGraph = new DirectedSparseMultigraph<ModelObject, ModelEdge>();
+        for(String currentLocation:currentHistories.keySet()){
+            double priorProbability = results.get(currentLocation);
+            HashMap<String, HashMap<String, Double>> currentLocationSecondOrderProbabilities = secondOrderProbabilities.get(currentLocation);
+            for(String prevLocation: currentHistories.get(currentLocation)) {
+                HashMap<String, Double> secondOrderProbabilitiesForConsideration = currentLocationSecondOrderProbabilities.get(prevLocation);
+                for(String possibleDestination: secondOrderProbabilitiesForConsideration.keySet()){
+                    double secondOrderValue = secondOrderProbabilitiesForConsideration.get(possibleDestination).doubleValue();
 
-        localGraph.addVertex(mainNode);
-        for (ModelObject node : neighbours) {
-            localGraph.addVertex(node);
-        }
-
-        for (String name : nameToGraphMap.keySet()) {
-            DirectedSparseMultigraph<ModelObject, ModelEdge> tempGraph = nameToGraphMap.get(name);
-
-            if (!tempGraph.containsVertex(mainNode)) {
-                continue;
-            }
-
-            Collection<ModelEdge> edgeCollection = tempGraph.getInEdges(mainNode);
-
-            for (ModelEdge edge : edgeCollection) {
-
-                localGraph.addEdge(new ModelEdge(), tempGraph.getOpposite(mainNode, edge),
-                        mainNode);
-
-            }
-
-
-            edgeCollection = tempGraph.getOutEdges(mainNode);
-
-            for (ModelEdge edge : edgeCollection) {
-
-                localGraph.addEdge(new ModelEdge(), mainNode, tempGraph.getOpposite(mainNode, edge));
-            }
-
-        }
-
-
-
-        final DirectedSparseMultigraph<ModelObject, ProbabilityEdge> graphToDraw = convertToProbabilities(localGraph);
-
-        renderGraphPanel(graphToDraw, mainNode, DisplayType.SIMPLE_COMPLETE_DIRECTED_GRAPH);
-
-
-    }
-
-    private DirectedSparseMultigraph<ModelObject, ProbabilityEdge> convertToProbabilities(DirectedSparseMultigraph<ModelObject, ModelEdge> localGraph) {
-        HashMap<ModelObject, HashMap<ModelObject, Integer>> nodeToNodeTravelFrequency = new HashMap<ModelObject, HashMap<ModelObject, Integer>>();
-
-        for (ModelEdge edge : localGraph.getEdges()) {
-            ModelObject source = localGraph.getSource(edge);
-            ModelObject destination = localGraph.getDest(edge);
-            if (source.toString().equals(destination.toString())) {
-                System.out.println("Cycle detected");
-            }
-
-            if (!nodeToNodeTravelFrequency.containsKey(source)) {
-                nodeToNodeTravelFrequency.put(source, new HashMap<ModelObject, Integer>());
-            }
-            if (!nodeToNodeTravelFrequency.get(source).containsKey(destination)) {
-                nodeToNodeTravelFrequency.get(source).put(destination, 0);
-            }
-
-            int currentValue = nodeToNodeTravelFrequency.get(source).get(destination).intValue();
-            nodeToNodeTravelFrequency.get(source).put(destination, currentValue + 1);
-
-        }
-
-        HashMap<ModelObject, HashMap<ModelObject, Double>> nodeToNodeProbabilities = new HashMap<ModelObject, HashMap<ModelObject, Double>>();
-
-        for (ModelObject source : nodeToNodeTravelFrequency.keySet()) {
-            nodeToNodeProbabilities.put(source, new HashMap<ModelObject, Double>());
-            double totalNumberOfOutEdges = 0.0;
-            for (ModelObject dest : nodeToNodeTravelFrequency.get(source).keySet()) {
-                totalNumberOfOutEdges += nodeToNodeTravelFrequency.get(source).get(dest);
-            }
-            for (ModelObject dest : nodeToNodeTravelFrequency.get(source).keySet()) {
-
-                nodeToNodeProbabilities.get(source).put(dest, (double) nodeToNodeTravelFrequency.get(source).get(dest) / totalNumberOfOutEdges);
-            }
-
-
-        }
-
-
-        DirectedSparseMultigraph<ModelObject, ProbabilityEdge> summarizedGraph = new DirectedSparseMultigraph<ModelObject, ProbabilityEdge>();
-        for (ModelObject vertex : localGraph.getVertices()) {
-            summarizedGraph.addVertex(vertex);
-        }
-        for (ModelObject source : nodeToNodeProbabilities.keySet()) {
-
-            for (ModelObject dest : nodeToNodeProbabilities.get(source).keySet()) {
-                if (source.toString().equals(dest.toString())) {
-                    System.out.println("Cycle");
+                    double probabilityToWrite = priorProbability *secondOrderValue;
+                    if(newResult.containsKey(possibleDestination)){
+                        double newProbability = newResult.get(possibleDestination)+probabilityToWrite
+                                ;
+                        newResult.put(possibleDestination,newProbability );
+                    }else{
+                        newResult.put(possibleDestination,probabilityToWrite );
+                    }
+                    futureHistories.put(possibleDestination, currentLocation);
                 }
-
-                summarizedGraph.addEdge(new ProbabilityEdge(nodeToNodeProbabilities.get(source).get(dest)), source, dest);
-
             }
 
-
         }
-        return summarizedGraph;
+
+        currentHistories.clear();
+        currentHistories.putAll(futureHistories);
+
+        results.clear();
+        results.putAll(newResult);
     }
 
-
-    private void generateProbabilityStyleData(HashMap<String, DirectedSparseMultigraph<ModelObject, ModelEdge>> nameToGraphMap, String room) {
-        ModelObject mainNode = NetworkModel.instance().findRoomByName(room);
+    private HashMap<String, HashMap<String, Double>> calculateSecondOrderProbForNeighbouringRooms(
+            HashMap<String, DirectedSparseMultigraph<ModelObject, ModelEdge>> nameToGraphMap, String startRoom) {
+        ModelObject mainNode = NetworkModel.instance().findRoomByName(startRoom);
         Collection<ModelObject> neighbours = NetworkModel.instance().getCompleteGraph().getNeighbors(mainNode);
         DirectedSparseMultigraph<ModelObject, ModelEdge> localGraph = new DirectedSparseMultigraph<ModelObject, ModelEdge>();
 
@@ -416,68 +347,134 @@ public class RoomAnalysisFrame extends JFrame {
 
 
 
-        final DirectedSparseMultigraph<ModelObject, ProbabilityEdge> graphToDraw = convertToProbabilities(localGraph);
-        renderGraphPanel(graphToDraw, mainNode, DisplayType.PATH_PROBABILITIES);
-
+        return  convertToSecondOrderProbabilities(localGraph);
     }
 
-    private <T extends ModelEdge> void renderGraphPanel(final DirectedSparseMultigraph<ModelObject, T> graphToDraw, final ModelObject mainNode, final DisplayType style) {
-        SwingUtilities.invokeLater(new Runnable() {
-            @Override
-            public void run() {
+    private HashMap<String, HashMap<String, Double>> convertToSecondOrderProbabilities(DirectedSparseMultigraph<ModelObject, ModelEdge> localGraph) {
+        HashMap<String, HashMap<String, Integer>> nodeToNodeTravelFrequency = new HashMap<String, HashMap<String, Integer>>();
 
+        for (ModelEdge edge : localGraph.getEdges()) {
+            String source = localGraph.getSource(edge).toString();
+            String destination = localGraph.getDest(edge).toString();
 
-                Layout<ModelObject, T> layout = new SpringLayout2<ModelObject, T>(graphToDraw);
+            if (!nodeToNodeTravelFrequency.containsKey(source)) {
+                nodeToNodeTravelFrequency.put(source, new HashMap<String, Integer>());
+            }
+            if (!nodeToNodeTravelFrequency.get(source).containsKey(destination)) {
+                nodeToNodeTravelFrequency.get(source).put(destination, 0);
+            }
 
+            int currentValue = nodeToNodeTravelFrequency.get(source).get(destination).intValue();
+            nodeToNodeTravelFrequency.get(source).put(destination, currentValue + 1);
 
-                layout.setSize(new Dimension(600, 500));
+        }
 
+        HashMap<String, HashMap<String, Double>> nodeToNodeProbabilities = new HashMap<String, HashMap<String, Double>>();
 
-                currentVisualizationViewer = new VisualizationViewer<ModelObject, T>(layout);
-                currentVisualizationViewer.setPreferredSize(new Dimension(600, 500));
+        for (String source : nodeToNodeTravelFrequency.keySet()) {
+            nodeToNodeProbabilities.put(source, new HashMap<String, Double>());
+            double totalNumberOfOutEdges = 0.0;
+            for (String dest : nodeToNodeTravelFrequency.get(source).keySet()) {
+                totalNumberOfOutEdges += nodeToNodeTravelFrequency.get(source).get(dest);
+            }
+            for (String dest : nodeToNodeTravelFrequency.get(source).keySet()) {
 
-
-                // Setup up a new vertex to paint transformer...
-                currentVisualizationViewer.getRenderContext().setVertexFillPaintTransformer(new Transformer<ModelObject, Paint>() {
-                    @Override
-                    public Paint transform(ModelObject modelObject) {
-                        if (modelObject.toString().equals(mainNode.toString())) {
-                            return (Paint) Color.RED;
-                        } else {
-                            return (Paint) Color.WHITE;
-                        }
-                    }
-                });
-
-                // Create a graph mouse and add it to the visualization component
-                DefaultModalGraphMouse gm = new DefaultModalGraphMouse();
-                gm.setMode(ModalGraphMouse.Mode.PICKING);
-                currentVisualizationViewer.setGraphMouse(gm);
-
-
-                currentVisualizationViewer.getRenderContext().setVertexShapeTransformer(new VertexEllipseTransformer<ModelObject, Shape>());
-
-
-                currentVisualizationViewer.getRenderContext().setVertexLabelTransformer(new ToStringLabeller<ModelObject>());
-                currentVisualizationViewer.getRenderer().getVertexLabelRenderer().setPosition(edu.uci.ics.jung.visualization.renderers.Renderer.VertexLabel.Position.CNTR);
-
-//                if (style.equals(DisplayType.PATH_PROBABILITIES)) {
-                    currentVisualizationViewer.getRenderContext().setEdgeLabelTransformer(new ToStringLabeller());
-//                }
-
-
-                chartDisplayPanel.add(currentVisualizationViewer);
-                currentVisualizationViewer.revalidate();
-                chartDisplayPanel.getRootPane().revalidate();
-
+                nodeToNodeProbabilities.get(source).put(dest, (double) nodeToNodeTravelFrequency.get(source).get(dest) / totalNumberOfOutEdges);
             }
 
 
-        });
+        }
+
+
+       return nodeToNodeProbabilities;
+    }
+
+    private HashMap<String, Double> calculateFirstOrderProbForNeighbouringRooms(
+            HashMap<String, DirectedSparseMultigraph<ModelObject, ModelEdge>> nameToGraphMap, String room) {
+        ModelObject mainNode = NetworkModel.instance().findRoomByName(room);
+        Collection<ModelObject> neighbours = NetworkModel.instance().getCompleteGraph().getNeighbors(mainNode);
+        DirectedSparseMultigraph<ModelObject, ModelEdge> localGraph = new DirectedSparseMultigraph<ModelObject, ModelEdge>();
+
+        localGraph.addVertex(mainNode);
+        for (ModelObject node : neighbours) {
+            localGraph.addVertex(node);
+        }
+
+        for (String name : nameToGraphMap.keySet()) {
+            DirectedSparseMultigraph<ModelObject, ModelEdge> tempGraph = nameToGraphMap.get(name);
+
+            if (!tempGraph.containsVertex(mainNode)) {
+                continue;
+            }
+
+
+            for (ModelEdge edge : tempGraph.getOutEdges(mainNode)) {
+
+                localGraph.addEdge(new ModelEdge(), mainNode, tempGraph.getOpposite(mainNode, edge));
+            }
+
+        }
+
+
+        return convertToFirstOrderProbabilities(localGraph, mainNode);
+    }
+
+    private HashMap<String, Double> convertToFirstOrderProbabilities(DirectedSparseMultigraph<ModelObject, ModelEdge> localGraph, ModelObject source) {
+        HashMap<String, Integer> nodeToNodeTravelFrequency = new HashMap<String, Integer>();
+
+        for (ModelEdge edge : localGraph.getEdges()) {
+
+            String destination = localGraph.getDest(edge).toString();
+
+
+            if (!nodeToNodeTravelFrequency.containsKey(destination)) {
+                nodeToNodeTravelFrequency.put(destination, 0);
+            }
+
+            int currentValue = nodeToNodeTravelFrequency.get(destination).intValue();
+            nodeToNodeTravelFrequency.put(destination, currentValue + 1);
+
+        }
+
+        HashMap<String, Double> nodeToNodeProbabilities = new HashMap<String, Double>();
+
+
+        double totalNumberOfOutEdges = 0.0;
+        for (String destination : nodeToNodeTravelFrequency.keySet()) {
+            totalNumberOfOutEdges += nodeToNodeTravelFrequency.get(destination);
+        }
+        for (String destination : nodeToNodeTravelFrequency.keySet()) {
+
+            nodeToNodeProbabilities.put(destination,
+                    (double) nodeToNodeTravelFrequency.get(destination) / totalNumberOfOutEdges);
+        }
+
+
+        return nodeToNodeProbabilities;
+    }
+
+    private void createCurrentTitle(String room, int pathLength, HashSet<Phase> selectedPhases) {
+
+        currentTitle = room + ": length=" + pathLength + ":";
+
+        if (selectedPhases.contains(Phase.EXPLORATION)) {
+            currentTitle += "E";
+        }
+        if (selectedPhases.contains(Phase.TASK_1)) {
+            currentTitle += "1";
+        }
+        if (selectedPhases.contains(Phase.TASK_2)) {
+            currentTitle += "2";
+        }
+        if (selectedPhases.contains(Phase.TASK_3)) {
+            currentTitle += "3";
+        }
+        setTitle(currentTitle);
     }
 
 
-    private HashMap<String, DirectedSparseMultigraph<ModelObject, ModelEdge>> generateRelevantGraphToNameMap(final Collection<String> dataNames, final HashSet<Phase> selectedPhases) throws ExecutionException, InterruptedException {
+    private HashMap<String, DirectedSparseMultigraph<ModelObject, ModelEdge>> generateRelevantGraphToNameMap(
+            final Collection<String> dataNames, final HashSet<Phase> selectedPhases) throws ExecutionException, InterruptedException {
 
         setEnabled(false);
         SwingWorker<HashMap<String, DirectedSparseMultigraph<ModelObject, ModelEdge>>, Void> tempWorker = new SwingWorker<HashMap<String, DirectedSparseMultigraph<ModelObject, ModelEdge>>, Void>() {
@@ -591,22 +588,6 @@ public class RoomAnalysisFrame extends JFrame {
     }
 
 
-    public enum DisplayType {
-        PATH_PROBABILITIES("2nd order markov"),
-        SIMPLE_COMPLETE_DIRECTED_GRAPH("1st order markov"),
-        STAT_DISPLAY("stat summary");
-        private final String name;
-
-        DisplayType(String s) {
-            name = s;
-        }
-
-        @Override
-        public String toString() {
-            return name;
-        }
-    }
-
     private void initializeRoomList() {
 
         synchronized (roomList) {
@@ -615,21 +596,6 @@ public class RoomAnalysisFrame extends JFrame {
 
     }
 
-
-    private class VertexEllipseTransformer<ModelObject, Shape> implements Transformer<ModelObject, Shape> {
-
-        @Override
-        public Shape transform(ModelObject modelObject) {
-
-//            int width = modelObject.toString().length() * 10;
-//
-//
-//            return (Shape) new Ellipse2D.Double(-width / 2, -width / 2, width, width);
-            int width = modelObject.toString().length() * 10;
-            return (Shape) new Rectangle(-width / 2, -10, width, 20);
-
-        }
-    }
 
     private class RoomDataListener implements ActionListener {
 
@@ -669,19 +635,20 @@ public class RoomAnalysisFrame extends JFrame {
 
 
                 if (currentVisualizationViewer != null) {
-                    JFileChooser jfc = new JFileChooser(new File("."+File.separatorChar + "SavedGraphs"));
+                    JFileChooser jfc = new JFileChooser(new File("." + File.separatorChar + "SavedGraphs"));
 //                    jfc.addChoosableFileFilter(new PngFileFilter());
 
-                    int result = jfc.showSaveDialog(RoomAnalysisFrame.this);
+                    int result = jfc.showSaveDialog(PathPredictionFrame.this);
                     if (result == JFileChooser.CANCEL_OPTION)
                         return;
                     File file = jfc.getSelectedFile();
 
 
                     writeToDisk(file);
-                }  else {
+                } else {
 
-                    JOptionPane.showMessageDialog(RoomAnalysisFrame.this,"No graph to save","Export error", JOptionPane.ERROR_MESSAGE);
+                    JOptionPane.showMessageDialog(PathPredictionFrame.this,
+                            "No graph to save", "Export error", JOptionPane.ERROR_MESSAGE);
                 }
 
             }
@@ -690,42 +657,7 @@ public class RoomAnalysisFrame extends JFrame {
     }
 
     public void writeToDisk(File file) {
-        //Dimension loDims = getGraphLayout().getSize();
-        Dimension vsDims = currentVisualizationViewer.getSize();
-
-        int width = vsDims.width;
-        int height = vsDims.height;
-        Color bg = currentVisualizationViewer.getBackground();
-
-        BufferedImage im = new BufferedImage(width, height, BufferedImage.TYPE_INT_BGR);
-        Graphics2D graphics = im.createGraphics();
-        graphics.setColor(bg);
-        graphics.fillRect(0, 0, width, height);
-
-
-        currentVisualizationViewer.paint(graphics);
-
-        try {
-            ImageIO.write(im, "png", file);
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
+        System.out.println("Not implemented yet!");
     }
-
-
-    private class ProbabilityEdge extends ModelEdge {
-        private final Double value;
-
-        public ProbabilityEdge(Double value) {
-            this.value = value;
-        }
-
-        @Override
-        public String toString() {
-            return new DecimalFormat("#.000").format(value);
-        }
-    }
-
-
 
 }

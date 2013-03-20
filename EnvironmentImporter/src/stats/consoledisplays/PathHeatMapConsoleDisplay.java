@@ -28,8 +28,6 @@ public class PathHeatMapConsoleDisplay extends ConsoleDisplay<HashMap<String, Ha
             System.out.println();
         }
 
-        for(String source: sumOfProbs.keySet()){
-            System.out.println(source+"="+ sumOfProbs.get(source));
-        }
+
     }
 }
