@@ -3,9 +3,7 @@ package stats.statisticshandlers;
 import gui.Phase;
 import gui.StatsDialog;
 import stats.chartdisplays.PathPredictionChartDisplay;
-import stats.chartdisplays.RoomInfoChartDisplay;
 import stats.consoledisplays.PathPredictionConsoleDisplay;
-import stats.consoledisplays.RoomInfoConsoleDisplay;
 
 import java.util.Arrays;
 import java.util.Collection;
@@ -38,7 +36,6 @@ public class PathPredictionHandler extends StatisticsHandler<PathPredictionConso
     }
 
 
-
     class GenerateRequiredDataTask extends AbstractTask {
 
 
@@ -63,7 +60,7 @@ public class PathPredictionHandler extends StatisticsHandler<PathPredictionConso
             if (allOrOne == StatsDialog.AllOrOne.EACH) {
 
                 for (String dataName : dataNames) {
-                    HashSet<String> tempDataNamesList= new HashSet<String>();
+                    HashSet<String> tempDataNamesList = new HashSet<String>();
                     tempDataNamesList.add(dataName);
 
 //                    Multiset<Double> data = summarizeData(dataNameDataMap, phase);

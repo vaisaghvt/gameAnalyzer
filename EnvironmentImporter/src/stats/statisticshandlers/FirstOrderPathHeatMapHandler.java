@@ -200,10 +200,6 @@ public class FirstOrderPathHeatMapHandler extends StatisticsHandler<PathHeatMapC
         }
 
 
-
-
-
-
     }
 
     private class RandomWalkCalculator extends SwingWorker<Void, Void> {
@@ -230,14 +226,13 @@ public class FirstOrderPathHeatMapHandler extends StatisticsHandler<PathHeatMapC
             }
 
             HashMap<String, HashMap<String, Double>> dataToDisplay = getFirstOrderMarkovData(resultMap);
-            chartDisplay.setTitle("First order heat map random walk" );
+            chartDisplay.setTitle("First order heat map random walk");
             chartDisplay.display(dataToDisplay);
             consoleDisplay.display(dataToDisplay);
 
         }
 
     }
-
 
 
 }

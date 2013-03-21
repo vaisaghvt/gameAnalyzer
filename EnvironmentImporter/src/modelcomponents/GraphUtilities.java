@@ -13,10 +13,14 @@ import org.apache.commons.math3.stat.descriptive.moment.Variance;
 import javax.swing.*;
 import javax.swing.text.DefaultCaret;
 import java.awt.*;
+import java.beans.PropertyChangeEvent;
+import java.beans.PropertyChangeListener;
 import java.text.DecimalFormat;
 import java.text.NumberFormat;
 import java.util.*;
 import java.util.List;
+import java.util.concurrent.ExecutionException;
+import java.util.concurrent.Semaphore;
 
 /**
  * Created with IntelliJ IDEA.
@@ -30,16 +34,51 @@ public class GraphUtilities {
     private final static MersenneTwister random = new MersenneTwister();
     private static final double EPSILON = 0.0000001;
 
-    public static HashMap<String, HashMap<String, HashMap<String, Double>>> calculateSecondOrderProbabilities(Collection<DirectedSparseMultigraph<ModelObject, ModelEdge>> graphCollection) {
-        HashMap<String, HashMap<String, HashMap<String, Double>>> result = new HashMap<String, HashMap<String, HashMap<String, Double>>>();
-        for (String room : NetworkModel.instance().getSortedRooms()) {
-            result.put(room,
-                    calculateSecondOrderProbForNeighbouringRooms(graphCollection, room));
+    public static HashMap<String, HashMap<String, HashMap<String, Double>>> calculateSecondOrderProbabilities(
+            final Collection<DirectedSparseMultigraph<ModelObject, ModelEdge>> graphCollection, final Semaphore semaphore){
 
 
+        final ProgressVisualizer pv = new ProgressVisualizer("Generating second order probabilities", true);
+
+        SwingWorker<HashMap<String, HashMap<String, HashMap<String, Double>>>, Void> secondOrderProbabilityCalculator = new SwingWorker<HashMap<String, HashMap<String, HashMap<String, Double>>>, Void>() {
+            @Override
+            protected HashMap<String, HashMap<String, HashMap<String, Double>>> doInBackground() throws Exception {
+                int numberOfRooms = NetworkModel.instance().getSortedRooms().size();
+                int count = 0;
+
+                this.addPropertyChangeListener(pv);
+                HashMap<String, HashMap<String, HashMap<String, Double>>> result = new HashMap<String, HashMap<String, HashMap<String, Double>>>();
+                for (String room : NetworkModel.instance().getSortedRooms()) {
+                    pv.print("processing " + room + "...\n");
+                    result.put(room,
+                            calculateSecondOrderProbForNeighbouringRooms(graphCollection, room));
+
+                    setProgress((count++ * 100) / numberOfRooms);
+
+                }
+
+                return result;
+
+            }
+
+            @Override
+            protected void done() {
+                pv.finish();
+                semaphore.release();
+            }
+        };
+
+        secondOrderProbabilityCalculator.execute();
+        try {
+            return secondOrderProbabilityCalculator.get();
+        } catch (InterruptedException e) {
+            e.printStackTrace();  //To change body of catch statement use File | Settings | File Templates.
+            return null;
+        } catch (ExecutionException e) {
+            e.printStackTrace();  //To change body of catch statement use File | Settings | File Templates.
+            return null;
         }
 
-        return result;
 
     }
 
@@ -147,16 +186,48 @@ public class GraphUtilities {
     }
 
 
-    public static HashMap<String, HashMap<String, Double>> calculateFirstOrderProbabilities(Collection<DirectedSparseMultigraph<ModelObject, ModelEdge>> graphCollection) {
-        HashMap<String, HashMap<String, Double>> result = new HashMap<String, HashMap<String, Double>>();
-        for (String room : NetworkModel.instance().getSortedRooms()) {
-            result.put(room,
-                    calculateFirstOrderProbForNeighbouringRooms(graphCollection, room));
+    public static HashMap<String, HashMap<String, Double>> calculateFirstOrderProbabilities(
+            final Collection<DirectedSparseMultigraph<ModelObject, ModelEdge>> graphCollection, final Semaphore semaphore) {
 
 
+        final ProgressVisualizer pv = new ProgressVisualizer("Generating first order probabilities", true);
+
+        SwingWorker<HashMap<String, HashMap<String, Double>>, Void> firstOrderProbabilityCalculator = new SwingWorker<HashMap<String, HashMap<String, Double>>, Void>() {
+            @Override
+            protected HashMap<String, HashMap<String, Double>> doInBackground() throws Exception {
+                int numberOfRooms = NetworkModel.instance().getSortedRooms().size();
+                int count = 0;
+                this.addPropertyChangeListener(pv);
+                HashMap<String, HashMap<String, Double>> result = new HashMap<String, HashMap<String, Double>>();
+                for (String room : NetworkModel.instance().getSortedRooms()) {
+                    pv.print("processing " + room + "...\n");
+
+                    result.put(room,
+                            calculateFirstOrderProbForNeighbouringRooms(graphCollection, room));
+
+                    setProgress((count++ * 100) / numberOfRooms);
+
+                }
+                return result;
+            }
+
+            @Override
+            protected void done() {
+                pv.finish();
+                semaphore.release();
+            }
+        };
+
+        firstOrderProbabilityCalculator.execute();
+        try {
+            return firstOrderProbabilityCalculator.get();
+        } catch (InterruptedException e) {
+            e.printStackTrace();  //To change body of catch statement use File | Settings | File Templates.
+            return null;
+        } catch (ExecutionException e) {
+            e.printStackTrace();  //To change body of catch statement use File | Settings | File Templates.
+            return null;
         }
-
-        return result;
     }
 
     private static HashMap<String, Double> calculateFirstOrderProbForNeighbouringRooms(
@@ -251,7 +322,7 @@ public class GraphUtilities {
             Collection<DirectedSparseMultigraph<ModelObject, ModelEdge>> resultSet =
                     new HashSet<DirectedSparseMultigraph<ModelObject, ModelEdge>>();
             List<Double> listOfGyrationRadius = new ArrayList<Double>();
-            ProgressVisualizer progressVisualizer = new ProgressVisualizer();
+            ProgressVisualizer progressVisualizer = new ProgressVisualizer("Generating path data", false);
             int count = 0;
             while (true) {
 
@@ -296,7 +367,7 @@ public class GraphUtilities {
 
         ModelObject currentNode = startingLocation;
         String destination = getDestination(firstOrderProbabilities.get(startRoom));
-        if(destination.equals(startRoom)){
+        if (destination.equals(startRoom)) {
             System.out.println("Source same as destination");
         }
 
@@ -315,7 +386,7 @@ public class GraphUtilities {
             ModelObject tempNode = currentNode;
             currentNode = addOneMoreHop(currentNode, lastNode, path, firstOrderProbabilities, secondOrderProbabilities, hops);
             lastNode = tempNode;
-            if(currentNode == lastNode){
+            if (currentNode == lastNode) {
                 System.out.println("Error!!");
             }
         }
@@ -334,12 +405,12 @@ public class GraphUtilities {
         if (nextLocationProbabilities == null) {
             nextLocationProbabilities = firstOrderProbabilities.get(lastNode);
         }
-        if(nextLocationProbabilities==null || nextLocationProbabilities.isEmpty()){
+        if (nextLocationProbabilities == null || nextLocationProbabilities.isEmpty()) {
             System.out.println("Mess up!!");
         }
 
         String destination = getDestination(nextLocationProbabilities);
-        if(destination.equals(lastNode.toString())){
+        if (destination.equals(lastNode.toString())) {
             System.out.println("Source and destination are same!!");
         }
 
@@ -523,27 +594,33 @@ public class GraphUtilities {
     }
 
 
-    public static class ProgressVisualizer {
+    public static class ProgressVisualizer implements PropertyChangeListener {
         private JFrame progressFrame;
         private JTextArea taskOutput;
         private double stability;
+        private JProgressBar progressBar;
 
-        public ProgressVisualizer() {
+        public ProgressVisualizer(final String title, final boolean isDeterminate) {
             SwingUtilities.invokeLater(new Runnable() {
 
 
                 @Override
                 public void run() {
-                    JProgressBar progressBar = new JProgressBar();
-                    progressBar.setIndeterminate(true);
+                    progressBar = new JProgressBar(0, 100);
+                    if(isDeterminate){
+                        progressBar.setValue(0);
+                        progressBar.setStringPainted(true);
+                    }else{
+                        progressBar.setIndeterminate(true);
 
+                    }
 
                     taskOutput = new JTextArea(5, 20);
                     taskOutput.setMargin(new Insets(5, 5, 5, 5));
                     taskOutput.setEditable(false);
                     DefaultCaret caret = (DefaultCaret) taskOutput.getCaret();
                     caret.setUpdatePolicy(DefaultCaret.ALWAYS_UPDATE);
-                    progressFrame = new JFrame("Generating path data");
+                    progressFrame = new JFrame(title);
                     progressFrame.setLayout(new BorderLayout());
                     progressFrame.add(progressBar, BorderLayout.NORTH);
                     progressFrame.add(new JScrollPane(taskOutput), BorderLayout.CENTER);
@@ -558,7 +635,6 @@ public class GraphUtilities {
         }
 
 
-
         public void finish() {
             SwingUtilities.invokeLater(new Runnable() {
                 @Override
@@ -570,7 +646,7 @@ public class GraphUtilities {
         }
 
         public void displayStability(int count) {
-            NumberFormat doubleFormat = new DecimalFormat("##.000000");
+            NumberFormat doubleFormat = new DecimalFormat("##.00000000");
             final String lastStabilityValue = doubleFormat.format(stability);
             NumberFormat integerFormat = new DecimalFormat("0000");
             final String lastCount = integerFormat.format(count);
@@ -587,6 +663,32 @@ public class GraphUtilities {
 
         public void setStability(double stability) {
             this.stability = stability;
+        }
+
+        @Override
+        public void propertyChange(PropertyChangeEvent event) {
+            if ("progress".equals(event.getPropertyName())) {
+                final int progress = (Integer) event.getNewValue();
+//            progressBar.setIndeterminate(false);
+                SwingUtilities.invokeLater(new Runnable() {
+                    @Override
+                    public void run() {
+                        progressBar.setValue(progress);
+                    }
+
+
+                });
+            }
+        }
+
+        public void print(final String s) {
+            SwingUtilities.invokeLater(new Runnable() {
+                @Override
+                public void run() {
+                    taskOutput.append(s);
+                    taskOutput.validate();
+                }
+            });
         }
     }
 }

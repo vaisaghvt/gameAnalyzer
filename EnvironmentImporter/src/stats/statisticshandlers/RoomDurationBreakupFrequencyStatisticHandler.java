@@ -10,8 +10,6 @@ import stats.StatisticChoice;
 import stats.chartdisplays.RoomDurationTotalFrequencyChartDisplay;
 import stats.consoledisplays.RoomDurationTotalFrequencyConsoleDisplay;
 
-import javax.swing.*;
-import java.awt.*;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.Set;
@@ -66,7 +64,6 @@ public class RoomDurationBreakupFrequencyStatisticHandler extends StatisticsHand
         HashMultimap<String, Long> result;
 
 
-
         public GenerateRequiredDataTask(Collection<String> dataNames, Phase phase, StatsDialog.AllOrOne allOrOne) {
             super(dataNames);
 
@@ -95,7 +92,7 @@ public class RoomDurationBreakupFrequencyStatisticHandler extends StatisticsHand
 
                 for (String dataName : dataNameDataMap.keySet()) {
                     HashMultimap<String, Long> tempResult = dataNameDataMap.get(dataName);
-                    for(String roomName : tempResult.keySet()){
+                    for (String roomName : tempResult.keySet()) {
                         result.putAll(roomName, tempResult.get(roomName));
                     }
 
@@ -108,7 +105,7 @@ public class RoomDurationBreakupFrequencyStatisticHandler extends StatisticsHand
             } else {
                 for (String dataName : dataNameDataMap.keySet()) {
                     HashMultimap<String, Long> tempResult = dataNameDataMap.get(dataName);
-                    for(String roomName : tempResult.keySet()){
+                    for (String roomName : tempResult.keySet()) {
                         result.putAll(roomName, tempResult.get(roomName));
                     }
                     Multiset<Long> dataResult = summarize(result);

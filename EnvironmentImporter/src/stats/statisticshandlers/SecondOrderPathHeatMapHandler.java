@@ -170,8 +170,6 @@ public class SecondOrderPathHeatMapHandler extends StatisticsHandler<PathHeatMap
     }
 
 
-
-
     class GenerateRequiredDataTask extends AbstractTask {
         private final Phase phase;
         HashMap<String, DirectedSparseMultigraph<ModelObject, ModelEdge>> dataNameDataMap = new HashMap<String, DirectedSparseMultigraph<ModelObject, ModelEdge>>();
@@ -240,7 +238,6 @@ public class SecondOrderPathHeatMapHandler extends StatisticsHandler<PathHeatMap
         }
 
 
-
     }
 
     private class RandomWalkCalculator extends SwingWorker<Void, Void> {
@@ -267,7 +264,7 @@ public class SecondOrderPathHeatMapHandler extends StatisticsHandler<PathHeatMap
             }
 
             HashMap<String, HashMap<String, Double>> dataToDisplay = getSecondOrderMarkovData(resultMap);
-            chartDisplay.setTitle("Second order heat map random walk" );
+            chartDisplay.setTitle("Second order heat map random walk");
             chartDisplay.display(dataToDisplay);
             consoleDisplay.display(dataToDisplay);
 

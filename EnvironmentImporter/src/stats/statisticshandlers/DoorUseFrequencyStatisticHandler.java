@@ -70,7 +70,6 @@ public class DoorUseFrequencyStatisticHandler extends StatisticsHandler<DoorUseC
     }
 
 
-
     class GenerateRequiredDataTask extends AbstractTask {
         private final Phase phase;
         private final StatisticChoice choice;
@@ -92,7 +91,7 @@ public class DoorUseFrequencyStatisticHandler extends StatisticsHandler<DoorUseC
         protected void doTasks(String dataName) {
             HashMap<String, Integer> temp;
 
-                temp = NetworkModel.instance().getEdgeDataFor(dataName, phase);
+            temp = NetworkModel.instance().getEdgeDataFor(dataName, phase);
 
 
             HashMap<String, Double> result = new HashMap<String, Double>();

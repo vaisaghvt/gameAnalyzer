@@ -125,7 +125,7 @@ public class SignificantDoorFrequencyStatisticHandler extends StatisticsHandler<
         @Override
         protected void doTasks(String dataName) {
 
-                dataNameDataMap.put(dataName, NetworkModel.instance().getEdgeDataFor(dataName));
+            dataNameDataMap.put(dataName, NetworkModel.instance().getEdgeDataFor(dataName));
 
         }
 

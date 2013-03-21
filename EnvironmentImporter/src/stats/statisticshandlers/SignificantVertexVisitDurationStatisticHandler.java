@@ -128,7 +128,7 @@ public class SignificantVertexVisitDurationStatisticHandler extends StatisticsHa
         @Override
         protected void doTasks(String dataName) {
 
-                dataNameDataMap.put(dataName, NetworkModel.instance().getVertexDataFor(dataName, choice, phase));
+            dataNameDataMap.put(dataName, NetworkModel.instance().getVertexDataFor(dataName, choice, phase));
 
 
         }

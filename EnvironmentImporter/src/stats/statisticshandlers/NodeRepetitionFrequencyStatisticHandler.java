@@ -34,7 +34,7 @@ public class NodeRepetitionFrequencyStatisticHandler extends StatisticsHandler<N
 
     @Override
     public void generateAndDisplayStats(Collection<String> dataNames, Phase phase, StatsDialog.AllOrOne allOrOne, StatsDialog.AggregationType aggregationType) {
-        GenerateRequiredDataTask task = new GenerateRequiredDataTask(dataNames,phase, allOrOne, aggregationType);
+        GenerateRequiredDataTask task = new GenerateRequiredDataTask(dataNames, phase, allOrOne, aggregationType);
         super.actualGenerateAndDisplay(task);
     }
 
@@ -135,7 +135,7 @@ public class NodeRepetitionFrequencyStatisticHandler extends StatisticsHandler<N
 
         @Override
         protected void doTasks(String dataName) {
-            HashMultimap<String, Long> temp= NetworkModel.instance().getVertexInTimesFor(dataName, phase);
+            HashMultimap<String, Long> temp = NetworkModel.instance().getVertexInTimesFor(dataName, phase);
             nameToResultMapping.put(dataName, temp);
         }
 

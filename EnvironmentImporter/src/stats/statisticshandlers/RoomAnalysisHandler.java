@@ -1,17 +1,12 @@
 package stats.statisticshandlers;
 
-import edu.uci.ics.jung.graph.DirectedSparseMultigraph;
-import gui.NetworkModel;
 import gui.Phase;
 import gui.StatsDialog;
-import modelcomponents.ModelEdge;
-import modelcomponents.ModelObject;
 import stats.chartdisplays.RoomInfoChartDisplay;
 import stats.consoledisplays.RoomInfoConsoleDisplay;
 
 import java.util.Arrays;
 import java.util.Collection;
-import java.util.HashMap;
 import java.util.HashSet;
 
 /**
@@ -41,7 +36,6 @@ public class RoomAnalysisHandler extends StatisticsHandler<RoomInfoConsoleDispla
     }
 
 
-
     class GenerateRequiredDataTask extends AbstractTask {
 
 
@@ -66,7 +60,7 @@ public class RoomAnalysisHandler extends StatisticsHandler<RoomInfoConsoleDispla
             if (allOrOne == StatsDialog.AllOrOne.EACH) {
 
                 for (String dataName : dataNames) {
-                    HashSet<String> tempDataNamesList= new HashSet<String>();
+                    HashSet<String> tempDataNamesList = new HashSet<String>();
                     tempDataNamesList.add(dataName);
 
 //                    Multiset<Double> data = summarizeData(dataNameDataMap, phase);

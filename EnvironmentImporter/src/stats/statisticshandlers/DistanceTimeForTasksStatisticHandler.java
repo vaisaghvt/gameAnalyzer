@@ -34,7 +34,6 @@ public class DistanceTimeForTasksStatisticHandler extends StatisticsHandler<Dist
         super.actualGenerateAndDisplay(task);
 
 
-
     }
 
     private HashMap<String, HashMap<String, Double>> summarizeDistanceTime(HashMap<String, Double> distanceTraveled, HashMap<String, Long> timeTaken) {
@@ -60,7 +59,7 @@ public class DistanceTimeForTasksStatisticHandler extends StatisticsHandler<Dist
         private HashMap<String, Long> timeTaken;
         private final StatisticChoice choice;
 
-        public GenerateRequiredDataTask(Collection<String> dataNames,StatisticChoice choice) {
+        public GenerateRequiredDataTask(Collection<String> dataNames, StatisticChoice choice) {
             super(dataNames);
             this.choice = choice;
             this.distanceTraveled = new HashMap<String, Double>();
@@ -70,8 +69,8 @@ public class DistanceTimeForTasksStatisticHandler extends StatisticsHandler<Dist
         @Override
         protected void doTasks(String dataName) {
 
-                distanceTraveled.put(dataName, NetworkModel.instance().getDistanceTraveledDuringTasks(dataName));
-                timeTaken.put(dataName, NetworkModel.instance().getTimeTraveledDuringTasks(dataName));
+            distanceTraveled.put(dataName, NetworkModel.instance().getDistanceTraveledDuringTasks(dataName));
+            timeTaken.put(dataName, NetworkModel.instance().getTimeTraveledDuringTasks(dataName));
 
         }
 

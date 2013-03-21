@@ -20,6 +20,8 @@ import java.text.NumberFormat;
 import java.util.*;
 import java.util.List;
 import java.util.concurrent.ExecutionException;
+import java.util.concurrent.Semaphore;
+import java.util.concurrent.TimeUnit;
 
 
 /**
@@ -368,6 +370,8 @@ public class RandomWalk {
     }
 
     public static Double getCoverageOfRandomWalks(final int pathLength, final String startingRoom) {
+        final Semaphore semaphore = new Semaphore(2);
+
         SwingWorker<Double, Void> tempWorker = new SwingWorker<Double, Void>() {
             @Override
             protected Double doInBackground() throws Exception {
@@ -375,8 +379,38 @@ public class RandomWalk {
                     generateRandomWalkCollection();
                 }
 
-                HashMap<String, HashMap<String, Double>> firstOrderProbs = GraphUtilities.calculateFirstOrderProbabilities(randomWalkGraphs);
-                HashMap<String, HashMap<String, HashMap<String, Double>>> secondOrderProbs = GraphUtilities.calculateSecondOrderProbabilities(randomWalkGraphs);
+
+                SwingWorker<HashMap<String, HashMap<String, Double>>, Void> firstOrderCalculator = new SwingWorker<HashMap<String, HashMap<String, Double>>, Void>() {
+                    @Override
+                    protected HashMap<String, HashMap<String, Double>> doInBackground() throws Exception {
+
+                        semaphore.acquire();
+                        return GraphUtilities.calculateFirstOrderProbabilities(randomWalkGraphs, semaphore);
+                    }
+
+                };
+
+                SwingWorker<HashMap<String, HashMap<String, HashMap<String, Double>>>, Void> secondOrderCalculator = new SwingWorker<HashMap<String, HashMap<String, HashMap<String, Double>>>, Void>() {
+                    @Override
+                    protected HashMap<String, HashMap<String, HashMap<String, Double>>> doInBackground() throws Exception {
+
+                        semaphore.acquire();
+                        return GraphUtilities.calculateSecondOrderProbabilities(randomWalkGraphs, semaphore);
+                    }
+
+
+                };
+
+                firstOrderCalculator.execute();
+                secondOrderCalculator.execute();
+
+
+                System.out.println("Waiting for random walk");
+                semaphore.tryAcquire(2,10, TimeUnit.MILLISECONDS);
+                System.out.println("Random walk acquired");
+                HashMap<String, HashMap<String, Double>> firstOrderProbs = firstOrderCalculator.get();
+                HashMap<String, HashMap<String, HashMap<String, Double>>> secondOrderProbs = secondOrderCalculator.get();
+                System.out.println("Data received");
 
                 Collection<DirectedSparseMultigraph<ModelObject, ModelEdge>> pathCollections = GraphUtilities.generatePaths(firstOrderProbs, secondOrderProbs, startingRoom, pathLength);
 

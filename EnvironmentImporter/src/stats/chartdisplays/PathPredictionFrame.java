@@ -1,8 +1,10 @@
 package stats.chartdisplays;
 
+import com.google.common.base.Functions;
 import com.google.common.collect.HashMultimap;
+import com.google.common.collect.ImmutableSortedMap;
+import com.google.common.collect.Ordering;
 import edu.uci.ics.jung.graph.DirectedSparseMultigraph;
-import edu.uci.ics.jung.visualization.VisualizationViewer;
 import gui.NetworkModel;
 import gui.Phase;
 import modelcomponents.GraphUtilities;
@@ -15,12 +17,15 @@ import javax.swing.text.DefaultCaret;
 import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
-import java.io.File;
+import java.text.DecimalFormat;
+import java.text.NumberFormat;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.concurrent.ExecutionException;
+import java.util.concurrent.Semaphore;
+import java.util.concurrent.TimeUnit;
 
 /**
  * Created with IntelliJ IDEA.
@@ -32,6 +37,7 @@ import java.util.concurrent.ExecutionException;
 public class PathPredictionFrame extends JFrame {
 
     private static final int PATH_LENGTH_ALLOWED = 300;
+    private JTextArea resultArea;
 
     public enum PathDataType {
         DESTINATION_PROBABILITIES, COVERAGE_COMPARISON
@@ -47,15 +53,9 @@ public class PathPredictionFrame extends JFrame {
     private JComboBox<Integer> pathLengthComboBox;
     private JComboBox<String> roomButtonComboBox;
     private Collection<String> roomList = new ArrayList<String>();
-    private HashMap<String, DirectedSparseMultigraph<ModelObject, ModelEdge>> data;
-    private JButton popOutButton = new JButton("Pop-out");
     private Collection<String> dataNameList;
 
-
-    private JButton saveAsImageButton = new JButton("Save as...");
-
     private ActionListener roomDataListener;
-    private VisualizationViewer<ModelObject, ? extends ModelEdge> currentVisualizationViewer;
     private String currentTitle;
     private JComboBox<PathDataType> typeComboBox;
 
@@ -69,43 +69,45 @@ public class PathPredictionFrame extends JFrame {
             @Override
             public void run() {
 
-                dataPanel = createRoomAnalysisPanel();
+                dataPanel = createPathPredictionFrame();
 
                 setTitle(getTitle());
                 setContentPane(dataPanel);
                 setVisible(true);
-                setSize(new Dimension(1200, 500));
+                setSize(new Dimension(1210, 800));
+
                 setLocation(100, 100);
+
                 setDefaultCloseOperation(WindowConstants.DO_NOTHING_ON_CLOSE);
             }
         });
     }
 
 
-    private JPanel createRoomAnalysisPanel() {
-        JPanel mainPanel = new JPanel(new GridLayout(1, 2));
+    private JPanel createPathPredictionFrame() {
+        JPanel mainPanel = new JPanel(new BorderLayout());
 
         JPanel buttonPanel = createButtonPanel();
-        JPanel leftPanel = createLeftPanel();
-        mainPanel.add(leftPanel);
-        mainPanel.add(buttonPanel);
+
+        JPanel panel = createResultPanel();
+        mainPanel.add(buttonPanel, BorderLayout.NORTH);
+        mainPanel.add(panel, BorderLayout.CENTER);
+
         return mainPanel;
     }
 
-    private JPanel createLeftPanel() {
-        JPanel panel = new JPanel(new BorderLayout());
-//        updateChartPanel();
-        JPanel bottomPanel = new JPanel(new GridLayout(1, 2));
+    private JPanel createResultPanel() {
+        resultArea = new JTextArea();
+        resultArea.setMargin(new Insets(5, 5, 5, 5));
+        resultArea.setEditable(false);
+        resultArea.setLineWrap(true);
+        DefaultCaret caret = (DefaultCaret) resultArea.getCaret();
+        caret.setUpdatePolicy(DefaultCaret.ALWAYS_UPDATE);
+        JPanel pane = new JPanel(new BorderLayout());
+        JScrollPane scrollPane = new JScrollPane(resultArea, JScrollPane.VERTICAL_SCROLLBAR_ALWAYS, JScrollPane.HORIZONTAL_SCROLLBAR_NEVER);
 
-        bottomPanel.add(popOutButton);
-        bottomPanel.add(saveAsImageButton);
-
-        saveAsImageButton.addActionListener(roomDataListener);
-        popOutButton.addActionListener(roomDataListener);
-        panel.add(chartDisplayPanel, BorderLayout.CENTER);
-        panel.add(bottomPanel, BorderLayout.SOUTH);
-
-        return panel;
+        pane.add(scrollPane, BorderLayout.CENTER);
+        return pane;
     }
 
 
@@ -195,15 +197,26 @@ public class PathPredictionFrame extends JFrame {
 
                             protected void done() {
                                 double total = 0.0;
-                                for (String roomName : result.keySet()) {
-                                    System.out.println(roomName + ":" + result.get(roomName));
+                                StringBuilder outputToWrite = new StringBuilder();
+                                NumberFormat doubleFormat = new DecimalFormat("00.000");
+
+                                Ordering<String> valueComparator = Ordering.natural().onResultOf(Functions.forMap(result)).reverse();
+
+                                ImmutableSortedMap<String, Double> resultMap = ImmutableSortedMap.copyOf(result, valueComparator);
+
+                                for (String roomName : resultMap.keySet()) {
+                                    if(resultMap.get(roomName)>=0.001)
+                                    outputToWrite.append(String.format("%-15s : %s %%,  ",roomName, doubleFormat.format(resultMap.get(roomName)*100) ));
                                     total += result.get(roomName);
                                 }
                                 System.out.println("total probabilities=" + total);
+                                final String resultText = outputToWrite.toString();
                                 SwingUtilities.invokeLater(new Runnable() {
                                     @Override
                                     public void run() {
                                         setTitle(room + ": path length =" + pathLength);
+                                        resultArea.setText(" Destination probabilities\n");
+                                        resultArea.append(resultText);
                                         validate();
                                         setCursor(Cursor.getPredefinedCursor(Cursor.DEFAULT_CURSOR));
                                     }
@@ -225,12 +238,16 @@ public class PathPredictionFrame extends JFrame {
                             }
 
                             protected void done() {
-                                System.out.println("Coverage Of RandomWalk = " + result.get("random"));
-                                System.out.println("Coverage Of Data = " + result.get("data"));
                                 SwingUtilities.invokeLater(new Runnable() {
                                     @Override
                                     public void run() {
                                         setTitle(room + ": path length =" + pathLength);
+                                        NumberFormat doubleFormat = new DecimalFormat("##.000");
+
+                                        resultArea.setText(" Coverage comparison \n");
+                                        resultArea.append("Coverage Of RandomWalk = " + doubleFormat.format(result.get("random")) + "%\n");
+                                        resultArea.append("Coverage Of Data = " + doubleFormat.format(result.get("data"))+"%\n");
+
                                         validate();
                                         setCursor(Cursor.getPredefinedCursor(Cursor.DEFAULT_CURSOR));
                                     }
@@ -270,6 +287,7 @@ public class PathPredictionFrame extends JFrame {
     private Double getCoverageOfData(
             final Collection<DirectedSparseMultigraph<ModelObject, ModelEdge>> graphCollection,
             final int pathLength, final String startingRoom) {
+        final Semaphore semaphore = new Semaphore(2);
 
 
         SwingWorker<Double, Void> tempWorker = new SwingWorker<Double, Void>() {
@@ -277,8 +295,38 @@ public class PathPredictionFrame extends JFrame {
             protected Double doInBackground() throws Exception {
 
 
-                HashMap<String, HashMap<String, Double>> firstOrderProbs = GraphUtilities.calculateFirstOrderProbabilities(graphCollection);
-                HashMap<String, HashMap<String, HashMap<String, Double>>> secondOrderProbs = GraphUtilities.calculateSecondOrderProbabilities(graphCollection);
+                SwingWorker<HashMap<String, HashMap<String, Double>>, Void> firstOrderCalculator = new SwingWorker<HashMap<String, HashMap<String, Double>>, Void>() {
+                    @Override
+                    protected HashMap<String, HashMap<String, Double>> doInBackground() throws Exception {
+
+                        semaphore.acquire();
+                        return GraphUtilities.calculateFirstOrderProbabilities(graphCollection,semaphore);
+                    }
+
+
+                };
+
+                SwingWorker<HashMap<String, HashMap<String, HashMap<String, Double>>>, Void> secondOrderCalculator = new SwingWorker<HashMap<String, HashMap<String, HashMap<String, Double>>>, Void>() {
+                    @Override
+                    protected HashMap<String, HashMap<String, HashMap<String, Double>>> doInBackground() throws Exception {
+
+                        semaphore.acquire();
+                        return GraphUtilities.calculateSecondOrderProbabilities(graphCollection, semaphore);
+                    }
+
+
+                };
+
+                firstOrderCalculator.execute();
+                secondOrderCalculator.execute();
+
+
+                System.out.println("Working..");
+                semaphore.tryAcquire(2, 10, TimeUnit.MILLISECONDS);
+                System.out.println("Ready to get");
+                HashMap<String, HashMap<String, Double>> firstOrderProbs = firstOrderCalculator.get();
+                HashMap<String, HashMap<String, HashMap<String, Double>>> secondOrderProbs = secondOrderCalculator.get();
+                System.out.println("Received");
 
                 Collection<DirectedSparseMultigraph<ModelObject, ModelEdge>> pathCollections = GraphUtilities.generatePaths(firstOrderProbs, secondOrderProbs, startingRoom, pathLength);
                 return GraphUtilities.calculateAverageCoverage(pathCollections);
@@ -347,7 +395,7 @@ public class PathPredictionFrame extends JFrame {
         for (String name : nameToGraphMap.keySet()) {
             graphCollection.add(nameToGraphMap.get(name));
         }
-        return GraphUtilities.calculateFirstOrderProbabilities(graphCollection);
+        return GraphUtilities.calculateFirstOrderProbabilities(graphCollection, new Semaphore(1));
     }
 
     private void addNextHop(HashMap<String, HashMap<String, Double>> results,
@@ -417,7 +465,7 @@ public class PathPredictionFrame extends JFrame {
         for (String name : nameToGraphMap.keySet()) {
             graphCollection.add(nameToGraphMap.get(name));
         }
-        return GraphUtilities.calculateSecondOrderProbabilities(graphCollection);
+        return GraphUtilities.calculateSecondOrderProbabilities(graphCollection, new Semaphore(1));
     }
 
     private HashMap<String, HashMap<String, Double>> calculateFirstHop(HashMap<String, Double> results,
@@ -605,11 +653,6 @@ public class PathPredictionFrame extends JFrame {
 
     }
 
-
-    public void writeToDisk(File file) {
-        System.out.println("Not implemented yet!");
-    }
-
     private class RoomDataListener implements ActionListener {
 
 
@@ -627,42 +670,8 @@ public class PathPredictionFrame extends JFrame {
                             }
                         });
 
-            } else if (event.getSource() == popOutButton) {
-                SwingUtilities.invokeLater(
-                        new Runnable() {
-                            @Override
-                            public void run() {
-                                JFrame poppedOutFrame = new JFrame();
-
-                                poppedOutFrame.setSize(chartDisplayPanel.getSize());
-                                poppedOutFrame.add(currentVisualizationViewer);
-                                poppedOutFrame.setVisible(true);
-                                poppedOutFrame.setTitle(currentTitle);
-                                poppedOutFrames.add(poppedOutFrame);
-
-                            }
-                        });
             } else if (event.getSource() == generateButton) {
                 updateChartPanel();
-            } else if (event.getSource() == saveAsImageButton) {
-
-
-                if (currentVisualizationViewer != null) {
-                    JFileChooser jfc = new JFileChooser(new File("."+File.separatorChar + "SavedGraphs"));
-//                    jfc.addChoosableFileFilter(new PngFileFilter());
-
-                    int result = jfc.showSaveDialog(PathPredictionFrame.this);
-                    if (result == JFileChooser.CANCEL_OPTION)
-                        return;
-                    File file = jfc.getSelectedFile();
-
-
-                    writeToDisk(file);
-                }  else {
-
-                    JOptionPane.showMessageDialog(PathPredictionFrame.this,"No graph to save","Export error", JOptionPane.ERROR_MESSAGE);
-                }
-
             }
 
         }

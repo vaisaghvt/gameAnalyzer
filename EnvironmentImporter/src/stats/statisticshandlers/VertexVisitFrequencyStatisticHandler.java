@@ -109,7 +109,7 @@ public class VertexVisitFrequencyStatisticHandler extends StatisticsHandler<Vert
         protected void doTasks(String dataName) {
             HashMap<String, Number> temp;
 
-                temp = NetworkModel.instance().getVertexDataFor(dataName, choice, phase);
+            temp = NetworkModel.instance().getVertexDataFor(dataName, choice, phase);
 
             HashMap<String, Double> result = new HashMap<String, Double>();
 
@@ -119,9 +119,9 @@ public class VertexVisitFrequencyStatisticHandler extends StatisticsHandler<Vert
                 result.put(roomName, (double) value);
 
             }
-            if(dataName.equals("random walk")){
+            if (dataName.equals("random walk")) {
                 result = normalizeResultForRandomWalk(result);
-            }else{
+            } else {
                 result = normalizeResult(result);
             }
             nameToResultMapping.put(dataName, result);
