@@ -369,22 +369,29 @@ public class RandomWalk {
         return randomWalkGraphs;
     }
 
-    public static Double getCoverageOfRandomWalks(final int pathLength, final String startingRoom) {
+    public static Double getCoverageOfRandomWalks(final int pathLength, final String startingRoom, Semaphore coverageAreaSemaphore) {
         final Semaphore semaphore = new Semaphore(2);
+        final Semaphore mutex = new Semaphore(1);
+        try {
+            mutex.acquire();
+        } catch (InterruptedException e) {
+            e.printStackTrace();  //To change body of catch statement use File | Settings | File Templates.
+        }
 
         SwingWorker<Double, Void> tempWorker = new SwingWorker<Double, Void>() {
             @Override
             protected Double doInBackground() throws Exception {
+
                 if (randomWalkGraphs == null || randomWalkGraphs.isEmpty()) {
                     generateRandomWalkCollection();
                 }
 
+                semaphore.acquire(2);
 
                 SwingWorker<HashMap<String, HashMap<String, Double>>, Void> firstOrderCalculator = new SwingWorker<HashMap<String, HashMap<String, Double>>, Void>() {
                     @Override
                     protected HashMap<String, HashMap<String, Double>> doInBackground() throws Exception {
 
-                        semaphore.acquire();
                         return GraphUtilities.calculateFirstOrderProbabilities(randomWalkGraphs, semaphore);
                     }
 
@@ -394,7 +401,7 @@ public class RandomWalk {
                     @Override
                     protected HashMap<String, HashMap<String, HashMap<String, Double>>> doInBackground() throws Exception {
 
-                        semaphore.acquire();
+
                         return GraphUtilities.calculateSecondOrderProbabilities(randomWalkGraphs, semaphore);
                     }
 
@@ -419,7 +426,10 @@ public class RandomWalk {
 
 
 
-                return GraphUtilities.calculateAverageCoverage(pathCollections);
+                Double coverage = GraphUtilities.calculateAverageCoverage(pathCollections);
+
+                mutex.release();
+                return coverage;
             }
 
 
@@ -427,6 +437,8 @@ public class RandomWalk {
         tempWorker.execute();
 
         try {
+            mutex.tryAcquire(1,5,TimeUnit.MILLISECONDS);
+            coverageAreaSemaphore.release();
             return tempWorker.get();
         } catch (InterruptedException e) {
             e.printStackTrace();

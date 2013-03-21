@@ -270,25 +270,66 @@ public class PathPredictionFrame extends JFrame {
     }
 
     private HashMap<String, Double> compareCoverage(
-            HashMap<String, DirectedSparseMultigraph<ModelObject, ModelEdge>> nameToGraphMap,
-            int pathLength, String startingRoom) {
+            final HashMap<String, DirectedSparseMultigraph<ModelObject, ModelEdge>> nameToGraphMap,
+            final int pathLength, final String startingRoom) {
         HashMap<String, Double> result = new HashMap<String, Double>();
-        Collection<DirectedSparseMultigraph<ModelObject, ModelEdge>> graphCollection = new HashSet<DirectedSparseMultigraph<ModelObject, ModelEdge>>();
-        for (String name : nameToGraphMap.keySet()) {
-            graphCollection.add(nameToGraphMap.get(name));
+
+        final Semaphore coverageAreaSemaphore = new Semaphore(2);
+        try {
+            coverageAreaSemaphore.acquire(2);
+        } catch (InterruptedException e) {
+
+            e.printStackTrace();
+        }
+        SwingWorker<Double, Void> randomWalkCoverageCalculator = new SwingWorker<Double, Void>() {
+            @Override
+            protected Double doInBackground() throws Exception {
+
+                return RandomWalk.getCoverageOfRandomWalks(pathLength, startingRoom, coverageAreaSemaphore)*100;
+            }
+        };
+        SwingWorker<Double, Void> dataBasedCoverageGenerator = new SwingWorker<Double, Void>() {
+            @Override
+            protected Double doInBackground() throws Exception {
+                Collection<DirectedSparseMultigraph<ModelObject, ModelEdge>> graphCollection = new HashSet<DirectedSparseMultigraph<ModelObject, ModelEdge>>();
+                for (String name : nameToGraphMap.keySet()) {
+                    graphCollection.add(nameToGraphMap.get(name));
+                }
+                return getCoverageOfData(graphCollection, pathLength, startingRoom, coverageAreaSemaphore)*100;
+
+            }
+        };
+
+        dataBasedCoverageGenerator.execute();
+        randomWalkCoverageCalculator.execute();
+
+        try {
+            coverageAreaSemaphore.tryAcquire(2,5,TimeUnit.MILLISECONDS);
+            result.put("random", randomWalkCoverageCalculator.get());
+
+            result.put("data", dataBasedCoverageGenerator.get() );
+        } catch (InterruptedException e) {
+            e.printStackTrace();  //To change body of catch statement use File | Settings | File Templates.
+
+        } catch (ExecutionException e) {
+            e.printStackTrace();  //To change body of catch statement use File | Settings | File Templates.
         }
 
-        result.put("random", RandomWalk.getCoverageOfRandomWalks(pathLength, startingRoom)*100);
 
-        result.put("data", getCoverageOfData(graphCollection, pathLength, startingRoom)*100);
         return result;
     }
 
     private Double getCoverageOfData(
             final Collection<DirectedSparseMultigraph<ModelObject, ModelEdge>> graphCollection,
-            final int pathLength, final String startingRoom) {
+            final int pathLength, final String startingRoom, Semaphore coverageAreaSemaphore) {
         final Semaphore semaphore = new Semaphore(2);
-
+        final Semaphore mutex = new Semaphore(1);
+        try {
+            mutex.acquire();
+            semaphore.acquire(2);
+        } catch (InterruptedException e) {
+            e.printStackTrace();  //To change body of catch statement use File | Settings | File Templates.
+        }
 
         SwingWorker<Double, Void> tempWorker = new SwingWorker<Double, Void>() {
             @Override
@@ -299,7 +340,6 @@ public class PathPredictionFrame extends JFrame {
                     @Override
                     protected HashMap<String, HashMap<String, Double>> doInBackground() throws Exception {
 
-                        semaphore.acquire();
                         return GraphUtilities.calculateFirstOrderProbabilities(graphCollection,semaphore);
                     }
 
@@ -310,7 +350,6 @@ public class PathPredictionFrame extends JFrame {
                     @Override
                     protected HashMap<String, HashMap<String, HashMap<String, Double>>> doInBackground() throws Exception {
 
-                        semaphore.acquire();
                         return GraphUtilities.calculateSecondOrderProbabilities(graphCollection, semaphore);
                     }
 
@@ -329,7 +368,11 @@ public class PathPredictionFrame extends JFrame {
                 System.out.println("Received");
 
                 Collection<DirectedSparseMultigraph<ModelObject, ModelEdge>> pathCollections = GraphUtilities.generatePaths(firstOrderProbs, secondOrderProbs, startingRoom, pathLength);
-                return GraphUtilities.calculateAverageCoverage(pathCollections);
+                Double result = GraphUtilities.calculateAverageCoverage(pathCollections);
+
+                mutex.release();
+
+                return result;
             }
 
 
@@ -337,6 +380,9 @@ public class PathPredictionFrame extends JFrame {
         tempWorker.execute();
 
         try {
+
+            mutex.tryAcquire(1,5,TimeUnit.MILLISECONDS);
+            coverageAreaSemaphore.release();
             return tempWorker.get();
         } catch (InterruptedException e) {
             e.printStackTrace();
