@@ -7,8 +7,6 @@ import stats.StatisticChoice;
 import stats.chartdisplays.DistanceTimeChartDisplay;
 import stats.consoledisplays.DistanceTimeConsoleDisplay;
 
-import javax.swing.*;
-import java.awt.*;
 import java.util.Collection;
 import java.util.HashMap;
 
@@ -71,10 +69,10 @@ public class DistanceTimeForTasksStatisticHandler extends StatisticsHandler<Dist
 
         @Override
         protected void doTasks(String dataName) {
-            synchronized (NetworkModel.instance()) {
+
                 distanceTraveled.put(dataName, NetworkModel.instance().getDistanceTraveledDuringTasks(dataName));
                 timeTaken.put(dataName, NetworkModel.instance().getTimeTraveledDuringTasks(dataName));
-            }
+
         }
 
         @Override

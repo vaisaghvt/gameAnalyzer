@@ -55,9 +55,9 @@ public class StaircaseVisitStatisticHandler extends StatisticsHandler<StaircaseV
         @Override
         protected void doTasks(String dataName) {
             YES_NO_CHOICE resultTemp;
-            synchronized (NetworkModel.instance()) {
+
                 resultTemp = NetworkModel.instance().getStaircaseRelatedMotion(dataName, phase);
-            }
+
             if (resultTemp == YES_NO_CHOICE.YES) {
                 result.put("yes", dataName);
             } else if (resultTemp == YES_NO_CHOICE.NO) {

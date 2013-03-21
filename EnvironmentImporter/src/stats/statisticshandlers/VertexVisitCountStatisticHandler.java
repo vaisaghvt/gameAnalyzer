@@ -9,8 +9,6 @@ import stats.StatisticChoice;
 import stats.chartdisplays.VertexVisitChartDisplay;
 import stats.consoledisplays.VertexVisitConsoleDisplay;
 
-import javax.swing.*;
-import java.awt.*;
 import java.util.Collection;
 import java.util.HashMap;
 
@@ -77,9 +75,9 @@ public class VertexVisitCountStatisticHandler extends StatisticsHandler<VertexVi
 
         @Override
         protected void doTasks(String dataName) {
-            synchronized (NetworkModel.instance()) {
+
                 dataNameDataMap.put(dataName, NetworkModel.instance().getVertexDataFor(dataName, choice, phase));
-            }
+
         }
 
         @Override

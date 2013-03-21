@@ -8,12 +8,9 @@ import stats.StatisticChoice;
 import stats.chartdisplays.RoomRepetitionChartDisplay;
 import stats.consoledisplays.RoomRepetitionConsoleDisplay;
 
-import javax.swing.*;
-import java.awt.*;
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.util.*;
-import java.util.List;
 
 /**
  * Created with IntelliJ IDEA.
@@ -164,9 +161,9 @@ public class RoomRememberedStatisticHandler extends StatisticsHandler<RoomRepeti
 
         @Override
         protected void doTasks(String dataName) {
-            synchronized (NetworkModel.instance()) {
+
                 dataNameDataMap.put(dataName, NetworkModel.instance().getVertexDataFor(dataName, StatisticChoice.TIME_SPENT_PER_VERTEX, phase));
-            }
+
         }
 
         @Override

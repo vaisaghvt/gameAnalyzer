@@ -5,8 +5,10 @@ import edu.uci.ics.jung.graph.DirectedSparseMultigraph;
 import edu.uci.ics.jung.visualization.VisualizationViewer;
 import gui.NetworkModel;
 import gui.Phase;
+import modelcomponents.GraphUtilities;
 import modelcomponents.ModelEdge;
 import modelcomponents.ModelObject;
+import randomwalk.RandomWalk;
 
 import javax.swing.*;
 import javax.swing.text.DefaultCaret;
@@ -14,7 +16,10 @@ import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.io.File;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.HashMap;
+import java.util.HashSet;
 import java.util.concurrent.ExecutionException;
 
 /**
@@ -25,14 +30,18 @@ import java.util.concurrent.ExecutionException;
  * To change this template use File | Settings | File Templates.
  */
 public class PathPredictionFrame extends JFrame {
+
+    private static final int PATH_LENGTH_ALLOWED = 300;
+
+    public enum PathDataType {
+        DESTINATION_PROBABILITIES, COVERAGE_COMPARISON
+    }
+
     private JPanel dataPanel;
     private JPanel chartDisplayPanel = new JPanel();
     private Collection<JFrame> poppedOutFrames = new HashSet<JFrame>();
 
-    private JCheckBox explorationCheckBox = new JCheckBox("Exploration");
-    private JCheckBox task1CheckBox = new JCheckBox("Task 1");
-    private JCheckBox task2CheckBox = new JCheckBox("Task 2");
-    private JCheckBox task3CheckBox = new JCheckBox("Task 3");
+
     private JButton closeButton = new JButton("Close");
     private JButton generateButton = new JButton("Generate");
     private JComboBox<Integer> pathLengthComboBox;
@@ -48,6 +57,7 @@ public class PathPredictionFrame extends JFrame {
     private ActionListener roomDataListener;
     private VisualizationViewer<ModelObject, ? extends ModelEdge> currentVisualizationViewer;
     private String currentTitle;
+    private JComboBox<PathDataType> typeComboBox;
 
     public PathPredictionFrame(Collection<String> dataNames) {
         roomDataListener = new RoomDataListener();
@@ -105,28 +115,26 @@ public class PathPredictionFrame extends JFrame {
         generateButton.addActionListener(roomDataListener);
         closeButton.addActionListener(roomDataListener);
         pathLengthComboBox = new JComboBox<Integer>();
-        for (int i = 1; i < 21; i++) {
+        for (int i = 1; i <= PATH_LENGTH_ALLOWED; i++) {
             pathLengthComboBox.addItem(new Integer(i));
         }
         pathLengthComboBox.setEditable(false);
 
 
-        JPanel buttonPanel = new JPanel(new GridLayout(7, 2));
+        typeComboBox = new JComboBox<PathDataType>();
+        for (PathDataType type : PathDataType.values()) {
+            typeComboBox.addItem(type);
+        }
+        typeComboBox.setEditable(false);
+
+
+        JPanel buttonPanel = new JPanel(new GridLayout(4, 2));
 
         buttonPanel.add(new JLabel("Choose Starting location :"));
         buttonPanel.add(getRoomButtonComboBox());
 
-        buttonPanel.add(new JLabel("Select phases"));
-        buttonPanel.add(explorationCheckBox);
-
-        buttonPanel.add(new JLabel());
-        buttonPanel.add(task1CheckBox);
-
-        buttonPanel.add(new JLabel());
-        buttonPanel.add(task2CheckBox);
-
-        buttonPanel.add(new JLabel());
-        buttonPanel.add(task3CheckBox);
+        buttonPanel.add(new JLabel("Select type:"));
+        buttonPanel.add(typeComboBox);
 
         buttonPanel.add(new JLabel("Path hop length:"));
         buttonPanel.add(pathLengthComboBox);
@@ -150,107 +158,183 @@ public class PathPredictionFrame extends JFrame {
         });
 
         final HashSet<Phase> selectedPhases = new HashSet<Phase>();
-        if (explorationCheckBox.isSelected()) {
-            selectedPhases.add(Phase.EXPLORATION);
-        }
-        if (task1CheckBox.isSelected()) {
-            selectedPhases.add(Phase.TASK_1);
-        }
-        if (task2CheckBox.isSelected()) {
-            selectedPhases.add(Phase.TASK_2);
-        }
-        if (task3CheckBox.isSelected()) {
-            selectedPhases.add(Phase.TASK_3);
-        }
-        if (!selectedPhases.isEmpty()) {
-            final int pathLength = pathLengthComboBox.getItemAt(pathLengthComboBox.getSelectedIndex()).intValue();
-            final String room = roomButtonComboBox.getItemAt(roomButtonComboBox.getSelectedIndex());
+        selectedPhases.add(Phase.EXPLORATION);
 
-            SwingUtilities.invokeLater(new Runnable() {
-                @Override
-                public void run() {
-                    setCursor(Cursor.getPredefinedCursor(Cursor.WAIT_CURSOR));
+        final PathDataType type = typeComboBox.getItemAt(typeComboBox.getSelectedIndex());
+        final int pathLength = pathLengthComboBox.getItemAt(pathLengthComboBox.getSelectedIndex()).intValue();
+        final String room = roomButtonComboBox.getItemAt(roomButtonComboBox.getSelectedIndex());
+
+        SwingUtilities.invokeLater(new Runnable() {
+            @Override
+            public void run() {
+                setCursor(Cursor.getPredefinedCursor(Cursor.WAIT_CURSOR));
+            }
+        });
+        SwingWorker<Void, Void> tempWorker = new SwingWorker<Void, Void>() {
+
+
+            @Override
+            protected Void doInBackground() throws Exception {
+                System.out.println("Generating name to graph mapping");
+                createCurrentTitle(room, pathLength);
+
+                final HashMap<String, DirectedSparseMultigraph<ModelObject, ModelEdge>> nameToGraphMap = generateRelevantGraphToNameMap(dataNameList, selectedPhases);
+                SwingWorker<Void, Void> tempWorker = null;
+
+                switch (type) {
+
+                    case DESTINATION_PROBABILITIES:
+                        tempWorker = new SwingWorker<Void, Void>() {
+                            public HashMap<String, Double> result;
+
+                            @Override
+                            protected Void doInBackground() throws Exception {
+                                result = predictDestinations(nameToGraphMap, pathLength, room);
+                                return null;
+                            }
+
+                            protected void done() {
+                                double total = 0.0;
+                                for (String roomName : result.keySet()) {
+                                    System.out.println(roomName + ":" + result.get(roomName));
+                                    total += result.get(roomName);
+                                }
+                                System.out.println("total probabilities=" + total);
+                                SwingUtilities.invokeLater(new Runnable() {
+                                    @Override
+                                    public void run() {
+                                        setTitle(room + ": path length =" + pathLength);
+                                        validate();
+                                        setCursor(Cursor.getPredefinedCursor(Cursor.DEFAULT_CURSOR));
+                                    }
+                                });
+                            }
+
+                        };
+
+
+                        break;
+                    case COVERAGE_COMPARISON:
+                        tempWorker = new SwingWorker<Void, Void>() {
+                            public HashMap<String, Double> result;
+
+                            @Override
+                            protected Void doInBackground() throws Exception {
+                                result = compareCoverage(nameToGraphMap, pathLength, room);
+                                return null;
+                            }
+
+                            protected void done() {
+                                System.out.println("Coverage Of RandomWalk = " + result.get("random"));
+                                System.out.println("Coverage Of Data = " + result.get("data"));
+                                SwingUtilities.invokeLater(new Runnable() {
+                                    @Override
+                                    public void run() {
+                                        setTitle(room + ": path length =" + pathLength);
+                                        validate();
+                                        setCursor(Cursor.getPredefinedCursor(Cursor.DEFAULT_CURSOR));
+                                    }
+                                });
+                            }
+
+                        };
+
+                        break;
                 }
-            });
-            SwingWorker<Void, Void> tempWorker = new SwingWorker<Void, Void>() {
-                public HashMap<String, Double> result;
 
-                @Override
-                protected Void doInBackground() throws Exception {
-                    System.out.println("Generating name to graph mapping");
-                    createCurrentTitle(room, pathLength, selectedPhases);
+                tempWorker.execute();
+                return null;
+            }
 
-                    HashMap<String, DirectedSparseMultigraph<ModelObject, ModelEdge>> nameToGraphMap = generateRelevantGraphToNameMap(dataNameList, selectedPhases);
-
-                    result = predictPath(nameToGraphMap, pathLength, room);
-
-                    return null;
-                }
-
-                protected void done() {
-                    double total =0.0;
-                    for(String roomName: result.keySet()){
-                        System.out.println(roomName+":"+ result.get(roomName));
-                        total+=result.get(roomName);
-                    }
-                    System.out.println("total probabilities="+total);
-
-                    SwingUtilities.invokeLater(new Runnable() {
-                        @Override
-                        public void run() {
-                            setTitle(room + ": path length =" + pathLength);
-                            chartDisplayPanel.setBorder(BorderFactory.createLineBorder(Color.BLACK));
-                            validate();
-                            setCursor(Cursor.getPredefinedCursor(Cursor.DEFAULT_CURSOR));
-                        }
-                    });
-                }
-
-            };
-            tempWorker.execute();
-
-        } else {
-            JOptionPane.showMessageDialog(this, "No phases selected", "Insufficient data Error!", JOptionPane.ERROR_MESSAGE);
-        }
+        };
+        tempWorker.execute();
 
 
     }
 
-    private HashMap<String, Double> predictPath(HashMap<String, DirectedSparseMultigraph<ModelObject, ModelEdge>> nameToGraphMap, int pathLength, String startRoom) {
+    private HashMap<String, Double> compareCoverage(
+            HashMap<String, DirectedSparseMultigraph<ModelObject, ModelEdge>> nameToGraphMap,
+            int pathLength, String startingRoom) {
+        HashMap<String, Double> result = new HashMap<String, Double>();
+        Collection<DirectedSparseMultigraph<ModelObject, ModelEdge>> graphCollection = new HashSet<DirectedSparseMultigraph<ModelObject, ModelEdge>>();
+        for (String name : nameToGraphMap.keySet()) {
+            graphCollection.add(nameToGraphMap.get(name));
+        }
+
+        result.put("random", RandomWalk.getCoverageOfRandomWalks(pathLength, startingRoom)*100);
+
+        result.put("data", getCoverageOfData(graphCollection, pathLength, startingRoom)*100);
+        return result;
+    }
+
+    private Double getCoverageOfData(
+            final Collection<DirectedSparseMultigraph<ModelObject, ModelEdge>> graphCollection,
+            final int pathLength, final String startingRoom) {
 
 
+        SwingWorker<Double, Void> tempWorker = new SwingWorker<Double, Void>() {
+            @Override
+            protected Double doInBackground() throws Exception {
 
 
+                HashMap<String, HashMap<String, Double>> firstOrderProbs = GraphUtilities.calculateFirstOrderProbabilities(graphCollection);
+                HashMap<String, HashMap<String, HashMap<String, Double>>> secondOrderProbs = GraphUtilities.calculateSecondOrderProbabilities(graphCollection);
 
-        HashMap<String, Double> firstOrderProbabilities = calculateFirstOrderProbForNeighbouringRooms(nameToGraphMap, startRoom);
+                Collection<DirectedSparseMultigraph<ModelObject, ModelEdge>> pathCollections = GraphUtilities.generatePaths(firstOrderProbs, secondOrderProbs, startingRoom, pathLength);
+                return GraphUtilities.calculateAverageCoverage(pathCollections);
+            }
 
-        HashMap<String, HashMap<String, HashMap<String, Double>>> secondOrderProbabilities = calculateSecondOrderProb(nameToGraphMap);
+
+        };
+        tempWorker.execute();
+
+        try {
+            return tempWorker.get();
+        } catch (InterruptedException e) {
+            e.printStackTrace();
+            return null;
+        } catch (ExecutionException e) {
+            e.printStackTrace();
+            return null;
+        }
+
+    }
+
+    private HashMap<String, Double> predictDestinations(HashMap<String, DirectedSparseMultigraph<ModelObject, ModelEdge>> nameToGraphMap, int pathLength, String startRoom) {
+
+
+        HashMap<String, HashMap<String, Double>> firstOrderProbabilities = calculateFirstOrderProb(nameToGraphMap);
+
+
+        if (pathLength == 1) {
+
+
+            return firstOrderProbabilities.get(startRoom);
+        }
+
+        HashMap<String, HashMap<String, HashMap<String, Double>>> secondOrderProbabilities =
+                calculateSecondOrderProb(nameToGraphMap);
+
 
         HashMultimap<String, String> currentHistories = HashMultimap.create();
 
 
-        for (String room : firstOrderProbabilities.keySet()) {
+        for (String room : firstOrderProbabilities.get(startRoom).keySet()) {
             currentHistories.put(room, startRoom);
-
-
 //            results.put(room, firstOrderProbabilities.get(room));
-
         }
-        HashMap<String, HashMap<String, Double>> results = calculateFirstHop(nameToGraphMap, firstOrderProbabilities, currentHistories, secondOrderProbabilities);
-
-
-
+        HashMap<String, HashMap<String, Double>> results = calculateFirstHop(firstOrderProbabilities.get(startRoom), currentHistories, firstOrderProbabilities, secondOrderProbabilities);
 
 
         for (int hops = 2; hops < pathLength; hops++) {
-            addNextHop(nameToGraphMap, results, currentHistories, secondOrderProbabilities);
+            addNextHop(results, currentHistories, firstOrderProbabilities, secondOrderProbabilities);
         }
 
         HashMap<String, Double> finalResult = new HashMap<String, Double>();
-        for(String finalLocation:results.keySet()){
-            double value =0.0;
-            for(String penultimateLocation:results.get(finalLocation).keySet()){
-                value+= results.get(finalLocation).get(penultimateLocation);
+        for (String finalLocation : results.keySet()) {
+            double value = 0.0;
+            for (String penultimateLocation : results.get(finalLocation).keySet()) {
+                value += results.get(finalLocation).get(penultimateLocation);
             }
             finalResult.put(finalLocation, value);
         }
@@ -258,45 +342,52 @@ public class PathPredictionFrame extends JFrame {
         return finalResult;
     }
 
-    private void addNextHop(HashMap<String, DirectedSparseMultigraph<ModelObject, ModelEdge>> nameToGraphMap, HashMap<String, HashMap<String, Double>> results, HashMultimap<String, String> currentHistories, HashMap<String, HashMap<String, HashMap<String, Double>>> secondOrderProbabilities) {
+    private HashMap<String, HashMap<String, Double>> calculateFirstOrderProb(HashMap<String, DirectedSparseMultigraph<ModelObject, ModelEdge>> nameToGraphMap) {
+        Collection<DirectedSparseMultigraph<ModelObject, ModelEdge>> graphCollection = new HashSet<DirectedSparseMultigraph<ModelObject, ModelEdge>>();
+        for (String name : nameToGraphMap.keySet()) {
+            graphCollection.add(nameToGraphMap.get(name));
+        }
+        return GraphUtilities.calculateFirstOrderProbabilities(graphCollection);
+    }
+
+    private void addNextHop(HashMap<String, HashMap<String, Double>> results,
+                            HashMultimap<String, String> currentHistories, HashMap<String, HashMap<String, Double>> firstOrderProbabilities, HashMap<String, HashMap<String, HashMap<String, Double>>> secondOrderProbabilities) {
 
         HashMultimap<String, String> futureHistories = HashMultimap.create();
         HashMap<String, HashMap<String, Double>> newResults = new HashMap<String, HashMap<String, Double>>();
 
-        for(String currentLocation:currentHistories.keySet()){       // For each of the possible current locations
+        for (String currentLocation : currentHistories.keySet()) {       // For each of the possible current locations
 
 
             HashMap<String, HashMap<String, Double>> currentLocationSecondOrderProbabilities = secondOrderProbabilities.get(currentLocation);
             // The probability of reaching a destination by going through that room.
-            for(String prevLocation: currentHistories.get(currentLocation)) {
+            for (String prevLocation : currentHistories.get(currentLocation)) {
                 double priorProbability = results.get(currentLocation).get(prevLocation);  // THe prabability of being in that current location.
 
 
-                HashMap<String, Double> secondOrderProbabilitiesForConsideration = currentLocationSecondOrderProbabilities.containsKey(prevLocation)?
-                        currentLocationSecondOrderProbabilities.get(prevLocation):
-                        calculateFirstOrderProbForNeighbouringRooms(nameToGraphMap,currentLocation);
+                HashMap<String, Double> secondOrderProbabilitiesForConsideration = currentLocationSecondOrderProbabilities.containsKey(prevLocation) ?
+                        currentLocationSecondOrderProbabilities.get(prevLocation) :
+                        firstOrderProbabilities.get(currentLocation);
                 // Given a previous location the probability of reaching a particular destination on passing through current location
 
 
-
-                for(String possibleDestination: secondOrderProbabilitiesForConsideration.keySet()){
-                    if(!newResults.containsKey(possibleDestination)){
+                for (String possibleDestination : secondOrderProbabilitiesForConsideration.keySet()) {
+                    if (!newResults.containsKey(possibleDestination)) {
                         newResults.put(possibleDestination, new HashMap<String, Double>());
                     }
                     HashMap<String, Double> newResultsForPossibleDestination = newResults.get(possibleDestination);
 
 
-
                     double secondOrderValue = secondOrderProbabilitiesForConsideration.get(possibleDestination).doubleValue();
 
-                    double probabilityToWrite = Math.exp(Math.log(priorProbability) +Math.log(secondOrderValue));
-                    if(newResultsForPossibleDestination.containsKey(currentLocation)){
-                        double newValue = newResultsForPossibleDestination.get(currentLocation)+probabilityToWrite;
+                    double probabilityToWrite = Math.exp(Math.log(priorProbability) + Math.log(secondOrderValue));
+                    if (newResultsForPossibleDestination.containsKey(currentLocation)) {
+                        double newValue = newResultsForPossibleDestination.get(currentLocation) + probabilityToWrite;
                         newResultsForPossibleDestination.put(currentLocation, newValue);
 
 
-                    }else{
-                        newResultsForPossibleDestination.put(currentLocation,probabilityToWrite );
+                    } else {
+                        newResultsForPossibleDestination.put(currentLocation, probabilityToWrite);
                     }
 
 
@@ -304,7 +395,6 @@ public class PathPredictionFrame extends JFrame {
                     newResults.put(possibleDestination, newResultsForPossibleDestination);
                 }
             }
-
 
 
         }
@@ -315,7 +405,7 @@ public class PathPredictionFrame extends JFrame {
         results.clear();
         results.putAll(newResults);
 
-        if(!newResults.keySet().containsAll(futureHistories.keySet()) || ! futureHistories.keySet().containsAll(newResults.keySet())){
+        if (!newResults.keySet().containsAll(futureHistories.keySet()) || !futureHistories.keySet().containsAll(newResults.keySet())) {
             System.out.println("Calculation Mistake.");
         }
 
@@ -323,54 +413,44 @@ public class PathPredictionFrame extends JFrame {
 
     private HashMap<String, HashMap<String, HashMap<String, Double>>> calculateSecondOrderProb(
             HashMap<String, DirectedSparseMultigraph<ModelObject, ModelEdge>> nameToGraphMap) {
-
-        HashMap<String, HashMap<String, HashMap<String, Double>>> result = new HashMap<String, HashMap<String, HashMap<String, Double>>>();
-        for(String room:roomList){
-            result.put(room,
-                    calculateSecondOrderProbForNeighbouringRooms(nameToGraphMap, room));
-
-
+        Collection<DirectedSparseMultigraph<ModelObject, ModelEdge>> graphCollection = new HashSet<DirectedSparseMultigraph<ModelObject, ModelEdge>>();
+        for (String name : nameToGraphMap.keySet()) {
+            graphCollection.add(nameToGraphMap.get(name));
         }
-
-        return result;
+        return GraphUtilities.calculateSecondOrderProbabilities(graphCollection);
     }
 
-    private HashMap<String, HashMap<String, Double>> calculateFirstHop(HashMap<String, DirectedSparseMultigraph<ModelObject, ModelEdge>> nameToGraphMap, HashMap<String, Double> results,
+    private HashMap<String, HashMap<String, Double>> calculateFirstHop(HashMap<String, Double> results,
                                                                        HashMultimap<String, String> currentHistories,
-                                                                       HashMap<String, HashMap<String, HashMap<String, Double>>> secondOrderProbabilities) {
+                                                                       HashMap<String, HashMap<String, Double>> firstOrderProbabilities, HashMap<String, HashMap<String, HashMap<String, Double>>> secondOrderProbabilities) {
 
         HashMultimap<String, String> futureHistories = HashMultimap.create();
         HashMap<String, HashMap<String, Double>> newResult = new HashMap<String, HashMap<String, Double>>();
 
-        for(String currentLocation:currentHistories.keySet()){       // For each of the possible current locations
+        for (String currentLocation : currentHistories.keySet()) {       // For each of the possible current locations
             double priorProbability = results.get(currentLocation);  // THe prabability of being in that current location.
 
-
             HashMap<String, HashMap<String, Double>> currentLocationSecondOrderProbabilities = secondOrderProbabilities.get(currentLocation);
-                                                                     // The probability of reaching a destination by going through that room.
-            for(String prevLocation: currentHistories.get(currentLocation)) {
-                HashMap<String, Double> secondOrderProbabilitiesForConsideration = currentLocationSecondOrderProbabilities.containsKey(prevLocation)?
-                        currentLocationSecondOrderProbabilities.get(prevLocation):
-                        calculateFirstOrderProbForNeighbouringRooms(nameToGraphMap,currentLocation);
+            // The probability of reaching a destination by going through that room.
+            for (String prevLocation : currentHistories.get(currentLocation)) {
+                HashMap<String, Double> secondOrderProbabilitiesForConsideration = currentLocationSecondOrderProbabilities.containsKey(prevLocation) ?
+                        currentLocationSecondOrderProbabilities.get(prevLocation) :
+                        firstOrderProbabilities.get(currentLocation);
 
 
-
-                for(String possibleDestination: secondOrderProbabilitiesForConsideration.keySet()){
-                    if(!newResult.containsKey(possibleDestination)){
+                for (String possibleDestination : secondOrderProbabilitiesForConsideration.keySet()) {
+                    if (!newResult.containsKey(possibleDestination)) {
                         newResult.put(possibleDestination, new HashMap<String, Double>());
                     }
                     HashMap<String, Double> newResultsForPossibleDestination = newResult.get(possibleDestination);
-
-
-
                     double secondOrderValue = secondOrderProbabilitiesForConsideration.get(possibleDestination).doubleValue();
 
-                    double probabilityToWrite = Math.exp(Math.log(priorProbability) +Math.log(secondOrderValue));
-                    if(newResultsForPossibleDestination.containsKey(currentLocation)){
+                    double probabilityToWrite = Math.exp(Math.log(priorProbability) + Math.log(secondOrderValue));
+                    if (newResultsForPossibleDestination.containsKey(currentLocation)) {
                         System.out.println("HOW???");
 
 
-                    }else{
+                    } else {
                         newResultsForPossibleDestination.put(currentLocation, probabilityToWrite);
                     }
 
@@ -381,204 +461,23 @@ public class PathPredictionFrame extends JFrame {
             }
 
 
-
         }
 
         currentHistories.clear();
         currentHistories.putAll(futureHistories);
 
 
-
-        if(!newResult.keySet().containsAll(futureHistories.keySet()) || ! futureHistories.keySet().containsAll(newResult.keySet())){
+        if (!newResult.keySet().containsAll(futureHistories.keySet()) || !futureHistories.keySet().containsAll(newResult.keySet())) {
             System.out.println("Calculation Mistake.");
         }
         return newResult;
     }
 
-    private HashMap<String, HashMap<String, Double>> calculateSecondOrderProbForNeighbouringRooms(
-            HashMap<String, DirectedSparseMultigraph<ModelObject, ModelEdge>> nameToGraphMap, String startRoom) {
-        ModelObject mainNode = NetworkModel.instance().findRoomByName(startRoom);
-        Collection<ModelObject> neighbours = NetworkModel.instance().getCompleteGraph().getNeighbors(mainNode);
-        DirectedSparseMultigraph<ModelObject, ModelEdge> localGraph = new DirectedSparseMultigraph<ModelObject, ModelEdge>();
 
-//        localGraph.addVertex(mainNode);
-        for (ModelObject node : neighbours) {
-            localGraph.addVertex(node);
-        }
-
-        for (String name : nameToGraphMap.keySet()) {
-            DirectedSparseMultigraph<ModelObject, ModelEdge> tempGraph = nameToGraphMap.get(name);
-
-            if (!tempGraph.containsVertex(mainNode)) {
-                continue;
-            }
-
-            TreeSet<ModelEdge> edgeCollection = new TreeSet<ModelEdge>(new Comparator<ModelEdge>() {
-                @Override
-                public int compare(ModelEdge o1, ModelEdge o2) {
-                    return (int) (o1.getTime() - o2.getTime());
-                }
-            });
-
-            edgeCollection.addAll(tempGraph.getIncidentEdges(mainNode));
-
-            ModelEdge lonelyEdge = null;
-            if (tempGraph.inDegree(mainNode) > tempGraph.outDegree(mainNode)) {
-                //Ending Vertex;
-                lonelyEdge = edgeCollection.pollLast();
-
-                localGraph.addVertex(mainNode);
-                localGraph.addEdge(new ModelEdge(),
-                        tempGraph.getOpposite(mainNode, lonelyEdge),
-                        mainNode
-                );
-
-            } else if (tempGraph.inDegree(mainNode) < tempGraph.outDegree(mainNode)) {
-                //First Vertex;
-                lonelyEdge = edgeCollection.pollFirst();
-
-
-                localGraph.addVertex(mainNode);
-                localGraph.addEdge(new ModelEdge(),
-                        mainNode,
-                        tempGraph.getOpposite(mainNode, lonelyEdge)
-                );
-
-            }
-
-            for (int i = 0; i < edgeCollection.size() / 2; i++) {
-                ModelEdge incoming = edgeCollection.pollFirst();
-                ModelEdge outgoing = edgeCollection.pollFirst();
-                ModelObject from = tempGraph.getOpposite(mainNode, incoming);
-                ModelObject to = tempGraph.getOpposite(mainNode, outgoing);
-                localGraph.addEdge(new ModelEdge(), from, to);
-            }
-        }
-
-
-
-        return  convertToSecondOrderProbabilities(localGraph);
-    }
-
-    private HashMap<String, HashMap<String, Double>> convertToSecondOrderProbabilities(DirectedSparseMultigraph<ModelObject, ModelEdge> localGraph) {
-        HashMap<String, HashMap<String, Integer>> nodeToNodeTravelFrequency = new HashMap<String, HashMap<String, Integer>>();
-
-        for (ModelEdge edge : localGraph.getEdges()) {
-            String source = localGraph.getSource(edge).toString();
-            String destination = localGraph.getDest(edge).toString();
-
-            if (!nodeToNodeTravelFrequency.containsKey(source)) {
-                nodeToNodeTravelFrequency.put(source, new HashMap<String, Integer>());
-            }
-            if (!nodeToNodeTravelFrequency.get(source).containsKey(destination)) {
-                nodeToNodeTravelFrequency.get(source).put(destination, 0);
-            }
-
-            int currentValue = nodeToNodeTravelFrequency.get(source).get(destination).intValue();
-            nodeToNodeTravelFrequency.get(source).put(destination, currentValue + 1);
-
-        }
-
-        HashMap<String, HashMap<String, Double>> nodeToNodeProbabilities = new HashMap<String, HashMap<String, Double>>();
-
-        for (String source : nodeToNodeTravelFrequency.keySet()) {
-            nodeToNodeProbabilities.put(source, new HashMap<String, Double>());
-            double totalNumberOfOutEdges = 0.0;
-            for (String dest : nodeToNodeTravelFrequency.get(source).keySet()) {
-                totalNumberOfOutEdges += nodeToNodeTravelFrequency.get(source).get(dest);
-            }
-            for (String dest : nodeToNodeTravelFrequency.get(source).keySet()) {
-
-                nodeToNodeProbabilities.get(source).put(dest, (double) nodeToNodeTravelFrequency.get(source).get(dest) / totalNumberOfOutEdges);
-            }
-
-
-        }
-
-
-       return nodeToNodeProbabilities;
-    }
-
-    private HashMap<String, Double> calculateFirstOrderProbForNeighbouringRooms(
-            HashMap<String, DirectedSparseMultigraph<ModelObject, ModelEdge>> nameToGraphMap, String room) {
-        ModelObject mainNode = NetworkModel.instance().findRoomByName(room);
-        Collection<ModelObject> neighbours = NetworkModel.instance().getCompleteGraph().getNeighbors(mainNode);
-        DirectedSparseMultigraph<ModelObject, ModelEdge> localGraph = new DirectedSparseMultigraph<ModelObject, ModelEdge>();
-
-        localGraph.addVertex(mainNode);
-        for (ModelObject node : neighbours) {
-            localGraph.addVertex(node);
-        }
-
-        for (String name : nameToGraphMap.keySet()) {
-            DirectedSparseMultigraph<ModelObject, ModelEdge> tempGraph = nameToGraphMap.get(name);
-
-            if (!tempGraph.containsVertex(mainNode)) {
-                continue;
-            }
-
-
-            for (ModelEdge edge : tempGraph.getOutEdges(mainNode)) {
-
-                localGraph.addEdge(new ModelEdge(), mainNode, tempGraph.getOpposite(mainNode, edge));
-            }
-
-        }
-
-
-        return convertToFirstOrderProbabilities(localGraph, mainNode);
-    }
-
-    private HashMap<String, Double> convertToFirstOrderProbabilities(DirectedSparseMultigraph<ModelObject, ModelEdge> localGraph, ModelObject source) {
-        HashMap<String, Integer> nodeToNodeTravelFrequency = new HashMap<String, Integer>();
-
-        for (ModelEdge edge : localGraph.getEdges()) {
-
-            String destination = localGraph.getDest(edge).toString();
-
-
-            if (!nodeToNodeTravelFrequency.containsKey(destination)) {
-                nodeToNodeTravelFrequency.put(destination, 0);
-            }
-
-            int currentValue = nodeToNodeTravelFrequency.get(destination).intValue();
-            nodeToNodeTravelFrequency.put(destination, currentValue + 1);
-
-        }
-
-        HashMap<String, Double> nodeToNodeProbabilities = new HashMap<String, Double>();
-
-
-        double totalNumberOfOutEdges = 0.0;
-        for (String destination : nodeToNodeTravelFrequency.keySet()) {
-            totalNumberOfOutEdges += nodeToNodeTravelFrequency.get(destination);
-        }
-        for (String destination : nodeToNodeTravelFrequency.keySet()) {
-
-            nodeToNodeProbabilities.put(destination,
-                    (double) nodeToNodeTravelFrequency.get(destination) / totalNumberOfOutEdges);
-        }
-
-
-        return nodeToNodeProbabilities;
-    }
-
-    private void createCurrentTitle(String room, int pathLength, HashSet<Phase> selectedPhases) {
+    private void createCurrentTitle(String room, int pathLength) {
 
         currentTitle = room + ": length=" + pathLength + ":";
 
-        if (selectedPhases.contains(Phase.EXPLORATION)) {
-            currentTitle += "E";
-        }
-        if (selectedPhases.contains(Phase.TASK_1)) {
-            currentTitle += "1";
-        }
-        if (selectedPhases.contains(Phase.TASK_2)) {
-            currentTitle += "2";
-        }
-        if (selectedPhases.contains(Phase.TASK_3)) {
-            currentTitle += "3";
-        }
         setTitle(currentTitle);
     }
 
@@ -707,6 +606,10 @@ public class PathPredictionFrame extends JFrame {
     }
 
 
+    public void writeToDisk(File file) {
+        System.out.println("Not implemented yet!");
+    }
+
     private class RoomDataListener implements ActionListener {
 
 
@@ -745,7 +648,7 @@ public class PathPredictionFrame extends JFrame {
 
 
                 if (currentVisualizationViewer != null) {
-                    JFileChooser jfc = new JFileChooser(new File("." + File.separatorChar + "SavedGraphs"));
+                    JFileChooser jfc = new JFileChooser(new File("."+File.separatorChar + "SavedGraphs"));
 //                    jfc.addChoosableFileFilter(new PngFileFilter());
 
                     int result = jfc.showSaveDialog(PathPredictionFrame.this);
@@ -755,19 +658,14 @@ public class PathPredictionFrame extends JFrame {
 
 
                     writeToDisk(file);
-                } else {
+                }  else {
 
-                    JOptionPane.showMessageDialog(PathPredictionFrame.this,
-                            "No graph to save", "Export error", JOptionPane.ERROR_MESSAGE);
+                    JOptionPane.showMessageDialog(PathPredictionFrame.this,"No graph to save","Export error", JOptionPane.ERROR_MESSAGE);
                 }
 
             }
 
         }
-    }
-
-    public void writeToDisk(File file) {
-        System.out.println("Not implemented yet!");
     }
 
 }

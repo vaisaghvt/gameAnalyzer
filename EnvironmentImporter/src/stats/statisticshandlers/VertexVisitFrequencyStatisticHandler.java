@@ -108,9 +108,9 @@ public class VertexVisitFrequencyStatisticHandler extends StatisticsHandler<Vert
         @Override
         protected void doTasks(String dataName) {
             HashMap<String, Number> temp;
-            synchronized (NetworkModel.instance()) {
+
                 temp = NetworkModel.instance().getVertexDataFor(dataName, choice, phase);
-            }
+
             HashMap<String, Double> result = new HashMap<String, Double>();
 
             for (String roomName : temp.keySet()) {

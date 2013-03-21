@@ -20,13 +20,10 @@ import java.util.Set;
  * Time: 12:39 PM
  * To change this template use File | Settings | File Templates.
  */
-public abstract class StatisticsHandler<T extends ConsoleDisplay, V extends ChartDisplay> implements PropertyChangeListener {
+public abstract class StatisticsHandler<T extends ConsoleDisplay, V extends ChartDisplay> {
 
     T consoleDisplay;
     V chartDisplay;
-    protected JProgressBar progressBar;
-    protected JTextArea taskOutput;
-    protected JFrame progressFrame;
 
 
     protected StatisticsHandler(V chartDisplay, T consoleDisplay) {
@@ -41,8 +38,8 @@ public abstract class StatisticsHandler<T extends ConsoleDisplay, V extends Char
 
     public <U extends AbstractTask> void actualGenerateAndDisplay(U task) {
         if (!task.getDataNames().isEmpty()) {
-            createProgressBar();
-            task.addPropertyChangeListener(this);
+            task.setProgressVisualizer(new ProgressVisualizer());
+
             task.execute();
         } else {
             System.out.println("No Data Names selected!");
@@ -87,48 +84,11 @@ public abstract class StatisticsHandler<T extends ConsoleDisplay, V extends Char
         }
     }
 
-    protected void createProgressBar() {
-        progressBar = new JProgressBar(0, 100);
-        progressBar.setValue(0);
-        progressBar.setStringPainted(true);
-        taskOutput = new JTextArea(5, 20);
-        taskOutput.setMargin(new Insets(5, 5, 5, 5));
-        taskOutput.setEditable(false);
-        DefaultCaret caret = (DefaultCaret) taskOutput.getCaret();
-        caret.setUpdatePolicy(DefaultCaret.ALWAYS_UPDATE);
-        progressFrame = new JFrame("Processing data");
-        progressFrame.setLayout(new BorderLayout());
-        progressFrame.add(progressBar, BorderLayout.NORTH);
-        progressFrame.add(new JScrollPane(taskOutput), BorderLayout.CENTER);
-        progressFrame.setDefaultCloseOperation(WindowConstants.DO_NOTHING_ON_CLOSE);
-        Dimension screenSize = Toolkit.getDefaultToolkit().getScreenSize();
-        double width = screenSize.getWidth();
-        double height = screenSize.getHeight();
-        progressFrame.setLocation((int) Math.floor(width / 2 - 200), (int) Math.floor(height / 2 - 100));
-        progressFrame.setSize(400, 200);
-        progressFrame.setVisible(true);
-
-    }
-
-    @Override
-    public void propertyChange(PropertyChangeEvent event) {
-        if ("progress".equals(event.getPropertyName())) {
-            final int progress = (Integer) event.getNewValue();
-//            progressBar.setIndeterminate(false);
-            SwingUtilities.invokeLater(new Runnable() {
-                @Override
-                public void run() {
-                    progressBar.setValue(progress);
-                }
-
-
-            });
-        }
-    }
 
     abstract class AbstractTask extends SwingWorker<Void, Void> {
 
         protected final Collection<String> dataNames;
+        private ProgressVisualizer progressVisualizer;
 
 
         public AbstractTask(Collection<String> dataNames) {
@@ -158,42 +118,108 @@ public abstract class StatisticsHandler<T extends ConsoleDisplay, V extends Char
             int i = 1;
             for (String dataName : dataNames) {
                 final String tempDataName = dataName;
-                SwingUtilities.invokeLater(new Runnable() {
-                    @Override
-                    public void run() {
-                        taskOutput.append("Processing " + tempDataName + "...\n");
-                    }
-                });
+                progressVisualizer.print("Processing " + tempDataName + "...\n");
+
                 doTasks(dataName);
                 final int currentProgress = i;
-                SwingUtilities.invokeLater(new Runnable() {
-                    @Override
-                    public void run() {
-                        setProgress((currentProgress * 100) / size);
-                    }
-                });
+
+                setProgress((currentProgress * 100) / size);
+
                 i++;
             }
+            progressVisualizer.print("done");
+
             return null;
         }
 
         @Override
         public final void done() {
             Toolkit.getDefaultToolkit().beep();
-            SwingUtilities.invokeLater(new Runnable() {
-                @Override
-                public void run() {
-                    progressFrame.dispose();
-                    taskOutput.append("Done.");
-                }
-            });
-
-
+            progressVisualizer.finish();
             summarizeAndDisplay();
         }
 
         public Collection<String> getDataNames() {
             return dataNames;
+        }
+
+        public void setProgressVisualizer(ProgressVisualizer progressVisualizer) {
+            this.progressVisualizer = progressVisualizer;
+            this.addPropertyChangeListener(progressVisualizer);
+        }
+    }
+
+
+    public static class ProgressVisualizer implements PropertyChangeListener {
+        private JFrame progressFrame;
+        private JTextArea taskOutput;
+        private JProgressBar progressBar;
+
+        public ProgressVisualizer() {
+            SwingUtilities.invokeLater(new Runnable() {
+
+
+                @Override
+                public void run() {
+                    progressBar = new JProgressBar(0, 100);
+                    progressBar.setValue(0);
+                    progressBar.setStringPainted(true);
+                    taskOutput = new JTextArea(5, 20);
+                    taskOutput.setMargin(new Insets(5, 5, 5, 5));
+                    taskOutput.setEditable(false);
+                    DefaultCaret caret = (DefaultCaret) taskOutput.getCaret();
+                    caret.setUpdatePolicy(DefaultCaret.ALWAYS_UPDATE);
+                    progressFrame = new JFrame("Processing data");
+                    progressFrame.setLayout(new BorderLayout());
+                    progressFrame.add(progressBar, BorderLayout.NORTH);
+                    progressFrame.add(new JScrollPane(taskOutput), BorderLayout.CENTER);
+                    progressFrame.setDefaultCloseOperation(WindowConstants.DO_NOTHING_ON_CLOSE);
+                    Dimension screenSize = Toolkit.getDefaultToolkit().getScreenSize();
+                    double width = screenSize.getWidth();
+                    double height = screenSize.getHeight();
+                    progressFrame.setLocation((int) Math.floor(width / 2 - 200), (int) Math.floor(height / 2 - 100));
+                    progressFrame.setSize(400, 200);
+                    progressFrame.setVisible(true);
+                }
+            });
+        }
+
+
+        public void finish() {
+            SwingUtilities.invokeLater(new Runnable() {
+                @Override
+                public void run() {
+
+                    progressFrame.dispose();
+                }
+            });
+        }
+
+
+        @Override
+        public void propertyChange(PropertyChangeEvent event) {
+            if ("progress".equals(event.getPropertyName())) {
+                final int progress = (Integer) event.getNewValue();
+//            progressBar.setIndeterminate(false);
+                SwingUtilities.invokeLater(new Runnable() {
+                    @Override
+                    public void run() {
+                        progressBar.setValue(progress);
+                    }
+
+
+                });
+            }
+        }
+
+        public void print(final String s) {
+            SwingUtilities.invokeLater(new Runnable() {
+                @Override
+                public void run() {
+                    taskOutput.append(s);
+                    taskOutput.validate();
+                }
+            });
         }
     }
 

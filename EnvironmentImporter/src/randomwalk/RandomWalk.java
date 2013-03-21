@@ -7,10 +7,7 @@ import edu.uci.ics.jung.graph.DirectedSparseMultigraph;
 import edu.uci.ics.jung.graph.Graph;
 import gui.NetworkModel;
 import javafx.geometry.Point3D;
-import modelcomponents.ModelArea;
-import modelcomponents.ModelEdge;
-import modelcomponents.ModelGroup;
-import modelcomponents.ModelObject;
+import modelcomponents.*;
 import org.apache.commons.collections15.buffer.CircularFifoBuffer;
 import org.apache.commons.math3.stat.descriptive.moment.Mean;
 import org.apache.commons.math3.stat.descriptive.moment.Variance;
@@ -35,9 +32,8 @@ import java.util.concurrent.ExecutionException;
 public class RandomWalk {
     private final static MersenneTwister random = new MersenneTwister();
     private static CircularFifoBuffer<Double> varianceList = new CircularFifoBuffer<Double>(5);
-    private static final double EPSILON = 0.00001;
+    private static final double EPSILON = 0.0000001;
     private static Collection<DirectedSparseMultigraph<ModelObject, ModelEdge>> randomWalkGraphs;
-    private static RandomWalk randomWalkInstance;
     private static Graph<ModelObject, ModelEdge> completeGraph = null;
     private static ModelObject startingLocation = null;
     private static JTextArea taskOutput;
@@ -61,7 +57,7 @@ public class RandomWalk {
 
         varianceList.clear();
         Collection<DirectedSparseMultigraph<ModelObject, ModelEdge>> resultSet =
-            new HashSet<DirectedSparseMultigraph<ModelObject, modelcomponents.ModelEdge>>();
+                new HashSet<DirectedSparseMultigraph<ModelObject, modelcomponents.ModelEdge>>();
         List<Double> listOfGyrationRadius = new ArrayList<Double>();
         createProgressBar();
         int count = 0;
@@ -73,17 +69,16 @@ public class RandomWalk {
             if (isStable(listOfGyrationRadius)) {
 
                 break;
-            } else{
+            } else {
                 count++;
-                if(count%50==0){
+                if (count % 50 == 0) {
                     NumberFormat doubleFormat = new DecimalFormat("##.000000");
-                    final String  lastStabilityValue = doubleFormat.format(stabilityValue);
+                    final String lastStabilityValue = doubleFormat.format(stabilityValue);
                     NumberFormat integerFormat = new DecimalFormat("0000");
                     final String lastCount = integerFormat.format(count);
                     SwingUtilities.invokeLater(new Runnable() {
                         @Override
                         public void run() {
-
 
 
                             taskOutput.append((lastCount) + " : " + lastStabilityValue + "\n");
@@ -351,9 +346,7 @@ public class RandomWalk {
         return result;
     }
 
-    public static Collection<DirectedSparseMultigraph<ModelObject,ModelEdge>> getAllRandomWalkGraphs() {
-        System.out.println("Creating random walks");
-
+    public static Collection<DirectedSparseMultigraph<ModelObject, ModelEdge>> getAllRandomWalkGraphs() {
         if (randomWalkGraphs == null || randomWalkGraphs.isEmpty()) {
             SwingWorker<Collection<DirectedSparseMultigraph<ModelObject, ModelEdge>>, Void> worker = new SwingWorker<Collection<DirectedSparseMultigraph<ModelObject, ModelEdge>>, Void>() {
                 @Override
@@ -371,7 +364,42 @@ public class RandomWalk {
                 e.printStackTrace();  //To change body of catch statement use File | Settings | File Templates.
             }
         }
-        System.out.println("generated "+randomWalkGraphs.size()+ " graphs");
         return randomWalkGraphs;
+    }
+
+    public static Double getCoverageOfRandomWalks(final int pathLength, final String startingRoom) {
+        SwingWorker<Double, Void> tempWorker = new SwingWorker<Double, Void>() {
+            @Override
+            protected Double doInBackground() throws Exception {
+                if (randomWalkGraphs == null || randomWalkGraphs.isEmpty()) {
+                    generateRandomWalkCollection();
+                }
+
+                HashMap<String, HashMap<String, Double>> firstOrderProbs = GraphUtilities.calculateFirstOrderProbabilities(randomWalkGraphs);
+                HashMap<String, HashMap<String, HashMap<String, Double>>> secondOrderProbs = GraphUtilities.calculateSecondOrderProbabilities(randomWalkGraphs);
+
+                Collection<DirectedSparseMultigraph<ModelObject, ModelEdge>> pathCollections = GraphUtilities.generatePaths(firstOrderProbs, secondOrderProbs, startingRoom, pathLength);
+
+
+
+
+
+
+                return GraphUtilities.calculateAverageCoverage(pathCollections);
+            }
+
+
+        };
+        tempWorker.execute();
+
+        try {
+            return tempWorker.get();
+        } catch (InterruptedException e) {
+            e.printStackTrace();
+            return null;
+        } catch (ExecutionException e) {
+            e.printStackTrace();
+            return null;
+        }
     }
 }

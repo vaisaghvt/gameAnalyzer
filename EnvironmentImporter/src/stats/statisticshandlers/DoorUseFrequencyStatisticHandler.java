@@ -91,9 +91,9 @@ public class DoorUseFrequencyStatisticHandler extends StatisticsHandler<DoorUseC
         @Override
         protected void doTasks(String dataName) {
             HashMap<String, Integer> temp;
-            synchronized (NetworkModel.instance()) {
+
                 temp = NetworkModel.instance().getEdgeDataFor(dataName, phase);
-            }
+
 
             HashMap<String, Double> result = new HashMap<String, Double>();
 
