@@ -14,6 +14,9 @@ import javax.swing.*;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.HashMap;
+import java.util.concurrent.ExecutionException;
+import java.util.concurrent.Semaphore;
+import java.util.concurrent.TimeUnit;
 
 /**
  * Created with IntelliJ IDEA.
@@ -40,27 +43,71 @@ public class FirstOrderPathHeatMapHandler extends StatisticsHandler<PathHeatMapC
     }
 
     private HashMap<String, HashMap<String, Double>> getFirstOrderMarkovData(
-            HashMap<String, DirectedSparseMultigraph<ModelObject, ModelEdge>> dataNameDataMap) {
+            final HashMap<String, DirectedSparseMultigraph<ModelObject, ModelEdge>> dataNameDataMap) {
 
-
-        HashMap<String, HashMap<String, Integer>> nodeToNodeFrequencyTable = new HashMap<String, HashMap<String, Integer>>();
-        HashMap<String, HashMap<String, Double>> result = new HashMap<String, HashMap<String, Double>>();
-
-        Collection<ModelObject> rooms = NetworkModel.instance().getCompleteGraph().getVertices();
-        for (ModelObject vertex : rooms) {
-            DirectedSparseMultigraph<ModelObject, ModelEdge> localGraphAtVertex =
-                    calculateLocalGraphAtVertex(vertex, dataNameDataMap);
-
-
-            addToNodeToNodeTable(localGraphAtVertex, nodeToNodeFrequencyTable);
-
+        final ProgressVisualizer pv = new ProgressVisualizer("Generating first order probabilities");
+        final Semaphore semaphore = new Semaphore(1);
+        try {
+            semaphore.acquire();
+        } catch (InterruptedException e) {
+            e.printStackTrace();  //To change body of catch statement use File | Settings | File Templates.
         }
 
-        result = summarizeToProbTable(nodeToNodeFrequencyTable);
+
+        SwingWorker<HashMap<String, HashMap<String, Integer>>, Void> firstOrderProbabilityCalculator = new SwingWorker<HashMap<String, HashMap<String, Integer>>, Void>() {
+            @Override
+            protected HashMap<String, HashMap<String, Integer>> doInBackground() throws Exception {
+                int numberOfRooms = NetworkModel.instance().getSortedRooms().size();
+                int count = 0;
+                HashMap<String, HashMap<String, Integer>> nodeToNodeFrequencyTable = new HashMap<String, HashMap<String, Integer>>();
+                this.addPropertyChangeListener(pv);
+                HashMap<String, HashMap<String, HashMap<String, Double>>> result = new HashMap<String, HashMap<String, HashMap<String, Double>>>();
+                Collection<ModelObject> rooms = NetworkModel.instance().getCompleteGraph().getVertices();
+
+                for (ModelObject vertex : rooms) {
+                    pv.print("processing " + vertex.toString() + "...\n");
+                    DirectedSparseMultigraph<ModelObject, ModelEdge> localGraphAtVertex =
+                            calculateLocalGraphAtVertex(vertex, dataNameDataMap);
+
+
+                    addToNodeToNodeTable(localGraphAtVertex, nodeToNodeFrequencyTable);
+
+                    setProgress((count++ * 100) / numberOfRooms);
+
+                }
+
+                return nodeToNodeFrequencyTable;
+
+            }
+
+            @Override
+            protected void done() {
+                pv.finish();
+                semaphore.release();
+            }
+        };
+
+        firstOrderProbabilityCalculator.execute();
+
+        HashMap<String, HashMap<String, Integer>> nodeToNodeFrequencyTable;
+        try {
+            semaphore.tryAcquire(1, 600, TimeUnit.SECONDS);
+            nodeToNodeFrequencyTable = firstOrderProbabilityCalculator.get();
+        } catch (InterruptedException e) {
+            e.printStackTrace();  //To change body of catch statement use File | Settings | File Templates.
+            return null;
+        } catch (ExecutionException e) {
+            e.printStackTrace();  //To change body of catch statement use File | Settings | File Templates.
+            return null;
+        }
+
+
+        HashMap<String, HashMap<String, Double>> result = summarizeToProbTable(nodeToNodeFrequencyTable);
 
 
         return result;
     }
+
 
     private HashMap<String, HashMap<String, Double>> summarizeToProbTable(HashMap<String, HashMap<String, Integer>> nodeToNodeTravelFrequency) {
         HashMap<String, HashMap<String, Double>> nodeToNodeProbabilities = new HashMap<String, HashMap<String, Double>>();
@@ -151,15 +198,14 @@ public class FirstOrderPathHeatMapHandler extends StatisticsHandler<PathHeatMapC
         @Override
         protected void doTasks(String dataName) {
             if (!dataName.equals("random walk")) {
-                synchronized (NetworkModel.instance()) {
-                    dataNameDataMap.put(dataName, NetworkModel.instance().getDirectedGraphOfPlayer(dataName, Collections.singleton(phase)));
-                }
+
+                dataNameDataMap.put(dataName, NetworkModel.instance().getDirectedGraphOfPlayer(dataName, Collections.singleton(phase)));
+
             }
         }
 
         @Override
         protected void summarizeAndDisplay() {
-            HashMap<String, HashMap<String, Double>> data;
             System.out.println("Done");
             switch (allOrOne) {
 
@@ -170,28 +216,55 @@ public class FirstOrderPathHeatMapHandler extends StatisticsHandler<PathHeatMapC
 
                         dataNames.remove("random walk");
                     }
-                    data = getFirstOrderMarkovData(dataNameDataMap);
-                    chartDisplay.setTitle("First order heat map :" + phase.toString());
-                    chartDisplay.display(data);
-                    consoleDisplay.display(data);
+                    SwingWorker<Void, Void> worker = new SwingWorker<Void, Void>() {
+                        public HashMap<String, HashMap<String, Double>> data;
+
+                        @Override
+                        protected Void doInBackground() throws Exception {
+                            data = getFirstOrderMarkovData(dataNameDataMap);
+                            data = subtractRandomWalk(data);
+                            return null;
+                        }
+
+                        protected void done() {
+                            chartDisplay.setTitle("First order heat map :" + phase.toString());
+                            chartDisplay.display(data);
+                            consoleDisplay.display(data);
+                        }
+                    };
+                    worker.execute();
                     break;
                 case EACH:
-                    HashMap<String, DirectedSparseMultigraph<ModelObject, ModelEdge>> tempDataNameDataMap
-                            = new HashMap<String, DirectedSparseMultigraph<ModelObject, ModelEdge>>();
+
                     if (dataNames.contains("random walk")) {
                         RandomWalkCalculator randomWalkCalculator = new RandomWalkCalculator();
                         randomWalkCalculator.execute();
 
                         dataNames.remove("random walk");
                     }
-                    for (String name : dataNames) {
+                    for (final String name : dataNames) {
 
+                        final HashMap<String, DirectedSparseMultigraph<ModelObject, ModelEdge>> tempDataNameDataMap = new HashMap<String, DirectedSparseMultigraph<ModelObject, ModelEdge>>();
                         tempDataNameDataMap.put(name, dataNameDataMap.get(name));
+                        SwingWorker<Void, Void> worker2 = new SwingWorker<Void, Void>() {
+                            public HashMap<String, HashMap<String, Double>> data;
 
-                        data = getFirstOrderMarkovData(tempDataNameDataMap);
-                        chartDisplay.setTitle("First order heat map :" + name + ":" + phase.toString());
-                        chartDisplay.display(data);
-                        consoleDisplay.display(data);
+                            @Override
+                            protected Void doInBackground() throws Exception {
+                                data = getFirstOrderMarkovData(tempDataNameDataMap);
+                                data = subtractRandomWalk(data);
+                                return null;
+                            }
+
+                            protected void done() {
+                                chartDisplay.setTitle("First order heat map :" + name + ":" + phase.toString());
+                                chartDisplay.display(data);
+                                consoleDisplay.display(data);
+
+                            }
+                        };
+                        worker2.execute();
+
                         tempDataNameDataMap.clear();
                     }
                     break;
@@ -210,8 +283,7 @@ public class FirstOrderPathHeatMapHandler extends StatisticsHandler<PathHeatMapC
         @Override
         protected Void doInBackground() throws Exception {
             collectionOfGraphs
-                    = RandomWalk.getAllRandomWalkGraphs();
-            ;
+                    = RandomWalk.getAllRandomWalkGraphs(new Semaphore(1));
             return null;
         }
 
@@ -220,18 +292,69 @@ public class FirstOrderPathHeatMapHandler extends StatisticsHandler<PathHeatMapC
             int count = 0;
             HashMap<String, DirectedSparseMultigraph<ModelObject, ModelEdge>> resultMap = new HashMap<String, DirectedSparseMultigraph<ModelObject, ModelEdge>>();
             for (DirectedSparseMultigraph<ModelObject, ModelEdge> graph : collectionOfGraphs) {
-
-
                 resultMap.put("randomWalk" + (count++), graph);
             }
 
             HashMap<String, HashMap<String, Double>> dataToDisplay = getFirstOrderMarkovData(resultMap);
+            dataToDisplay = subtractRandomWalk(dataToDisplay);
             chartDisplay.setTitle("First order heat map random walk");
             chartDisplay.display(dataToDisplay);
             consoleDisplay.display(dataToDisplay);
 
         }
 
+    }
+
+    private HashMap<String, HashMap<String, Double>> subtractRandomWalk(HashMap<String, HashMap<String, Double>> data) {
+
+        final Semaphore generatorSemaphore = new Semaphore(1);
+        try {
+            generatorSemaphore.acquire();
+        } catch (InterruptedException e) {
+            e.printStackTrace();  //To change body of catch statement use File | Settings | File Templates.
+        }
+        SwingWorker<Collection<DirectedSparseMultigraph<ModelObject, ModelEdge>>, Void> randomWalkGenerator = new SwingWorker<Collection<DirectedSparseMultigraph<ModelObject, ModelEdge>>, Void>() {
+            @Override
+            protected Collection<DirectedSparseMultigraph<ModelObject, ModelEdge>> doInBackground() throws Exception {
+                Collection<DirectedSparseMultigraph<ModelObject, ModelEdge>> collectionOfGraphs = RandomWalk.getAllRandomWalkGraphs(generatorSemaphore);
+                return collectionOfGraphs;
+            }
+        };
+        randomWalkGenerator.execute();
+        Collection<DirectedSparseMultigraph<ModelObject, ModelEdge>> collectionOfGraphs = null;
+        try {
+            generatorSemaphore.tryAcquire(1, 300, TimeUnit.SECONDS);
+            collectionOfGraphs = randomWalkGenerator.get();
+        } catch (InterruptedException e) {
+            e.printStackTrace();
+        } catch (ExecutionException e) {
+            e.printStackTrace();
+        }
+
+        System.out.println("Calculating new Data");
+        HashMap<String, DirectedSparseMultigraph<ModelObject, ModelEdge>> resultMap = new HashMap<String, DirectedSparseMultigraph<ModelObject, ModelEdge>>();
+        int count = 0;
+        for (DirectedSparseMultigraph<ModelObject, ModelEdge> graph : collectionOfGraphs) {
+            resultMap.put("randomWalk" + (count++), graph);
+        }
+
+        HashMap<String, HashMap<String, Double>> randomWalkData = getFirstOrderMarkovData(resultMap);
+
+        HashMap<String, HashMap<String, Double>> result = new HashMap<String, HashMap<String, Double>>();
+        for (String sourceRoom : randomWalkData.keySet()) {
+            result.put(sourceRoom, new HashMap<String, Double>());
+            for (String destinationRoom : randomWalkData.get(sourceRoom).keySet()) {
+                if (data.containsKey(sourceRoom) && data.get(sourceRoom).containsKey(destinationRoom)) {
+                    result.get(sourceRoom).put(destinationRoom,
+                            data.get(sourceRoom).get(destinationRoom) - randomWalkData.get(sourceRoom).get(destinationRoom));
+                } else {
+                    result.get(sourceRoom).put(destinationRoom, -randomWalkData.get(sourceRoom).get(destinationRoom));
+                }
+
+            }
+        }
+
+        return result;  //To change body of created methods use File | Settings | File Templates.
     }
 
 

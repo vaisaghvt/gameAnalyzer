@@ -30,6 +30,8 @@ import java.awt.geom.Ellipse2D;
 import java.awt.geom.Point2D;
 import java.util.*;
 import java.util.List;
+import java.util.concurrent.Semaphore;
+import java.util.concurrent.TimeUnit;
 
 import static stats.StatisticChoice.TIME_SPENT_PER_VERTEX;
 import static stats.StatisticChoice.VERTEX_VISIT_FREQUENCY;
@@ -74,6 +76,8 @@ public class NetworkModel extends MainPanel implements ActionListener {
     private Collection<String> sortedRoomNames;
     private HashMap<String, HashMap<Integer, DirectedSparseMultigraph<ModelObject, ModelEdge>>> cachedGraph =
             new HashMap<String, HashMap<Integer, DirectedSparseMultigraph<ModelObject, ModelEdge>>>();
+    private final Semaphore movementCacheSemaphore = new Semaphore(1);
+    private final Semaphore graphCacheSemaphore = new Semaphore(1);
 
     /**
      * Creates a new instance of SimpleGraphView
@@ -464,7 +468,7 @@ public class NetworkModel extends MainPanel implements ActionListener {
 
         if (instance == null) {
 
-                instance = new NetworkModel();
+            instance = new NetworkModel();
 
         }
 
@@ -619,19 +623,28 @@ public class NetworkModel extends MainPanel implements ActionListener {
     }
 
     private synchronized void cacheGraph(String dataName, Collection<Phase> phases, DirectedSparseMultigraph<ModelObject, ModelEdge> result) {
+        try {
+            graphCacheSemaphore.tryAcquire(1,600, TimeUnit.SECONDS);
+        } catch (InterruptedException e) {
+            e.printStackTrace();  //To change body of catch statement use File | Settings | File Templates.
+        }
         if (!cachedGraph.containsKey(dataName)) {
-            cachedGraph.put(dataName, new HashMap<Integer, DirectedSparseMultigraph<ModelObject, ModelEdge>>());
+
+                cachedGraph.put(dataName, new HashMap<Integer, DirectedSparseMultigraph<ModelObject, ModelEdge>>());
+
         }
         HashMap<Integer, DirectedSparseMultigraph<ModelObject, ModelEdge>> tempMap = cachedGraph.get(dataName);
         int codeForPhases = findCode(phases);
         if (!tempMap.containsKey(codeForPhases)) {
             tempMap.put(codeForPhases, result);
-            cachedGraph.put(dataName, tempMap);
+
+                cachedGraph.put(dataName, tempMap);
+
         } else {
             System.out.println("INCORRECT CACHING!! ALREADY EXISTS.");
         }
 
-
+        graphCacheSemaphore.release();
     }
 
     public List<HashMap<String, Number>> getMovementOfPlayer(String dataName, Collection<Phase> phases) {
@@ -648,17 +661,25 @@ public class NetworkModel extends MainPanel implements ActionListener {
         return result;
     }
 
-    private synchronized List<HashMap<String, Number>> findAndCacheMovement(String dataName, Collection<Phase> phases, int code) {
 
-            List<HashMap<String, Number>> result = Database.getInstance().getMovementOfPlayer(dataName, phases);
-            HashMap<Integer, List<HashMap<String, Number>>> dataForName = this.nameToPhaseToMovementMap.get(dataName);
-            if (dataForName == null) {
-                dataForName = new HashMap<Integer, List<HashMap<String, Number>>>();
-            }
-            dataForName.put(code, result);
+    private List<HashMap<String, Number>> findAndCacheMovement(String dataName, Collection<Phase> phases, int code) {
+        try {
+            movementCacheSemaphore.tryAcquire(1,600, TimeUnit.SECONDS);
+        } catch (InterruptedException e) {
+            e.printStackTrace();  //To change body of catch statement use File | Settings | File Templates.
+        }
+        List<HashMap<String, Number>> result = Database.getInstance().getMovementOfPlayer(dataName, phases);
+        HashMap<Integer, List<HashMap<String, Number>>> dataForName = this.nameToPhaseToMovementMap.get(dataName);
+        if (dataForName == null) {
+            dataForName = new HashMap<Integer, List<HashMap<String, Number>>>();
+        }
+        dataForName.put(code, result);
+
 
             this.nameToPhaseToMovementMap.put(dataName, dataForName);
-            return result;
+
+        movementCacheSemaphore.release();
+        return result;
 
     }
 

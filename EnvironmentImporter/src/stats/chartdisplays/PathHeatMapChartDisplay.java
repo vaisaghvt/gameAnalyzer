@@ -6,7 +6,7 @@ import org.jfree.chart.JFreeChart;
 import org.jfree.chart.axis.AxisLocation;
 import org.jfree.chart.axis.NumberAxis;
 import org.jfree.chart.plot.XYPlot;
-import org.jfree.chart.renderer.GrayPaintScale;
+import org.jfree.chart.renderer.LookupPaintScale;
 import org.jfree.chart.renderer.xy.XYBlockRenderer;
 import org.jfree.chart.title.PaintScaleLegend;
 import org.jfree.data.xy.MatrixSeries;
@@ -30,6 +30,7 @@ public class PathHeatMapChartDisplay extends ChartDisplay<HashMap<String, HashMa
 
 
     private HashMap<String, Integer> roomToCodeMapping;
+    private final int NUMBER_OF_DIVISIONS=6;
 
     @Override
     public void display(HashMap<String, HashMap<String, Double>> data) {
@@ -54,8 +55,10 @@ public class PathHeatMapChartDisplay extends ChartDisplay<HashMap<String, HashMa
         Collection<String> rooms= NetworkModel.instance().getFloorNeighbourSortedRooms();
         HashMap<String, Integer> nameToCodeMapping = new HashMap<String, Integer>();
         for (String name : rooms) {
+//            System.out.println(i+":"+name);
             nameToCodeMapping.put(name, i++);
         }
+
         return nameToCodeMapping;
     }
 
@@ -71,9 +74,13 @@ public class PathHeatMapChartDisplay extends ChartDisplay<HashMap<String, HashMa
 
                 Integer destinationId = roomToCodeMapping.get(destination);
                 if (!data.containsKey(source) || !data.get(source).containsKey(destination)) {
-                    series.update(sourceId, destinationId, 0);
+                    series.update(sourceId, destinationId, -1.0);
                 } else {
-                    series.update(sourceId, destinationId, data.get(source).get(destination));
+                    double value =  (data.get(source).get(destination)+1.0)/2;
+                    if(value<0 ||value>1){
+                        System.out.println(value);
+                    }
+                    series.update(sourceId,destinationId, value);
                 }
             }
 
@@ -102,11 +109,17 @@ public class PathHeatMapChartDisplay extends ChartDisplay<HashMap<String, HashMa
 
 
         XYBlockRenderer xyblockrenderer = new XYBlockRenderer();
-        GrayPaintScale graypaintscale = new GrayPaintScale(0.0D, 1.0D);
-        xyblockrenderer.setPaintScale(graypaintscale);
+
+
+
+
+        LookupPaintScale paintScale = createNewLookupPaintScale();
+
+//        paintScale.add(-1.0,Color.WHITE );
+        xyblockrenderer.setPaintScale(paintScale);
 
         XYPlot xyplot = new XYPlot(xyzDataSet, numberAxis, numberAxis1, xyblockrenderer);
-        xyplot.setBackgroundPaint(Color.lightGray);
+        xyplot.setBackgroundPaint(Color.white);
         xyplot.setDomainGridlinesVisible(false);
         xyplot.setRangeGridlinePaint(Color.white);
         xyplot.setAxisOffset(new RectangleInsets(5D, 5D, 5D, 5D));
@@ -118,9 +131,10 @@ public class PathHeatMapChartDisplay extends ChartDisplay<HashMap<String, HashMa
         NumberAxis numberAxis2 = new NumberAxis("Scale");
         numberAxis2.setAxisLinePaint(Color.white);
         numberAxis2.setTickMarkPaint(Color.white);
+        numberAxis2.setRange(-1.0D, 1.0D);
         numberAxis2.setTickLabelFont(new Font("Dialog", 0, 7));
         PaintScaleLegend paintscalelegend = new PaintScaleLegend(
-                new GrayPaintScale(), numberAxis2);
+                paintScale, numberAxis2);
         paintscalelegend.setStripOutlineVisible(false);
         paintscalelegend.setSubdivisionCount(20);
         paintscalelegend.setAxisLocation(AxisLocation.BOTTOM_OR_LEFT);
@@ -133,6 +147,30 @@ public class PathHeatMapChartDisplay extends ChartDisplay<HashMap<String, HashMa
         jfreechart.addSubtitle(paintscalelegend);
 //        ChartUtilities.applyCurrentTheme(jfreechart);
         return jfreechart;
+    }
+
+    private LookupPaintScale createNewLookupPaintScale() {
+        LookupPaintScale paintScale = new LookupPaintScale();
+
+        paintScale.add(0.0, Color.BLUE);
+        paintScale.add(0.4, Color.WHITE);
+        paintScale.add(0.6, Color.RED);
+        return paintScale;
+//        double valueDivisionSize = 2.0/NUMBER_OF_DIVISIONS;
+//        int colorDivisionSize = 255/NUMBER_OF_DIVISIONS;
+//
+//
+//        int redValue = 0;
+//        int blueValue =255;
+//        double value= -1.0;
+//        for(int i=0;i<NUMBER_OF_DIVISIONS;i++){
+//            paintScale.add(value, new Color(redValue, 0, blueValue));
+//            value+=valueDivisionSize;
+//            redValue+=colorDivisionSize;
+//            blueValue-=colorDivisionSize;
+//        }
+//
+//        return paintScale;
     }
 
 

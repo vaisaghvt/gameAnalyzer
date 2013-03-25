@@ -12,6 +12,7 @@ import java.beans.PropertyChangeEvent;
 import java.beans.PropertyChangeListener;
 import java.util.Collection;
 import java.util.Set;
+import java.util.concurrent.*;
 
 /**
  * Created with IntelliJ IDEA.
@@ -38,7 +39,7 @@ public abstract class StatisticsHandler<T extends ConsoleDisplay, V extends Char
 
     public <U extends AbstractTask> void actualGenerateAndDisplay(U task) {
         if (!task.getDataNames().isEmpty()) {
-            task.setProgressVisualizer(new ProgressVisualizer());
+            task.setProgressVisualizer(new ProgressVisualizer("Processing data"));
 
             task.execute();
         } else {
@@ -89,12 +90,17 @@ public abstract class StatisticsHandler<T extends ConsoleDisplay, V extends Char
 
         protected final Collection<String> dataNames;
         private ProgressVisualizer progressVisualizer;
+        private final Semaphore dataRunningSemaphore;
 
 
         public AbstractTask(Collection<String> dataNames) {
             this.dataNames = dataNames;
-
-
+            dataRunningSemaphore = new Semaphore(dataNames.size());
+            try {
+                dataRunningSemaphore.acquire(dataNames.size());
+            } catch (InterruptedException e) {
+                e.printStackTrace();  //To change body of catch statement use File | Settings | File Templates.
+            }
         }
 
         protected abstract void doTasks(String dataName);
@@ -103,40 +109,65 @@ public abstract class StatisticsHandler<T extends ConsoleDisplay, V extends Char
 
         @Override
         public final Void doInBackground() {
-//            if(!windows){
-//               SwingUtilities.invokeLater(new Runnable() {
-//                   @Override
-//                   public void run() {
-//                       taskOutput.append("Refer to console for progress");
-//                   }
-//               });
-//
-//            }
 
             setProgress(0);
+            ExecutorService threadPool = Executors.newCachedThreadPool();
+            CompletionService<Boolean> ecs
+                    = new ExecutorCompletionService<Boolean>(threadPool);
+
             final int size = dataNames.size();
-            int i = 1;
+
             for (String dataName : dataNames) {
                 final String tempDataName = dataName;
                 progressVisualizer.print("Processing " + tempDataName + "...\n");
 
-                doTasks(dataName);
-                final int currentProgress = i;
+                ecs.submit(new Callable<Boolean>() {
 
-                setProgress((currentProgress * 100) / size);
+                    @Override
+                    public Boolean call() throws Exception {
+                        doTasks(tempDataName);
+                        dataRunningSemaphore.release();
+                        return true;
+                    }
+                });
 
-                i++;
             }
-            progressVisualizer.print("done");
+
+            try {
+                int currentProgress = 0;
+                for (int submittedNumber = 0; submittedNumber < dataNames.size(); ++submittedNumber) {
+                    Boolean result = ecs.take().get();
+                    if (result != null)
+                        setProgress((currentProgress++ * 100) / size);
+                    ;
+                }
+
+                dataRunningSemaphore.tryAcquire(dataNames.size(), 600, TimeUnit.SECONDS);
+            } catch (InterruptedException e) {
+                throw new RuntimeException(e);
+            } catch (ExecutionException e) {
+                e.printStackTrace();  //To change body of catch statement use File | Settings | File Templates.
+            }
+
 
             return null;
         }
 
         @Override
         public final void done() {
+
             Toolkit.getDefaultToolkit().beep();
+            progressVisualizer.print("done");
             progressVisualizer.finish();
-            summarizeAndDisplay();
+            SwingWorker<Void, Void> worker = new SwingWorker<Void, Void>() {
+                @Override
+                protected Void doInBackground() throws Exception {
+                    summarizeAndDisplay();
+                    return null;
+                }
+            };
+            worker.execute();
+
         }
 
         public Collection<String> getDataNames() {
@@ -155,7 +186,7 @@ public abstract class StatisticsHandler<T extends ConsoleDisplay, V extends Char
         private JTextArea taskOutput;
         private JProgressBar progressBar;
 
-        public ProgressVisualizer() {
+        public ProgressVisualizer(final String title) {
             SwingUtilities.invokeLater(new Runnable() {
 
 
@@ -169,7 +200,7 @@ public abstract class StatisticsHandler<T extends ConsoleDisplay, V extends Char
                     taskOutput.setEditable(false);
                     DefaultCaret caret = (DefaultCaret) taskOutput.getCaret();
                     caret.setUpdatePolicy(DefaultCaret.ALWAYS_UPDATE);
-                    progressFrame = new JFrame("Processing data");
+                    progressFrame = new JFrame(title);
                     progressFrame.setLayout(new BorderLayout());
                     progressFrame.add(progressBar, BorderLayout.NORTH);
                     progressFrame.add(new JScrollPane(taskOutput), BorderLayout.CENTER);

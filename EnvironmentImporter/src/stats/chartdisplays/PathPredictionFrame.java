@@ -304,7 +304,7 @@ public class PathPredictionFrame extends JFrame {
         randomWalkCoverageCalculator.execute();
 
         try {
-            coverageAreaSemaphore.tryAcquire(2,5,TimeUnit.MILLISECONDS);
+            coverageAreaSemaphore.tryAcquire(2,300,TimeUnit.SECONDS);
             result.put("random", randomWalkCoverageCalculator.get());
 
             result.put("data", dataBasedCoverageGenerator.get() );
@@ -361,7 +361,7 @@ public class PathPredictionFrame extends JFrame {
 
 
                 System.out.println("Working..");
-                semaphore.tryAcquire(2, 10, TimeUnit.MILLISECONDS);
+                semaphore.tryAcquire(2, 300, TimeUnit.SECONDS);
                 System.out.println("Ready to get");
                 HashMap<String, HashMap<String, Double>> firstOrderProbs = firstOrderCalculator.get();
                 HashMap<String, HashMap<String, HashMap<String, Double>>> secondOrderProbs = secondOrderCalculator.get();
@@ -381,7 +381,7 @@ public class PathPredictionFrame extends JFrame {
 
         try {
 
-            mutex.tryAcquire(1,5,TimeUnit.MILLISECONDS);
+            mutex.tryAcquire(1,300,TimeUnit.SECONDS);
             coverageAreaSemaphore.release();
             return tempWorker.get();
         } catch (InterruptedException e) {
