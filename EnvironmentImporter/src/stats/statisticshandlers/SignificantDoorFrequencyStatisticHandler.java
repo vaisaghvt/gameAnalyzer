@@ -7,8 +7,6 @@ import stats.StatisticChoice;
 import stats.chartdisplays.SignificantDoorFrequencyChartDisplay;
 import stats.consoledisplays.SignificantDoorFrequencyConsoleDisplay;
 
-import javax.swing.*;
-import java.awt.*;
 import java.util.Collection;
 import java.util.HashMap;
 
@@ -126,9 +124,9 @@ public class SignificantDoorFrequencyStatisticHandler extends StatisticsHandler<
 
         @Override
         protected void doTasks(String dataName) {
-            synchronized (NetworkModel.instance()) {
-                dataNameDataMap.put(dataName, NetworkModel.instance().getEdgeDataFor(dataName));
-            }
+
+            dataNameDataMap.put(dataName, NetworkModel.instance().getEdgeDataFor(dataName));
+
         }
 
         @Override

@@ -14,8 +14,6 @@ import org.apache.commons.math3.stat.descriptive.moment.Variance;
 import stats.chartdisplays.GraphDetailsChartDisplay;
 import stats.consoledisplays.GraphDetailsConsoleDisplay;
 
-import javax.swing.*;
-import java.awt.*;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -273,14 +271,13 @@ public class GraphDetailsStatisticHandler extends StatisticsHandler<GraphDetails
         protected void doTasks(String dataName) {
             List<HashMap<String, Number>> movementOfPlayer;
             DirectedSparseMultigraph<ModelObject, ModelEdge> graphForPlayer;
-            synchronized (NetworkModel.instance()) {
-                movementOfPlayer = NetworkModel.instance().getMovementOfPlayer(dataName, phases);
 
-            }
-            synchronized (NetworkModel.instance()) {
-                graphForPlayer =
-                        NetworkModel.instance().getDirectedGraphOfPlayer(dataName, phases);
-            }
+            movementOfPlayer = NetworkModel.instance().getMovementOfPlayer(dataName, phases);
+
+
+            graphForPlayer =
+                    NetworkModel.instance().getDirectedGraphOfPlayer(dataName, phases);
+
 
             HashMap<String, String> results = new HashMap<String, String>();
             results = getStatsForMovement(movementOfPlayer, results);

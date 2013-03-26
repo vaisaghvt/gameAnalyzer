@@ -19,6 +19,7 @@ import edu.uci.ics.jung.visualization.transform.MutableTransformer;
 import javafx.geometry.Point3D;
 import modelcomponents.*;
 import org.apache.commons.collections15.Transformer;
+import randomwalk.FirstOrderBiasedRandomWalk;
 import randomwalk.RandomWalk;
 import stats.StatisticChoice;
 
@@ -30,6 +31,8 @@ import java.awt.geom.Ellipse2D;
 import java.awt.geom.Point2D;
 import java.util.*;
 import java.util.List;
+import java.util.concurrent.Semaphore;
+import java.util.concurrent.TimeUnit;
 
 import static stats.StatisticChoice.TIME_SPENT_PER_VERTEX;
 import static stats.StatisticChoice.VERTEX_VISIT_FREQUENCY;
@@ -74,6 +77,8 @@ public class NetworkModel extends MainPanel implements ActionListener {
     private Collection<String> sortedRoomNames;
     private HashMap<String, HashMap<Integer, DirectedSparseMultigraph<ModelObject, ModelEdge>>> cachedGraph =
             new HashMap<String, HashMap<Integer, DirectedSparseMultigraph<ModelObject, ModelEdge>>>();
+    private final Semaphore movementCacheSemaphore = new Semaphore(1);
+    private final Semaphore graphCacheSemaphore = new Semaphore(1);
 
     /**
      * Creates a new instance of SimpleGraphView
@@ -108,7 +113,7 @@ public class NetworkModel extends MainPanel implements ActionListener {
 
 
     @Override
-    public void setDocument(Document current) {
+    public synchronized void setDocument(Document current) {
         this.document = current;
         ModelFile file = document.getModelFile();
         completeGraph = new UndirectedSparseGraph<ModelObject, ModelEdge>();
@@ -166,7 +171,7 @@ public class NetworkModel extends MainPanel implements ActionListener {
         }
 
         RandomWalk.setRandomWalkParameters(completeGraph, startingNode);
-
+        FirstOrderBiasedRandomWalk.setRandomWalkParameters(completeGraph, startingNode);
 
         sortedRoomNames = new TreeSet<String>();
         for (ModelObject area : this.completeGraph.getVertices()) {
@@ -454,15 +459,19 @@ public class NetworkModel extends MainPanel implements ActionListener {
 
     public static void scaleToRightAmount(VisualizationViewer<ModelObject, ModelEdge> vv, double value) {
 
-        Point2D ivtfrom = vv.getRenderContext().getMultiLayerTransformer().inverseTransform(Layer.VIEW, new Point2D.Double(vv.getWidth()/2, vv.getHeight()/2));
+        Point2D ivtfrom = vv.getRenderContext().getMultiLayerTransformer().inverseTransform(Layer.VIEW, new Point2D.Double(vv.getWidth() / 2, vv.getHeight() / 2));
         MutableTransformer modelTransformer = vv.getRenderContext().getMultiLayerTransformer().getTransformer(Layer.LAYOUT);
         modelTransformer.scale(value, value, ivtfrom);
         vv.repaint();
     }
 
-    public static synchronized NetworkModel instance() {
-        if (instance == null)
+    public static NetworkModel instance() {
+
+        if (instance == null) {
+
             instance = new NetworkModel();
+
+        }
 
         return instance;
     }
@@ -614,39 +623,65 @@ public class NetworkModel extends MainPanel implements ActionListener {
         }
     }
 
-    private void cacheGraph(String dataName, Collection<Phase> phases, DirectedSparseMultigraph<ModelObject, ModelEdge> result) {
+    private synchronized void cacheGraph(String dataName, Collection<Phase> phases, DirectedSparseMultigraph<ModelObject, ModelEdge> result) {
+        try {
+            graphCacheSemaphore.tryAcquire(1,600, TimeUnit.SECONDS);
+        } catch (InterruptedException e) {
+            e.printStackTrace();  //To change body of catch statement use File | Settings | File Templates.
+        }
         if (!cachedGraph.containsKey(dataName)) {
-            cachedGraph.put(dataName, new HashMap<Integer, DirectedSparseMultigraph<ModelObject, ModelEdge>>());
+
+                cachedGraph.put(dataName, new HashMap<Integer, DirectedSparseMultigraph<ModelObject, ModelEdge>>());
+
         }
         HashMap<Integer, DirectedSparseMultigraph<ModelObject, ModelEdge>> tempMap = cachedGraph.get(dataName);
         int codeForPhases = findCode(phases);
         if (!tempMap.containsKey(codeForPhases)) {
             tempMap.put(codeForPhases, result);
-            cachedGraph.put(dataName, tempMap);
+
+                cachedGraph.put(dataName, tempMap);
+
         } else {
             System.out.println("INCORRECT CACHING!! ALREADY EXISTS.");
         }
 
-
+        graphCacheSemaphore.release();
     }
 
     public List<HashMap<String, Number>> getMovementOfPlayer(String dataName, Collection<Phase> phases) {
         List<HashMap<String, Number>> result;
         int code = findCode(phases);
         if (!nameToPhaseToMovementMap.containsKey(dataName) || !nameToPhaseToMovementMap.get(dataName).containsKey(code)) {
-            result = Database.getInstance().getMovementOfPlayer(dataName, phases);
-            HashMap<Integer, List<HashMap<String, Number>>> dataForName = this.nameToPhaseToMovementMap.get(dataName);
-            if (dataForName == null) {
-                dataForName = new HashMap<Integer, List<HashMap<String, Number>>>();
-            }
-            dataForName.put(code, result);
-            this.nameToPhaseToMovementMap.put(dataName, dataForName);
+            result = findAndCacheMovement(dataName, phases, code);
+
         } else {
 
             result = this.nameToPhaseToMovementMap.get(dataName).get(code);
 
         }
         return result;
+    }
+
+
+    private List<HashMap<String, Number>> findAndCacheMovement(String dataName, Collection<Phase> phases, int code) {
+        try {
+            movementCacheSemaphore.tryAcquire(1,600, TimeUnit.SECONDS);
+        } catch (InterruptedException e) {
+            e.printStackTrace();  //To change body of catch statement use File | Settings | File Templates.
+        }
+        List<HashMap<String, Number>> result = Database.getInstance().getMovementOfPlayer(dataName, phases);
+        HashMap<Integer, List<HashMap<String, Number>>> dataForName = this.nameToPhaseToMovementMap.get(dataName);
+        if (dataForName == null) {
+            dataForName = new HashMap<Integer, List<HashMap<String, Number>>>();
+        }
+        dataForName.put(code, result);
+
+
+            this.nameToPhaseToMovementMap.put(dataName, dataForName);
+
+        movementCacheSemaphore.release();
+        return result;
+
     }
 
     private int findCode(Collection<Phase> phases) {
@@ -1022,15 +1057,15 @@ public class NetworkModel extends MainPanel implements ActionListener {
     }
 
     public Collection<String> getFloorDegreeSortedRooms() {
-        TreeSet<String> degreeSortedRoomNames = new TreeSet<String>(new Comparator<String>(){
+        TreeSet<String> degreeSortedRoomNames = new TreeSet<String>(new Comparator<String>() {
 
             @Override
             public int compare(String roomName1, String roomName2) {
                 ModelObject room1 = findRoomByName(roomName1);
                 ModelObject room2 = findRoomByName(roomName2);
-                if(completeGraph.degree(room1)!=completeGraph.degree(room2)){
-                    return completeGraph.degree(room1)- completeGraph.degree(room2);
-                }else{
+                if (completeGraph.degree(room1) != completeGraph.degree(room2)) {
+                    return completeGraph.degree(room1) - completeGraph.degree(room2);
+                } else {
                     return roomName1.compareTo(roomName2);
                 }
             }
@@ -1114,8 +1149,6 @@ public class NetworkModel extends MainPanel implements ActionListener {
     }
 
 
-
-
     public Graph<ModelObject, ModelEdge> getCompleteGraph() {
         return completeGraph;
     }
@@ -1145,7 +1178,7 @@ public class NetworkModel extends MainPanel implements ActionListener {
                 floorRooms[floor].add(name);
 
             }
-            for(int i=0;i<floorRooms.length;i++){
+            for (int i = 0; i < floorRooms.length; i++) {
                 floorRooms[i] = sortByConnections(floorRooms[i]);
             }
 
@@ -1167,36 +1200,36 @@ public class NetworkModel extends MainPanel implements ActionListener {
 
         listOfRooms.addAll(floorRoom);
 
-        while(!listOfRooms.isEmpty()){
+        while (!listOfRooms.isEmpty()) {
             String room = listOfRooms.remove(0);
 
-            if(!connectionSortedRooms.contains(room)){
+            if (!connectionSortedRooms.contains(room)) {
                 connectionSortedRooms.add(room);
 
             }
-            for(ModelObject neighbour : completeGraph.getNeighbors(findRoomByName(room))){
-                if(!connectionSortedRooms.contains(neighbour.toString())){
+            for (ModelObject neighbour : completeGraph.getNeighbors(findRoomByName(room))) {
+                if (!connectionSortedRooms.contains(neighbour.toString())) {
                     toBeProcessed.add(neighbour.toString());
                 }
             }
-            while(!toBeProcessed.isEmpty()){
+            while (!toBeProcessed.isEmpty()) {
                 room = toBeProcessed.remove(0);
                 boolean removalStatus = listOfRooms.remove(room);
 
-                if(!removalStatus){
-                    if(floorRoom.contains(floorRoom.contains(room))){
+                if (!removalStatus) {
+                    if (floorRoom.contains(floorRoom.contains(room))) {
                         System.out.println("in trouble");
-                    }else {
+                    } else {
                         continue;
                     }
                 }
 
-                if(!connectionSortedRooms.contains(room)){
+                if (!connectionSortedRooms.contains(room)) {
                     connectionSortedRooms.add(room);
 
                 }
-                for(ModelObject neighbour : completeGraph.getNeighbors(findRoomByName(room))){
-                    if(!connectionSortedRooms.contains(neighbour.toString())){
+                for (ModelObject neighbour : completeGraph.getNeighbors(findRoomByName(room))) {
+                    if (!connectionSortedRooms.contains(neighbour.toString())) {
                         toBeProcessed.add(neighbour.toString());
                     }
                 }
@@ -1204,7 +1237,7 @@ public class NetworkModel extends MainPanel implements ActionListener {
 
             }
         }
-        if(connectionSortedRooms.size()!= floorRoom.size()){
+        if (connectionSortedRooms.size() != floorRoom.size()) {
             System.out.println("Size mismatch");
         }
         return connectionSortedRooms;
@@ -1666,10 +1699,9 @@ public class NetworkModel extends MainPanel implements ActionListener {
 
         DirectedSparseMultigraph<ModelObject, ModelEdge> graph
                 = getDirectedGraphOfPlayer(dataName, Collections.singleton(phase));
-        HashMap<String,Integer> result = new HashMap<String, Integer>();
+        HashMap<String, Integer> result = new HashMap<String, Integer>();
         for (ModelEdge edge : graph.getEdges()) {
             String edgeStringRepresentation = edgeToString(graph.getEndpoints(edge));
-
 
 
             Integer previousNumber = result.get(edgeStringRepresentation);
@@ -1678,7 +1710,6 @@ public class NetworkModel extends MainPanel implements ActionListener {
             } else {
                 result.put(edgeStringRepresentation, previousNumber.intValue() + 1);
             }
-
 
 
         }
@@ -1735,16 +1766,15 @@ public class NetworkModel extends MainPanel implements ActionListener {
         set.add(endpoints.getSecond().toString());
 
 
-
         int floorOfFirst = instance().getFloorForVertex(endpoints.getFirst());
         int floorOfSecond = instance().getFloorForVertex(endpoints.getSecond());
-        if(floorOfFirst == floorOfSecond)
-            return floorOfFirst+":"+set.pollFirst() + "to" + set.pollLast();
+        if (floorOfFirst == floorOfSecond)
+            return floorOfFirst + ":" + set.pollFirst() + "to" + set.pollLast();
         else
-            return "Staircase:"+set.pollFirst() + "to" + set.pollLast();
+            return "Staircase:" + set.pollFirst() + "to" + set.pollLast();
     }
 
-    public int getFloorForVertex(ModelObject vertex){
+    public int getFloorForVertex(ModelObject vertex) {
         int floor;
         if (vertex instanceof ModelArea) {
             floor = NetworkModel.instance().getFloorForArea((ModelArea) vertex);
@@ -1785,7 +1815,7 @@ public class NetworkModel extends MainPanel implements ActionListener {
             int width = 40;
 
 
-            return (Shape) new Ellipse2D.Double(-width/2,-width/2, width, width);
+            return (Shape) new Ellipse2D.Double(-width / 2, -width / 2, width, width);
 
 
         }

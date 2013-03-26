@@ -69,9 +69,9 @@ public class VertexVisitDurationStatisticHandler extends StatisticsHandler<Verte
         @Override
         protected void doTasks(String dataName) {
             HashMap<String, Number> temp;
-            synchronized (NetworkModel.instance()) {
-                temp = NetworkModel.instance().getVertexDataFor(dataName, choice, phase);
-            }
+
+            temp = NetworkModel.instance().getVertexDataFor(dataName, choice, phase);
+
             HashMap<String, Double> result = new HashMap<String, Double>();
 
             for (String roomName : temp.keySet()) {
@@ -110,7 +110,6 @@ public class VertexVisitDurationStatisticHandler extends StatisticsHandler<Verte
                 consoleDisplay.display(finalResult);
             }
         }
-
 
 
     }

@@ -8,8 +8,6 @@ import stats.StatisticChoice;
 import stats.chartdisplays.PathChartDisplay;
 import stats.consoledisplays.PathConsoleDisplay;
 
-import javax.swing.*;
-import java.awt.*;
 import java.util.Collection;
 
 /**
@@ -37,9 +35,6 @@ public class PathStatisticHandler extends StatisticsHandler<PathConsoleDisplay, 
         super.actualGenerateAndDisplay(task);
 
 
-
-
-
     }
 
     class GenerateRequiredDataTask extends AbstractTask {
@@ -57,16 +52,15 @@ public class PathStatisticHandler extends StatisticsHandler<PathConsoleDisplay, 
         @Override
         protected void doTasks(String dataName) {
             String paths;
-            synchronized (NetworkModel.instance()) {
-                paths =  NetworkModel.instance().getPathDataFor(dataName, phase);
-            }
+            paths = NetworkModel.instance().getPathDataFor(dataName, phase);
 
-            if(phase ==Phase.TASK_3){
+
+            if (phase == Phase.TASK_3) {
                 result.put(paths, dataName);
-            }else if(phase == Phase.TASK_2){
+            } else if (phase == Phase.TASK_2) {
                 String[] parts = paths.split(",");
-                result.put(parts[0],dataName);
-                result.put(parts[1],dataName);
+                result.put(parts[0], dataName);
+                result.put(parts[1], dataName);
             }
 
         }

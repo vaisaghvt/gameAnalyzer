@@ -10,13 +10,12 @@ import modelcomponents.ModelEdge;
 import modelcomponents.ModelObject;
 import org.apache.commons.math3.stat.descriptive.moment.Mean;
 import org.apache.commons.math3.stat.descriptive.moment.Variance;
-import stats.StatisticChoice;
 import stats.chartdisplays.ParallelCoordinatePlotChart;
 import stats.consoledisplays.GraphDetailsToFile;
 
-import javax.swing.*;
-import java.awt.*;
-import java.util.*;
+import java.util.Collection;
+import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 
 /**
@@ -183,14 +182,12 @@ public class ParallelCoordinatePlotGenerator extends StatisticsHandler<GraphDeta
         protected void doTasks(String dataName) {
             List<HashMap<String, Number>> movementOfPlayer;
             DirectedSparseMultigraph<ModelObject, ModelEdge> graphForPlayer;
-            synchronized (NetworkModel.instance()) {
-                movementOfPlayer = NetworkModel.instance().getMovementOfPlayer(dataName, phases);
 
-            }
-            synchronized (NetworkModel.instance()) {
-                graphForPlayer =
-                        NetworkModel.instance().getDirectedGraphOfPlayer(dataName, phases);
-            }
+            movementOfPlayer = NetworkModel.instance().getMovementOfPlayer(dataName, phases);
+
+            graphForPlayer =
+                    NetworkModel.instance().getDirectedGraphOfPlayer(dataName, phases);
+
             HashMap<String, String> results = new HashMap<String, String>();
             results = getStatsForMovement(movementOfPlayer, results);
             results = getStatsForGraph(dataName, graphForPlayer, results);

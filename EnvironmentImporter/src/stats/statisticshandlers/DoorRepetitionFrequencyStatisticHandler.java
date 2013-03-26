@@ -9,8 +9,6 @@ import gui.StatsDialog;
 import stats.chartdisplays.DoorRepetitionFrequencyChartDisplay;
 import stats.consoledisplays.DoorRepetitionFrequencyConsoleDisplay;
 
-import javax.swing.*;
-import java.awt.*;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.Iterator;
@@ -126,7 +124,7 @@ public class DoorRepetitionFrequencyStatisticHandler extends StatisticsHandler<D
         private final StatsDialog.AggregationType type;
         private final HashMap<String, Integer> roomDegree;
 
-        public GenerateRequiredDataTask(Collection<String> dataNames,  StatsDialog.AllOrOne allOrOne, StatsDialog.AggregationType aggregationType) {
+        public GenerateRequiredDataTask(Collection<String> dataNames, StatsDialog.AllOrOne allOrOne, StatsDialog.AggregationType aggregationType) {
             super(dataNames);
             this.allOrOne = allOrOne;
             this.type = aggregationType;

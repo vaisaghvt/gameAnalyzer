@@ -7,10 +7,7 @@ import edu.uci.ics.jung.graph.DirectedSparseMultigraph;
 import edu.uci.ics.jung.graph.Graph;
 import gui.NetworkModel;
 import javafx.geometry.Point3D;
-import modelcomponents.ModelArea;
-import modelcomponents.ModelEdge;
-import modelcomponents.ModelGroup;
-import modelcomponents.ModelObject;
+import modelcomponents.*;
 import org.apache.commons.collections15.buffer.CircularFifoBuffer;
 import org.apache.commons.math3.stat.descriptive.moment.Mean;
 import org.apache.commons.math3.stat.descriptive.moment.Variance;
@@ -22,7 +19,7 @@ import java.text.DecimalFormat;
 import java.text.NumberFormat;
 import java.util.*;
 import java.util.List;
-import java.util.concurrent.ExecutionException;
+import java.util.concurrent.*;
 
 
 /**
@@ -35,14 +32,15 @@ import java.util.concurrent.ExecutionException;
 public class RandomWalk {
     private final static MersenneTwister random = new MersenneTwister();
     private static CircularFifoBuffer<Double> varianceList = new CircularFifoBuffer<Double>(5);
-    private static final double EPSILON = 0.00001;
+    private static final double EPSILON = 0.0000001;
     private static Collection<DirectedSparseMultigraph<ModelObject, ModelEdge>> randomWalkGraphs;
-    private static RandomWalk randomWalkInstance;
     private static Graph<ModelObject, ModelEdge> completeGraph = null;
     private static ModelObject startingLocation = null;
     private static JTextArea taskOutput;
     private static double stabilityValue;
     private static JFrame progressFrame;
+    private static final Semaphore randomWalkSemaphore = new Semaphore(1);
+    private static final int MAX_SOLVER_SIZE = 5000;
 
     private RandomWalk() {
     }
@@ -55,55 +53,99 @@ public class RandomWalk {
 
 
     private static Collection<DirectedSparseMultigraph<ModelObject, ModelEdge>> generateRandomWalkCollection() {
+        if (!randomWalkSemaphore.tryAcquire()) {
+            try {
+                randomWalkSemaphore.tryAcquire(1, 600, TimeUnit.SECONDS);
+            } catch (InterruptedException e) {
+                e.printStackTrace();
+            }
+            return randomWalkGraphs;
+        }
         if (completeGraph == null || startingLocation == null) {
             throw new NullPointerException();
         }
 
         varianceList.clear();
         Collection<DirectedSparseMultigraph<ModelObject, ModelEdge>> resultSet =
-            new HashSet<DirectedSparseMultigraph<ModelObject, modelcomponents.ModelEdge>>();
+                new HashSet<DirectedSparseMultigraph<ModelObject, modelcomponents.ModelEdge>>();
         List<Double> listOfGyrationRadius = new ArrayList<Double>();
         createProgressBar();
+        ExecutorService threadPool = Executors.newCachedThreadPool();
+//        ExecutorService threadPool = Executors.newFixedThreadPool(1);
+        CompletionService<DirectedSparseMultigraph<ModelObject, ModelEdge>> ecs
+                = new ExecutorCompletionService<DirectedSparseMultigraph<ModelObject, ModelEdge>>(threadPool);
         int count = 0;
-        while (true) {
 
-            DirectedSparseMultigraph<ModelObject, ModelEdge> tempGraph = generateRandomWalk(completeGraph, startingLocation);
-            resultSet.add(tempGraph);
-            listOfGyrationRadius.add(calculateRadiusOfGyration(tempGraph, startingLocation));
-            if (isStable(listOfGyrationRadius)) {
+        int n = MAX_SOLVER_SIZE;
+        List<Future<DirectedSparseMultigraph<ModelObject, ModelEdge>>> futures
+                = new ArrayList<Future<DirectedSparseMultigraph<ModelObject, ModelEdge>>>(n);
+        try {
+            for (int i = 0; i < n; i++) {
+                futures.add(ecs.submit(new Callable<DirectedSparseMultigraph<ModelObject, ModelEdge>>() {
 
-                break;
-            } else{
-                count++;
-                if(count%50==0){
-                    NumberFormat doubleFormat = new DecimalFormat("##.000000");
-                    final String  lastStabilityValue = doubleFormat.format(stabilityValue);
-                    NumberFormat integerFormat = new DecimalFormat("0000");
-                    final String lastCount = integerFormat.format(count);
-                    SwingUtilities.invokeLater(new Runnable() {
-                        @Override
-                        public void run() {
-
-
-
-                            taskOutput.append((lastCount) + " : " + lastStabilityValue + "\n");
-                            progressFrame.revalidate();
-                        }
-                    });
-                }
+                    @Override
+                    public DirectedSparseMultigraph<ModelObject, ModelEdge> call() throws Exception {
+                        return generateRandomWalk(completeGraph, startingLocation);
+                    }
+                }));
             }
 
 
-//            System.out.println(resultSet.size());
+            DirectedSparseMultigraph<ModelObject, ModelEdge> tempGraph = null;
+            for (int i = 0; i < n; i++) {
+                try {
+                    tempGraph = ecs.take().get();
+
+                    if (tempGraph != null) {
+                        resultSet.add(tempGraph);
+                        listOfGyrationRadius.add(calculateRadiusOfGyration(tempGraph, startingLocation));
+                        if (isStable(listOfGyrationRadius)) {
+                            break;
+                        } else {
+                            count++;
+                            if (count % 50 == 0) {
+                                NumberFormat doubleFormat = new DecimalFormat("##.000000");
+                                final String lastStabilityValue = doubleFormat.format(stabilityValue);
+                                NumberFormat integerFormat = new DecimalFormat("0000");
+                                final String lastCount = integerFormat.format(count);
+                                SwingUtilities.invokeLater(new Runnable() {
+                                    @Override
+                                    public void run() {
+                                        taskOutput.append((lastCount) + " : " + lastStabilityValue + "\n");
+                                        progressFrame.revalidate();
+                                    }
+                                });
+                            }
+                        }
+
+                    }
+                } catch (ExecutionException e) {
+                    e.printStackTrace();  //To change body of catch statement use File | Settings | File Templates.
+                } catch (InterruptedException e) {
+                    e.printStackTrace();  //To change body of catch statement use File | Settings | File Templates.
+                }
+            }
+
+        } finally {
+            for (Future<DirectedSparseMultigraph<ModelObject, ModelEdge>> f : futures)
+                f.cancel(true);
         }
+
+
+//            System.out.println(resultSet.size());
+
+
         SwingUtilities.invokeLater(new Runnable() {
             @Override
             public void run() {
                 progressFrame.dispose();
             }
-        });
+        }
+
+        );
 
         randomWalkGraphs = resultSet;
+        randomWalkSemaphore.release();
         return randomWalkGraphs;
     }
 
@@ -351,19 +393,29 @@ public class RandomWalk {
         return result;
     }
 
-    public static Collection<DirectedSparseMultigraph<ModelObject,ModelEdge>> getAllRandomWalkGraphs() {
-        System.out.println("Creating random walks");
-
+    public static Collection<DirectedSparseMultigraph<ModelObject, ModelEdge>> getAllRandomWalkGraphs(final Semaphore generatorSemaphore) {
+        final Semaphore tempSemaphore = new Semaphore(1);
+        try {
+            tempSemaphore.acquire(1);
+        } catch (InterruptedException e) {
+            e.printStackTrace();  //To change body of catch statement use File | Settings | File Templates.
+        }
         if (randomWalkGraphs == null || randomWalkGraphs.isEmpty()) {
             SwingWorker<Collection<DirectedSparseMultigraph<ModelObject, ModelEdge>>, Void> worker = new SwingWorker<Collection<DirectedSparseMultigraph<ModelObject, ModelEdge>>, Void>() {
                 @Override
                 protected Collection<DirectedSparseMultigraph<ModelObject, ModelEdge>> doInBackground() throws Exception {
-                    return generateRandomWalkCollection();
+                    Collection<DirectedSparseMultigraph<ModelObject, ModelEdge>> graphCollection = generateRandomWalkCollection();
+                    tempSemaphore.release();
+                    return graphCollection;
                 }
+
             };
 
             worker.execute();
             try {
+
+                tempSemaphore.tryAcquire(1, 300, TimeUnit.SECONDS);
+
                 worker.get();
             } catch (InterruptedException e) {
                 e.printStackTrace();  //To change body of catch statement use File | Settings | File Templates.
@@ -371,7 +423,82 @@ public class RandomWalk {
                 e.printStackTrace();  //To change body of catch statement use File | Settings | File Templates.
             }
         }
-        System.out.println("generated "+randomWalkGraphs.size()+ " graphs");
+        System.out.println("data received");
+        generatorSemaphore.release();
         return randomWalkGraphs;
+    }
+
+    public static Double getCoverageOfRandomWalks(final int pathLength, final String startingRoom, Semaphore coverageAreaSemaphore) {
+        final Semaphore semaphore = new Semaphore(2);
+        final Semaphore mutex = new Semaphore(1);
+        try {
+            mutex.acquire();
+        } catch (InterruptedException e) {
+            e.printStackTrace();  //To change body of catch statement use File | Settings | File Templates.
+        }
+
+        SwingWorker<Double, Void> tempWorker = new SwingWorker<Double, Void>() {
+            @Override
+            protected Double doInBackground() throws Exception {
+
+                if (randomWalkGraphs == null || randomWalkGraphs.isEmpty()) {
+                    generateRandomWalkCollection();
+                }
+
+                semaphore.acquire(2);
+
+                SwingWorker<HashMap<String, HashMap<String, Double>>, Void> firstOrderCalculator = new SwingWorker<HashMap<String, HashMap<String, Double>>, Void>() {
+                    @Override
+                    protected HashMap<String, HashMap<String, Double>> doInBackground() throws Exception {
+
+                        return GraphUtilities.calculateFirstOrderProbabilities(randomWalkGraphs, semaphore);
+                    }
+
+                };
+
+                SwingWorker<HashMap<String, HashMap<String, HashMap<String, Double>>>, Void> secondOrderCalculator = new SwingWorker<HashMap<String, HashMap<String, HashMap<String, Double>>>, Void>() {
+                    @Override
+                    protected HashMap<String, HashMap<String, HashMap<String, Double>>> doInBackground() throws Exception {
+
+
+                        return GraphUtilities.calculateSecondOrderProbabilities(randomWalkGraphs, semaphore);
+                    }
+
+
+                };
+
+                firstOrderCalculator.execute();
+                secondOrderCalculator.execute();
+
+
+                System.out.println("Waiting for random walk");
+                semaphore.tryAcquire(2, 300, TimeUnit.SECONDS);
+                System.out.println("Random walk acquired");
+                HashMap<String, HashMap<String, Double>> firstOrderProbs = firstOrderCalculator.get();
+                HashMap<String, HashMap<String, HashMap<String, Double>>> secondOrderProbs = secondOrderCalculator.get();
+                System.out.println("Data received");
+
+                Collection<DirectedSparseMultigraph<ModelObject, ModelEdge>> pathCollections = GraphUtilities.generatePaths(firstOrderProbs, secondOrderProbs, startingRoom, pathLength);
+                Double coverage = GraphUtilities.calculateAverageCoverage(pathCollections);
+
+                mutex.release();
+                return coverage;
+            }
+
+
+        };
+        tempWorker.execute();
+
+        try {
+            mutex.tryAcquire(1, 300, TimeUnit.SECONDS);
+            coverageAreaSemaphore.release();
+            return tempWorker.get();
+        } catch (InterruptedException e) {
+            e.printStackTrace();
+            return null;
+        } catch (ExecutionException e) {
+            e.printStackTrace();
+            return null;
+        }
     }
 }

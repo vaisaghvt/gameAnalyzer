@@ -22,7 +22,7 @@ public enum StatisticChoice {
     TIME_SPENT_PER_SIGNIFICANT_VERTEX("SignificantVertexVisitDurationStatisticHandler", "Time spent at \"significant\" vertices", true, true, false,
             Phase.EXPLORATION, Phase.TASK_1, Phase.TASK_2, Phase.TASK_3),
     ROOM_ANALYSIS("RoomAnalysisHandler", "Analyse rooms in detail", true, false,true),
-    PATH_PREDICTION("PathPredictionHandler", "Predict paths from current location", true, false,true),
+    PATH_PREDICTION("PathPredictionHandler", "Predict paths from current location", true, false,false),
 
     VERTEX_VISIT_FREQUENCY("VertexVisitFrequencyStatisticHandler", "Frequency of visit for each room"
             , true, true,true,  Phase.EXPLORATION, Phase.TASK_1, Phase.TASK_2, Phase.TASK_3),
@@ -36,7 +36,6 @@ public enum StatisticChoice {
             Phase.TASK_2, Phase.TASK_3),
     DOOR_FREQUENCY("SignificantDoorFrequencyStatisticHandler", "Frequency of use of significant doors", true, true,false,
             Phase.EXPLORATION, Phase.TASK_1, Phase.TASK_2, Phase.TASK_3),
-
     ROOM_REMEMBERED("RoomRememberedStatisticHandler", "Correlation of vertex visit to survey answer", false, false,false,
             Phase.EXPLORATION, Phase.TASK_1),
     STAIRCASE_VISIT_CHANCE("StaircaseVisitStatisticHandler", "Frequency of taking a staircase in opp direction", false, false,false,
