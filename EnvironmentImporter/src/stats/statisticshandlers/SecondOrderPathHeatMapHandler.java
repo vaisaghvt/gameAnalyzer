@@ -6,6 +6,7 @@ import gui.Phase;
 import gui.StatsDialog;
 import modelcomponents.ModelEdge;
 import modelcomponents.ModelObject;
+import randomwalk.FirstOrderBiasedRandomWalk;
 import randomwalk.RandomWalk;
 import stats.chartdisplays.PathHeatMapChartDisplay;
 import stats.consoledisplays.PathHeatMapConsoleDisplay;
@@ -25,6 +26,7 @@ import java.util.concurrent.TimeUnit;
  */
 public class SecondOrderPathHeatMapHandler extends StatisticsHandler<PathHeatMapConsoleDisplay, PathHeatMapChartDisplay> {
 
+   boolean USE_FIRST_ORDER_BIASED_RANDOM = true;
 
     public SecondOrderPathHeatMapHandler() {
         super(new PathHeatMapChartDisplay(),
@@ -307,7 +309,11 @@ public class SecondOrderPathHeatMapHandler extends StatisticsHandler<PathHeatMap
         SwingWorker<Collection<DirectedSparseMultigraph<ModelObject, ModelEdge>>, Void> randomWalkGenerator = new SwingWorker<Collection<DirectedSparseMultigraph<ModelObject, ModelEdge>>, Void>() {
             @Override
             protected Collection<DirectedSparseMultigraph<ModelObject, ModelEdge>> doInBackground() throws Exception {
-                Collection<DirectedSparseMultigraph<ModelObject, ModelEdge>> collectionOfGraphs = RandomWalk.getAllRandomWalkGraphs(generatorSemaphore);
+                Collection<DirectedSparseMultigraph<ModelObject, ModelEdge>> collectionOfGraphs;
+                if(USE_FIRST_ORDER_BIASED_RANDOM)
+                    collectionOfGraphs = FirstOrderBiasedRandomWalk.getAllRandomWalkGraphs(generatorSemaphore);
+                else
+                    collectionOfGraphs = RandomWalk.getAllRandomWalkGraphs(generatorSemaphore);
                 return collectionOfGraphs;
             }
         };
@@ -361,9 +367,10 @@ public class SecondOrderPathHeatMapHandler extends StatisticsHandler<PathHeatMap
 
         @Override
         protected Void doInBackground() throws Exception {
-            collectionOfGraphs
-                    = RandomWalk.getAllRandomWalkGraphs(new Semaphore(1));
-            ;
+            if(USE_FIRST_ORDER_BIASED_RANDOM)
+                collectionOfGraphs = FirstOrderBiasedRandomWalk.getAllRandomWalkGraphs(new Semaphore(1));
+            else
+                collectionOfGraphs = RandomWalk.getAllRandomWalkGraphs(new Semaphore(1));
             return null;
         }
 

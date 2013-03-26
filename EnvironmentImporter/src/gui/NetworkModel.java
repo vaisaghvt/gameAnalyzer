@@ -19,6 +19,7 @@ import edu.uci.ics.jung.visualization.transform.MutableTransformer;
 import javafx.geometry.Point3D;
 import modelcomponents.*;
 import org.apache.commons.collections15.Transformer;
+import randomwalk.FirstOrderBiasedRandomWalk;
 import randomwalk.RandomWalk;
 import stats.StatisticChoice;
 
@@ -170,7 +171,7 @@ public class NetworkModel extends MainPanel implements ActionListener {
         }
 
         RandomWalk.setRandomWalkParameters(completeGraph, startingNode);
-
+        FirstOrderBiasedRandomWalk.setRandomWalkParameters(completeGraph, startingNode);
 
         sortedRoomNames = new TreeSet<String>();
         for (ModelObject area : this.completeGraph.getVertices()) {

@@ -29,7 +29,7 @@ import java.util.concurrent.*;
  * Time: 5:40 PM
  * To change this template use File | Settings | File Templates.
  */
-public class RandomWalk {
+public class FirstOrderBiasedRandomWalk {
     private final static MersenneTwister random = new MersenneTwister();
     private static CircularFifoBuffer<Double> varianceList = new CircularFifoBuffer<Double>(5);
     private static final double EPSILON = 0.0000001;
@@ -42,13 +42,15 @@ public class RandomWalk {
     private static final Semaphore randomWalkSemaphore = new Semaphore(1);
     private static final int MAX_SOLVER_SIZE = 5000;
 
-    private RandomWalk() {
+    private static boolean withDistanceFilter = true;
+
+    private FirstOrderBiasedRandomWalk() {
     }
 
 
     public static void setRandomWalkParameters(Graph<ModelObject, ModelEdge> completeGraph, ModelObject startingLocation) {
-        RandomWalk.completeGraph = completeGraph;
-        RandomWalk.startingLocation = startingLocation;
+        FirstOrderBiasedRandomWalk.completeGraph = completeGraph;
+        FirstOrderBiasedRandomWalk.startingLocation = startingLocation;
     }
 
 
@@ -59,6 +61,7 @@ public class RandomWalk {
             } catch (InterruptedException e) {
                 e.printStackTrace();
             }
+            randomWalkSemaphore.release();
             return randomWalkGraphs;
         }
         if (completeGraph == null || startingLocation == null) {
@@ -67,7 +70,7 @@ public class RandomWalk {
 
         varianceList.clear();
         Collection<DirectedSparseMultigraph<ModelObject, ModelEdge>> resultSet =
-                new HashSet<DirectedSparseMultigraph<ModelObject, modelcomponents.ModelEdge>>();
+                new HashSet<DirectedSparseMultigraph<ModelObject, ModelEdge>>();
         List<Double> listOfGyrationRadius = new ArrayList<Double>();
         createProgressBar();
         ExecutorService threadPool = Executors.newCachedThreadPool();
@@ -303,26 +306,106 @@ public class RandomWalk {
 
 
     private static DirectedSparseMultigraph<ModelObject, ModelEdge> generateRandomWalk(Graph<ModelObject, ModelEdge> graph, ModelObject startingLocation) {
-
         DirectedSparseMultigraph<ModelObject, ModelEdge> currentGraph = new DirectedSparseMultigraph<ModelObject, ModelEdge>();
         int coverage = calculateCoverage(graph, currentGraph);
         int time = 0;
         ModelObject currentLocation = startingLocation;
         currentGraph.addVertex(currentLocation);
+        ArrayList<ModelObject> neighbours = new ArrayList<ModelObject>();
+        ModelObject lastVisited = null;
+
+
         while (coverage < 100) {
-            ArrayList<ModelObject> neighbours = new ArrayList<ModelObject>();
+            neighbours.clear();
             neighbours.addAll(graph.getNeighbors(currentLocation));
-            ModelObject next = neighbours.get((int) Math.floor(random.nextDouble() * neighbours.size()));
+            if (neighbours.size() > 1 && lastVisited != null) {
+                neighbours.remove(lastVisited);
+            }
+
+
+            ModelObject next = null;
+
+            if (withDistanceFilter && lastVisited != null) {
+                HashMap<ModelObject, Double> probabilityMap = generateProbabilities(lastVisited, neighbours);
+                double randomValue = random.nextDouble();
+                double sum = 0;
+                for (ModelObject neighbour : probabilityMap.keySet()) {
+                    sum += probabilityMap.get(neighbour);
+                    if (sum > randomValue) {
+                        next = neighbour;
+                        break;
+                    }
+
+                }
+//                   next = findNearestDestination(lastVisited, neighbours) ;
+            } else {
+                next = neighbours.get((int) Math.floor(random.nextDouble() * neighbours.size()));
+            }
             currentGraph.addVertex(next);
             ModelEdge edge = new ModelEdge();
             edge.setTime(time++);
             currentGraph.addEdge(edge, currentLocation, next);
+            lastVisited = currentLocation;
             currentLocation = next;
             coverage = calculateCoverage(graph, currentGraph);
 
         }
 
         return currentGraph;
+
+    }
+
+    private static ModelObject findNearestDestination(ModelObject location, ArrayList<ModelObject> neighbours) {
+
+        if (neighbours.size() == 1) {
+            return neighbours.get(0);
+        }
+        Point3D currentCenter = getCenterOfArea(location);
+
+        ModelObject result = null;
+        double randomNoise = random.nextDouble();
+        if (randomNoise > 0.80) {
+            return neighbours.get((int) Math.floor(random.nextDouble() * neighbours.size()));
+        }
+        double minDistance = Double.MAX_VALUE;
+        for (ModelObject neighbour : neighbours) {
+            double distance = currentCenter.distance(getCenterOfArea(neighbour));
+            if (distance < minDistance) {
+                minDistance = distance;
+
+                result = neighbour;
+            }
+        }
+        return result;
+
+    }
+
+    private static HashMap<ModelObject, Double> generateProbabilities(ModelObject currentLocation, ArrayList<ModelObject> neighbours) {
+        HashMap<ModelObject, Double> destinationProbabilities = new HashMap<ModelObject, Double>();
+
+        if (neighbours.size() == 1) {
+            destinationProbabilities.put(neighbours.get(0), 1.0);
+            return destinationProbabilities;
+        }
+        Point3D currentCenter = getCenterOfArea(currentLocation);
+        HashMap<ModelObject, Double> destinationDistanceMap = new HashMap<ModelObject, Double>();
+        double total = 0;
+        for (ModelObject neighbour : neighbours) {
+            double distance = currentCenter.distance(getCenterOfArea(neighbour));
+            destinationDistanceMap.put(neighbour, distance);
+            total += distance;
+        }
+        double newTotal = 0;
+        for (ModelObject destination : destinationDistanceMap.keySet()) {
+            double newValue = total - destinationDistanceMap.get(destination);
+            destinationDistanceMap.put(destination, newValue);
+            newTotal += newValue;
+        }
+        for (ModelObject destination : destinationDistanceMap.keySet()) {
+            destinationProbabilities.put(destination, destinationDistanceMap.get(destination) / newTotal);
+        }
+//        System.out.println(destinationProbabilities);
+        return destinationProbabilities;
     }
 
 

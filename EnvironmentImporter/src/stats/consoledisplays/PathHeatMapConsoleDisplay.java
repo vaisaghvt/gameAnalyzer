@@ -33,9 +33,9 @@ public class PathHeatMapConsoleDisplay extends ConsoleDisplay<HashMap<String, Ha
                 } else {
                     double value =  (data.get(source).get(destination)+1.0)/2;
                     if(value>0.6){
-                        higherInData.add(source +"to"+ destination);
+                        higherInData.add(source +" to "+ destination+" : "+data.get(source).get(destination));
                     } else if(value<0.4){
-                        lowerInData.add(source+"to"+destination);
+                        lowerInData.add(source+" to "+destination+" : "+data.get(source).get(destination));
                     }
                 }
             }
@@ -47,7 +47,7 @@ public class PathHeatMapConsoleDisplay extends ConsoleDisplay<HashMap<String, Ha
             System.out.println(value);
         }
 
-        System.out.println(" ********* Lower in Data ***********");
+        System.out.println(" ********* Higher in Random Walk ***********");
         for(String value : lowerInData){
             System.out.println(value);
         }
