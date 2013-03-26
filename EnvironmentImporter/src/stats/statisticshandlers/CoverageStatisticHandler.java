@@ -8,8 +8,6 @@ import stats.StatisticChoice;
 import stats.chartdisplays.CoverageChartDisplay;
 import stats.consoledisplays.CoverageConsoleDisplay;
 
-import javax.swing.*;
-import java.awt.*;
 import java.util.Collection;
 
 /**
@@ -33,9 +31,8 @@ public class CoverageStatisticHandler extends StatisticsHandler<CoverageConsoleD
     @Override
     public void generateAndDisplayStats(Collection<String> dataNames, Phase phase, StatsDialog.AllOrOne all, StatsDialog.AggregationType itemAt) {
 
-        GenerateRequiredDataTask task = new GenerateRequiredDataTask(dataNames, StatisticChoice.COVERAGE,phase);
+        GenerateRequiredDataTask task = new GenerateRequiredDataTask(dataNames, StatisticChoice.COVERAGE, phase);
         super.actualGenerateAndDisplay(task);
-
 
 
     }
@@ -51,13 +48,13 @@ public class CoverageStatisticHandler extends StatisticsHandler<CoverageConsoleD
             super(dataNames);
             this.choice = choice;
             this.phase = phase;
-       }
+        }
 
         @Override
         protected void doTasks(String dataName) {
-            synchronized (NetworkModel.instance()) {
-                coverageLevel.put(NetworkModel.instance().getCoverage(dataName, phase), dataName);
-            }
+
+            coverageLevel.put(NetworkModel.instance().getCoverage(dataName, phase), dataName);
+
         }
 
         @Override

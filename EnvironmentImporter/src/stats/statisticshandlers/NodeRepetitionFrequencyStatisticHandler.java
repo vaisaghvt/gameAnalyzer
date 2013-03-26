@@ -9,8 +9,6 @@ import gui.StatsDialog;
 import stats.chartdisplays.NodeRepetitionFrequencyChartDisplay;
 import stats.consoledisplays.NodeRepetitionFrequencyConsoleDisplay;
 
-import javax.swing.*;
-import java.awt.*;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.Iterator;
@@ -36,7 +34,7 @@ public class NodeRepetitionFrequencyStatisticHandler extends StatisticsHandler<N
 
     @Override
     public void generateAndDisplayStats(Collection<String> dataNames, Phase phase, StatsDialog.AllOrOne allOrOne, StatsDialog.AggregationType aggregationType) {
-        GenerateRequiredDataTask task = new GenerateRequiredDataTask(dataNames, allOrOne, aggregationType);
+        GenerateRequiredDataTask task = new GenerateRequiredDataTask(dataNames, phase, allOrOne, aggregationType);
         super.actualGenerateAndDisplay(task);
     }
 
@@ -107,9 +105,10 @@ public class NodeRepetitionFrequencyStatisticHandler extends StatisticsHandler<N
 
 //                    }else if(difference/1000 >=300){
 //                        result.add((Math.log(300)));
-                    } else {
-                        System.out.println(second + "," + first);
                     }
+//                    else {
+////                        System.out.println(second + "," + first);
+//                    }
                     first = second;
 
                 }
@@ -125,16 +124,18 @@ public class NodeRepetitionFrequencyStatisticHandler extends StatisticsHandler<N
         private HashMap<String, HashMultimap<String, Long>> nameToResultMapping = new HashMap<String, HashMultimap<String, Long>>();
         private final StatsDialog.AllOrOne allOrOne;
         private final StatsDialog.AggregationType type;
+        private final Phase phase;
 
-        public GenerateRequiredDataTask(Collection<String> dataNames,  StatsDialog.AllOrOne allOrOne, StatsDialog.AggregationType aggregationType) {
+        public GenerateRequiredDataTask(Collection<String> dataNames, Phase phase, StatsDialog.AllOrOne allOrOne, StatsDialog.AggregationType aggregationType) {
             super(dataNames);
             this.allOrOne = allOrOne;
             this.type = aggregationType;
+            this.phase = phase;
         }
 
         @Override
         protected void doTasks(String dataName) {
-            HashMultimap<String, Long> temp= NetworkModel.instance().getVertexInTimesFor(dataName);
+            HashMultimap<String, Long> temp = NetworkModel.instance().getVertexInTimesFor(dataName, phase);
             nameToResultMapping.put(dataName, temp);
         }
 

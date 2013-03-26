@@ -115,7 +115,7 @@ public class StatsDialog extends JFrame implements ActionListener {
             this.aggregationTypeComboBox.setEnabled(false);
         } else {
             this.allOrOneComboBox.setEnabled(true);
-            if (allOrOneComboBox.getItemAt(allOrOneComboBox.getSelectedIndex()) == AllOrOne.ALL) {
+            if (allOrOneComboBox.getItemAt(allOrOneComboBox.getSelectedIndex()) == AllOrOne.ALL && choice.hasAggregationChoice()) {
                 this.aggregationTypeComboBox.setEnabled(true);
             } else {
                 this.aggregationTypeComboBox.setEnabled(false);
@@ -192,9 +192,14 @@ public class StatsDialog extends JFrame implements ActionListener {
             phaseChoiceList.addItem(phase);
         }
 
+
         //Create the combo box, select item at index 4.
         //Indices start at 0, so 4 specifies the pig.
-        phaseChoiceList.setSelectedIndex(0);
+        if (!choice.getPhases().isEmpty()) {
+            phaseChoiceList.setSelectedIndex(0);
+        } else {
+            phaseChoiceList.setEnabled(false);
+        }
         phaseChoiceList.addActionListener(this);
         phaseChoiceList.setEditable(false);
     }
@@ -421,10 +426,15 @@ public class StatsDialog extends JFrame implements ActionListener {
             });
 
         } else if (event.getSource() == bNone) {
+            SwingUtilities.invokeLater(new Runnable() {
+                @Override
+                public void run() {
 
-            for (JCheckBox cBox : dataNameList) {
-                cBox.setSelected(false);
-            }
+                    for (JCheckBox cBox : dataNameList) {
+                        cBox.setSelected(false);
+                    }
+                }
+            });
 
         } else if (event.getSource() == bOneRandom) {
 

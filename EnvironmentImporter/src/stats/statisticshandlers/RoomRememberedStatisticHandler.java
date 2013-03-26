@@ -8,12 +8,9 @@ import stats.StatisticChoice;
 import stats.chartdisplays.RoomRepetitionChartDisplay;
 import stats.consoledisplays.RoomRepetitionConsoleDisplay;
 
-import javax.swing.*;
-import java.awt.*;
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.util.*;
-import java.util.List;
 
 /**
  * Created with IntelliJ IDEA.
@@ -145,7 +142,7 @@ public class RoomRememberedStatisticHandler extends StatisticsHandler<RoomRepeti
 
     }
 
-    class GenerateRequiredDataTask extends AbstractTask{
+    class GenerateRequiredDataTask extends AbstractTask {
         private final Phase phase;
 
         private final StatisticChoice choice;
@@ -164,16 +161,15 @@ public class RoomRememberedStatisticHandler extends StatisticsHandler<RoomRepeti
 
         @Override
         protected void doTasks(String dataName) {
-            synchronized (NetworkModel.instance()) {
-                dataNameDataMap.put(dataName, NetworkModel.instance().getVertexDataFor(dataName, StatisticChoice.TIME_SPENT_PER_VERTEX, phase));
-            }
+
+            dataNameDataMap.put(dataName, NetworkModel.instance().getVertexDataFor(dataName, StatisticChoice.TIME_SPENT_PER_VERTEX, phase));
+
         }
 
         @Override
         protected void summarizeAndDisplay() {
             HashMap<String, HashMap<String, Long>> roomVisitData = summarizeData(dataNameDataMap, phase);
             HashMultimap<String, String> rememberedRooms = getRememberedRooms();
-
 
 
             HashMap<String, HashMap<String, HashMap<String, String>>> summarizedData = summarizeToHashMap(roomVisitData, rememberedRooms);

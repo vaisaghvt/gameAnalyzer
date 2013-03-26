@@ -9,8 +9,6 @@ import stats.StatisticChoice;
 import stats.chartdisplays.RoomDurationTotalFrequencyChartDisplay;
 import stats.consoledisplays.RoomDurationTotalFrequencyConsoleDisplay;
 
-import javax.swing.*;
-import java.awt.*;
 import java.util.Collection;
 import java.util.HashMap;
 
@@ -88,10 +86,10 @@ public class RoomDurationTotalFrequencyStatisticHandler extends StatisticsHandle
         @Override
         protected void doTasks(String dataName) {
             HashMap<String, Number> temp;
-            synchronized (NetworkModel.instance()) {
-                temp = NetworkModel.instance().
-                        getVertexDataFor(dataName, StatisticChoice.TIME_SPENT_PER_VERTEX, phase);
-            }
+
+            temp = NetworkModel.instance().
+                    getVertexDataFor(dataName, StatisticChoice.TIME_SPENT_PER_VERTEX, phase);
+
             HashMap<String, Long> result = new HashMap<String, Long>();
             for (String roomName : temp.keySet()) {
                 int numberOfEdges = roomEdgeCountMapping.get(roomName);
@@ -105,7 +103,6 @@ public class RoomDurationTotalFrequencyStatisticHandler extends StatisticsHandle
         protected void summarizeAndDisplay() {
             if (allOrOne == StatsDialog.AllOrOne.ALL) {
                 Multiset<Long> dataResult = summarizeAll(dataNameDataMap);
-
 
 
                 chartDisplay.setTitle(StatisticChoice.ROOM_DURATION_FREQUENCY.toString());

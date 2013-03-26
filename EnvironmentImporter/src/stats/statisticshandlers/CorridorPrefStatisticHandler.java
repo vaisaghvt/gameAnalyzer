@@ -9,8 +9,6 @@ import stats.StatisticChoice;
 import stats.chartdisplays.CorridorPrefChartDisplay;
 import stats.consoledisplays.CorridorPrefConsoleDisplay;
 
-import javax.swing.*;
-import java.awt.*;
 import java.util.Collection;
 
 /**
@@ -34,7 +32,7 @@ public class CorridorPrefStatisticHandler extends StatisticsHandler<CorridorPref
     @Override
     public void generateAndDisplayStats(Collection<String> dataNames, Phase phase, StatsDialog.AllOrOne all, StatsDialog.AggregationType itemAt) {
 
-        GenerateRequiredDataTask task = new GenerateRequiredDataTask(dataNames, StatisticChoice.CORRIDOR_PREFERENCE_MEASURE,phase);
+        GenerateRequiredDataTask task = new GenerateRequiredDataTask(dataNames, StatisticChoice.CORRIDOR_PREFERENCE_MEASURE, phase);
         super.actualGenerateAndDisplay(task);
 
 
@@ -44,8 +42,7 @@ public class CorridorPrefStatisticHandler extends StatisticsHandler<CorridorPref
     class GenerateRequiredDataTask extends AbstractTask {
         private final Phase phase;
         private final StatisticChoice choice;
-        HashMultimap<String,String> result = HashMultimap.create();
-
+        HashMultimap<String, String> result = HashMultimap.create();
 
 
         public GenerateRequiredDataTask(Collection<String> dataNames, StatisticChoice choice, Phase phase) {
@@ -57,9 +54,9 @@ public class CorridorPrefStatisticHandler extends StatisticsHandler<CorridorPref
         @Override
         protected void doTasks(String dataName) {
             YES_NO_CHOICE resultTemp;
-            synchronized (NetworkModel.instance()) {
-                resultTemp = NetworkModel.instance().getCorridorRelatedMotion(dataName, phase);
-            }
+
+            resultTemp = NetworkModel.instance().getCorridorRelatedMotion(dataName, phase);
+
             if (resultTemp == YES_NO_CHOICE.YES) {
                 result.put("yes", dataName);
             } else if (resultTemp == YES_NO_CHOICE.NO) {

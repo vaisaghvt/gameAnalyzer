@@ -39,7 +39,7 @@ public class DoorUseFrequencyStatisticHandler extends StatisticsHandler<DoorUseC
     private HashMap<String, Double> normalizeResult(HashMap<String, Double> personData) {
 
         HashMap<String, Double> result = new HashMap<String, Double>();
-        HashMap<String, Number> randomWalkData = RandomWalk.instance().calculateAverageDoorUseFrequency();
+        HashMap<String, Number> randomWalkData = RandomWalk.calculateAverageDoorUseFrequency();
         int NRandom = 0, NPerson = 0;
         for (String room : randomWalkData.keySet()) {
             NRandom += randomWalkData.get(room).intValue();
@@ -70,7 +70,6 @@ public class DoorUseFrequencyStatisticHandler extends StatisticsHandler<DoorUseC
     }
 
 
-
     class GenerateRequiredDataTask extends AbstractTask {
         private final Phase phase;
         private final StatisticChoice choice;
@@ -91,9 +90,9 @@ public class DoorUseFrequencyStatisticHandler extends StatisticsHandler<DoorUseC
         @Override
         protected void doTasks(String dataName) {
             HashMap<String, Integer> temp;
-            synchronized (NetworkModel.instance()) {
-                temp = NetworkModel.instance().getEdgeDataFor(dataName, phase);
-            }
+
+            temp = NetworkModel.instance().getEdgeDataFor(dataName, phase);
+
 
             HashMap<String, Double> result = new HashMap<String, Double>();
 

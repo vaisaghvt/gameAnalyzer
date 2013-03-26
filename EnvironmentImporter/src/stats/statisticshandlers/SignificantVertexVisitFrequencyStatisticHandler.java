@@ -7,8 +7,6 @@ import stats.StatisticChoice;
 import stats.chartdisplays.SignificantVertexChartDisplay;
 import stats.consoledisplays.SignificantVertexConsoleDisplay;
 
-import javax.swing.*;
-import java.awt.*;
 import java.util.Collection;
 import java.util.HashMap;
 
@@ -131,9 +129,9 @@ public class SignificantVertexVisitFrequencyStatisticHandler extends StatisticsH
 
         @Override
         protected void doTasks(String dataName) {
-            synchronized (NetworkModel.instance()) {
-                dataNameDataMap.put(dataName, NetworkModel.instance().getVertexDataFor(dataName, choice, phase));
-            }
+
+            dataNameDataMap.put(dataName, NetworkModel.instance().getVertexDataFor(dataName, choice, phase));
+
         }
 
         @Override
