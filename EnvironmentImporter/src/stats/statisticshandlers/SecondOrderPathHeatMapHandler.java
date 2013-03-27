@@ -26,7 +26,7 @@ import java.util.concurrent.TimeUnit;
  */
 public class SecondOrderPathHeatMapHandler extends StatisticsHandler<PathHeatMapConsoleDisplay, PathHeatMapChartDisplay> {
 
-   boolean USE_FIRST_ORDER_BIASED_RANDOM = false;
+   boolean USE_FIRST_ORDER_BIASED_RANDOM = true;
 
     public SecondOrderPathHeatMapHandler() {
         super(new PathHeatMapChartDisplay(),

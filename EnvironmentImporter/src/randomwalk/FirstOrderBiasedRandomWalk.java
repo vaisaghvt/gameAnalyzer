@@ -42,7 +42,7 @@ public class FirstOrderBiasedRandomWalk {
     private static final Semaphore randomWalkSemaphore = new Semaphore(1);
     private static final int MAX_SOLVER_SIZE = 5000;
 
-    private static boolean withDistanceFilter = true;
+    private static boolean withDistanceFilter = false;
 
     private FirstOrderBiasedRandomWalk() {
     }
