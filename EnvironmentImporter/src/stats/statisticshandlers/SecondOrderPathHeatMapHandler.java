@@ -26,7 +26,7 @@ import java.util.concurrent.TimeUnit;
  */
 public class SecondOrderPathHeatMapHandler extends StatisticsHandler<PathHeatMapConsoleDisplay, PathHeatMapChartDisplay> {
 
-   boolean USE_FIRST_ORDER_BIASED_RANDOM = true;
+   boolean USE_FIRST_ORDER_BIASED_RANDOM = false;
 
     public SecondOrderPathHeatMapHandler() {
         super(new PathHeatMapChartDisplay(),
@@ -191,8 +191,8 @@ public class SecondOrderPathHeatMapHandler extends StatisticsHandler<PathHeatMap
                 edgeCollection.pollFirst();
 
             }
-
-            for (int i = 0; i < edgeCollection.size() / 2; i++) {
+            int size = edgeCollection.size();
+            for (int i = 0; i <  size/ 2; i++) {
                 ModelEdge incoming = edgeCollection.pollFirst();
                 ModelEdge outgoing = edgeCollection.pollFirst();
                 ModelObject from = tempGraph.getOpposite(mainNode, incoming);

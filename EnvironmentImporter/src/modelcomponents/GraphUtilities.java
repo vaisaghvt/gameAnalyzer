@@ -132,8 +132,8 @@ public class GraphUtilities {
 //                );
 
             }
-
-            for (int i = 0; i < edgeCollection.size() / 2; i++) {
+            int size = edgeCollection.size();
+            for (int i = 0; i <  size/ 2; i++) {
                 ModelEdge incoming = edgeCollection.pollFirst();
                 ModelEdge outgoing = edgeCollection.pollFirst();
                 ModelObject from = tempGraph.getOpposite(mainNode, incoming);

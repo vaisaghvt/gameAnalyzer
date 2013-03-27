@@ -16,7 +16,7 @@ public class RoomInfoChartDisplay extends ChartDisplay<Collection<String>> {
 
     @Override
     public void display(Collection<String> dataNames) {
-        RoomAnalysisFrame frame = new RoomAnalysisFrame(dataNames);
+        new RoomAnalysisFrame(dataNames);
 
 
 

@@ -259,19 +259,10 @@ public class PathPredictionFrame extends JFrame {
                         break;
                 }
 
-<<<<<<< HEAD
-                protected void done() {
-                    double total = 0.0;
-                    for (String roomName : result.keySet()) {
-                        System.out.println(roomName + ":" + result.get(roomName));
-                        total += result.get(roomName);
-                    }
-                    System.out.println("total probabilities=" + total);
-=======
+
                 tempWorker.execute();
                 return null;
             }
->>>>>>> origin/master
 
         };
         tempWorker.execute();
@@ -345,14 +336,7 @@ public class PathPredictionFrame extends JFrame {
             @Override
             protected Double doInBackground() throws Exception {
 
-<<<<<<< HEAD
-        HashMap<String, Double> firstOrderProbabilities = calculateFirstOrderProbForNeighbouringRooms(nameToGraphMap, startRoom);
 
-        if (pathLength == 1) {
-            return firstOrderProbabilities;
-        }
-        HashMap<String, HashMap<String, HashMap<String, Double>>> secondOrderProbabilities = calculateSecondOrderProb(nameToGraphMap);
-=======
 
                 SwingWorker<HashMap<String, HashMap<String, Double>>, Void> firstOrderCalculator = new SwingWorker<HashMap<String, HashMap<String, Double>>, Void>() {
                     @Override
@@ -363,7 +347,7 @@ public class PathPredictionFrame extends JFrame {
 
 
                 };
->>>>>>> origin/master
+
 
                 SwingWorker<HashMap<String, HashMap<String, HashMap<String, Double>>>, Void> secondOrderCalculator = new SwingWorker<HashMap<String, HashMap<String, HashMap<String, Double>>>, Void>() {
                     @Override
@@ -424,10 +408,7 @@ public class PathPredictionFrame extends JFrame {
 
             return firstOrderProbabilities.get(startRoom);
         }
-<<<<<<< HEAD
 
-        HashMap<String, HashMap<String, Double>> results = calculateFirstHop(nameToGraphMap, firstOrderProbabilities, currentHistories, secondOrderProbabilities);
-=======
 
         HashMap<String, HashMap<String, HashMap<String, Double>>> secondOrderProbabilities =
                 calculateSecondOrderProb(nameToGraphMap);
@@ -441,7 +422,7 @@ public class PathPredictionFrame extends JFrame {
 //            results.put(room, firstOrderProbabilities.get(room));
         }
         HashMap<String, HashMap<String, Double>> results = calculateFirstHop(firstOrderProbabilities.get(startRoom), currentHistories, firstOrderProbabilities, secondOrderProbabilities);
->>>>>>> origin/master
+
 
 
         for (int hops = 2; hops < pathLength; hops++) {
@@ -486,11 +467,9 @@ public class PathPredictionFrame extends JFrame {
 
                 HashMap<String, Double> secondOrderProbabilitiesForConsideration = currentLocationSecondOrderProbabilities.containsKey(prevLocation) ?
                         currentLocationSecondOrderProbabilities.get(prevLocation) :
-<<<<<<< HEAD
-                        calculateFirstOrderProbForNeighbouringRooms(nameToGraphMap, currentLocation);
-=======
+
                         firstOrderProbabilities.get(currentLocation);
->>>>>>> origin/master
+
                 // Given a previous location the probability of reaching a particular destination on passing through current location
 
 
@@ -536,19 +515,9 @@ public class PathPredictionFrame extends JFrame {
 
     private HashMap<String, HashMap<String, HashMap<String, Double>>> calculateSecondOrderProb(
             HashMap<String, DirectedSparseMultigraph<ModelObject, ModelEdge>> nameToGraphMap) {
-<<<<<<< HEAD
-
-        HashMap<String, HashMap<String, HashMap<String, Double>>> result = new HashMap<String, HashMap<String, HashMap<String, Double>>>();
-        for (String room : roomList) {
-            result.put(room,
-                    calculateSecondOrderProbForNeighbouringRooms(nameToGraphMap, room));
-
-
-=======
         Collection<DirectedSparseMultigraph<ModelObject, ModelEdge>> graphCollection = new HashSet<DirectedSparseMultigraph<ModelObject, ModelEdge>>();
         for (String name : nameToGraphMap.keySet()) {
             graphCollection.add(nameToGraphMap.get(name));
->>>>>>> origin/master
         }
         return GraphUtilities.calculateSecondOrderProbabilities(graphCollection, new Semaphore(1));
     }
@@ -568,11 +537,7 @@ public class PathPredictionFrame extends JFrame {
             for (String prevLocation : currentHistories.get(currentLocation)) {
                 HashMap<String, Double> secondOrderProbabilitiesForConsideration = currentLocationSecondOrderProbabilities.containsKey(prevLocation) ?
                         currentLocationSecondOrderProbabilities.get(prevLocation) :
-<<<<<<< HEAD
-                        calculateFirstOrderProbForNeighbouringRooms(nameToGraphMap, currentLocation);
-=======
                         firstOrderProbabilities.get(currentLocation);
->>>>>>> origin/master
 
 
                 for (String possibleDestination : secondOrderProbabilitiesForConsideration.keySet()) {
@@ -580,11 +545,6 @@ public class PathPredictionFrame extends JFrame {
                         newResult.put(possibleDestination, new HashMap<String, Double>());
                     }
                     HashMap<String, Double> newResultsForPossibleDestination = newResult.get(possibleDestination);
-<<<<<<< HEAD
-
-
-=======
->>>>>>> origin/master
                     double secondOrderValue = secondOrderProbabilitiesForConsideration.get(possibleDestination).doubleValue();
 
                     double probabilityToWrite = Math.exp(Math.log(priorProbability) + Math.log(secondOrderValue));
@@ -615,179 +575,8 @@ public class PathPredictionFrame extends JFrame {
         return newResult;
     }
 
-<<<<<<< HEAD
-    private HashMap<String, HashMap<String, Double>> calculateSecondOrderProbForNeighbouringRooms(
-            HashMap<String, DirectedSparseMultigraph<ModelObject, ModelEdge>> nameToGraphMap, String startRoom) {
-        ModelObject mainNode = NetworkModel.instance().findRoomByName(startRoom);
-        Collection<ModelObject> neighbours = NetworkModel.instance().getCompleteGraph().getNeighbors(mainNode);
-        DirectedSparseMultigraph<ModelObject, ModelEdge> localGraph = new DirectedSparseMultigraph<ModelObject, ModelEdge>();
-
-//        localGraph.addVertex(mainNode);
-        for (ModelObject node : neighbours) {
-            localGraph.addVertex(node);
-        }
-
-        for (String name : nameToGraphMap.keySet()) {
-            DirectedSparseMultigraph<ModelObject, ModelEdge> tempGraph = nameToGraphMap.get(name);
-
-            if (!tempGraph.containsVertex(mainNode)) {
-                continue;
-            }
-
-            TreeSet<ModelEdge> edgeCollection = new TreeSet<ModelEdge>(new Comparator<ModelEdge>() {
-                @Override
-                public int compare(ModelEdge o1, ModelEdge o2) {
-                    return (int) (o1.getTime() - o2.getTime());
-                }
-            });
-
-            edgeCollection.addAll(tempGraph.getIncidentEdges(mainNode));
-
-            ModelEdge lonelyEdge = null;
-            if (tempGraph.inDegree(mainNode) > tempGraph.outDegree(mainNode)) {
-                //Ending Vertex;
-                lonelyEdge = edgeCollection.pollLast();
-
-                localGraph.addVertex(mainNode);
-                localGraph.addEdge(new ModelEdge(),
-                        tempGraph.getOpposite(mainNode, lonelyEdge),
-                        mainNode
-                );
-
-            } else if (tempGraph.inDegree(mainNode) < tempGraph.outDegree(mainNode)) {
-                //First Vertex;
-                lonelyEdge = edgeCollection.pollFirst();
-
-
-                localGraph.addVertex(mainNode);
-                localGraph.addEdge(new ModelEdge(),
-                        mainNode,
-                        tempGraph.getOpposite(mainNode, lonelyEdge)
-                );
-
-            }
-
-            for (int i = 0; i < edgeCollection.size() / 2; i++) {
-                ModelEdge incoming = edgeCollection.pollFirst();
-                ModelEdge outgoing = edgeCollection.pollFirst();
-                ModelObject from = tempGraph.getOpposite(mainNode, incoming);
-                ModelObject to = tempGraph.getOpposite(mainNode, outgoing);
-                localGraph.addEdge(new ModelEdge(), from, to);
-            }
-        }
-
-
-        return convertToSecondOrderProbabilities(localGraph);
-    }
-
-    private HashMap<String, HashMap<String, Double>> convertToSecondOrderProbabilities(DirectedSparseMultigraph<ModelObject, ModelEdge> localGraph) {
-        HashMap<String, HashMap<String, Integer>> nodeToNodeTravelFrequency = new HashMap<String, HashMap<String, Integer>>();
-
-        for (ModelEdge edge : localGraph.getEdges()) {
-            String source = localGraph.getSource(edge).toString();
-            String destination = localGraph.getDest(edge).toString();
-
-            if (!nodeToNodeTravelFrequency.containsKey(source)) {
-                nodeToNodeTravelFrequency.put(source, new HashMap<String, Integer>());
-            }
-            if (!nodeToNodeTravelFrequency.get(source).containsKey(destination)) {
-                nodeToNodeTravelFrequency.get(source).put(destination, 0);
-            }
-
-            int currentValue = nodeToNodeTravelFrequency.get(source).get(destination).intValue();
-            nodeToNodeTravelFrequency.get(source).put(destination, currentValue + 1);
-
-        }
-
-        HashMap<String, HashMap<String, Double>> nodeToNodeProbabilities = new HashMap<String, HashMap<String, Double>>();
-
-        for (String source : nodeToNodeTravelFrequency.keySet()) {
-            nodeToNodeProbabilities.put(source, new HashMap<String, Double>());
-            double totalNumberOfOutEdges = 0.0;
-            for (String dest : nodeToNodeTravelFrequency.get(source).keySet()) {
-                totalNumberOfOutEdges += nodeToNodeTravelFrequency.get(source).get(dest);
-            }
-            for (String dest : nodeToNodeTravelFrequency.get(source).keySet()) {
-
-                nodeToNodeProbabilities.get(source).put(dest, (double) nodeToNodeTravelFrequency.get(source).get(dest) / totalNumberOfOutEdges);
-            }
-
-
-        }
-
-
-        return nodeToNodeProbabilities;
-    }
-
-    private HashMap<String, Double> calculateFirstOrderProbForNeighbouringRooms(
-            HashMap<String, DirectedSparseMultigraph<ModelObject, ModelEdge>> nameToGraphMap, String room) {
-        ModelObject mainNode = NetworkModel.instance().findRoomByName(room);
-        Collection<ModelObject> neighbours = NetworkModel.instance().getCompleteGraph().getNeighbors(mainNode);
-        DirectedSparseMultigraph<ModelObject, ModelEdge> localGraph = new DirectedSparseMultigraph<ModelObject, ModelEdge>();
-
-        localGraph.addVertex(mainNode);
-        for (ModelObject node : neighbours) {
-            localGraph.addVertex(node);
-        }
-
-        for (String name : nameToGraphMap.keySet()) {
-            DirectedSparseMultigraph<ModelObject, ModelEdge> tempGraph = nameToGraphMap.get(name);
-
-            if (!tempGraph.containsVertex(mainNode)) {
-                continue;
-            }
-
-
-            for (ModelEdge edge : tempGraph.getOutEdges(mainNode)) {
-
-                localGraph.addEdge(new ModelEdge(), mainNode, tempGraph.getOpposite(mainNode, edge));
-            }
-
-        }
-
-
-        return convertToFirstOrderProbabilities(localGraph, mainNode);
-    }
-
-    private HashMap<String, Double> convertToFirstOrderProbabilities(DirectedSparseMultigraph<ModelObject, ModelEdge> localGraph, ModelObject source) {
-        HashMap<String, Integer> nodeToNodeTravelFrequency = new HashMap<String, Integer>();
-
-        for (ModelEdge edge : localGraph.getEdges()) {
-
-            String destination = localGraph.getDest(edge).toString();
-
-
-            if (!nodeToNodeTravelFrequency.containsKey(destination)) {
-                nodeToNodeTravelFrequency.put(destination, 0);
-            }
-
-            int currentValue = nodeToNodeTravelFrequency.get(destination).intValue();
-            nodeToNodeTravelFrequency.put(destination, currentValue + 1);
-
-        }
-
-        HashMap<String, Double> nodeToNodeProbabilities = new HashMap<String, Double>();
-
-
-        double totalNumberOfOutEdges = 0.0;
-        for (String destination : nodeToNodeTravelFrequency.keySet()) {
-            totalNumberOfOutEdges += nodeToNodeTravelFrequency.get(destination);
-        }
-        for (String destination : nodeToNodeTravelFrequency.keySet()) {
-
-            nodeToNodeProbabilities.put(destination,
-                    (double) nodeToNodeTravelFrequency.get(destination) / totalNumberOfOutEdges);
-        }
-
-
-        return nodeToNodeProbabilities;
-    }
-
-    private void createCurrentTitle(String room, int pathLength, HashSet<Phase> selectedPhases) {
-=======
 
     private void createCurrentTitle(String room, int pathLength) {
->>>>>>> origin/master
 
         currentTitle = room + ": length=" + pathLength + ":";
 
