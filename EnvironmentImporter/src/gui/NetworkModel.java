@@ -19,8 +19,7 @@ import edu.uci.ics.jung.visualization.transform.MutableTransformer;
 import javafx.geometry.Point3D;
 import modelcomponents.*;
 import org.apache.commons.collections15.Transformer;
-import randomwalk.FirstOrderBiasedRandomWalk;
-import randomwalk.RandomWalk;
+import randomwalk.RandomWalkOrganizer;
 import stats.StatisticChoice;
 
 import javax.swing.*;
@@ -71,7 +70,7 @@ public class NetworkModel extends MainPanel implements ActionListener {
     private JMenuItem miPath6 = new JMenuItem("Path6");
     private HashSet<String> highlightedVertices;
     private VisualizationViewer<ModelObject, ModelEdge> vv;
-    private HashMap<String, HashMap<Integer, List<HashMap<String, Number>>>> nameToPhaseToMovementMap =
+    private HashMap<String, HashMap<Integer, List<HashMap<String, Number>>>> cachedMovement =
             new HashMap<String, HashMap<Integer, List<HashMap<String, Number>>>>();
 
     private Collection<String> sortedRoomNames;
@@ -115,6 +114,8 @@ public class NetworkModel extends MainPanel implements ActionListener {
     @Override
     public synchronized void setDocument(Document current) {
         this.document = current;
+        this.cachedGraph.clear();
+        this.cachedMovement.clear();
         ModelFile file = document.getModelFile();
         completeGraph = new UndirectedSparseGraph<ModelObject, ModelEdge>();
         idAreaMapping = new HashMap<Integer, ModelArea>();
@@ -164,14 +165,13 @@ public class NetworkModel extends MainPanel implements ActionListener {
         currentData = "default";
         currentGraph = completeGraph;
 
-        //TODO : Fix this for to find actual start.
+
         ModelObject startingNode = this.findRoomByName("Start");
         if (startingNode == null) {
             startingNode = this.findRoomByName("StartingRoom");
         }
 
-        RandomWalk.setRandomWalkParameters(completeGraph, startingNode);
-        FirstOrderBiasedRandomWalk.setRandomWalkParameters(completeGraph, startingNode);
+        RandomWalkOrganizer.setRandomWalkParameters(completeGraph, startingNode);
 
         sortedRoomNames = new TreeSet<String>();
         for (ModelObject area : this.completeGraph.getVertices()) {
@@ -602,7 +602,9 @@ public class NetworkModel extends MainPanel implements ActionListener {
                 }
 
             }
-            cacheGraph(dataName, phases, result);
+            int code = findCode(phases);
+
+            cacheGraph(dataName, code, result);
         }
 
 
@@ -623,64 +625,90 @@ public class NetworkModel extends MainPanel implements ActionListener {
         }
     }
 
-    private synchronized void cacheGraph(String dataName, Collection<Phase> phases, DirectedSparseMultigraph<ModelObject, ModelEdge> result) {
+    private void cacheGraph(final String dataName, final int codeForPhases, final DirectedSparseMultigraph<ModelObject, ModelEdge> result) {
+
         try {
-            graphCacheSemaphore.tryAcquire(1,600, TimeUnit.SECONDS);
+            graphCacheSemaphore.tryAcquire(1, 600, TimeUnit.SECONDS);
         } catch (InterruptedException e) {
             e.printStackTrace();  //To change body of catch statement use File | Settings | File Templates.
         }
+        if (cachedGraph.containsKey(dataName) && cachedGraph.get(dataName).containsKey(codeForPhases)) {
+            graphCacheSemaphore.release();
+            return;
+        }
+
+
+//                synchronized (cachedGraph) {
         if (!cachedGraph.containsKey(dataName)) {
-
-                cachedGraph.put(dataName, new HashMap<Integer, DirectedSparseMultigraph<ModelObject, ModelEdge>>());
-
+            cachedGraph.put(dataName, new HashMap<Integer, DirectedSparseMultigraph<ModelObject, ModelEdge>>());
         }
         HashMap<Integer, DirectedSparseMultigraph<ModelObject, ModelEdge>> tempMap = cachedGraph.get(dataName);
-        int codeForPhases = findCode(phases);
         if (!tempMap.containsKey(codeForPhases)) {
             tempMap.put(codeForPhases, result);
-
-                cachedGraph.put(dataName, tempMap);
-
+            cachedGraph.put(dataName, tempMap);
         } else {
             System.out.println("INCORRECT CACHING!! ALREADY EXISTS.");
         }
-
+//                }
         graphCacheSemaphore.release();
     }
+
+
 
     public List<HashMap<String, Number>> getMovementOfPlayer(String dataName, Collection<Phase> phases) {
         List<HashMap<String, Number>> result;
         int code = findCode(phases);
-        if (!nameToPhaseToMovementMap.containsKey(dataName) || !nameToPhaseToMovementMap.get(dataName).containsKey(code)) {
-            result = findAndCacheMovement(dataName, phases, code);
+
+        if (!cachedMovement.containsKey(dataName) || !cachedMovement.get(dataName).containsKey(code)) {
+            try {
+                movementCacheSemaphore.tryAcquire(1, 600, TimeUnit.SECONDS);
+            } catch (InterruptedException e) {
+                e.printStackTrace();  //To change body of catch statement use File | Settings | File Templates.
+            }
+            if (!cachedMovement.containsKey(dataName) || !cachedMovement.get(dataName).containsKey(code)) {
+                result = findMovement(dataName, phases);
+                cacheMovement(dataName, code, result);    }
+            else{
+                movementCacheSemaphore.release();
+                result = this.cachedMovement.get(dataName).get(code);
+            }
+
 
         } else {
 
-            result = this.nameToPhaseToMovementMap.get(dataName).get(code);
+            result = this.cachedMovement.get(dataName).get(code);
 
         }
         return result;
     }
 
+    private List<HashMap<String, Number>> findMovement(String dataName, Collection<Phase> phases) {
 
-    private List<HashMap<String, Number>> findAndCacheMovement(String dataName, Collection<Phase> phases, int code) {
-        try {
-            movementCacheSemaphore.tryAcquire(1,600, TimeUnit.SECONDS);
-        } catch (InterruptedException e) {
-            e.printStackTrace();  //To change body of catch statement use File | Settings | File Templates.
+        return Database.getInstance().getMovementOfPlayer(dataName, phases);
+    }
+
+    private void cacheMovement(final String dataName, final int code, final List<HashMap<String, Number>> result) {
+
+
+        if (cachedMovement.containsKey(dataName) && cachedMovement.get(dataName).containsKey(code)) {
+            return;
         }
-        List<HashMap<String, Number>> result = Database.getInstance().getMovementOfPlayer(dataName, phases);
-        HashMap<Integer, List<HashMap<String, Number>>> dataForName = this.nameToPhaseToMovementMap.get(dataName);
-        if (dataForName == null) {
-            dataForName = new HashMap<Integer, List<HashMap<String, Number>>>();
+
+//                synchronized (cachedMovement) {
+        if (!cachedMovement.containsKey(dataName)) {
+            cachedMovement.put(dataName, new HashMap<Integer, List<HashMap<String, Number>>>());
         }
-        dataForName.put(code, result);
+        HashMap<Integer, List<HashMap<String, Number>>> dataForName = cachedMovement.get(dataName);
 
-
-            this.nameToPhaseToMovementMap.put(dataName, dataForName);
-
+        if (!dataForName.containsKey(code)) {
+            dataForName.put(code, result);
+            cachedMovement.put(dataName, dataForName);
+        } else {
+            System.out.println("INCORRECT CACHING!! ALREADY EXISTS.");
+        }
+//                }
         movementCacheSemaphore.release();
-        return result;
+
 
     }
 
@@ -757,7 +785,7 @@ public class NetworkModel extends MainPanel implements ActionListener {
                     return YES_NO_CHOICE.YES;
                 }
             }
-//          TODO : l3staircase Room implementation.
+//
 // else if(localGraph.containsVertex(l3staircaseRoom)) {
 //                if(localGraph.getNeighbors(l3staircaseRoom).contains(findRoomByName(localGraph, "s3to2"))){
 //                    return true;
@@ -794,7 +822,7 @@ public class NetworkModel extends MainPanel implements ActionListener {
                     return YES_NO_CHOICE.YES;
                 }
             }
-            //          TODO : l3staircase Room implementation.
+
 // else if(localGraph.containsVertex(l3staircaseRoom)) {
 //                if(localGraph.getNeighbors(l3staircaseRoom).contains(findRoomByName(localGraph, "s3to2"))){
 //                    return true;
@@ -1246,61 +1274,61 @@ public class NetworkModel extends MainPanel implements ActionListener {
     }
 
 
-    private class SimpleFloorColoringTransformer<ModelObject, Paint> implements Transformer<ModelObject, Paint> {
-        @Override
-        public Paint transform(ModelObject obj) {
-            ModelArea area;
+private class SimpleFloorColoringTransformer<ModelObject, Paint> implements Transformer<ModelObject, Paint> {
+    @Override
+    public Paint transform(ModelObject obj) {
+        ModelArea area;
 
-            if (highlightedVertices != null) {
-                if (highlightedVertices.contains(obj.toString())) {
-                    return (Paint) Color.RED;
-                }
-
+        if (highlightedVertices != null) {
+            if (highlightedVertices.contains(obj.toString())) {
+                return (Paint) Color.RED;
             }
 
-            if (!(obj instanceof ModelArea)) {
-                area = idAreaMapping.get(((ModelGroup) obj).getAreaIds().iterator().next());
-            } else {
-                area = (ModelArea) obj;
-            }
-
-            int floor = areaFloorMapping.get(area);
-            switch (floor) {
-                case 0:
-                    return (Paint) Color.LIGHT_GRAY;
-                case 1:
-                    return (Paint) Color.GREEN;
-                case 2:
-                    return (Paint) Color.YELLOW;
-            }
-            return (Paint) Color.BLACK;
         }
+
+        if (!(obj instanceof ModelArea)) {
+            area = idAreaMapping.get(((ModelGroup) obj).getAreaIds().iterator().next());
+        } else {
+            area = (ModelArea) obj;
+        }
+
+        int floor = areaFloorMapping.get(area);
+        switch (floor) {
+            case 0:
+                return (Paint) Color.LIGHT_GRAY;
+            case 1:
+                return (Paint) Color.GREEN;
+            case 2:
+                return (Paint) Color.YELLOW;
+        }
+        return (Paint) Color.BLACK;
     }
+}
 
-    private class DegreeBasedColorTransformer<ModelObject, Paint> implements Transformer<ModelObject, Paint> {
+private class DegreeBasedColorTransformer<ModelObject, Paint> implements Transformer<ModelObject, Paint> {
 
-        @Override
-        public Paint transform(ModelObject obj) {
-            int degree = 0;
-            double degreeNormalized = 0;
-            Object object;
+    @Override
+    public Paint transform(ModelObject obj) {
+        int degree = 0;
+        double degreeNormalized = 0;
+        Object object;
 
-            object = (Object) obj;
-            modelcomponents.ModelObject object1 = (modelcomponents.ModelObject) object;
+        object = (Object) obj;
+        modelcomponents.ModelObject object1 = (modelcomponents.ModelObject) object;
 
 
-            if (NetworkModel.this.currentGraph instanceof DirectedSparseMultigraph) {
-                try {
-                    degree = currentGraph.inDegree(object1);
-                    degreeNormalized = (double) degree / (double) completeGraph.degree(object1);
-                    degree -= (NetworkModel.this.completeGraph.degree(object1));
-                } catch (NullPointerException e) {
-                    // Called at the wrong point of time...
-                    return ((Paint) Color.BLACK);
-                }
-            } else {
-                degree = NetworkModel.this.currentGraph.degree(object1);
+        if (NetworkModel.this.currentGraph instanceof DirectedSparseMultigraph) {
+            try {
+                degree = currentGraph.inDegree(object1);
+                degreeNormalized = (double) degree / (double) completeGraph.degree(object1);
+                degree -= (NetworkModel.this.completeGraph.degree(object1));
+            } catch (NullPointerException e) {
+                // Called at the wrong point of time...
+                return ((Paint) Color.BLACK);
             }
+        } else {
+            degree = NetworkModel.this.currentGraph.degree(object1);
+        }
 
 
 //
@@ -1324,115 +1352,115 @@ public class NetworkModel extends MainPanel implements ActionListener {
 //                return (Paint) Color.RED;
 //            }
 
-            if (degreeNormalized < 1.0) {
+        if (degreeNormalized < 1.0) {
 
-                return (Paint) Color.white;
+            return (Paint) Color.white;
 
-            } else if (degreeNormalized <= 1.5) {
-                return (Paint) Color.LIGHT_GRAY;
+        } else if (degreeNormalized <= 1.5) {
+            return (Paint) Color.LIGHT_GRAY;
 
-            } else if (degreeNormalized <= 2) {
+        } else if (degreeNormalized <= 2) {
 
-                return (Paint) Color.YELLOW;
+            return (Paint) Color.YELLOW;
 
-            } else if (degreeNormalized <= 2.5) {
-                return (Paint) Color.GREEN;
-            } else if (degreeNormalized <= 3) {
-                return (Paint) Color.PINK;
-            } else {
-                return (Paint) Color.RED;
-            }
-
+        } else if (degreeNormalized <= 2.5) {
+            return (Paint) Color.GREEN;
+        } else if (degreeNormalized <= 3) {
+            return (Paint) Color.PINK;
+        } else {
+            return (Paint) Color.RED;
         }
+
+    }
+}
+
+private class VertexRectangleTransformer<ModelObject, Shape> implements Transformer<ModelObject, Shape> {
+
+    @Override
+    public Shape transform(ModelObject modelObject) {
+
+        int width = modelObject.toString().length() * 10;
+        return (Shape) new Rectangle(-width / 2, -10, width, 20);
+
+
+    }
+}
+
+public class areaToLocationTransformer<ModelObject, Point2D> implements Transformer<ModelObject, Point2D> {
+
+    @Override
+    public Point2D transform(ModelObject modelObject) {
+
+
+        return getCenterOfArea(modelObject);
     }
 
-    private class VertexRectangleTransformer<ModelObject, Shape> implements Transformer<ModelObject, Shape> {
 
-        @Override
-        public Shape transform(ModelObject modelObject) {
-
-            int width = modelObject.toString().length() * 10;
-            return (Shape) new Rectangle(-width / 2, -10, width, 20);
-
-
-        }
-    }
-
-    public class areaToLocationTransformer<ModelObject, Point2D> implements Transformer<ModelObject, Point2D> {
-
-        @Override
-        public Point2D transform(ModelObject modelObject) {
+    private Point2D getCenterOfArea(ModelObject area) {
+        if (area instanceof ModelArea) {
+            ModelArea room = (ModelArea) area;
+            Point3D tempPoint = getCenterOfRoom(room);
+            double x = tempPoint.getX();
+            double y = tempPoint.getY();
+            int floor = (int) tempPoint.getZ();
 
 
-            return getCenterOfArea(modelObject);
-        }
+            Point p = MapImagePanel.convertToDrawingCoordinate(new Point((int) x, (int) y), floor);
 
 
-        private Point2D getCenterOfArea(ModelObject area) {
-            if (area instanceof ModelArea) {
-                ModelArea room = (ModelArea) area;
-                Point3D tempPoint = getCenterOfRoom(room);
-                double x = tempPoint.getX();
-                double y = tempPoint.getY();
-                int floor = (int) tempPoint.getZ();
+            p = new Point((int) (p.getX() +
+                    (floor * 700)), (int) p.getY());
 
 
-                Point p = MapImagePanel.convertToDrawingCoordinate(new Point((int) x, (int) y), floor);
-
-
-                p = new Point((int) (p.getX() +
-                        (floor * 700)), (int) p.getY());
-
-
-                Point2D point = (Point2D) (new java.awt.geom.Point2D.Double(p.x, p.y));
-
-
-                return point;
-            }
-
-            ModelGroup group = (ModelGroup) area;
-            double sumX = 0;
-            double sumY = 0;
-            int n = 0;
-            int floor = 0;
-
-            for (int areaId : group.getAreaIds()) {
-
-
-                ModelArea tempArea = NetworkModel.instance().getRoomForId(areaId);
-                Point3D tempPoint = getCenterOfRoom(tempArea);
-                double x = tempPoint.getX();
-                double y = tempPoint.getY();
-
-                sumX += x;
-                sumY += y;
-
-                floor = (int) tempPoint.getZ();
-                n++;
-            }
-
-            Point p = MapImagePanel.convertToDrawingCoordinate(
-                    new Point((int) (sumX / n), (int) (sumY / n)), floor);
-
-            p = new Point((int) (p.getX() + (floor * 700)), (int) p.getY());
-
-            Point2D point = (Point2D) (new java.awt.geom.Point2D.Double(p.getX(), p.getY()));
+            Point2D point = (Point2D) (new java.awt.geom.Point2D.Double(p.x, p.y));
 
 
             return point;
         }
 
-        private Point3D getCenterOfRoom(ModelArea room) {
-            Point p1 = room.getCorner0();
-            Point p2 = room.getCorner1();
+        ModelGroup group = (ModelGroup) area;
+        double sumX = 0;
+        double sumY = 0;
+        int n = 0;
+        int floor = 0;
 
-            double x = (p1.getX() + p2.getX()) / 2;
-            double y = (p1.getY() + p2.getY()) / 2;
-            double z = (double) NetworkModel.instance().getFloorForArea(room);
-            return new Point3D(x, y, z);
+        for (int areaId : group.getAreaIds()) {
 
+
+            ModelArea tempArea = NetworkModel.instance().getRoomForId(areaId);
+            Point3D tempPoint = getCenterOfRoom(tempArea);
+            double x = tempPoint.getX();
+            double y = tempPoint.getY();
+
+            sumX += x;
+            sumY += y;
+
+            floor = (int) tempPoint.getZ();
+            n++;
         }
+
+        Point p = MapImagePanel.convertToDrawingCoordinate(
+                new Point((int) (sumX / n), (int) (sumY / n)), floor);
+
+        p = new Point((int) (p.getX() + (floor * 700)), (int) p.getY());
+
+        Point2D point = (Point2D) (new java.awt.geom.Point2D.Double(p.getX(), p.getY()));
+
+
+        return point;
     }
+
+    private Point3D getCenterOfRoom(ModelArea room) {
+        Point p1 = room.getCorner0();
+        Point p2 = room.getCorner1();
+
+        double x = (p1.getX() + p2.getX()) / 2;
+        double y = (p1.getY() + p2.getY()) / 2;
+        double z = (double) NetworkModel.instance().getFloorForArea(room);
+        return new Point3D(x, y, z);
+
+    }
+}
 
     public String getPathDataFor(String dataName, Phase phase) {
 
@@ -1621,9 +1649,10 @@ public class NetworkModel extends MainPanel implements ActionListener {
 
     public HashMap<String, Number> getVertexDataFor(String dataName, StatisticChoice choice, Phase phase) {
 
+
         if (dataName.equalsIgnoreCase("random walk")) {
             if (choice == VERTEX_VISIT_FREQUENCY && phase == Phase.EXPLORATION) {
-                return RandomWalk.calculateAverageRoomVisitFrequency();
+                return RandomWalkOrganizer.calculateAverageRoomVisitFrequency();
             } else {
                 System.out.println("Wrong Call to Random Walk");
                 return new HashMap<String, Number>();
@@ -1789,37 +1818,37 @@ public class NetworkModel extends MainPanel implements ActionListener {
         return this.areaFloorMapping.get(area);
     }
 
-    private class EdgeDurationColorTransformer<ModelEdge, Paint> implements Transformer<ModelEdge, Paint> {
-        @Override
-        public Paint transform(ModelEdge modelEdge) {
-            Object obj = (Object) modelEdge;
-            modelcomponents.ModelEdge edge = (modelcomponents.ModelEdge) obj;
+private class EdgeDurationColorTransformer<ModelEdge, Paint> implements Transformer<ModelEdge, Paint> {
+    @Override
+    public Paint transform(ModelEdge modelEdge) {
+        Object obj = (Object) modelEdge;
+        modelcomponents.ModelEdge edge = (modelcomponents.ModelEdge) obj;
 
-            if (currentData.equalsIgnoreCase("default")) {
-                return (Paint) Color.BLACK;
-
-            }
-            long time = Long.parseLong(Database.getInstance().getPhaseCompleteTime(Phase.TASK_3, currentData));
-            float value = (float) edge.getTime() / (float) time;
-            //value *=255;
-            return (Paint) new Color(1.0f - value, 1.0f - value, 1.0f - value);
+        if (currentData.equalsIgnoreCase("default")) {
+            return (Paint) Color.BLACK;
 
         }
+        long time = Long.parseLong(Database.getInstance().getPhaseCompleteTime(Phase.TASK_3, currentData));
+        float value = (float) edge.getTime() / (float) time;
+        //value *=255;
+        return (Paint) new Color(1.0f - value, 1.0f - value, 1.0f - value);
+
     }
+}
 
-    private class VertexEllipseTransformer<ModelObject, Shape> implements Transformer<ModelObject, Shape> {
+private class VertexEllipseTransformer<ModelObject, Shape> implements Transformer<ModelObject, Shape> {
 
-        @Override
-        public Shape transform(ModelObject modelObject) {
+    @Override
+    public Shape transform(ModelObject modelObject) {
 
-            int width = 40;
-
-
-            return (Shape) new Ellipse2D.Double(-width / 2, -width / 2, width, width);
+        int width = 40;
 
 
-        }
+        return (Shape) new Ellipse2D.Double(-width / 2, -width / 2, width, width);
+
+
     }
+}
 
 }
 

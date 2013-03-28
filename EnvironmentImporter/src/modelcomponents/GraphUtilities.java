@@ -5,18 +5,14 @@ import edu.uci.ics.jung.graph.DirectedGraph;
 import edu.uci.ics.jung.graph.DirectedSparseMultigraph;
 import edu.uci.ics.jung.graph.Graph;
 import gui.NetworkModel;
+import gui.ProgressVisualizer;
 import javafx.geometry.Point3D;
 import org.apache.commons.collections15.buffer.CircularFifoBuffer;
 import org.apache.commons.math3.stat.descriptive.moment.Mean;
 import org.apache.commons.math3.stat.descriptive.moment.Variance;
 
 import javax.swing.*;
-import javax.swing.text.DefaultCaret;
 import java.awt.*;
-import java.beans.PropertyChangeEvent;
-import java.beans.PropertyChangeListener;
-import java.text.DecimalFormat;
-import java.text.NumberFormat;
 import java.util.*;
 import java.util.List;
 import java.util.concurrent.ExecutionException;
@@ -38,7 +34,7 @@ public class GraphUtilities {
             final Collection<DirectedSparseMultigraph<ModelObject, ModelEdge>> graphCollection, final Semaphore semaphore){
 
 
-        final ProgressVisualizer pv = new ProgressVisualizer("Generating second order probabilities", true);
+        final ProgressVisualizer pv = new ProgressVisualizer("Generating second order probabilities", ProgressVisualizer.DeterminateType.DETERMINATE);
 
         SwingWorker<HashMap<String, HashMap<String, HashMap<String, Double>>>, Void> secondOrderProbabilityCalculator = new SwingWorker<HashMap<String, HashMap<String, HashMap<String, Double>>>, Void>() {
             @Override
@@ -190,7 +186,7 @@ public class GraphUtilities {
             final Collection<DirectedSparseMultigraph<ModelObject, ModelEdge>> graphCollection, final Semaphore semaphore) {
 
 
-        final ProgressVisualizer pv = new ProgressVisualizer("Generating first order probabilities", true);
+        final ProgressVisualizer pv = new ProgressVisualizer("Generating first order probabilities", ProgressVisualizer.DeterminateType.DETERMINATE);
 
         SwingWorker<HashMap<String, HashMap<String, Double>>, Void> firstOrderProbabilityCalculator = new SwingWorker<HashMap<String, HashMap<String, Double>>, Void>() {
             @Override
@@ -322,7 +318,7 @@ public class GraphUtilities {
             Collection<DirectedSparseMultigraph<ModelObject, ModelEdge>> resultSet =
                     new HashSet<DirectedSparseMultigraph<ModelObject, ModelEdge>>();
             List<Double> listOfGyrationRadius = new ArrayList<Double>();
-            ProgressVisualizer progressVisualizer = new ProgressVisualizer("Generating path data", false);
+            ProgressVisualizer progressVisualizer = new ProgressVisualizer("Generating path data", ProgressVisualizer.DeterminateType.INDETERMINATE);
             int count = 0;
             while (true) {
 
@@ -449,7 +445,7 @@ public class GraphUtilities {
         return null;
     }
 
-    private static boolean isStable(List<Double> listOfGyrationRadius, CircularFifoBuffer<Double> varianceList, ProgressVisualizer progressVisualizer) {
+    public static boolean isStable(List<Double> listOfGyrationRadius, CircularFifoBuffer<Double> varianceList, ProgressVisualizer progressVisualizer) {
 
         double[] primitiveNumbers = new double[listOfGyrationRadius.size()];
         int i = 0;
@@ -489,7 +485,7 @@ public class GraphUtilities {
     }
 
 
-    private static Double calculateRadiusOfGyration(DirectedGraph<ModelObject, ModelEdge> graph, ModelObject start) {
+    public static Double calculateRadiusOfGyration(DirectedGraph<ModelObject, ModelEdge> graph, ModelObject start) {
         Point3D centerOfMass = calcCenterOfMass(graph, start);
 
         TreeSet<ModelEdge> setOfEdges = new TreeSet<ModelEdge>(new Comparator<ModelEdge>() {
@@ -513,7 +509,7 @@ public class GraphUtilities {
         return Math.sqrt(sum / n);
     }
 
-    private static Point3D calcCenterOfMass(DirectedGraph<ModelObject, ModelEdge> graph, ModelObject start) {
+    public static Point3D calcCenterOfMass(DirectedGraph<ModelObject, ModelEdge> graph, ModelObject start) {
         ModelObject current = start;
         double sumX = 0;
         double sumY = 0;
@@ -541,7 +537,7 @@ public class GraphUtilities {
         return new Point3D(sumX / n, sumY / n, sumZ / n);
     }
 
-    private static Point3D getCenterOfArea(ModelObject area) {
+    public static Point3D getCenterOfArea(ModelObject area) {
         if (area instanceof ModelArea) {
             ModelArea room = (ModelArea) area;
             return getCenterOfRoom(room);
@@ -566,7 +562,7 @@ public class GraphUtilities {
         return new Point3D(sumX / n, sumY / n, sumZ / n);
     }
 
-    private static Point3D getCenterOfRoom(ModelArea room) {
+    public static Point3D getCenterOfRoom(ModelArea room) {
         Point p1 = room.getCorner0();
         Point p2 = room.getCorner1();
 
@@ -575,6 +571,16 @@ public class GraphUtilities {
         double z = (double) NetworkModel.instance().getFloorForArea(room);
         return new Point3D(x, y, z);
 
+    }
+
+    public static int calculateCoverage(Graph<ModelObject, ModelEdge> completeGraph, DirectedGraph<ModelObject, ModelEdge> graph) {
+        int count = 0;
+        for (ModelObject vertex : completeGraph.getVertices()) {
+            if (graph.containsVertex(vertex)) {
+                count++;
+            }
+        }
+        return (count * 100) / completeGraph.getVertexCount();
     }
 
     public static Double calculateAverageCoverage(Collection<DirectedSparseMultigraph<ModelObject, ModelEdge>> graphCollection) {
@@ -594,101 +600,5 @@ public class GraphUtilities {
     }
 
 
-    public static class ProgressVisualizer implements PropertyChangeListener {
-        private JFrame progressFrame;
-        private JTextArea taskOutput;
-        private double stability;
-        private JProgressBar progressBar;
 
-        public ProgressVisualizer(final String title, final boolean isDeterminate) {
-            SwingUtilities.invokeLater(new Runnable() {
-
-
-                @Override
-                public void run() {
-                    progressBar = new JProgressBar(0, 100);
-                    if(isDeterminate){
-                        progressBar.setValue(0);
-                        progressBar.setStringPainted(true);
-                    }else{
-                        progressBar.setIndeterminate(true);
-
-                    }
-
-                    taskOutput = new JTextArea(5, 20);
-                    taskOutput.setMargin(new Insets(5, 5, 5, 5));
-                    taskOutput.setEditable(false);
-                    DefaultCaret caret = (DefaultCaret) taskOutput.getCaret();
-                    caret.setUpdatePolicy(DefaultCaret.ALWAYS_UPDATE);
-                    progressFrame = new JFrame(title);
-                    progressFrame.setLayout(new BorderLayout());
-                    progressFrame.add(progressBar, BorderLayout.NORTH);
-                    progressFrame.add(new JScrollPane(taskOutput), BorderLayout.CENTER);
-                    progressFrame.setDefaultCloseOperation(WindowConstants.DO_NOTHING_ON_CLOSE);
-                    Dimension screenSize = Toolkit.getDefaultToolkit().getScreenSize();
-
-                    progressFrame.setLocation(25, 25);
-                    progressFrame.setSize(400, 200);
-                    progressFrame.setVisible(true);
-                }
-            });
-        }
-
-
-        public void finish() {
-            SwingUtilities.invokeLater(new Runnable() {
-                @Override
-                public void run() {
-
-                    progressFrame.dispose();
-                }
-            });
-        }
-
-        public void displayStability(int count) {
-            NumberFormat doubleFormat = new DecimalFormat("##.00000000");
-            final String lastStabilityValue = doubleFormat.format(stability);
-            NumberFormat integerFormat = new DecimalFormat("0000");
-            final String lastCount = integerFormat.format(count);
-            SwingUtilities.invokeLater(new Runnable() {
-                @Override
-                public void run() {
-
-
-                    taskOutput.append((lastCount) + " : " + lastStabilityValue + "\n");
-                    progressFrame.revalidate();
-                }
-            });
-        }
-
-        public void setStability(double stability) {
-            this.stability = stability;
-        }
-
-        @Override
-        public void propertyChange(PropertyChangeEvent event) {
-            if ("progress".equals(event.getPropertyName())) {
-                final int progress = (Integer) event.getNewValue();
-//            progressBar.setIndeterminate(false);
-                SwingUtilities.invokeLater(new Runnable() {
-                    @Override
-                    public void run() {
-                        progressBar.setValue(progress);
-                    }
-
-
-                });
-            }
-        }
-
-        public void print(final String s) {
-            SwingUtilities.invokeLater(new Runnable() {
-                @Override
-                public void run() {
-                    taskOutput.append(s);
-                    taskOutput.validate();
-                }
-            });
-        }
-    }
 }

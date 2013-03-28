@@ -10,7 +10,7 @@ import gui.Phase;
 import modelcomponents.GraphUtilities;
 import modelcomponents.ModelEdge;
 import modelcomponents.ModelObject;
-import randomwalk.RandomWalk;
+import randomwalk.RandomWalkOrganizer;
 
 import javax.swing.*;
 import javax.swing.text.DefaultCaret;
@@ -286,7 +286,7 @@ public class PathPredictionFrame extends JFrame {
             @Override
             protected Double doInBackground() throws Exception {
 
-                return RandomWalk.getCoverageOfRandomWalks(pathLength, startingRoom, coverageAreaSemaphore)*100;
+                return RandomWalkOrganizer.getCoverageOfRandomWalks(pathLength, startingRoom, coverageAreaSemaphore)*100;
             }
         };
         SwingWorker<Double, Void> dataBasedCoverageGenerator = new SwingWorker<Double, Void>() {

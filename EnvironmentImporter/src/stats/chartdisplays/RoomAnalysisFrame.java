@@ -3,12 +3,14 @@ package stats.chartdisplays;
 import edu.uci.ics.jung.algorithms.layout.Layout;
 import edu.uci.ics.jung.algorithms.layout.SpringLayout2;
 import edu.uci.ics.jung.graph.DirectedSparseMultigraph;
+import edu.uci.ics.jung.graph.util.Pair;
 import edu.uci.ics.jung.visualization.VisualizationViewer;
 import edu.uci.ics.jung.visualization.control.DefaultModalGraphMouse;
 import edu.uci.ics.jung.visualization.control.ModalGraphMouse;
 import edu.uci.ics.jung.visualization.decorators.ToStringLabeller;
 import gui.NetworkModel;
 import gui.Phase;
+import gui.ProgressVisualizer;
 import modelcomponents.ModelEdge;
 import modelcomponents.ModelObject;
 import org.apache.commons.collections15.Transformer;
@@ -17,7 +19,6 @@ import javax.imageio.ImageIO;
 import javax.swing.*;
 import javax.swing.event.ChangeEvent;
 import javax.swing.event.ChangeListener;
-import javax.swing.text.DefaultCaret;
 import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
@@ -47,6 +48,13 @@ public class RoomAnalysisFrame extends JFrame {
     private JLabel startTimeValue = new JLabel("0");
     private JSlider endTimeSelection;
     private JLabel endTimeValue = new JLabel("45");
+
+    private JSlider maxCoverageSlider;
+    private JLabel minCoverageLabel = new JLabel("0");
+    private JSlider minCoverageSlider;
+    private JLabel maxCoverageLabel = new JLabel("100");
+
+
     private JButton closeButton = new JButton("Close");
     private JButton generateButton = new JButton("Generate");
     private JComboBox<DisplayType> displayTypeJComboBox;
@@ -114,13 +122,21 @@ public class RoomAnalysisFrame extends JFrame {
 
     private JPanel createButtonPanel() {
 
-        LimitedBoundedRangeModel startModel = new LimitedBoundedRangeModel(null, LimitedBoundedRangeModel.MAX_OR_MIN.MAX);
-        LimitedBoundedRangeModel endModel = new LimitedBoundedRangeModel(startModel, LimitedBoundedRangeModel.MAX_OR_MIN.MIN);
+        LimitedBoundedRangeModel startModel = new LimitedBoundedRangeModel(null, LimitedBoundedRangeModel.MAX_OR_MIN.MAX,0,45);
+        LimitedBoundedRangeModel endModel = new LimitedBoundedRangeModel(startModel, LimitedBoundedRangeModel.MAX_OR_MIN.MIN,0,45);
         startModel.limit = endModel;
         startTimeSelection = new JSlider(startModel);
         startTimeSelection.setValue(0);
         endTimeSelection = new JSlider(endModel);
         endTimeSelection.setValue(45);
+
+        LimitedBoundedRangeModel minCoverage = new LimitedBoundedRangeModel(null, LimitedBoundedRangeModel.MAX_OR_MIN.MAX,0,100);
+        LimitedBoundedRangeModel maxCoverage = new LimitedBoundedRangeModel(minCoverage, LimitedBoundedRangeModel.MAX_OR_MIN.MIN,0,100);
+        minCoverage.limit = maxCoverage;
+        minCoverageSlider = new JSlider(minCoverage);
+        minCoverageSlider.setValue(0);
+        maxCoverageSlider = new JSlider(maxCoverage);
+        maxCoverageSlider.setValue(100);
 
 
         generateButton.addActionListener(roomDataListener);
@@ -132,7 +148,7 @@ public class RoomAnalysisFrame extends JFrame {
         displayTypeJComboBox.setEditable(false);
 
 
-        JPanel buttonPanel = new JPanel(new GridLayout(9, 2));
+        JPanel buttonPanel = new JPanel(new GridLayout(11, 2));
 
         buttonPanel.add(new JLabel("Choose room :"));
         buttonPanel.add(getRoomButtonComboBox());
@@ -166,6 +182,21 @@ public class RoomAnalysisFrame extends JFrame {
 
         startTimeSelection.addChangeListener(roomDataListener);
         endTimeSelection.addChangeListener(roomDataListener);
+
+        buttonPanel.add(new JLabel("Choose Min coverage:"));
+        JPanel minCoveragePanel = new JPanel(new BorderLayout());
+        minCoveragePanel.add(minCoverageSlider, BorderLayout.CENTER);
+        minCoveragePanel.add(minCoverageLabel, BorderLayout.WEST);
+        buttonPanel.add(minCoveragePanel);
+
+        buttonPanel.add(new JLabel("Choose Max coverage"));
+        JPanel maxCoveragePanel = new JPanel(new BorderLayout());
+        maxCoveragePanel.add(maxCoverageSlider, BorderLayout.CENTER);
+        maxCoveragePanel.add(maxCoverageLabel, BorderLayout.WEST);
+        buttonPanel.add(maxCoveragePanel);
+
+        maxCoverageSlider.addChangeListener(roomDataListener);
+        minCoverageSlider.addChangeListener(roomDataListener);
 
 
         buttonPanel.add(generateButton);
@@ -207,6 +238,10 @@ public class RoomAnalysisFrame extends JFrame {
             final String room = roomButtonComboBox.getItemAt(roomButtonComboBox.getSelectedIndex());
             final int startTimeSeconds = startTimeSelection.getValue();
             final int endTimeSeconds = endTimeSelection.getValue();
+            final int minCoverageValue = minCoverageSlider.getValue();
+            final int maxCoverageValue = maxCoverageSlider.getValue();
+
+
             SwingUtilities.invokeLater(new Runnable() {
                 @Override
                 public void run() {
@@ -220,15 +255,17 @@ public class RoomAnalysisFrame extends JFrame {
                     createCurrentTitle(room, type, selectedPhases);
 
                     HashMap<String, DirectedSparseMultigraph<ModelObject, ModelEdge>> nameToGraphMap = generateRelevantGraphToNameMap(dataNameList, selectedPhases);
+                    HashMap<String, Long> nameToMinCoverageTimeMap = calculateTimeOfCoverage(minCoverageValue, nameToGraphMap);
+                    HashMap<String, Long> nameToMaxCoverageTimeMap = calculateTimeOfCoverage(maxCoverageValue, nameToGraphMap);
                     switch (type) {
 
                         case PATH_PROBABILITIES:
-                            generateProbabilityStyleData(nameToGraphMap, room, startTimeSeconds, endTimeSeconds);
+                            generateProbabilityStyleData(nameToGraphMap, room, startTimeSeconds, endTimeSeconds, nameToMinCoverageTimeMap,nameToMaxCoverageTimeMap);
                             break;
                         case SIMPLE_COMPLETE_DIRECTED_GRAPH:
 
                             System.out.println("Calling simple complete directed graph");
-                            generateSimpleNumberedStyleData(nameToGraphMap, room, startTimeSeconds, endTimeSeconds);
+                            generateSimpleNumberedStyleData(nameToGraphMap, room, startTimeSeconds, endTimeSeconds, nameToMinCoverageTimeMap, nameToMaxCoverageTimeMap);
                             break;
                         case STAT_DISPLAY:
                             generateStats(nameToGraphMap, room, startTimeSeconds, endTimeSeconds);
@@ -259,6 +296,64 @@ public class RoomAnalysisFrame extends JFrame {
 
     }
 
+    private HashMap<String, Long> calculateTimeOfCoverage(final int coverage, final HashMap<String, DirectedSparseMultigraph<ModelObject, ModelEdge>> nameToGraphMap) {
+        setEnabled(false);
+        SwingWorker<HashMap<String, Long>, String> worker = new SwingWorker<HashMap<String, Long>, String>() {
+            public ProgressVisualizer pv;
+
+            @Override
+            protected HashMap<String, Long> doInBackground() throws Exception {
+                pv = new ProgressVisualizer("Calculating coverage times", ProgressVisualizer.DeterminateType.DETERMINATE);
+                HashMap<String, Long> result = new HashMap<String, Long>();
+                for(String name:nameToGraphMap.keySet()){
+                    DirectedSparseMultigraph<ModelObject, ModelEdge> graph = nameToGraphMap.get(name);
+                    pv.print(name);
+                    long timeAtCoverage = findTimeAtCoverage(coverage, graph);
+                    result.put(name, timeAtCoverage);
+
+                }
+
+
+                return result;
+            }
+
+
+        };
+
+        worker.execute();
+        try {
+            return worker.get();
+        } catch (InterruptedException e) {
+            e.printStackTrace();  //To change body of catch statement use File | Settings | File Templates.
+        } catch (ExecutionException e) {
+            e.printStackTrace();  //To change body of catch statement use File | Settings | File Templates.
+        }
+        return null;
+    }
+
+    private long findTimeAtCoverage(int coverage, DirectedSparseMultigraph<ModelObject, ModelEdge> graph) {
+        TreeSet<ModelEdge> edgeCollection = new TreeSet<ModelEdge>(new Comparator<ModelEdge>() {
+            @Override
+            public int compare(ModelEdge o1, ModelEdge o2) {
+                return (int) (o1.getTime() - o2.getTime());
+            }
+        });
+
+        edgeCollection.addAll(graph.getEdges());
+        int totalSize = NetworkModel.instance().getCompleteGraph().getVertexCount();
+        Collection<ModelObject> visitedVertices = new HashSet<ModelObject>();
+        for(ModelEdge edge: edgeCollection){
+            Pair<ModelObject> vertices = graph.getEndpoints(edge);
+            visitedVertices.addAll(vertices);
+            int currentCoverage = ((visitedVertices.size() * 100) / totalSize);
+            if(currentCoverage>=coverage){
+                return edge.getTime();
+            }
+        }
+        return -1;
+    }
+
+
     private void createCurrentTitle(String room, DisplayType type, HashSet<Phase> selectedPhases) {
 
         currentTitle = room + ":" + type + ":";
@@ -283,7 +378,7 @@ public class RoomAnalysisFrame extends JFrame {
 
     }
 
-    private void generateSimpleNumberedStyleData(HashMap<String, DirectedSparseMultigraph<ModelObject, ModelEdge>> nameToGraphMap, String room, int startTimeSeconds, int endTimeSeconds) {
+    private void generateSimpleNumberedStyleData(HashMap<String, DirectedSparseMultigraph<ModelObject, ModelEdge>> nameToGraphMap, String room, int startTimeSeconds, int endTimeSeconds, HashMap<String, Long> nameToMinCoverageTimeMap, HashMap<String, Long> nameToMaxCoverageTimeMap) {
 
         ModelObject mainNode = NetworkModel.instance().findRoomByName(room);
         Collection<ModelObject> neighbours = NetworkModel.instance().getCompleteGraph().getNeighbors(mainNode);
@@ -389,7 +484,7 @@ public class RoomAnalysisFrame extends JFrame {
     }
 
 
-    private void generateProbabilityStyleData(HashMap<String, DirectedSparseMultigraph<ModelObject, ModelEdge>> nameToGraphMap, String room, int startTimeSeconds, int endTimeSeconds) {
+    private void generateProbabilityStyleData(HashMap<String, DirectedSparseMultigraph<ModelObject, ModelEdge>> nameToGraphMap, String room, int startTimeSeconds, int endTimeSeconds, HashMap<String, Long> nameToMinCoverageTimeMap, HashMap<String, Long> nameToMaxCoverageTimeMap) {
         ModelObject mainNode = NetworkModel.instance().findRoomByName(room);
         Collection<ModelObject> neighbours = NetworkModel.instance().getCompleteGraph().getNeighbors(mainNode);
         DirectedSparseMultigraph<ModelObject, ModelEdge> localGraph = new DirectedSparseMultigraph<ModelObject, ModelEdge>();
@@ -521,35 +616,29 @@ public class RoomAnalysisFrame extends JFrame {
 
         setEnabled(false);
         SwingWorker<HashMap<String, DirectedSparseMultigraph<ModelObject, ModelEdge>>, Void> tempWorker = new SwingWorker<HashMap<String, DirectedSparseMultigraph<ModelObject, ModelEdge>>, Void>() {
-            private JProgressBar progressBar;
-            private JTextArea taskOutput;
-            private JFrame progressFrame;
+
+
+            public ProgressVisualizer pv;
 
             @Override
             protected HashMap<String, DirectedSparseMultigraph<ModelObject, ModelEdge>> doInBackground() throws Exception {
-                createProgressBar();
+                pv = new ProgressVisualizer("generating graphs...", ProgressVisualizer.DeterminateType.DETERMINATE);
 
                 HashMap<String, DirectedSparseMultigraph<ModelObject, ModelEdge>> result = new HashMap<String, DirectedSparseMultigraph<ModelObject, ModelEdge>>();
                 final int size = dataNames.size();
                 int i = 1;
+                 this.addPropertyChangeListener(pv);
                 for (String dataName : dataNames) {
                     final String tempDataName = dataName;
-                    SwingUtilities.invokeLater(new Runnable() {
-                        @Override
-                        public void run() {
-                            taskOutput.append("Processing " + tempDataName + "...\n");
-                        }
-                    });
+                    pv.print("Processing " + tempDataName + "...\n");
+
                     synchronized (NetworkModel.instance()) {
                         result.put(dataName, NetworkModel.instance().getDirectedGraphOfPlayer(dataName, selectedPhases));
                     }
                     final int currentProgress = i;
-                    SwingUtilities.invokeLater(new Runnable() {
-                        @Override
-                        public void run() {
-                            progressBar.setValue((currentProgress * 100) / size);
-                        }
-                    });
+
+                    setProgress((currentProgress * 100) / size);
+
                     i++;
                 }
                 return result;
@@ -558,46 +647,11 @@ public class RoomAnalysisFrame extends JFrame {
             @Override
             protected void done() {
                 Toolkit.getDefaultToolkit().beep();
-                SwingUtilities.invokeLater(new Runnable() {
-                    @Override
-                    public void run() {
-                        progressFrame.dispose();
-                        taskOutput.append("Done.");
-                    }
-                });
+                pv.finish();
                 setEnabled(true);
             }
 
-            private void createProgressBar() {
-                SwingUtilities.invokeLater(new Runnable() {
 
-
-                    @Override
-                    public void run() {
-                        progressBar = new JProgressBar(0, 100);
-                        progressBar.setValue(0);
-                        progressBar.setStringPainted(true);
-
-
-                        taskOutput = new JTextArea(5, 20);
-                        taskOutput.setMargin(new Insets(5, 5, 5, 5));
-                        taskOutput.setEditable(false);
-                        DefaultCaret caret = (DefaultCaret) taskOutput.getCaret();
-                        caret.setUpdatePolicy(DefaultCaret.ALWAYS_UPDATE);
-                        progressFrame = new JFrame("Generating data");
-                        progressFrame.setLayout(new BorderLayout());
-                        progressFrame.add(progressBar, BorderLayout.NORTH);
-                        progressFrame.add(new JScrollPane(taskOutput), BorderLayout.CENTER);
-                        progressFrame.setDefaultCloseOperation(WindowConstants.DO_NOTHING_ON_CLOSE);
-                        Dimension screenSize = Toolkit.getDefaultToolkit().getScreenSize();
-                        double width = screenSize.getWidth();
-                        double height = screenSize.getHeight();
-                        progressFrame.setLocation((int) Math.floor(width / 2 - 200), (int) Math.floor(height / 2 - 100));
-                        progressFrame.setSize(400, 200);
-                        progressFrame.setVisible(true);
-                    }
-                });
-            }
 
         };
 
@@ -752,6 +806,28 @@ public class RoomAnalysisFrame extends JFrame {
                         }
                     });
                 }
+            } else if (e.getSource() == minCoverageSlider) {
+                if (!minCoverageSlider.getValueIsAdjusting()) {
+//                    System.out.println("Start time at "+startTimeSelection.getValue());
+                    final String currentValue = String.valueOf(minCoverageSlider.getValue());
+                    SwingUtilities.invokeLater(new Runnable() {
+                        @Override
+                        public void run() {
+                            minCoverageLabel.setText(currentValue);
+                        }
+                    });
+                }
+            } else if (e.getSource() == maxCoverageSlider) {
+                if (!maxCoverageSlider.getValueIsAdjusting()) {
+//                    System.out.println("End time at "+endTimeSelection.getValue());
+                    final String currentValue = String.valueOf(maxCoverageSlider.getValue());
+                    SwingUtilities.invokeLater(new Runnable() {
+                        @Override
+                        public void run() {
+                            maxCoverageLabel.setText(currentValue);
+                        }
+                    });
+                }
             }
         }
     }
@@ -807,11 +883,11 @@ public class RoomAnalysisFrame extends JFrame {
         BoundedRangeModel limit;
         MAX_OR_MIN constraintType;
 
-        public LimitedBoundedRangeModel(BoundedRangeModel limit, MAX_OR_MIN constraintType) {
+        public LimitedBoundedRangeModel(BoundedRangeModel limit, MAX_OR_MIN constraintType, int min, int max) {
             this.limit = limit;
             this.constraintType = constraintType;
-            this.setMaximum(45);
-            this.setMinimum(0);
+            this.setMaximum(max);
+            this.setMinimum(min);
         }
 
         /**

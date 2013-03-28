@@ -4,7 +4,7 @@ import com.google.common.collect.HashMultimap;
 import gui.NetworkModel;
 import gui.Phase;
 import gui.StatsDialog;
-import randomwalk.FirstOrderBiasedRandomWalk;
+import randomwalk.RandomWalkOrganizer;
 import stats.StatisticChoice;
 import stats.chartdisplays.VertexChartDisplay;
 import stats.consoledisplays.VertexConsoleDisplay;
@@ -57,7 +57,7 @@ public class VertexVisitFrequencyStatisticHandler extends StatisticsHandler<Vert
     private HashMap<String, Double> normalizeResult(HashMap<String, Double> personData) {
 
         HashMap<String, Double> result = new HashMap<String, Double>();
-        HashMap<String, Number> randomWalkData = FirstOrderBiasedRandomWalk.calculateAverageRoomVisitFrequency();
+        HashMap<String, Number> randomWalkData = RandomWalkOrganizer.calculateAverageRoomVisitFrequency();
         int NRandom = 0, NPerson = 0;
         for (String room : randomWalkData.keySet()) {
             NRandom += randomWalkData.get(room).intValue();

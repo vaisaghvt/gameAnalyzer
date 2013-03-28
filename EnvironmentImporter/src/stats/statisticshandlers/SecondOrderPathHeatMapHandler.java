@@ -3,11 +3,11 @@ package stats.statisticshandlers;
 import edu.uci.ics.jung.graph.DirectedSparseMultigraph;
 import gui.NetworkModel;
 import gui.Phase;
+import gui.ProgressVisualizer;
 import gui.StatsDialog;
 import modelcomponents.ModelEdge;
 import modelcomponents.ModelObject;
-import randomwalk.FirstOrderBiasedRandomWalk;
-import randomwalk.RandomWalk;
+import randomwalk.RandomWalkOrganizer;
 import stats.chartdisplays.PathHeatMapChartDisplay;
 import stats.consoledisplays.PathHeatMapConsoleDisplay;
 
@@ -45,7 +45,7 @@ public class SecondOrderPathHeatMapHandler extends StatisticsHandler<PathHeatMap
     private HashMap<String, HashMap<String, Double>> getSecondOrderMarkovData(
             final HashMap<String, DirectedSparseMultigraph<ModelObject, ModelEdge>> dataNameDataMap) {
 
-        final ProgressVisualizer pv = new ProgressVisualizer("Generating second order probabilities");
+        final ProgressVisualizer pv = new ProgressVisualizer("Generating second order probabilities", ProgressVisualizer.DeterminateType.DETERMINATE);
         final Semaphore semaphore = new Semaphore(1);
         try {
             semaphore.acquire();
@@ -310,10 +310,8 @@ public class SecondOrderPathHeatMapHandler extends StatisticsHandler<PathHeatMap
             @Override
             protected Collection<DirectedSparseMultigraph<ModelObject, ModelEdge>> doInBackground() throws Exception {
                 Collection<DirectedSparseMultigraph<ModelObject, ModelEdge>> collectionOfGraphs;
-                if(USE_FIRST_ORDER_BIASED_RANDOM)
-                    collectionOfGraphs = FirstOrderBiasedRandomWalk.getAllRandomWalkGraphs(generatorSemaphore);
-                else
-                    collectionOfGraphs = RandomWalk.getAllRandomWalkGraphs(generatorSemaphore);
+
+                    collectionOfGraphs = RandomWalkOrganizer.getAllRandomWalkGraphs(generatorSemaphore);
                 return collectionOfGraphs;
             }
         };
@@ -367,10 +365,7 @@ public class SecondOrderPathHeatMapHandler extends StatisticsHandler<PathHeatMap
 
         @Override
         protected Void doInBackground() throws Exception {
-            if(USE_FIRST_ORDER_BIASED_RANDOM)
-                collectionOfGraphs = FirstOrderBiasedRandomWalk.getAllRandomWalkGraphs(new Semaphore(1));
-            else
-                collectionOfGraphs = RandomWalk.getAllRandomWalkGraphs(new Semaphore(1));
+            collectionOfGraphs = RandomWalkOrganizer.getAllRandomWalkGraphs(new Semaphore(1));
             return null;
         }
 
