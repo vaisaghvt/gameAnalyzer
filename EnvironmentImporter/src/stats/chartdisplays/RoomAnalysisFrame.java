@@ -304,16 +304,21 @@ public class RoomAnalysisFrame extends JFrame {
             @Override
             protected HashMap<String, Long> doInBackground() throws Exception {
                 pv = new ProgressVisualizer("Calculating coverage times", ProgressVisualizer.DeterminateType.DETERMINATE);
+                this.addPropertyChangeListener(pv);
+                int i=0;
                 HashMap<String, Long> result = new HashMap<String, Long>();
                 for(String name:nameToGraphMap.keySet()){
                     DirectedSparseMultigraph<ModelObject, ModelEdge> graph = nameToGraphMap.get(name);
-                    pv.print(name);
+                    pv.print("processing "+name+"...\n");
                     long timeAtCoverage = findTimeAtCoverage(coverage, graph);
                     result.put(name, timeAtCoverage);
+                    final int currentProgress = i;
+                    setProgress((currentProgress*100) /nameToGraphMap.keySet().size());
+
 
                 }
 
-
+                 pv.finish();
                 return result;
             }
 
@@ -342,6 +347,7 @@ public class RoomAnalysisFrame extends JFrame {
         edgeCollection.addAll(graph.getEdges());
         int totalSize = NetworkModel.instance().getCompleteGraph().getVertexCount();
         Collection<ModelObject> visitedVertices = new HashSet<ModelObject>();
+        long maxTime=0;
         for(ModelEdge edge: edgeCollection){
             Pair<ModelObject> vertices = graph.getEndpoints(edge);
             visitedVertices.addAll(vertices);
@@ -349,8 +355,9 @@ public class RoomAnalysisFrame extends JFrame {
             if(currentCoverage>=coverage){
                 return edge.getTime();
             }
+            maxTime = edge.getTime();
         }
-        return -1;
+        return maxTime;
     }
 
 
@@ -484,10 +491,13 @@ public class RoomAnalysisFrame extends JFrame {
     }
 
 
-    private void generateProbabilityStyleData(HashMap<String, DirectedSparseMultigraph<ModelObject, ModelEdge>> nameToGraphMap, String room, int startTimeSeconds, int endTimeSeconds, HashMap<String, Long> nameToMinCoverageTimeMap, HashMap<String, Long> nameToMaxCoverageTimeMap) {
+    private void generateProbabilityStyleData(HashMap<String, DirectedSparseMultigraph<ModelObject, ModelEdge>> nameToGraphMap, String room,
+                                              int startTime, int endTime, HashMap<String, Long> nameToMinCoverageTimeMap,
+                                              HashMap<String, Long> nameToMaxCoverageTimeMap) {
         ModelObject mainNode = NetworkModel.instance().findRoomByName(room);
         Collection<ModelObject> neighbours = NetworkModel.instance().getCompleteGraph().getNeighbors(mainNode);
         DirectedSparseMultigraph<ModelObject, ModelEdge> localGraph = new DirectedSparseMultigraph<ModelObject, ModelEdge>();
+
 
 //        localGraph.addVertex(mainNode);
         for (ModelObject node : neighbours) {
@@ -496,7 +506,9 @@ public class RoomAnalysisFrame extends JFrame {
 
         for (String name : nameToGraphMap.keySet()) {
             DirectedSparseMultigraph<ModelObject, ModelEdge> tempGraph = nameToGraphMap.get(name);
+            long startTimeSeconds = Math.max(startTime*60000,nameToMinCoverageTimeMap.get(name) );
 
+            long endTimeSeconds = Math.min(endTime*60000, nameToMaxCoverageTimeMap.get(name));
             if (!tempGraph.containsVertex(mainNode)) {
                 continue;
             }
@@ -509,7 +521,7 @@ public class RoomAnalysisFrame extends JFrame {
             });
 
             for (ModelEdge edge : tempGraph.getIncidentEdges(mainNode)) {
-                if (edge.getTime() >= startTimeSeconds * 60000 && edge.getTime() <= endTimeSeconds * 60000)
+                if (edge.getTime() >= startTimeSeconds && edge.getTime() <= endTimeSeconds)
                     edgeCollection.add(edge);
             }
 
