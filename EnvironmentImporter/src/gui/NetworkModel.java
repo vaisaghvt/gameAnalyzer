@@ -1642,7 +1642,7 @@ public class areaToLocationTransformer<ModelObject, Point2D> implements Transfor
             }
         }
         System.out.println("WARNING! COULDN'T FIND ROOM WITH NAME:" + roomName);
-        assert false;
+//        assert false;
         return null;
     }
 
