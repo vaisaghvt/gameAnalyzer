@@ -162,8 +162,8 @@ public class RandomWalkOrganizer {
     }
 
 
-    public static HashMap<String, Number> calculateAverageRoomVisitFrequency() {
-        final RANDOM_WALK_TYPE type = getRandomWalkType();
+    public static HashMap<String, Number> calculateAverageRoomVisitFrequency(final RANDOM_WALK_TYPE type) {
+
         ensureGraphExists(type);
 
         HashMap<String, Number> result = new HashMap<String, Number>();
@@ -265,6 +265,19 @@ public class RandomWalkOrganizer {
         return randomWalkGraphs.get(type);
     }
 
+    public static Collection<DirectedSparseMultigraph<ModelObject, ModelEdge>> getAllRandomWalkGraphs(final Semaphore generatorSemaphore, final RANDOM_WALK_TYPE type) {
+        final Semaphore tempSemaphore = new Semaphore(1);
+        try {
+            tempSemaphore.acquire(1);
+        } catch (InterruptedException e) {
+            e.printStackTrace();
+        }
+
+        ensureGraphExists(type);
+        generatorSemaphore.release();
+        return randomWalkGraphs.get(type);
+    }
+
     public static Double getCoverageOfRandomWalks(final int pathLength, final String startingRoom, Semaphore coverageAreaSemaphore) {
         final Semaphore semaphore = new Semaphore(2);
         final Semaphore mutex = new Semaphore(1);
@@ -278,6 +291,7 @@ public class RandomWalkOrganizer {
             @Override
             protected Double doInBackground() throws Exception {
                 final RANDOM_WALK_TYPE type = getRandomWalkType();
+                System.out.println("here");
                 ensureGraphExists(type);
 
                 semaphore.acquire(2);

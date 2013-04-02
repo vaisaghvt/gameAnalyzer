@@ -22,6 +22,9 @@ import static randomwalk.RandomWalkOrganizer.random;
  */
 class FirstOrderBiasedWithDistance implements RandomWalkGenerator {
 
+    private static final int REQUIRED_COVERAGE = 90;
+    private static final double SHORTEST_DISTANCE_PREFERENCE = 0.15;
+
     public DirectedSparseMultigraph<ModelObject, ModelEdge> generateRandomWalk(Graph<ModelObject, ModelEdge> graph, ModelObject startingLocation) {
         DirectedSparseMultigraph<ModelObject, ModelEdge> currentGraph = new DirectedSparseMultigraph<ModelObject, ModelEdge>();
         int coverage = calculateCoverage(graph, currentGraph);
@@ -32,7 +35,7 @@ class FirstOrderBiasedWithDistance implements RandomWalkGenerator {
         ModelObject lastVisited = null;
 
 
-        while (coverage < 100) {
+        while (coverage < REQUIRED_COVERAGE) {
             neighbours.clear();
             neighbours.addAll(graph.getNeighbors(currentLocation));
             if (neighbours.size() > 1 && lastVisited != null) {
@@ -54,7 +57,7 @@ class FirstOrderBiasedWithDistance implements RandomWalkGenerator {
                     }
 
                 }
-//                   next = findNearestDestination(lastVisited, neighbours) ;
+//                next = findNearestDestination(lastVisited, neighbours);
             } else {
                 next = neighbours.get((int) Math.floor(random.nextDouble() * neighbours.size()));
             }
@@ -72,30 +75,47 @@ class FirstOrderBiasedWithDistance implements RandomWalkGenerator {
 
     }
 
-    private static ModelObject findNearestDestination(ModelObject location, ArrayList<ModelObject> neighbours) {
-
-        if (neighbours.size() == 1) {
-            return neighbours.get(0);
-        }
-        Point3D currentCenter = getCenterOfArea(location);
-
-        ModelObject result = null;
-        double randomNoise = random.nextDouble();
-        if (randomNoise > 0.80) {
-            return neighbours.get((int) Math.floor(random.nextDouble() * neighbours.size()));
-        }
-        double minDistance = Double.MAX_VALUE;
-        for (ModelObject neighbour : neighbours) {
-            double distance = currentCenter.distance(getCenterOfArea(neighbour));
-            if (distance < minDistance) {
-                minDistance = distance;
-
-                result = neighbour;
-            }
-        }
-        return result;
-
-    }
+//    private static ModelObject findNearestDestination(ModelObject lastVisited, ArrayList<ModelObject> neighbours) {
+//
+//        if (neighbours.size() == 1) {
+//            return neighbours.get(0);
+//        }
+//        Point3D currentCenter = getCenterOfArea(lastVisited);
+//
+//        double secondMinDistance = Double.MAX_VALUE;
+//        ModelObject result = null;
+//        double randomNoise = random.nextDouble();
+//        if (randomNoise > SHORTEST_DISTANCE_PREFERENCE) {
+//            return neighbours.get((int) Math.floor(random.nextDouble() * neighbours.size()));
+//        }
+//
+//
+//        double minDistance = Double.MAX_VALUE;
+//        ModelObject nearestNeighbour = null;
+//        ModelObject secondNearestNeighbour = null;
+//        for (ModelObject neighbour : neighbours) {
+//            double distance = currentCenter.distance(getCenterOfArea(neighbour));
+//            if (distance < minDistance) {
+//                secondMinDistance = minDistance;
+//                minDistance = distance;
+//
+//                nearestNeighbour = neighbour;
+//            } else if (distance < secondMinDistance) {
+//                secondMinDistance = distance;
+//                secondNearestNeighbour = neighbour;
+//            }
+//        }
+//
+//        if (secondMinDistance - minDistance < 1) {
+//            result = random.nextDouble() > 0.5 ? secondNearestNeighbour : nearestNeighbour;
+//        } else {
+//            result = nearestNeighbour;
+//        }
+//
+//        if(result==)
+//        return result;
+//
+//    }
 
     private static HashMap<ModelObject, Double> generateProbabilities(ModelObject currentLocation, ArrayList<ModelObject> neighbours) {
         HashMap<ModelObject, Double> destinationProbabilities = new HashMap<ModelObject, Double>();
