@@ -36,6 +36,7 @@ import java.util.concurrent.ExecutionException;
  * To change this template use File | Settings | File Templates.
  */
 public class RoomAnalysisFrame extends JFrame {
+    private static final int MAX_NUMBER_TRACKING = 10;
     private JPanel dataPanel;
     private JPanel chartDisplayPanel = new JPanel();
     private Collection<JFrame> poppedOutFrames = new HashSet<JFrame>();
@@ -142,9 +143,9 @@ public class RoomAnalysisFrame extends JFrame {
         generateButton.addActionListener(roomDataListener);
         closeButton.addActionListener(roomDataListener);
         displayTypeJComboBox = new JComboBox<DisplayType>();
-        displayTypeJComboBox.addItem(DisplayType.PATH_PROBABILITIES);
-        displayTypeJComboBox.addItem(DisplayType.SIMPLE_COMPLETE_DIRECTED_GRAPH);
-        displayTypeJComboBox.addItem(DisplayType.STAT_DISPLAY);
+        for(DisplayType type : DisplayType.values()){
+            displayTypeJComboBox.addItem(type);
+        }
         displayTypeJComboBox.setEditable(false);
 
 
@@ -259,16 +260,16 @@ public class RoomAnalysisFrame extends JFrame {
                     HashMap<String, Long> nameToMaxCoverageTimeMap = calculateTimeOfCoverage(maxCoverageValue, nameToGraphMap);
                     switch (type) {
 
-                        case PATH_PROBABILITIES:
-                            generateProbabilityStyleData(nameToGraphMap, room, startTimeSeconds, endTimeSeconds, nameToMinCoverageTimeMap,nameToMaxCoverageTimeMap);
+                        case SECOND_ORDER_MARKOV:
+                            generateSecondOrderProbabilities(nameToGraphMap, room, startTimeSeconds, endTimeSeconds, nameToMinCoverageTimeMap, nameToMaxCoverageTimeMap);
                             break;
-                        case SIMPLE_COMPLETE_DIRECTED_GRAPH:
+                        case FIRST_ORDER_MARKOV:
 
-                            System.out.println("Calling simple complete directed graph");
-                            generateSimpleNumberedStyleData(nameToGraphMap, room, startTimeSeconds, endTimeSeconds, nameToMinCoverageTimeMap, nameToMaxCoverageTimeMap);
+//                            System.out.println("Calling simple complete directed graph");
+                            generateFirstOrderProbabilities(nameToGraphMap, room, startTimeSeconds, endTimeSeconds, nameToMinCoverageTimeMap, nameToMaxCoverageTimeMap);
                             break;
-                        case STAT_DISPLAY:
-                            generateStats(nameToGraphMap, room, startTimeSeconds, endTimeSeconds);
+                        case TEMPORAL_SECOND_ORDER_MARKOV:
+                            generateTemporalSecondOrderMarkov(nameToGraphMap, room, startTimeSeconds, endTimeSeconds, nameToMinCoverageTimeMap, nameToMaxCoverageTimeMap);
                             break;
                     }
                     return null;
@@ -380,12 +381,157 @@ public class RoomAnalysisFrame extends JFrame {
         setTitle(currentTitle);
     }
 
-    private void generateStats(HashMap<String, DirectedSparseMultigraph<ModelObject, ModelEdge>> nameToGraphMap, String room, int startTimeSeconds, int endTimeSeconds) {
+    private void generateTemporalSecondOrderMarkov(HashMap<String, DirectedSparseMultigraph<ModelObject, ModelEdge>> nameToGraphMap, String room,
+                                                   int startTime, int endTime, HashMap<String, Long> nameToMinCoverageTimeMap, HashMap<String, Long> nameToMaxCoverageTimeMap) {
+        final ModelObject mainNode = NetworkModel.instance().findRoomByName(room);
+        Collection<ModelObject> neighbours = NetworkModel.instance().getCompleteGraph().getNeighbors(mainNode);
+        ArrayList<DirectedSparseMultigraph<ModelObject, ModelEdge>> localGraphs = new ArrayList<DirectedSparseMultigraph<ModelObject, ModelEdge>>(MAX_NUMBER_TRACKING);
+
+        for(int i=0;i<MAX_NUMBER_TRACKING;i++){
+            DirectedSparseMultigraph<ModelObject, ModelEdge> localGraph = new DirectedSparseMultigraph<ModelObject, ModelEdge>();
+            for (ModelObject node : neighbours) {
+                localGraph.addVertex(node);
+            }
+            localGraphs.add(localGraph);
+        }
+
+
+
+
+//        localGraph.addVertex(mainNode);
+
+
+
+        for (String name : nameToGraphMap.keySet()) {
+            DirectedSparseMultigraph<ModelObject, ModelEdge> tempGraph = nameToGraphMap.get(name);
+//            long startTimeSeconds = Math.max(startTime*60000,nameToMinCoverageTimeMap.get(name) );
+//
+//            long endTimeSeconds = Math.min(endTime*60000, nameToMaxCoverageTimeMap.get(name));
+
+
+
+            if (!tempGraph.containsVertex(mainNode)) {
+                continue;
+            }
+
+            TreeSet<ModelEdge> edgeCollection = new TreeSet<ModelEdge>(new Comparator<ModelEdge>() {
+                @Override
+                public int compare(ModelEdge o1, ModelEdge o2) {
+                    return (int) (o1.getTime() - o2.getTime());
+                }
+            });
+
+            for (ModelEdge edge : tempGraph.getIncidentEdges(mainNode)) {
+//                if (edge.getTime() >= startTimeSeconds && edge.getTime() <= endTimeSeconds)
+                    edgeCollection.add(edge);
+            }
+
+
+            ModelEdge lonelyEdge = null;
+            if (tempGraph.inDegree(mainNode) > tempGraph.outDegree(mainNode)) {
+                //Ending Vertex;
+                lonelyEdge = edgeCollection.pollLast();
+
+//                localGraph.addVertex(mainNode);
+//                localGraph.addEdge(new ModelEdge(),
+//                        tempGraph.getOpposite(mainNode, lonelyEdge),
+//                        mainNode
+//                );
+
+            } else if (tempGraph.inDegree(mainNode) < tempGraph.outDegree(mainNode)) {
+                //First Vertex;
+                lonelyEdge = edgeCollection.pollFirst();
+
+
+//                localGraph.addVertex(mainNode);
+//                localGraph.addEdge(new ModelEdge(),
+//                        mainNode,
+//                        tempGraph.getOpposite(mainNode, lonelyEdge)
+//                );
+
+            }
+            if(tempGraph.inDegree(mainNode)!= tempGraph.outDegree(mainNode)){
+                System.out.println("YOU're screwed!!!");
+            }
+
+            int visitNumber =0;
+
+            int size = edgeCollection.size();
+            DirectedSparseMultigraph<ModelObject,ModelEdge> localGraph = localGraphs.get(visitNumber);
+            for (int i = 0; i < size / 2; i++) {
+                ModelEdge incoming = edgeCollection.pollFirst();
+                ModelEdge outgoing = edgeCollection.pollFirst();
+                ModelObject from = tempGraph.getOpposite(mainNode, incoming);
+                ModelObject to = tempGraph.getOpposite(mainNode, outgoing);
+                localGraph.addEdge(new ModelEdge(), from, to);
+                if(visitNumber<MAX_NUMBER_TRACKING-1 && isLeaving(outgoing, tempGraph, to, mainNode)){
+                    visitNumber++;
+                    localGraph = localGraphs.get(visitNumber);
+                }
+            }
+        }
+
+
+        for(int i=0;i<MAX_NUMBER_TRACKING;i++){
+            DirectedSparseMultigraph<ModelObject, ModelEdge> localGraph = localGraphs.get(i);
+            final DirectedSparseMultigraph<ModelObject, ProbabilityEdge> graphToDraw = convertToProbabilities(localGraph);
+
+//            ArrayList<ProbabilityEdge> edges = new ArrayList<ProbabilityEdge>(graphToDraw.getEdges());
+//            int size = graphToDraw.getEdges().size();
+//            for(int j=0;j<size;j++ ){
+//                ProbabilityEdge edge = edges.get(j);
+//                if(edge.prob<0.1) {
+//                    graphToDraw.getEdges().remove(edge);
+//                }
+//            }
+            final int currentAttemptNumber = i;
+            SwingUtilities.invokeLater(new Runnable() {
+                @Override
+                public void run() {
+                    JPanel panel = drawInPanel(graphToDraw, mainNode);
+                    JFrame frame = new JFrame();
+                    frame.getContentPane().add(panel);
+                    frame.setVisible(true);
+                    frame.setSize(600,600);
+                    frame.revalidate();
+
+                    frame.setTitle("For attempt number :"+ (currentAttemptNumber+1));
+                }
+            });
+        }
 
 
     }
 
-    private void generateSimpleNumberedStyleData(HashMap<String, DirectedSparseMultigraph<ModelObject, ModelEdge>> nameToGraphMap, String room, int startTimeSeconds, int endTimeSeconds, HashMap<String, Long> nameToMinCoverageTimeMap, HashMap<String, Long> nameToMaxCoverageTimeMap) {
+
+
+    private boolean isLeaving(ModelEdge incomingEdge, DirectedSparseMultigraph<ModelObject, ModelEdge> graph,ModelObject mainNode, ModelObject from) {
+        long timeOfIncomingEdge = incomingEdge.getTime();
+        TreeSet<ModelEdge> edgeCollection = new TreeSet<ModelEdge>(new Comparator<ModelEdge>() {
+            @Override
+            public int compare(ModelEdge o1, ModelEdge o2) {
+                return (int) (o1.getTime() - o2.getTime());
+            }
+        });
+
+        edgeCollection.addAll(graph.getOutEdges(mainNode));
+
+        for(ModelEdge edge :edgeCollection){
+            if(edge.getTime()>= timeOfIncomingEdge){
+                ModelObject destination = graph.getOpposite(mainNode, edge);
+                if(destination.toString().equals(from.toString())){
+                    return false;
+                }
+                else {
+                    return true;
+                }
+            }
+        }
+        return true;
+
+    }
+
+    private void generateFirstOrderProbabilities(HashMap<String, DirectedSparseMultigraph<ModelObject, ModelEdge>> nameToGraphMap, String room, int startTimeSeconds, int endTimeSeconds, HashMap<String, Long> nameToMinCoverageTimeMap, HashMap<String, Long> nameToMaxCoverageTimeMap) {
 
         ModelObject mainNode = NetworkModel.instance().findRoomByName(room);
         Collection<ModelObject> neighbours = NetworkModel.instance().getCompleteGraph().getNeighbors(mainNode);
@@ -426,7 +572,7 @@ public class RoomAnalysisFrame extends JFrame {
 
         final DirectedSparseMultigraph<ModelObject, ProbabilityEdge> graphToDraw = convertToProbabilities(localGraph);
 
-        renderGraphPanel(graphToDraw, mainNode, DisplayType.SIMPLE_COMPLETE_DIRECTED_GRAPH);
+        renderGraphPanel(graphToDraw, mainNode, DisplayType.FIRST_ORDER_MARKOV);
 
 
     }
@@ -491,9 +637,9 @@ public class RoomAnalysisFrame extends JFrame {
     }
 
 
-    private void generateProbabilityStyleData(HashMap<String, DirectedSparseMultigraph<ModelObject, ModelEdge>> nameToGraphMap, String room,
-                                              int startTime, int endTime, HashMap<String, Long> nameToMinCoverageTimeMap,
-                                              HashMap<String, Long> nameToMaxCoverageTimeMap) {
+    private void generateSecondOrderProbabilities(HashMap<String, DirectedSparseMultigraph<ModelObject, ModelEdge>> nameToGraphMap, String room,
+                                                  int startTime, int endTime, HashMap<String, Long> nameToMinCoverageTimeMap,
+                                                  HashMap<String, Long> nameToMaxCoverageTimeMap) {
         ModelObject mainNode = NetworkModel.instance().findRoomByName(room);
         Collection<ModelObject> neighbours = NetworkModel.instance().getCompleteGraph().getNeighbors(mainNode);
         DirectedSparseMultigraph<ModelObject, ModelEdge> localGraph = new DirectedSparseMultigraph<ModelObject, ModelEdge>();
@@ -564,8 +710,54 @@ public class RoomAnalysisFrame extends JFrame {
 
 
         final DirectedSparseMultigraph<ModelObject, ProbabilityEdge> graphToDraw = convertToProbabilities(localGraph);
-        renderGraphPanel(graphToDraw, mainNode, DisplayType.PATH_PROBABILITIES);
+        renderGraphPanel(graphToDraw, mainNode, DisplayType.SECOND_ORDER_MARKOV);
 
+    }
+
+    private JPanel drawInPanel(DirectedSparseMultigraph<ModelObject, ProbabilityEdge> graphToDraw,final  ModelObject mainNode) {
+        Layout<ModelObject, ProbabilityEdge> layout = new SpringLayout2<ModelObject, ProbabilityEdge>(graphToDraw);
+
+
+        layout.setSize(new Dimension(600, 500));
+
+
+        VisualizationViewer<ModelObject, ProbabilityEdge> tempVisualizationViewer = new VisualizationViewer<ModelObject, ProbabilityEdge>(layout);
+        tempVisualizationViewer.setPreferredSize(new Dimension(600, 500));
+
+
+        // Setup up a new vertex to paint transformer...
+        tempVisualizationViewer.getRenderContext().setVertexFillPaintTransformer(new Transformer<ModelObject, Paint>() {
+            @Override
+            public Paint transform(ModelObject modelObject) {
+                if (modelObject.toString().equals(mainNode.toString())) {
+                    return Color.RED;
+                } else {
+                    return Color.WHITE;
+                }
+            }
+        });
+
+        // Create a graph mouse and add it to the visualization component
+        DefaultModalGraphMouse gm = new DefaultModalGraphMouse();
+        gm.setMode(ModalGraphMouse.Mode.PICKING);
+        tempVisualizationViewer.setGraphMouse(gm);
+
+
+        tempVisualizationViewer.getRenderContext().setVertexShapeTransformer(new VertexEllipseTransformer<ModelObject, Shape>());
+
+
+        tempVisualizationViewer.getRenderContext().setVertexLabelTransformer(new ToStringLabeller<ModelObject>());
+        tempVisualizationViewer.getRenderer().getVertexLabelRenderer().setPosition(edu.uci.ics.jung.visualization.renderers.Renderer.VertexLabel.Position.CNTR);
+
+//                if (style.equals(DisplayType.SECOND_ORDER_MARKOV)) {
+        tempVisualizationViewer.getRenderContext().setEdgeLabelTransformer(new ToStringLabeller());
+//                }
+
+
+
+        tempVisualizationViewer.revalidate();
+
+        return tempVisualizationViewer;
     }
 
     private <T extends ModelEdge> void renderGraphPanel(final DirectedSparseMultigraph<ModelObject, T> graphToDraw, final ModelObject mainNode, final DisplayType style) {
@@ -608,7 +800,7 @@ public class RoomAnalysisFrame extends JFrame {
                 currentVisualizationViewer.getRenderContext().setVertexLabelTransformer(new ToStringLabeller<ModelObject>());
                 currentVisualizationViewer.getRenderer().getVertexLabelRenderer().setPosition(edu.uci.ics.jung.visualization.renderers.Renderer.VertexLabel.Position.CNTR);
 
-//                if (style.equals(DisplayType.PATH_PROBABILITIES)) {
+//                if (style.equals(DisplayType.SECOND_ORDER_MARKOV)) {
                 currentVisualizationViewer.getRenderContext().setEdgeLabelTransformer(new ToStringLabeller());
 //                }
 
@@ -698,9 +890,9 @@ public class RoomAnalysisFrame extends JFrame {
 
 
     public enum DisplayType {
-        PATH_PROBABILITIES("2nd order markov"),
-        SIMPLE_COMPLETE_DIRECTED_GRAPH("1st order markov"),
-        STAT_DISPLAY("stat summary");
+        FIRST_ORDER_MARKOV("1st order markov"),
+        SECOND_ORDER_MARKOV("2nd order markov"),        
+        TEMPORAL_SECOND_ORDER_MARKOV("Temporal 2nd order markov");
         private final String name;
 
         DisplayType(String s) {
