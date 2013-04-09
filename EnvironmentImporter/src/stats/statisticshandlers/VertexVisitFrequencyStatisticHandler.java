@@ -60,7 +60,7 @@ public class VertexVisitFrequencyStatisticHandler extends StatisticsHandler<Vert
 
     }
 
-    private HashMap<String, Double> normalizeResultForRandomWalk(HashMap<String, Double> personData) {
+    private HashMap<String, Double> normalizeResultForRandomWalk() {
         HashMap<String, Double> result = new HashMap<String, Double>();
 
         int[] NRandomForFloor = new int[3];
@@ -75,10 +75,10 @@ public class VertexVisitFrequencyStatisticHandler extends StatisticsHandler<Vert
             NRandom+= randomWalkData.get(room).intValue();
         }
 
-        for (String room : personData.keySet()) {
+        for (String room : randomWalkData.keySet()) {
             int floorNumber= NetworkModel.instance().getFloorForVertex(
                     NetworkModel.instance().findRoomByName(room));
-            double originalValueForRoom = personData.get(room).doubleValue();
+            double originalValueForRoom = randomWalkData.get(room).doubleValue();
             double scaledValue = originalValueForRoom / NRandomForFloor[floorNumber];
 //            double scaledValue = originalValueForRoom / NRandom;
 //            double normalizedValue = scaledValue / randomWalkData.get(room).doubleValue();
@@ -93,19 +93,19 @@ public class VertexVisitFrequencyStatisticHandler extends StatisticsHandler<Vert
 
         HashMap<String, Double> result = new HashMap<String, Double>();
         HashMap<String, Number> randomWalkData = RandomWalkOrganizer.calculateAverageRoomVisitFrequency(RandomWalkOrganizer.RANDOM_WALK_TYPE.UNBIASED);
-//        int NRandom = 0, NPerson = 0;
+        int NRandom = 0, NPerson = 0;
         int[] NRandomForFloor = new int[3];
         int[] NPersonForFloor = new int[3];
         for (String room : randomWalkData.keySet()) {
             int floorNumber= NetworkModel.instance().getFloorForVertex(
                     NetworkModel.instance().findRoomByName(room));
-
+//            NRandom+= randomWalkData.get(room).intValue();
             NRandomForFloor[floorNumber] += randomWalkData.get(room).intValue();
         }
         for (String room : personData.keySet()) {
             int floorNumber= NetworkModel.instance().getFloorForVertex(
                     NetworkModel.instance().findRoomByName(room));
-
+//        NPerson+= personData.get(room).intValue();
             NPersonForFloor[floorNumber] += personData.get(room).intValue();
 
         }
@@ -114,6 +114,7 @@ public class VertexVisitFrequencyStatisticHandler extends StatisticsHandler<Vert
             int floorNumber= NetworkModel.instance().getFloorForVertex(
                     NetworkModel.instance().findRoomByName(room));
             double originalValueForRoom = personData.get(room).doubleValue();
+//            double scaledValue = (originalValueForRoom *NRandom) /NPerson;
             double scaledValue = (originalValueForRoom * NRandomForFloor[floorNumber]) / NPersonForFloor[floorNumber];
             double normalizedValue = scaledValue / randomWalkData.get(room).doubleValue();
             result.put(room, normalizedValue);
@@ -166,7 +167,7 @@ public class VertexVisitFrequencyStatisticHandler extends StatisticsHandler<Vert
 
             }
             if (dataName.equals("random walk")) {
-                result = normalizeResultForRandomWalk(result);
+                result = normalizeResultForRandomWalk();
             } else {
                 result = normalizeResult(result);
             }

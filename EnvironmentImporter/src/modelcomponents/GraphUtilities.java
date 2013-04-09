@@ -9,6 +9,7 @@ import gui.ProgressVisualizer;
 import javafx.geometry.Point3D;
 import org.apache.commons.collections15.buffer.CircularFifoBuffer;
 import org.apache.commons.math3.stat.descriptive.moment.Mean;
+import org.apache.commons.math3.stat.descriptive.moment.StandardDeviation;
 import org.apache.commons.math3.stat.descriptive.moment.Variance;
 
 import javax.swing.*;
@@ -290,6 +291,67 @@ public class GraphUtilities {
         return nodeToNodeProbabilities;
     }
 
+    public static Collection<DirectedSparseMultigraph<ModelObject, ModelEdge>> generatePathsTillCoverage(
+            HashMap<String, HashMap<String, Double>> firstOrderProbs, HashMap<String, HashMap<String, HashMap<String, Double>>> secondOrderProbs,
+            String startingRoom, final int coverageRequired) {
+        try {
+            Graph<ModelObject, ModelEdge> completeGraph = NetworkModel.instance().getCompleteGraph();
+            ModelObject startingLocation = null;
+
+
+            if (completeGraph != null) {
+                startingLocation = NetworkModel.instance().findRoomByName(startingRoom);
+                if (startingLocation == null) {
+                    System.out.println("No starting location");
+                    throw new NullPointerException();
+                }
+
+            } else {
+                System.out.println("No graph to load.");
+                throw new NullPointerException();
+            }
+
+
+            CircularFifoBuffer<Double> varianceList = new CircularFifoBuffer<Double>(5);
+
+            Collection<DirectedSparseMultigraph<ModelObject, ModelEdge>> resultSet =
+                    new HashSet<DirectedSparseMultigraph<ModelObject, ModelEdge>>();
+            List<Double> listOfGyrationRadius = new ArrayList<Double>();
+            ProgressVisualizer progressVisualizer = new ProgressVisualizer("Generating path data", ProgressVisualizer.DeterminateType.INDETERMINATE);
+            int count = 0;
+            while (true) {
+
+                DirectedSparseMultigraph<ModelObject, ModelEdge> tempGraph = generatePathForCoverage(completeGraph, startingLocation, coverageRequired, firstOrderProbs, secondOrderProbs);
+                resultSet.add(tempGraph);
+                listOfGyrationRadius.add(calculateRadiusOfGyration(tempGraph, startingLocation));
+                if (isStable(listOfGyrationRadius, varianceList, progressVisualizer)) {
+
+                    break;
+                } else {
+                    count++;
+                    if (count % 50 == 0) {
+
+                        progressVisualizer.displayStability(count);
+
+                    }
+                }
+
+
+//            System.out.println(resultSet.size());
+            }
+            progressVisualizer.finish();
+
+
+            return resultSet;
+        } catch (Exception e) {
+            e.printStackTrace();
+            return null;
+        }
+    }
+
+
+
+
     public static Collection<DirectedSparseMultigraph<ModelObject, ModelEdge>> generatePaths(
             HashMap<String, HashMap<String, Double>> firstOrderProbs,
             HashMap<String, HashMap<String, HashMap<String, Double>>> secondOrderProbs,
@@ -349,6 +411,46 @@ public class GraphUtilities {
             return null;
         }
     }
+
+    private static DirectedSparseMultigraph<ModelObject, ModelEdge> generatePathForCoverage(Graph<ModelObject, ModelEdge> completeGraph, ModelObject startingLocation,
+                                                                                            int coverageRequired, HashMap<String, HashMap<String, Double>> firstOrderProbabilities,
+                                                                                            HashMap<String, HashMap<String, HashMap<String, Double>>> secondOrderProbabilities) {
+        DirectedSparseMultigraph<ModelObject, ModelEdge> path = new DirectedSparseMultigraph<ModelObject, ModelEdge>();
+        path.addVertex(startingLocation);
+        String startRoom = startingLocation.toString();
+
+
+        ModelObject currentNode = startingLocation;
+        String destination = getDestination(firstOrderProbabilities.get(startRoom));
+
+
+        if (destination.equals(startRoom)) {
+            System.out.println("Source same as destination");
+        }
+
+        currentNode = addNewVertexToPath(currentNode, destination, path, 0);
+
+        int numberOfNodesRequired = coverageRequired * completeGraph.getVertexCount() /100;
+
+
+
+        ModelObject lastNode = startingLocation;
+
+        int hops=1;
+
+        while(path.getVertexCount() < numberOfNodesRequired){
+            ModelObject tempNode = currentNode;
+            currentNode = addOneMoreHop(currentNode, lastNode, path, firstOrderProbabilities, secondOrderProbabilities, hops);
+            lastNode = tempNode;
+            if (currentNode == lastNode) {
+                System.out.println("Error!!");
+            }
+            hops++;
+        }
+
+        return path;
+    }
+
 
     private static DirectedSparseMultigraph<ModelObject, ModelEdge> generatePath(
             Graph<ModelObject, ModelEdge> completeGraph,
@@ -599,6 +701,25 @@ public class GraphUtilities {
 
     }
 
+
+    public static HashMap<String, Double> calculateNumberOfHops(Collection<DirectedSparseMultigraph<ModelObject, ModelEdge>> pathCollections) {
+        double[] edgeCountArray = new double[pathCollections.size()];
+        int pathNumber = 0;
+        for(DirectedSparseMultigraph<ModelObject, ModelEdge> path: pathCollections){
+            edgeCountArray[pathNumber] = path.getEdgeCount();
+            pathNumber++;
+        }
+
+        Mean meanCalculator= new Mean();
+        double calculatedMean = meanCalculator.evaluate(edgeCountArray);
+        StandardDeviation sd = new StandardDeviation();
+        double calculatedSD = sd.evaluate(edgeCountArray);
+
+        HashMap<String, Double> result = new HashMap<String, Double>();
+        result.put("mean", calculatedMean);
+        result.put("sd", calculatedSD);
+        return result;
+    }
 
 
 }

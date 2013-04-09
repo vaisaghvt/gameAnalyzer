@@ -27,6 +27,8 @@ import static modelcomponents.GraphUtilities.isStable;
  */
 public class RandomWalkOrganizer {
 
+    public static final int COVERAGE_REQUIRED = 90;
+
     public static RANDOM_WALK_TYPE getRandomWalkType() {
         return (RANDOM_WALK_TYPE)
                 JOptionPane.showInputDialog(new JFrame(), "Choose random walk type", "Random walk chooser",
@@ -34,6 +36,7 @@ public class RandomWalkOrganizer {
                         RANDOM_WALK_TYPE.values(), RANDOM_WALK_TYPE.UNBIASED);
 
     }
+
 
     public enum RANDOM_WALK_TYPE {
         UNBIASED(new UnbiasedRandomWalk()),
@@ -277,6 +280,79 @@ public class RandomWalkOrganizer {
         generatorSemaphore.release();
         return randomWalkGraphs.get(type);
     }
+
+
+    public static HashMap<String, Double> getHopsRequiredForRandomWalks(final String startingRoom, Semaphore coverageAreaSemaphore) {
+        final Semaphore semaphore = new Semaphore(2);
+        final Semaphore mutex = new Semaphore(1);
+        try {
+            mutex.acquire();
+        } catch (InterruptedException e) {
+            e.printStackTrace();
+        }
+
+        SwingWorker<HashMap<String, Double>, Void> tempWorker = new SwingWorker<HashMap<String, Double>, Void>() {
+            @Override
+            protected HashMap<String, Double> doInBackground() throws Exception {
+                final RANDOM_WALK_TYPE type = getRandomWalkType();
+                System.out.println("here");
+                ensureGraphExists(type);
+
+                semaphore.acquire(2);
+
+                SwingWorker<HashMap<String, HashMap<String, Double>>, Void> firstOrderCalculator = new SwingWorker<HashMap<String, HashMap<String, Double>>, Void>() {
+                    @Override
+                    protected HashMap<String, HashMap<String, Double>> doInBackground() throws Exception {
+                        return GraphUtilities.calculateFirstOrderProbabilities(randomWalkGraphs.get(type), semaphore);
+                    }
+
+                };
+
+                SwingWorker<HashMap<String, HashMap<String, HashMap<String, Double>>>, Void> secondOrderCalculator = new SwingWorker<HashMap<String, HashMap<String, HashMap<String, Double>>>, Void>() {
+                    @Override
+                    protected HashMap<String, HashMap<String, HashMap<String, Double>>> doInBackground() throws Exception {
+                        return GraphUtilities.calculateSecondOrderProbabilities(randomWalkGraphs.get(type), semaphore);
+                    }
+
+
+                };
+
+                firstOrderCalculator.execute();
+                secondOrderCalculator.execute();
+
+
+                System.out.println("Waiting for random walk");
+                semaphore.tryAcquire(2, 300, TimeUnit.SECONDS);
+                System.out.println("Random walk acquired");
+                HashMap<String, HashMap<String, Double>> firstOrderProbs = firstOrderCalculator.get();
+                HashMap<String, HashMap<String, HashMap<String, Double>>> secondOrderProbs = secondOrderCalculator.get();
+                System.out.println("Data received");
+
+                Collection<DirectedSparseMultigraph<ModelObject, ModelEdge>> pathCollections = GraphUtilities.generatePathsTillCoverage(firstOrderProbs, secondOrderProbs, startingRoom, COVERAGE_REQUIRED);
+                HashMap<String, Double> result = GraphUtilities.calculateNumberOfHops(pathCollections);
+
+
+                mutex.release();
+                return result;
+            }
+
+
+        };
+        tempWorker.execute();
+
+        try {
+            mutex.tryAcquire(1, 300, TimeUnit.SECONDS);
+            coverageAreaSemaphore.release();
+            return tempWorker.get();
+        } catch (InterruptedException e) {
+            e.printStackTrace();
+            return null;
+        } catch (ExecutionException e) {
+            e.printStackTrace();
+            return null;
+        }
+    }
+
 
     public static Double getCoverageOfRandomWalks(final int pathLength, final String startingRoom, Semaphore coverageAreaSemaphore) {
         final Semaphore semaphore = new Semaphore(2);
