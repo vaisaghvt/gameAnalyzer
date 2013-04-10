@@ -722,4 +722,62 @@ public class GraphUtilities {
     }
 
 
+    public static Collection<List<String>> findActualPathsOfLength(DirectedSparseMultigraph<ModelObject, ModelEdge> graph, ModelObject startingNode, int length) {
+        Collection<List<String>> listOfPaths = new ArrayList<List<String>>();
+
+        int hopsRemaining = length;
+        Collection<ModelEdge> outEdges =  graph.getOutEdges(startingNode);
+        for(ModelEdge edge:outEdges){
+
+            List<String> path = new ArrayList<String>(length);
+            path.add(startingNode.toString());
+            followTillHopCount(graph, startingNode, edge, hopsRemaining - 1, path);
+            if(path.size()== length){
+                listOfPaths.add(path);
+            }else {
+                System.out.println("path ignored due to insufficient size");
+            }
+        }
+
+        return listOfPaths;
+    }
+
+    private static void followTillHopCount(DirectedSparseMultigraph<ModelObject, ModelEdge> graph, ModelObject startingNode, ModelEdge previousEdge, int hopsRemaining, List<String> path) {
+        if(hopsRemaining==0){
+            return;
+        }else{
+            ModelObject currentLocation = graph.getOpposite(startingNode, previousEdge);
+            path.add(currentLocation.toString());
+            ModelEdge newEdge = findNextEdge(currentLocation, previousEdge, graph);
+            if(newEdge!=null){
+                followTillHopCount(graph, startingNode, newEdge, hopsRemaining-1, path);
+            }else{
+                System.out.println("No more path to follow!");
+            }
+        }
+    }
+
+    private static ModelEdge findNextEdge(ModelObject currentLocation, ModelEdge previousEdge, DirectedSparseMultigraph<ModelObject, ModelEdge> graph) {
+
+        double currentTime = previousEdge.getTime();
+
+        TreeSet<ModelEdge> setOfEdges = new TreeSet<ModelEdge>(new Comparator<ModelEdge>() {
+            @Override
+            public int compare(ModelEdge modelEdge1, ModelEdge modelEdge2) {
+                return (int) (modelEdge1.getTime() - modelEdge2.getTime());
+            }
+        });
+
+        setOfEdges.addAll(graph.getOutEdges(currentLocation));
+
+        for(ModelEdge edge: setOfEdges){
+            double nextTime = edge.getTime();
+            if(nextTime>=currentTime){
+                return edge;
+            }
+        }
+
+//        assert false;
+        return null;
+    }
 }

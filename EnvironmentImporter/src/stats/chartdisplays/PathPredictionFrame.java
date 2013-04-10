@@ -443,7 +443,7 @@ public class PathPredictionFrame extends JFrame {
 
                 System.out.println("Working..");
                 semaphore.tryAcquire(2, 300, TimeUnit.SECONDS);
-                System.out.println("Ready to get");
+                System.out.println("Ready to getValue");
                 HashMap<String, HashMap<String, Double>> firstOrderProbs = firstOrderCalculator.get();
                 HashMap<String, HashMap<String, HashMap<String, Double>>> secondOrderProbs = secondOrderCalculator.get();
                 System.out.println("Received");
@@ -519,7 +519,7 @@ public class PathPredictionFrame extends JFrame {
 
                 System.out.println("Working..");
                 semaphore.tryAcquire(2, 300, TimeUnit.SECONDS);
-                System.out.println("Ready to get");
+                System.out.println("Ready to getValue");
                 HashMap<String, HashMap<String, Double>> firstOrderProbs = firstOrderCalculator.get();
                 HashMap<String, HashMap<String, HashMap<String, Double>>> secondOrderProbs = secondOrderCalculator.get();
                 System.out.println("Received");
@@ -573,7 +573,7 @@ public class PathPredictionFrame extends JFrame {
 
         for (String room : firstOrderProbabilities.get(startRoom).keySet()) {
             currentHistories.put(room, startRoom);
-//            results.put(room, firstOrderProbabilities.get(room));
+//            results.putValue(room, firstOrderProbabilities.getValue(room));
         }
         HashMap<String, HashMap<String, Double>> results = calculateFirstHop(firstOrderProbabilities.get(startRoom), currentHistories, firstOrderProbabilities, secondOrderProbabilities);
 

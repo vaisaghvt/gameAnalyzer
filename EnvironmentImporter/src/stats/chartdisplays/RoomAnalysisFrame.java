@@ -404,9 +404,9 @@ public class RoomAnalysisFrame extends JFrame {
 
         for (String name : nameToGraphMap.keySet()) {
             DirectedSparseMultigraph<ModelObject, ModelEdge> tempGraph = nameToGraphMap.get(name);
-//            long startTimeSeconds = Math.max(startTime*60000,nameToMinCoverageTimeMap.get(name) );
+//            long startTimeSeconds = Math.max(startTime*60000,nameToMinCoverageTimeMap.getValue(name) );
 //
-//            long endTimeSeconds = Math.min(endTime*60000, nameToMaxCoverageTimeMap.get(name));
+//            long endTimeSeconds = Math.min(endTime*60000, nameToMaxCoverageTimeMap.getValue(name));
 
 
 
@@ -479,7 +479,7 @@ public class RoomAnalysisFrame extends JFrame {
 //            ArrayList<ProbabilityEdge> edges = new ArrayList<ProbabilityEdge>(graphToDraw.getEdges());
 //            int size = graphToDraw.getEdges().size();
 //            for(int j=0;j<size;j++ ){
-//                ProbabilityEdge edge = edges.get(j);
+//                ProbabilityEdge edge = edges.getValue(j);
 //                if(edge.prob<0.1) {
 //                    graphToDraw.getEdges().remove(edge);
 //                }

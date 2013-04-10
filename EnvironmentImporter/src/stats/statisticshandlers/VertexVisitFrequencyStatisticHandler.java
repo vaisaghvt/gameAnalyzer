@@ -81,7 +81,7 @@ public class VertexVisitFrequencyStatisticHandler extends StatisticsHandler<Vert
             double originalValueForRoom = randomWalkData.get(room).doubleValue();
             double scaledValue = originalValueForRoom / NRandomForFloor[floorNumber];
 //            double scaledValue = originalValueForRoom / NRandom;
-//            double normalizedValue = scaledValue / randomWalkData.get(room).doubleValue();
+//            double normalizedValue = scaledValue / randomWalkData.getValue(room).doubleValue();
             result.put(room, scaledValue);
         }
 
@@ -99,13 +99,13 @@ public class VertexVisitFrequencyStatisticHandler extends StatisticsHandler<Vert
         for (String room : randomWalkData.keySet()) {
             int floorNumber= NetworkModel.instance().getFloorForVertex(
                     NetworkModel.instance().findRoomByName(room));
-//            NRandom+= randomWalkData.get(room).intValue();
+//            NRandom+= randomWalkData.getValue(room).intValue();
             NRandomForFloor[floorNumber] += randomWalkData.get(room).intValue();
         }
         for (String room : personData.keySet()) {
             int floorNumber= NetworkModel.instance().getFloorForVertex(
                     NetworkModel.instance().findRoomByName(room));
-//        NPerson+= personData.get(room).intValue();
+//        NPerson+= personData.getValue(room).intValue();
             NPersonForFloor[floorNumber] += personData.get(room).intValue();
 
         }

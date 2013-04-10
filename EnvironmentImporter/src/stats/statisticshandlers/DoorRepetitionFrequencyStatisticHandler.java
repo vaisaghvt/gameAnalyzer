@@ -98,7 +98,7 @@ public class DoorRepetitionFrequencyStatisticHandler extends StatisticsHandler<D
                 while (iterator.hasNext()) {
                     second = iterator.next();
                     long difference = second - first;
-//                   System.out.println(roomName+","+roomDegree.get(roomName));
+//                   System.out.println(roomName+","+roomDegree.getValue(roomName));
                     if (difference / 1000 > 0) {
 //                            && difference/1000 <300){
 
