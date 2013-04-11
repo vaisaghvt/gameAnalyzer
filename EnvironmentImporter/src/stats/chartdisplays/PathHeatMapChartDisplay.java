@@ -1,5 +1,6 @@
 package stats.chartdisplays;
 
+import com.google.common.collect.HashBasedTable;
 import modelcomponents.CompleteGraph;
 import org.jfree.chart.ChartPanel;
 import org.jfree.chart.JFreeChart;
@@ -26,17 +27,17 @@ import java.util.HashMap;
  * Time: 1:13 PM
  * To change this template use File | Settings | File Templates.
  */
-public class PathHeatMapChartDisplay extends ChartDisplay<HashMap<String, HashMap<String, Double>>> {
+public class PathHeatMapChartDisplay extends ChartDisplay<HashBasedTable<String, String, Double>> {
 
 
     private HashMap<String, Integer> roomToCodeMapping;
-    private final int NUMBER_OF_DIVISIONS=6;
+
 
     @Override
-    public void display(HashMap<String, HashMap<String, Double>> data) {
+    public void display(HashBasedTable<String, String, Double> data) {
 
 
-        roomToCodeMapping = generateNewRoomToCodeMapping(data);
+        roomToCodeMapping = generateNewRoomToCodeMapping();
         final XYZDataset dataSet = createDataSet(data);
         final JFreeChart chart = createChart(dataSet);
         final ChartPanel chartPanel = new ChartPanel(chart);
@@ -48,8 +49,7 @@ public class PathHeatMapChartDisplay extends ChartDisplay<HashMap<String, HashMa
         currentFrame.setSize(new Dimension(1020, 560));
     }
 
-    private HashMap<String, Integer> generateNewRoomToCodeMapping(
-            HashMap<String, HashMap<String, Double>> data) {
+    private HashMap<String, Integer> generateNewRoomToCodeMapping() {
         int i = 0;
         //Graph<ModelObject, ModelEdge> graph = NetworkModel.instance().getCompleteGraph();
         Collection<String> rooms= CompleteGraph.instance().getFloorNeighbourSortedRooms();
@@ -62,7 +62,7 @@ public class PathHeatMapChartDisplay extends ChartDisplay<HashMap<String, HashMa
         return nameToCodeMapping;
     }
 
-    private XYZDataset createDataSet(HashMap<String, HashMap<String, Double>> data) {
+    private XYZDataset createDataSet(HashBasedTable<String, String, Double> data) {
 
         MatrixSeries series = new MatrixSeries("DataTable", roomToCodeMapping.keySet().size(), roomToCodeMapping.keySet().size());
 
@@ -73,10 +73,10 @@ public class PathHeatMapChartDisplay extends ChartDisplay<HashMap<String, HashMa
             for (String destination : roomToCodeMapping.keySet()) {
 
                 Integer destinationId = roomToCodeMapping.get(destination);
-                if (!data.containsKey(source) || !data.get(source).containsKey(destination)) {
+                if (!data.contains(source, destination)) {
                     series.update(sourceId, destinationId, -1.0);
                 } else {
-                    double value =  (data.get(source).get(destination)+1.0)/2;
+                    double value =  (data.get(source,destination)+1.0)/2;
                     if(value<0 ||value>1){
                         System.out.println(value);
                     }

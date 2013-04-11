@@ -1,5 +1,6 @@
 package stats.consoledisplays;
 
+import com.google.common.collect.HashBasedTable;
 import modelcomponents.CompleteGraph;
 
 import java.util.ArrayList;
@@ -13,12 +14,12 @@ import java.util.HashMap;
  * Time: 1:05 PM
  * To change this template use File | Settings | File Templates.
  */
-public class PathHeatMapConsoleDisplay extends ConsoleDisplay<HashMap<String, HashMap<String, Double>>> {
+public class PathHeatMapConsoleDisplay extends ConsoleDisplay<HashBasedTable<String, String, Double>> {
 
 
     @Override
-    public void display(HashMap<String, HashMap<String, Double>> data) {
-        HashMap<String, Integer> roomToCodeMapping = generateNewRoomToCodeMapping(data);
+    public void display(HashBasedTable<String, String, Double> data) {
+        HashMap<String, Integer> roomToCodeMapping = generateNewRoomToCodeMapping();
         ArrayList<String> higherInData = new ArrayList<String>();
         ArrayList<String> lowerInData = new ArrayList<String>();
         for (String source : roomToCodeMapping.keySet()) {
@@ -28,21 +29,21 @@ public class PathHeatMapConsoleDisplay extends ConsoleDisplay<HashMap<String, Ha
             for (String destination : roomToCodeMapping.keySet()) {
 
                 Integer destinationId = roomToCodeMapping.get(destination);
-                if (!data.containsKey(source) || !data.get(source).containsKey(destination)) {
+                if (!data.contains(source, destination)) {
 
                 } else {
-                    double value =  (data.get(source).get(destination)+1.0)/2;
+                    double value =  (data.get(source, destination)+1.0)/2;
                     if(value>0.6){
-                        higherInData.add(source +" to "+ destination+" : "+data.get(source).get(destination));
+                        higherInData.add(source +" to "+ destination+" : "+data.get(source, destination));
                     } else if(value<0.4){
-                        lowerInData.add(source+" to "+destination+" : "+data.get(source).get(destination));
+                        lowerInData.add(source+" to "+destination+" : "+data.get(source,destination));
                     }
                 }
             }
 
         }
 
-        System.out.println(" ********* HIgher in Data **********");
+        System.out.println(" ********* Higher in Data **********");
         for(String value : higherInData){
             System.out.println(value);
         }
@@ -56,7 +57,7 @@ public class PathHeatMapConsoleDisplay extends ConsoleDisplay<HashMap<String, Ha
 
     }
 
-    private HashMap<String, Integer> generateNewRoomToCodeMapping(HashMap<String, HashMap<String, Double>> data) {
+    private HashMap<String, Integer> generateNewRoomToCodeMapping() {
         int i = 0;
         //Graph<ModelObject, ModelEdge> graph = NetworkModel.instance().getCompleteGraph();
         Collection<String> rooms= CompleteGraph.instance().getFloorNeighbourSortedRooms();

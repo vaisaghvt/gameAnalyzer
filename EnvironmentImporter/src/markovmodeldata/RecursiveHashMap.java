@@ -2,10 +2,7 @@ package markovmodeldata;
 
 import com.google.common.collect.HashBasedTable;
 
-import java.util.ArrayDeque;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
+import java.util.*;
 
 /**
  * Created with IntelliJ IDEA.
@@ -139,7 +136,7 @@ public class RecursiveHashMap {
         }
     }
 
-    public HashBasedTable obtainHeatMap() {
+    public HashBasedTable<String, String, Double> obtainHeatMap() {
         HashBasedTable<String, String, Double> result = HashBasedTable.create();
         HashMap<String, Integer> pathsFromSource = new HashMap<String, Integer>();
         HashBasedTable<String, String, Integer> sourceDestinationPathNumberMapping =
@@ -174,5 +171,41 @@ public class RecursiveHashMap {
         }
 
         return result;
+    }
+
+    public Map<String, Double> getDestinationProbabilities(List<String> stateSequence) {
+        assert stateSequence.size() == order;
+        ArrayList<String> newStateSequence = new ArrayList<String>(stateSequence);
+        return recursiveGetDestinationProbabilities(newStateSequence);
+
+
+
+    }
+
+    private Map<String, Double> recursiveGetDestinationProbabilities(ArrayList<String> stateSequence) {
+
+        if (stateSequence.size() == 1) {
+            assert firstOrderTable != null;
+            String penultimateLocation = stateSequence.get(0);
+            if (firstOrderTable.containsRow(penultimateLocation)) {
+                return firstOrderTable.rowMap().get(penultimateLocation);
+            } else {
+                return null;
+            }
+        } else {
+            String oldest = stateSequence.remove(0);
+            if (myMap.containsKey(oldest)) {
+                return myMap.get(oldest).getDestinationProbabilities(stateSequence);
+            } else {
+                return null;
+            }
+
+        }
+    }
+
+    public Map<String, Double> getDestinationProbabilities(String startRoom) {
+        List<String> singletonList = new ArrayList<String>(1);
+        singletonList.add(startRoom);
+        return this.getDestinationProbabilities(singletonList);
     }
 }

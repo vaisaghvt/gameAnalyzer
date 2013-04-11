@@ -13,26 +13,26 @@ import java.util.HashMap;
 import java.util.List;
 
 public class MarkovDataStore {
-    private final Collection<DirectedSparseMultigraph<ModelObject, ModelEdge>> humanMovementGraphCollection;
-    HashMap<Integer, RecursiveHashMap> orderToHumanMarkovDataMapping =
+    private final Collection<DirectedSparseMultigraph<ModelObject, ModelEdge>> graphCollection;
+    HashMap<Integer, RecursiveHashMap> orderToDirectMarkovDataMapping =
             new HashMap<Integer, RecursiveHashMap>();
     HashBasedTable<Integer, Integer, RecursiveHashMap> nFromMData = HashBasedTable.create();
 
     public MarkovDataStore(Collection<DirectedSparseMultigraph<ModelObject, ModelEdge>> graphs) {
-        this.humanMovementGraphCollection = graphs;
+        this.graphCollection = graphs;
     }
 
-    public boolean containsHumanMarkovData(int order) {
-        return orderToHumanMarkovDataMapping.containsKey(order);
+    public boolean containsDirectMarkovData(int order) {
+        return orderToDirectMarkovDataMapping.containsKey(order);
     }
 
 
-    public RecursiveHashMap getHumanMarkovData(int order) {
-        if (!containsHumanMarkovData(order)) {
-            putHumanData(order, generateHumanDataForOrder(order));
+    public RecursiveHashMap getDirectMarkovData(int order) {
+        if (!containsDirectMarkovData(order)) {
+            purDirectMarkovData(order, generateDirectDataForOrder(order));
         }
 
-        return orderToHumanMarkovDataMapping.get(order);
+        return orderToDirectMarkovDataMapping.get(order);
     }
 
     public boolean containsNFromMData(int n, int m) {
@@ -51,7 +51,7 @@ public class MarkovDataStore {
     }
 
 
-    private RecursiveHashMap generateHumanDataForOrder(int order) {
+    private RecursiveHashMap generateDirectDataForOrder(int order) {
         Collection<ModelObject> vertices = CompleteGraph.instance().getVertices();
 //        HashMultimap<String, List<String>> pathsFromSource = HashMultimap.create();
         RecursiveHashMap requiredResult = new RecursiveHashMap(order);
@@ -59,7 +59,7 @@ public class MarkovDataStore {
         for(ModelObject vertex: vertices){
 //            String source = vertex.toString();
             List<List<String>> completeListOfPathsForCurrent = new ArrayList<List<String>>();
-            for(DirectedSparseMultigraph<ModelObject, ModelEdge> graph: humanMovementGraphCollection){
+            for(DirectedSparseMultigraph<ModelObject, ModelEdge> graph: graphCollection){
                 Collection<List<String>> pathsTaken = GraphUtilities.findActualPathsOfLength(graph, vertex, order);
                 completeListOfPathsForCurrent.addAll(pathsTaken);
             }
@@ -75,15 +75,15 @@ public class MarkovDataStore {
 
     }
 
-    private void putHumanData(int order, RecursiveHashMap markovData) {
-        orderToHumanMarkovDataMapping.put(order, markovData);
+    private void purDirectMarkovData(int order, RecursiveHashMap markovData) {
+        orderToDirectMarkovDataMapping.put(order, markovData);
     }
 
     private RecursiveHashMap constructNFromM(int n, int m) {
         if (n <= m) {
-            return orderToHumanMarkovDataMapping.get(n);
+            return orderToDirectMarkovDataMapping.get(n);
 //        }else if (n == m + 1) {
-//            RecursiveHashMap mThOrderMap = orderToHumanMarkovDataMapping.getValue(m);
+//            RecursiveHashMap mThOrderMap = orderToDirectMarkovDataMapping.getValue(m);
 //            RecursiveHashMap result = new RecursiveHashMap(n);
 //            for (List<String> sequence : mThOrderMap.getSequences()) {
 //                String destination = sequence.getValue(sequence.size() - 1);
@@ -111,7 +111,7 @@ public class MarkovDataStore {
 //            return result;
 
         } else {
-            RecursiveHashMap mThOrderMap = orderToHumanMarkovDataMapping.get(m);
+            RecursiveHashMap mThOrderMap = orderToDirectMarkovDataMapping.get(m);
             RecursiveHashMap nMinusOneTable = constructNFromM(n - 1, m);  // equals mthOrderMap if n= m+1;
             RecursiveHashMap result = new RecursiveHashMap(n);
             for (List<String> sequence : nMinusOneTable.getSequences()) {

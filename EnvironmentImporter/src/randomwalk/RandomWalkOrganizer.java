@@ -5,6 +5,9 @@ import edu.uci.ics.jung.graph.DirectedGraph;
 import edu.uci.ics.jung.graph.DirectedSparseMultigraph;
 import gui.NetworkModel;
 import gui.ProgressVisualizer;
+import markovmodeldata.MarkovDataOrganizer;
+import markovmodeldata.MarkovDataStore;
+import markovmodeldata.RecursiveHashMap;
 import modelcomponents.CompleteGraph;
 import modelcomponents.GraphUtilities;
 import modelcomponents.ModelEdge;
@@ -27,7 +30,6 @@ import static modelcomponents.GraphUtilities.isStable;
  */
 public class RandomWalkOrganizer {
 
-    public static final int COVERAGE_REQUIRED = 90;
 
     public static RANDOM_WALK_TYPE getRandomWalkType() {
         return (RANDOM_WALK_TYPE)
@@ -274,7 +276,7 @@ public class RandomWalkOrganizer {
     }
 
 
-    public static HashMap<String, Double> getHopsRequiredForRandomWalks(final String startingRoom, Semaphore coverageAreaSemaphore) {
+    public static HashMap<String, Double> getHopsRequiredForRandomWalks(final String startingRoom, Semaphore coverageAreaSemaphore, final int coverageRequired) {
         final Semaphore semaphore = new Semaphore(2);
         final Semaphore mutex = new Semaphore(1);
         try {
@@ -287,27 +289,33 @@ public class RandomWalkOrganizer {
             @Override
             protected HashMap<String, Double> doInBackground() throws Exception {
                 final RANDOM_WALK_TYPE type = getRandomWalkType();
-                System.out.println("here");
-                ensureGraphExists(type);
+//                ensureGraphExists(type);
 
                 semaphore.acquire(2);
 
-                SwingWorker<HashMap<String, HashMap<String, Double>>, Void> firstOrderCalculator = new SwingWorker<HashMap<String, HashMap<String, Double>>, Void>() {
+                SwingWorker<RecursiveHashMap, Void> firstOrderCalculator = new SwingWorker<RecursiveHashMap, Void>() {
                     @Override
-                    protected HashMap<String, HashMap<String, Double>> doInBackground() throws Exception {
-                        return GraphUtilities.calculateFirstOrderProbabilities(randomWalkGraphs.get(type), semaphore);
+                    protected RecursiveHashMap doInBackground() throws Exception {
+                        MarkovDataStore store = MarkovDataOrganizer.instance().getRandomWalkMarkovData(type);
+                        semaphore.release();     //TODO think about how to release this
+                        return store.getDirectMarkovData(1);
+//                                GraphUtilities.calculateFirstOrderProbabilities(randomWalkGraphs.get(type), semaphore);
                     }
 
                 };
 
-                SwingWorker<HashMap<String, HashMap<String, HashMap<String, Double>>>, Void> secondOrderCalculator = new SwingWorker<HashMap<String, HashMap<String, HashMap<String, Double>>>, Void>() {
+                SwingWorker<RecursiveHashMap, Void> secondOrderCalculator = new SwingWorker<RecursiveHashMap, Void>() {
                     @Override
-                    protected HashMap<String, HashMap<String, HashMap<String, Double>>> doInBackground() throws Exception {
-                        return GraphUtilities.calculateSecondOrderProbabilities(randomWalkGraphs.get(type), semaphore);
+                    protected RecursiveHashMap doInBackground() throws Exception {
+                        MarkovDataStore store = MarkovDataOrganizer.instance().getRandomWalkMarkovData(type);
+                        semaphore.release(); //TODO: THink about how to release this
+                        return store.getDirectMarkovData(2);
+//                        return GraphUtilities.calculateSecondOrderProbabilities(randomWalkGraphs.get(type), semaphore);
                     }
 
 
                 };
+
 
                 firstOrderCalculator.execute();
                 secondOrderCalculator.execute();
@@ -316,11 +324,11 @@ public class RandomWalkOrganizer {
                 System.out.println("Waiting for random walk");
                 semaphore.tryAcquire(2, 300, TimeUnit.SECONDS);
                 System.out.println("Random walk acquired");
-                HashMap<String, HashMap<String, Double>> firstOrderProbs = firstOrderCalculator.get();
-                HashMap<String, HashMap<String, HashMap<String, Double>>> secondOrderProbs = secondOrderCalculator.get();
+                RecursiveHashMap firstOrderProbs = firstOrderCalculator.get();
+                RecursiveHashMap secondOrderProbs = secondOrderCalculator.get();
                 System.out.println("Data received");
 
-                Collection<DirectedSparseMultigraph<ModelObject, ModelEdge>> pathCollections = GraphUtilities.generatePathsTillCoverage(firstOrderProbs, secondOrderProbs, startingRoom, COVERAGE_REQUIRED);
+                Collection<DirectedSparseMultigraph<ModelObject, ModelEdge>> pathCollections = GraphUtilities.generatePathsTillCoverage(firstOrderProbs, secondOrderProbs, startingRoom, coverageRequired);
                 HashMap<String, Double> result = GraphUtilities.calculateNumberOfHops(pathCollections);
 
 
@@ -364,21 +372,24 @@ public class RandomWalkOrganizer {
 
                 semaphore.acquire(2);
 
-                SwingWorker<HashMap<String, HashMap<String, Double>>, Void> firstOrderCalculator = new SwingWorker<HashMap<String, HashMap<String, Double>>, Void>() {
+                SwingWorker<RecursiveHashMap, Void> firstOrderCalculator = new SwingWorker<RecursiveHashMap, Void>() {
                     @Override
-                    protected HashMap<String, HashMap<String, Double>> doInBackground() throws Exception {
-
-                        return GraphUtilities.calculateFirstOrderProbabilities(randomWalkGraphs.get(type), semaphore);
+                    protected RecursiveHashMap doInBackground() throws Exception {
+                        MarkovDataStore store = MarkovDataOrganizer.instance().getRandomWalkMarkovData(type);
+                        semaphore.release();     //TODO think about how to release this
+                        return store.getDirectMarkovData(1);
+//                                GraphUtilities.calculateFirstOrderProbabilities(randomWalkGraphs.get(type), semaphore);
                     }
 
                 };
 
-                SwingWorker<HashMap<String, HashMap<String, HashMap<String, Double>>>, Void> secondOrderCalculator = new SwingWorker<HashMap<String, HashMap<String, HashMap<String, Double>>>, Void>() {
+                SwingWorker<RecursiveHashMap, Void> secondOrderCalculator = new SwingWorker<RecursiveHashMap, Void>() {
                     @Override
-                    protected HashMap<String, HashMap<String, HashMap<String, Double>>> doInBackground() throws Exception {
-
-
-                        return GraphUtilities.calculateSecondOrderProbabilities(randomWalkGraphs.get(type), semaphore);
+                    protected RecursiveHashMap doInBackground() throws Exception {
+                        MarkovDataStore store = MarkovDataOrganizer.instance().getRandomWalkMarkovData(type);
+                        semaphore.release(); //TODO: THink about how to release this
+                        return store.getDirectMarkovData(2);
+//                        return GraphUtilities.calculateSecondOrderProbabilities(randomWalkGraphs.get(type), semaphore);
                     }
 
 
@@ -391,8 +402,8 @@ public class RandomWalkOrganizer {
                 System.out.println("Waiting for random walk");
                 semaphore.tryAcquire(2, 300, TimeUnit.SECONDS);
                 System.out.println("Random walk acquired");
-                HashMap<String, HashMap<String, Double>> firstOrderProbs = firstOrderCalculator.get();
-                HashMap<String, HashMap<String, HashMap<String, Double>>> secondOrderProbs = secondOrderCalculator.get();
+                RecursiveHashMap firstOrderProbs = firstOrderCalculator.get();
+                RecursiveHashMap secondOrderProbs = secondOrderCalculator.get();
                 System.out.println("Data received");
 
                 Collection<DirectedSparseMultigraph<ModelObject, ModelEdge>> pathCollections = GraphUtilities.generatePaths(firstOrderProbs, secondOrderProbs, startingRoom, pathLength);

@@ -7,6 +7,9 @@ import com.google.common.collect.Ordering;
 import edu.uci.ics.jung.graph.DirectedSparseMultigraph;
 import gui.NetworkModel;
 import gui.Phase;
+import markovmodeldata.MarkovDataOrganizer;
+import markovmodeldata.MarkovDataStore;
+import markovmodeldata.RecursiveHashMap;
 import modelcomponents.CompleteGraph;
 import modelcomponents.GraphUtilities;
 import modelcomponents.ModelEdge;
@@ -20,10 +23,7 @@ import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.text.DecimalFormat;
 import java.text.NumberFormat;
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.HashMap;
-import java.util.HashSet;
+import java.util.*;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.Semaphore;
 import java.util.concurrent.TimeUnit;
@@ -165,6 +165,8 @@ public class PathPredictionFrame extends JFrame {
 
         final PathDataType type = typeComboBox.getItemAt(typeComboBox.getSelectedIndex());
         final int pathLength = pathLengthComboBox.getItemAt(pathLengthComboBox.getSelectedIndex()).intValue();
+//        final int coverageRequired = coverageComboBox.getItemAt(pathLengthComboBox.getSelectedIndex()).intValue();
+        final int coverageRequired = 80;
         final String room = roomButtonComboBox.getItemAt(roomButtonComboBox.getSelectedIndex());
 
         SwingUtilities.invokeLater(new Runnable() {
@@ -181,18 +183,18 @@ public class PathPredictionFrame extends JFrame {
                 System.out.println("Generating name to graph mapping");
                 createCurrentTitle(room, pathLength);
 
-                final HashMap<String, DirectedSparseMultigraph<ModelObject, ModelEdge>> nameToGraphMap = generateRelevantGraphToNameMap(dataNameList, selectedPhases);
+                final Collection<DirectedSparseMultigraph<ModelObject, ModelEdge>> graphCollection = generateRelevantGraphs(dataNameList, selectedPhases);
                 SwingWorker<Void, Void> tempWorker = null;
 
                 switch (type) {
 
                     case DESTINATION_PROBABILITIES:
                         tempWorker = new SwingWorker<Void, Void>() {
-                            public HashMap<String, Double> result;
+                            public Map<String, Double> result;
 
                             @Override
                             protected Void doInBackground() throws Exception {
-                                result = predictDestinations(nameToGraphMap, pathLength, room);
+                                result = predictDestinations(dataNameList, selectedPhases,graphCollection, pathLength, room);
                                 return null;
                             }
 
@@ -230,11 +232,11 @@ public class PathPredictionFrame extends JFrame {
                         break;
                     case COVERAGE_COMPARISON:
                         tempWorker = new SwingWorker<Void, Void>() {
-                            public HashMap<String, Double> result;
+                            public Map<String, Double> result;
 
                             @Override
                             protected Void doInBackground() throws Exception {
-                                result = compareCoverage(nameToGraphMap, pathLength, room);
+                                result = compareCoverage(dataNameList, selectedPhases, graphCollection, pathLength, room);
                                 return null;
                             }
 
@@ -260,11 +262,11 @@ public class PathPredictionFrame extends JFrame {
                         break;
                     case HOP_COMPARISON:
                         tempWorker = new SwingWorker<Void, Void>() {
-                            public HashMap<String, HashMap<String, Double>> result;
+                            public Map<String, HashMap<String, Double>> result;
 
                             @Override
                             protected Void doInBackground() throws Exception {
-                                result = compareHopRequirement(nameToGraphMap, pathLength, room);
+                                result = compareHopRequirement(dataNameList, selectedPhases,graphCollection, coverageRequired, room);
                                 return null;
                             }
 
@@ -278,7 +280,7 @@ public class PathPredictionFrame extends JFrame {
 
                                         resultArea.setText(" Hop requirement comparison \n");
                                         resultArea.append("Coverage Of RandomWalk = " + doubleFormat.format(result.get("random").get("mean")) + "\u00B1" + result.get("random").get("sd") + "\n");
-                                        resultArea.append("Coverage Of Human = " + doubleFormat.format(result.get("data").get("mean"))+ "\u00B1"+result.get("data").get("sd")+"\n");
+                                        resultArea.append("Coverage Of Human = " + doubleFormat.format(result.get("data").get("mean")) + "\u00B1" + result.get("data").get("sd") + "\n");
 
                                         validate();
                                         setCursor(Cursor.getPredefinedCursor(Cursor.DEFAULT_CURSOR));
@@ -302,7 +304,9 @@ public class PathPredictionFrame extends JFrame {
 
     }
 
-    private HashMap<String, HashMap<String, Double>> compareHopRequirement(final HashMap<String, DirectedSparseMultigraph<ModelObject, ModelEdge>> nameToGraphMap,final int pathLength, final String startingRoom) {
+    private HashMap<String, HashMap<String, Double>> compareHopRequirement(final Collection<String> nameCollection, final HashSet<Phase> phasesSelected,
+                                                                           final Collection<DirectedSparseMultigraph<ModelObject, ModelEdge>> graphCollection,
+                                                                           final int coverageRequired, final String startingRoom) {
         HashMap<String, HashMap<String, Double>> result = new HashMap<String, HashMap<String, Double>>();
 
         final Semaphore coverageAreaSemaphore = new Semaphore(2);
@@ -312,33 +316,31 @@ public class PathPredictionFrame extends JFrame {
 
             e.printStackTrace();
         }
-        SwingWorker<HashMap<String, Double>, Void> randomWalkCoverageCalculator = new SwingWorker<HashMap<String, Double>, Void>() {
+        SwingWorker<HashMap<String, Double>, Void> randomWalkHopRequirementCalculator = new SwingWorker<HashMap<String, Double>, Void>() {
             @Override
             protected HashMap<String, Double> doInBackground() throws Exception {
 
-                return RandomWalkOrganizer.getHopsRequiredForRandomWalks(startingRoom, coverageAreaSemaphore);
+                return RandomWalkOrganizer.getHopsRequiredForRandomWalks(startingRoom, coverageAreaSemaphore, coverageRequired);
             }
         };
-        SwingWorker<HashMap<String, Double>, Void> dataBasedCoverageGenerator = new SwingWorker<HashMap<String, Double>, Void>() {
+        SwingWorker<HashMap<String, Double>, Void> humanHopRequirementCalculator = new SwingWorker<HashMap<String, Double>, Void>() {
             @Override
             protected HashMap<String, Double> doInBackground() throws Exception {
-                Collection<DirectedSparseMultigraph<ModelObject, ModelEdge>> graphCollection = new HashSet<DirectedSparseMultigraph<ModelObject, ModelEdge>>();
-                for (String name : nameToGraphMap.keySet()) {
-                    graphCollection.add(nameToGraphMap.get(name));
-                }
-                return getHopsRequiredForHumans(graphCollection, startingRoom, coverageAreaSemaphore);
+
+                //TODO: pass the namelist and phaselist
+                return getHopsRequiredForHumans(nameCollection, phasesSelected, graphCollection, startingRoom, coverageAreaSemaphore, coverageRequired);
 
             }
         };
 
-        dataBasedCoverageGenerator.execute();
-        randomWalkCoverageCalculator.execute();
+        humanHopRequirementCalculator.execute();
+        randomWalkHopRequirementCalculator.execute();
 
         try {
             coverageAreaSemaphore.tryAcquire(2, 300, TimeUnit.SECONDS);
-            result.put("random", randomWalkCoverageCalculator.get());
+            result.put("random", randomWalkHopRequirementCalculator.get());
 
-            result.put("data", dataBasedCoverageGenerator.get());
+            result.put("data", humanHopRequirementCalculator.get());
         } catch (InterruptedException e) {
             e.printStackTrace();
 
@@ -350,9 +352,87 @@ public class PathPredictionFrame extends JFrame {
         return result;
     }
 
+    private HashMap<String, Double> getHopsRequiredForHumans(final Collection<String> nameCollection, final Collection<Phase> phasesSelected,
+                                                             final Collection<DirectedSparseMultigraph<ModelObject, ModelEdge>> graphCollection,
+                                                             final String startingRoom, Semaphore coverageAreaSemaphore, final int coverageRequired) {
+        final Semaphore semaphore = new Semaphore(2);
+        final Semaphore mutex = new Semaphore(1);
+        try {
+            mutex.acquire();
+            semaphore.acquire(2);
+        } catch (InterruptedException e) {
+            e.printStackTrace();
+        }
+
+        SwingWorker<HashMap<String, Double>, Void> tempWorker = new SwingWorker<HashMap<String, Double>, Void>() {
+            @Override
+            protected HashMap<String, Double> doInBackground() throws Exception {
+
+
+                SwingWorker<RecursiveHashMap, Void> firstOrderCalculator = new SwingWorker<RecursiveHashMap, Void>() {
+                    @Override
+                    protected RecursiveHashMap doInBackground() throws Exception {
+                        MarkovDataStore store = MarkovDataOrganizer.instance().getMarkovDataStore(nameCollection, phasesSelected, graphCollection);
+                        semaphore.release();     //TODO think about how to release this
+                        return store.getDirectMarkovData(1);
+//                                GraphUtilities.calculateFirstOrderProbabilities(randomWalkGraphs.get(type), semaphore);
+                    }
+
+                };
+
+                SwingWorker<RecursiveHashMap, Void> secondOrderCalculator = new SwingWorker<RecursiveHashMap, Void>() {
+                    @Override
+                    protected RecursiveHashMap doInBackground() throws Exception {
+                        MarkovDataStore store = MarkovDataOrganizer.instance().getMarkovDataStore(nameCollection, phasesSelected, graphCollection);
+                        semaphore.release();     //TODO think about how to release this
+                        return store.getDirectMarkovData(2);
+//                        return GraphUtilities.calculateSecondOrderProbabilities(randomWalkGraphs.get(type), semaphore);
+                    }
+
+
+                };
+
+                firstOrderCalculator.execute();
+                secondOrderCalculator.execute();
+
+
+                System.out.println("Working..");
+                semaphore.tryAcquire(2,300,TimeUnit.SECONDS);
+                System.out.println("Ready to getValue");
+                RecursiveHashMap firstOrderProbs = firstOrderCalculator.get();
+                RecursiveHashMap secondOrderProbs = secondOrderCalculator.get();
+                System.out.println("Received");
+
+                Collection<DirectedSparseMultigraph<ModelObject, ModelEdge>> pathCollections = GraphUtilities.generatePathsTillCoverage(
+                        firstOrderProbs, secondOrderProbs, startingRoom, coverageRequired);
+                HashMap<String, Double> result = GraphUtilities.calculateNumberOfHops(pathCollections);
+
+                mutex.release();
+
+                return result;
+            }
+        };
+        tempWorker.execute();
+
+        try{
+            mutex.tryAcquire(1, 300, TimeUnit.SECONDS);
+            coverageAreaSemaphore.release();
+            return tempWorker.get();
+        } catch (InterruptedException e){
+            e.printStackTrace();
+            return null;
+        } catch (ExecutionException e){
+            e.printStackTrace();
+            return null;
+        }
+
+    }
+
+
+
 
     private HashMap<String, Double> compareCoverage(
-            final HashMap<String, DirectedSparseMultigraph<ModelObject, ModelEdge>> nameToGraphMap,
+            final Collection<String> dataNameList, final HashSet<Phase> selectedPhases, final Collection<DirectedSparseMultigraph<ModelObject, ModelEdge>> graphCollection,
             final int pathLength, final String startingRoom) {
         HashMap<String, Double> result = new HashMap<String, Double>();
 
@@ -373,11 +453,8 @@ public class PathPredictionFrame extends JFrame {
         SwingWorker<Double, Void> dataBasedCoverageGenerator = new SwingWorker<Double, Void>() {
             @Override
             protected Double doInBackground() throws Exception {
-                Collection<DirectedSparseMultigraph<ModelObject, ModelEdge>> graphCollection = new HashSet<DirectedSparseMultigraph<ModelObject, ModelEdge>>();
-                for (String name : nameToGraphMap.keySet()) {
-                    graphCollection.add(nameToGraphMap.get(name));
-                }
-                return getCoverageOfData(graphCollection, pathLength, startingRoom, coverageAreaSemaphore) * 100;
+
+                return getCoverageOfData(dataNameList, selectedPhases, graphCollection, pathLength, startingRoom, coverageAreaSemaphore) * 100;
 
             }
         };
@@ -388,97 +465,21 @@ public class PathPredictionFrame extends JFrame {
         try {
             coverageAreaSemaphore.tryAcquire(2, 300, TimeUnit.SECONDS);
             result.put("random", randomWalkCoverageCalculator.get());
-
             result.put("data", dataBasedCoverageGenerator.get());
         } catch (InterruptedException e) {
-            e.printStackTrace();  //To change body of catch statement use File | Settings | File Templates.
+            e.printStackTrace();
 
         } catch (ExecutionException e) {
-            e.printStackTrace();  //To change body of catch statement use File | Settings | File Templates.
+            e.printStackTrace();
         }
 
 
         return result;
     }
 
-    private HashMap<String, Double> getHopsRequiredForHumans(final Collection<DirectedSparseMultigraph<ModelObject, ModelEdge>> graphCollection,
-                                                             final String startingRoom, Semaphore coverageAreaSemaphore) {
-        final Semaphore semaphore = new Semaphore(2);
-        final Semaphore mutex = new Semaphore(1);
-        try {
-            mutex.acquire();
-            semaphore.acquire(2);
-        } catch (InterruptedException e) {
-            e.printStackTrace();
-        }
-
-        SwingWorker<HashMap<String, Double>, Void> tempWorker = new SwingWorker<HashMap<String, Double>, Void>() {
-            @Override
-            protected HashMap<String, Double> doInBackground() throws Exception {
-
-
-                SwingWorker<HashMap<String, HashMap<String, Double>>, Void> firstOrderCalculator = new SwingWorker<HashMap<String, HashMap<String, Double>>, Void>() {
-                    @Override
-                    protected HashMap<String, HashMap<String, Double>> doInBackground() throws Exception {
-
-                        return GraphUtilities.calculateFirstOrderProbabilities(graphCollection, semaphore);
-                    }
-
-
-                };
-
-
-                SwingWorker<HashMap<String, HashMap<String, HashMap<String, Double>>>, Void> secondOrderCalculator = new SwingWorker<HashMap<String, HashMap<String, HashMap<String, Double>>>, Void>() {
-                    @Override
-                    protected HashMap<String, HashMap<String, HashMap<String, Double>>> doInBackground() throws Exception {
-
-                        return GraphUtilities.calculateSecondOrderProbabilities(graphCollection, semaphore);
-                    }
-
-
-                };
-
-                firstOrderCalculator.execute();
-                secondOrderCalculator.execute();
-
-
-                System.out.println("Working..");
-                semaphore.tryAcquire(2, 300, TimeUnit.SECONDS);
-                System.out.println("Ready to getValue");
-                HashMap<String, HashMap<String, Double>> firstOrderProbs = firstOrderCalculator.get();
-                HashMap<String, HashMap<String, HashMap<String, Double>>> secondOrderProbs = secondOrderCalculator.get();
-                System.out.println("Received");
-
-                Collection<DirectedSparseMultigraph<ModelObject, ModelEdge>> pathCollections = GraphUtilities.generatePathsTillCoverage(firstOrderProbs, secondOrderProbs, startingRoom, RandomWalkOrganizer.COVERAGE_REQUIRED);
-                HashMap<String, Double> result = GraphUtilities.calculateNumberOfHops(pathCollections);
-
-                mutex.release();
-
-                return result;
-            }
-
-
-        };
-        tempWorker.execute();
-
-        try {
-            mutex.tryAcquire(1, 300, TimeUnit.SECONDS);
-            coverageAreaSemaphore.release();
-            return tempWorker.get();
-        } catch (InterruptedException e) {
-            e.printStackTrace();
-            return null;
-        } catch (ExecutionException e) {
-            e.printStackTrace();
-            return null;
-        }
-
-    }
-
-
-    private Double getCoverageOfData(
-            final Collection<DirectedSparseMultigraph<ModelObject, ModelEdge>> graphCollection,
-            final int pathLength, final String startingRoom, Semaphore coverageAreaSemaphore) {
+     private Double getCoverageOfData(
+             final Collection<String> nameCollection, final HashSet<Phase> phasesSelected, final Collection<DirectedSparseMultigraph<ModelObject, ModelEdge>> graphCollection,
+             final int pathLength, final String startingRoom, Semaphore coverageAreaSemaphore) {
         final Semaphore semaphore = new Semaphore(2);
         final Semaphore mutex = new Semaphore(1);
         try {
@@ -493,22 +494,24 @@ public class PathPredictionFrame extends JFrame {
             protected Double doInBackground() throws Exception {
 
 
-                SwingWorker<HashMap<String, HashMap<String, Double>>, Void> firstOrderCalculator = new SwingWorker<HashMap<String, HashMap<String, Double>>, Void>() {
+                SwingWorker<RecursiveHashMap, Void> firstOrderCalculator = new SwingWorker<RecursiveHashMap, Void>() {
                     @Override
-                    protected HashMap<String, HashMap<String, Double>> doInBackground() throws Exception {
-
-                        return GraphUtilities.calculateFirstOrderProbabilities(graphCollection, semaphore);
+                    protected RecursiveHashMap doInBackground() throws Exception {
+                        MarkovDataStore store = MarkovDataOrganizer.instance().getMarkovDataStore(nameCollection, phasesSelected, graphCollection);
+                        semaphore.release();     //TODO think about how to release this
+                        return store.getDirectMarkovData(1);
+//                                GraphUtilities.calculateFirstOrderProbabilities(randomWalkGraphs.get(type), semaphore);
                     }
-
 
                 };
 
-
-                SwingWorker<HashMap<String, HashMap<String, HashMap<String, Double>>>, Void> secondOrderCalculator = new SwingWorker<HashMap<String, HashMap<String, HashMap<String, Double>>>, Void>() {
+                SwingWorker<RecursiveHashMap, Void> secondOrderCalculator = new SwingWorker<RecursiveHashMap, Void>() {
                     @Override
-                    protected HashMap<String, HashMap<String, HashMap<String, Double>>> doInBackground() throws Exception {
-
-                        return GraphUtilities.calculateSecondOrderProbabilities(graphCollection, semaphore);
+                    protected RecursiveHashMap doInBackground() throws Exception {
+                        MarkovDataStore store = MarkovDataOrganizer.instance().getMarkovDataStore(nameCollection, phasesSelected, graphCollection);
+                        semaphore.release();     //TODO think about how to release this
+                        return store.getDirectMarkovData(2);
+//                        return GraphUtilities.calculateSecondOrderProbabilities(randomWalkGraphs.get(type), semaphore);
                     }
 
 
@@ -519,10 +522,10 @@ public class PathPredictionFrame extends JFrame {
 
 
                 System.out.println("Working..");
-                semaphore.tryAcquire(2, 300, TimeUnit.SECONDS);
+                semaphore.tryAcquire(2,300,TimeUnit.SECONDS);
                 System.out.println("Ready to getValue");
-                HashMap<String, HashMap<String, Double>> firstOrderProbs = firstOrderCalculator.get();
-                HashMap<String, HashMap<String, HashMap<String, Double>>> secondOrderProbs = secondOrderCalculator.get();
+                RecursiveHashMap firstOrderProbs = firstOrderCalculator.get();
+                RecursiveHashMap secondOrderProbs = secondOrderCalculator.get();
                 System.out.println("Received");
 
                 Collection<DirectedSparseMultigraph<ModelObject, ModelEdge>> pathCollections = GraphUtilities.generatePaths(firstOrderProbs, secondOrderProbs, startingRoom, pathLength);
@@ -552,56 +555,52 @@ public class PathPredictionFrame extends JFrame {
 
     }
 
-    private HashMap<String, Double> predictDestinations(HashMap<String, DirectedSparseMultigraph<ModelObject, ModelEdge>> nameToGraphMap, int pathLength, String startRoom) {
+    private Map<String, Double> predictDestinations(Collection<String> names, Collection<Phase> phases,
+                                                        Collection<DirectedSparseMultigraph<ModelObject, ModelEdge>> graphs,
+                                                        int pathLength, String startRoom) {
 
 
-        HashMap<String, HashMap<String, Double>> firstOrderProbabilities = calculateFirstOrderProb(nameToGraphMap);
-
-
+        MarkovDataStore markovData = MarkovDataOrganizer.instance().getMarkovDataStore(names, phases, graphs);
+        RecursiveHashMap firstOrderProbabilities = markovData.getDirectMarkovData(1);
         if (pathLength == 1) {
-
-
-            return firstOrderProbabilities.get(startRoom);
+            return firstOrderProbabilities.getDestinationProbabilities(startRoom);
         }
 
 
-        HashMap<String, HashMap<String, HashMap<String, Double>>> secondOrderProbabilities =
-                calculateSecondOrderProb(nameToGraphMap);
+        RecursiveHashMap secondOrderProbabilities =
+                markovData.getDirectMarkovData(2);
 
 
         HashMultimap<String, String> currentHistories = HashMultimap.create();
 
+        System.out.println("Currently not implemented");
+        //TODO : Fix this if i really want to calculate.
 
-        for (String room : firstOrderProbabilities.get(startRoom).keySet()) {
-            currentHistories.put(room, startRoom);
-//            results.putValue(room, firstOrderProbabilities.getValue(room));
-        }
-        HashMap<String, HashMap<String, Double>> results = calculateFirstHop(firstOrderProbabilities.get(startRoom), currentHistories, firstOrderProbabilities, secondOrderProbabilities);
+//        for (String room : firstOrderProbabilities.get(startRoom).keySet()) {
+//            currentHistories.put(room, startRoom);
+////            results.putValue(room, firstOrderProbabilities.getValue(room));
+//        }
 
 
-        for (int hops = 2; hops < pathLength; hops++) {
-            addNextHop(results, currentHistories, firstOrderProbabilities, secondOrderProbabilities);
-        }
+//        HashMap<String, HashMap<String, Double>> results = calculateFirstHop(firstOrderProbabilities.get(startRoom), currentHistories, firstOrderProbabilities, secondOrderProbabilities);
+//
+//
+//        for (int hops = 2; hops < pathLength; hops++) {
+//            addNextHop(results, currentHistories, firstOrderProbabilities, secondOrderProbabilities);
+//        }
+//
+//        HashMap<String, Double> finalResult = new HashMap<String, Double>();
+//        for (String finalLocation : results.keySet()) {
+//            double value = 0.0;
+//            for (String penultimateLocation : results.get(finalLocation).keySet()) {
+//                value += results.get(finalLocation).get(penultimateLocation);
+//            }
+//            finalResult.put(finalLocation, value);
+//        }
+//
+//        return finalResult;
+        return null;
 
-        HashMap<String, Double> finalResult = new HashMap<String, Double>();
-        for (String finalLocation : results.keySet()) {
-            double value = 0.0;
-            for (String penultimateLocation : results.get(finalLocation).keySet()) {
-                value += results.get(finalLocation).get(penultimateLocation);
-            }
-            finalResult.put(finalLocation, value);
-        }
-
-        return finalResult;
-
-    }
-
-    private HashMap<String, HashMap<String, Double>> calculateFirstOrderProb(HashMap<String, DirectedSparseMultigraph<ModelObject, ModelEdge>> nameToGraphMap) {
-        Collection<DirectedSparseMultigraph<ModelObject, ModelEdge>> graphCollection = new HashSet<DirectedSparseMultigraph<ModelObject, ModelEdge>>();
-        for (String name : nameToGraphMap.keySet()) {
-            graphCollection.add(nameToGraphMap.get(name));
-        }
-        return GraphUtilities.calculateFirstOrderProbabilities(graphCollection, new Semaphore(1));
     }
 
     private void addNextHop(HashMap<String, HashMap<String, Double>> results,
@@ -667,14 +666,6 @@ public class PathPredictionFrame extends JFrame {
 
     }
 
-    private HashMap<String, HashMap<String, HashMap<String, Double>>> calculateSecondOrderProb(
-            HashMap<String, DirectedSparseMultigraph<ModelObject, ModelEdge>> nameToGraphMap) {
-        Collection<DirectedSparseMultigraph<ModelObject, ModelEdge>> graphCollection = new HashSet<DirectedSparseMultigraph<ModelObject, ModelEdge>>();
-        for (String name : nameToGraphMap.keySet()) {
-            graphCollection.add(nameToGraphMap.get(name));
-        }
-        return GraphUtilities.calculateSecondOrderProbabilities(graphCollection, new Semaphore(1));
-    }
 
     private HashMap<String, HashMap<String, Double>> calculateFirstHop(HashMap<String, Double> results,
                                                                        HashMultimap<String, String> currentHistories,
@@ -738,20 +729,20 @@ public class PathPredictionFrame extends JFrame {
     }
 
 
-    private HashMap<String, DirectedSparseMultigraph<ModelObject, ModelEdge>> generateRelevantGraphToNameMap(
+    private Collection<DirectedSparseMultigraph<ModelObject, ModelEdge>> generateRelevantGraphs(
             final Collection<String> dataNames, final HashSet<Phase> selectedPhases) throws ExecutionException, InterruptedException {
 
         setEnabled(false);
-        SwingWorker<HashMap<String, DirectedSparseMultigraph<ModelObject, ModelEdge>>, Void> tempWorker = new SwingWorker<HashMap<String, DirectedSparseMultigraph<ModelObject, ModelEdge>>, Void>() {
+        SwingWorker<Collection<DirectedSparseMultigraph<ModelObject, ModelEdge>>, Void> tempWorker = new SwingWorker<Collection<DirectedSparseMultigraph<ModelObject, ModelEdge>>, Void>() {
             private JProgressBar progressBar;
             private JTextArea taskOutput;
             private JFrame progressFrame;
 
             @Override
-            protected HashMap<String, DirectedSparseMultigraph<ModelObject, ModelEdge>> doInBackground() throws Exception {
+            protected Collection<DirectedSparseMultigraph<ModelObject, ModelEdge>> doInBackground() throws Exception {
                 createProgressBar();
 
-                HashMap<String, DirectedSparseMultigraph<ModelObject, ModelEdge>> result = new HashMap<String, DirectedSparseMultigraph<ModelObject, ModelEdge>>();
+                Collection<DirectedSparseMultigraph<ModelObject, ModelEdge>> result = new HashSet<DirectedSparseMultigraph<ModelObject, ModelEdge>>();
                 final int size = dataNames.size();
                 int i = 1;
                 for (String dataName : dataNames) {
@@ -762,9 +753,9 @@ public class PathPredictionFrame extends JFrame {
                             taskOutput.append("Processing " + tempDataName + "...\n");
                         }
                     });
-                    synchronized (NetworkModel.instance()) {
-                        result.put(dataName, NetworkModel.instance().getDirectedGraphOfPlayer(dataName, selectedPhases));
-                    }
+
+                    result.add(NetworkModel.instance().getDirectedGraphOfPlayer(dataName, selectedPhases));
+
                     final int currentProgress = i;
                     SwingUtilities.invokeLater(new Runnable() {
                         @Override
