@@ -7,7 +7,6 @@ import edu.uci.ics.jung.algorithms.layout.Layout;
 import edu.uci.ics.jung.algorithms.layout.StaticLayout;
 import edu.uci.ics.jung.graph.DirectedSparseMultigraph;
 import edu.uci.ics.jung.graph.Graph;
-import edu.uci.ics.jung.graph.UndirectedSparseGraph;
 import edu.uci.ics.jung.graph.util.Pair;
 import edu.uci.ics.jung.visualization.Layer;
 import edu.uci.ics.jung.visualization.VisualizationViewer;
@@ -46,14 +45,11 @@ import static stats.StatisticChoice.VERTEX_VISIT_FREQUENCY;
 public class NetworkModel extends MainPanel implements ActionListener {
 
 
-    Graph<ModelObject, ModelEdge> completeGraph;
     Graph<ModelObject, ModelEdge> currentGraph;
-    HashMap<Integer, ModelArea> idAreaMapping;
+
     private Document document;
     private static NetworkModel instance;
-    private HashMap<ModelArea, Integer> areaFloorMapping;
     private String currentData;
-    HashMap<Integer, ModelGroup> areaIdGroupMapping;
     private HashSet<Phase> selectedPhases;
     private JMenuItem mi3Shortest = new JMenuItem("3Shortest");
     private JMenuItem mi3Norm = new JMenuItem("3Norm");
@@ -73,7 +69,7 @@ public class NetworkModel extends MainPanel implements ActionListener {
     private HashMap<String, HashMap<Integer, List<HashMap<String, Number>>>> cachedMovement =
             new HashMap<String, HashMap<Integer, List<HashMap<String, Number>>>>();
 
-    private Collection<String> sortedRoomNames;
+
     private HashMap<String, HashMap<Integer, DirectedSparseMultigraph<ModelObject, ModelEdge>>> cachedGraph =
             new HashMap<String, HashMap<Integer, DirectedSparseMultigraph<ModelObject, ModelEdge>>>();
     private final Semaphore movementCacheSemaphore = new Semaphore(1);
@@ -116,87 +112,20 @@ public class NetworkModel extends MainPanel implements ActionListener {
         this.document = current;
         this.cachedGraph.clear();
         this.cachedMovement.clear();
-        ModelFile file = document.getModelFile();
-        completeGraph = new UndirectedSparseGraph<ModelObject, ModelEdge>();
-        idAreaMapping = new HashMap<Integer, ModelArea>();
-        areaFloorMapping = new HashMap<ModelArea, Integer>();
-        areaIdGroupMapping = new HashMap<Integer, ModelGroup>();
-
-        for (ModelFloor floor : file.getFloors()) {
-            for (ModelGroup group : floor.getGroups()) {
-                for (Integer areaId : group.getAreaIds()) {
-                    this.areaIdGroupMapping.put(areaId, group);
-                }
-            }
-
-            for (ModelArea area : floor.getRooms()) {
-                idAreaMapping.put(area.getId(), area);
-                areaFloorMapping.put(area, floor.getId());
-
-                this.addNewVertex(completeGraph, area);
-            }
-            for (ModelArea area : floor.getStaircases()) {
-                idAreaMapping.put(area.getId(), area);
-                areaFloorMapping.put(area, floor.getId());
-
-                this.addNewVertex(completeGraph, area);
-
-            }
-        }
-        for (ModelFloor floor : file.getFloors()) {
-            for (ModelLink link : floor.getLinks()) {
-                this.addNewEdge(completeGraph,
-                        idAreaMapping.get(link.getConnectingAreas().get(0)),
-                        idAreaMapping.get(link.getConnectingAreas().get(1)));
-            }
-        }
-        for (ModelStaircaseGroup group : file.getStaircaseGroups()) {
-            ArrayList<Integer> staircases = new ArrayList<Integer>();
-            staircases.addAll(group.getStaircaseIds());
-
-            int areaId0 = staircases.get(0);
-            int areaId1 = staircases.get(1);
-            this.addNewEdge(completeGraph,
-                    idAreaMapping.get(areaId0),
-                    idAreaMapping.get(areaId1)
-            );
-
-        }
+        CompleteGraph.instance().initialize(document.getModelFile());
         currentData = "default";
-        currentGraph = completeGraph;
-
-
-        ModelObject startingNode = this.findRoomByName("Start");
-        if (startingNode == null) {
-            startingNode = this.findRoomByName("StartingRoom");
-        }
-
-        RandomWalkOrganizer.setRandomWalkParameters(completeGraph, startingNode);
-
-        sortedRoomNames = new TreeSet<String>();
-        for (ModelObject area : this.completeGraph.getVertices()) {
-            sortedRoomNames.add(area.toString());
-        }
-
+        currentGraph = CompleteGraph.instance().getGraph();
 
         redrawPanel();
     }
 
-    private void addNewVertex(Graph<ModelObject, ModelEdge> graph, ModelArea area) {
-        if (areaIdGroupMapping.containsKey(area.getId())) {
-            ModelGroup group = areaIdGroupMapping.get(area.getId());
-            if (!graph.containsVertex(group))
-                graph.addVertex(areaIdGroupMapping.get(area.getId()));
-        } else {
-            graph.addVertex(area);
-        }
-    }
+
 
     public void setDisplay(String dataName, boolean clearHighlightedVertices) {
         if (!clearHighlightedVertices)
             highlightedVertices.clear();
         if (dataName.equalsIgnoreCase("default")) {
-            currentGraph = completeGraph;
+            currentGraph = CompleteGraph.instance().getGraph();
 
             selectedPhases.clear();
             currentData = dataName;
@@ -237,7 +166,7 @@ public class NetworkModel extends MainPanel implements ActionListener {
                             getRootPane().setCursor(Cursor.getPredefinedCursor(Cursor.DEFAULT_CURSOR));
                         }
                     });
-                    ;
+
                 }
 
 
@@ -278,128 +207,8 @@ public class NetworkModel extends MainPanel implements ActionListener {
     }
 
 
-    public ModelArea getRoomForId(int id) {
-        return this.idAreaMapping.get(id);
-    }
-
-    private void addNewEdge(Graph<ModelObject, ModelEdge> result, ModelArea area0, ModelArea area1) {
-        int areaId0 = area0.getId();
-        int areaId1 = area1.getId();
-        ModelGroup group0 = null, group1 = null;
-
-        group0 = this.areaIdGroupMapping.get(areaId0);
 
 
-        group1 = this.areaIdGroupMapping.get(areaId1);
-
-        if (group0 == null && group1 == null) {
-            result.addEdge(new ModelEdge(), area0, area1);
-        } else if (group1 == null) {
-            result.addEdge(new ModelEdge(), group0, area1);
-        } else if (group0 == null) {
-            result.addEdge(new ModelEdge(), area0, group1);
-        } else {
-            if (!group0.equals(group1)) {
-                result.addEdge(new ModelEdge(), group0, group1);
-            }
-        }
-    }
-
-    private ModelObject findVertexOfLocation(int x, int y, int floor, ModelObject prevVertex) {
-
-
-        if (prevVertex == null) {
-            return findFromScratch(x, y, floor); // search in all locations on that floor
-
-        }
-        if (inPrevArea(x, y, floor, prevVertex)) {
-            return prevVertex;  // if in previous area return that itself
-        } else {
-            ModelObject newVertex = findInNeighbouringVertices(x, y, floor, prevVertex);
-
-            return newVertex; // returns null if nothing found (i.e. between areas)
-        }
-
-
-    }
-
-    private ModelObject findInNeighbouringVertices(int x, int y, int floor, ModelObject prevVertex) {
-
-        for (ModelObject room : completeGraph.getNeighbors(prevVertex)) {
-            if (room instanceof ModelGroup) {
-                ModelGroup group = (ModelGroup) room;
-                for (Integer roomId : group.getAreaIds()) {
-                    ModelArea area = this.idAreaMapping.get(roomId);
-                    if (floor == areaFloorMapping.get(area) && isInArea(area, x, y)) {
-                        if (!areaIdGroupMapping.containsKey(area.getId())) {
-                            return area;
-                        } else {
-                            return areaIdGroupMapping.get(area.getId());
-                        }
-                    }
-                }
-            } else if (floor == areaFloorMapping.get((ModelArea) room) && isInArea((ModelArea) room, x, y)) {
-                return room;
-            }
-        }
-        return null;
-    }
-
-    private boolean inPrevArea(int x, int y, int floor, ModelObject prevVertex) {
-        if (prevVertex instanceof ModelArea) {
-            ModelArea prevArea = (ModelArea) prevVertex;
-            return (this.areaFloorMapping.get(prevArea) == floor) && isInArea(prevArea, x, y);
-        } else {
-            ModelGroup group = (ModelGroup) prevVertex;
-            for (Integer areaId : group.getAreaIds()) {
-                ModelArea area = idAreaMapping.get(areaId);
-
-                if ((this.areaFloorMapping.get(area) == floor) && isInArea(area, x, y)) {
-                    return true;
-                }
-
-            }
-            return false;
-        }
-
-
-    }
-
-    private ModelObject findFromScratch(int x, int y, int floor) {
-        ModelFloor floorObject = document.getFloor(floor);
-        for (ModelArea area : floorObject.getRooms()) {
-            if (isInArea(area, x, y)) {
-                if (!areaIdGroupMapping.containsKey(area.getId())) {
-                    return area;
-                } else {
-                    return areaIdGroupMapping.get(area.getId());
-                }
-            }
-        }
-        for (ModelArea area : floorObject.getStaircases()) {
-            if (isInArea(area, x, y)) {
-                if (!areaIdGroupMapping.containsKey(area.getId())) {
-                    return area;
-                } else {
-                    return areaIdGroupMapping.get(area.getId());
-                }
-            }
-        }
-
-        return null;
-    }
-
-    private boolean isInArea(ModelArea area, int x, int y) {
-        int mnx = (int) Math.min(area.getCorner0().getX(), area.getCorner1().getX());
-        int mny = (int) Math.min(area.getCorner0().getY(), area.getCorner1().getY());
-        int mxx = (int) Math.max(area.getCorner0().getX(), area.getCorner1().getX());
-        int mxy = (int) Math.max(area.getCorner0().getY(), area.getCorner1().getY());
-
-        if (x >= mnx && x <= mxx && y >= mny && y <= mxy) {
-            return true;
-        }
-        return false;
-    }
 
     private void redrawPanel() {
         this.removeAll();
@@ -531,30 +340,92 @@ public class NetworkModel extends MainPanel implements ActionListener {
         this.setDisplay(currentData, true);
     }
 
-    public HashMap<String, HashMap<String, Integer>> getHopDataFor(Collection<String> dataNames) {
 
+    private ModelObject findVertexOfLocation(int x, int y, int floor, ModelObject prevVertex) {
+        if (prevVertex == null) {
+            return findFromScratch(x, y, floor); // search in all locations on that floor
+        }
+        if (inPrevArea(x, y, floor, prevVertex)) {
+            return prevVertex;  // if in previous area return that itself
+        } else {
+            return findInNeighbouringVertices(x, y, floor, prevVertex); // returns null if nothing found (i.e. between areas)
+        }
+    }
 
-        HashSet<Phase> phases = new HashSet<Phase>();
+    private ModelObject findInNeighbouringVertices(int x, int y, int floor, ModelObject prevVertex) {
 
-        HashMap<String, HashMap<String, Integer>> result = new HashMap<String, HashMap<String, Integer>>();
-        for (String dataName : dataNames) {
-            System.out.println("Processing " + dataName + "...");
-            result.put(dataName, new HashMap<String, Integer>());
-            for (Phase phase : Phase.values()) {
-                phases.clear();
-                phases.add(phase);
+        for (ModelObject room : CompleteGraph.instance().getNeighbors(prevVertex)) {
+            if (room instanceof ModelGroup) {
+                ModelGroup group = (ModelGroup) room;
+                for (Integer roomId : group.getAreaIds()) {
+                    ModelArea area = CompleteGraph.instance().getRoomForId(roomId);
+                    if (floor == CompleteGraph.instance().getFloorForArea(area) && isInArea(area, x, y)) {
+                        if (!CompleteGraph.instance().isArea(area.getId())) {
+                            return area;
+                        } else {
+                            return CompleteGraph.instance().getGroupForId(area.getId());
+                        }
+                    }
+                }
+            } else if (floor == CompleteGraph.instance().getFloorForArea((ModelArea) room) && isInArea((ModelArea) room, x, y)) {
+                return room;
+            }
+        }
+        return null;
+    }
 
-                DirectedSparseMultigraph<ModelObject, ModelEdge> localGraph
-                        = getDirectedGraphOfPlayer(dataName, phases);
-                HashMap<String, Integer> map = result.get(dataName);
-                map.put(phase.toString(), localGraph.getEdgeCount());
-                result.put(dataName, map);
+    private boolean inPrevArea(int x, int y, int floor, ModelObject prevVertex) {
+        if (prevVertex instanceof ModelArea) {
+            ModelArea prevArea = (ModelArea) prevVertex;
+            return (CompleteGraph.instance().getFloorForArea(prevArea) == floor) && isInArea(prevArea, x, y);
+        } else {
+            ModelGroup group = (ModelGroup) prevVertex;
+            for (Integer areaId : group.getAreaIds()) {
+                ModelArea area = CompleteGraph.instance().getRoomForId(areaId);
+
+                if (CompleteGraph.instance().getFloorForArea(area) == floor && isInArea(area, x, y)) {
+                    return true;
+                }
 
             }
-
+            return false;
         }
 
-        return result;
+
+    }
+
+
+    private ModelObject findFromScratch(int x, int y, int floor) {
+        ModelFloor floorObject = document.getFloor(floor);
+        for (ModelArea area : floorObject.getRooms()) {
+            if (isInArea(area, x, y)) {
+                if (!CompleteGraph.instance().isArea(area.getId())) {
+                    return area;
+                } else {
+                    return CompleteGraph.instance().getGroupForId(area.getId());
+                }
+            }
+        }
+        for (ModelArea area : floorObject.getStaircases()) {
+            if (isInArea(area, x, y)) {
+                if (!CompleteGraph.instance().isArea(area.getId())) {
+                    return area;
+                } else {
+                    return CompleteGraph.instance().getGroupForId(area.getId());
+                }
+            }
+        }
+
+        return null;
+    }
+
+    private boolean isInArea(ModelArea area, int x, int y) {
+        int mnx = (int) Math.min(area.getCorner0().getX(), area.getCorner1().getX());
+        int mny = (int) Math.min(area.getCorner0().getY(), area.getCorner1().getY());
+        int mxx = (int) Math.max(area.getCorner0().getX(), area.getCorner1().getX());
+        int mxy = (int) Math.max(area.getCorner0().getY(), area.getCorner1().getY());
+
+        return x >= mnx && x <= mxx && y >= mny && y <= mxy;
     }
 
     public DirectedSparseMultigraph<ModelObject, ModelEdge> getDirectedGraphOfPlayer(String dataName, Collection<Phase> phases) {
@@ -630,7 +501,7 @@ public class NetworkModel extends MainPanel implements ActionListener {
         try {
             graphCacheSemaphore.tryAcquire(1, 600, TimeUnit.SECONDS);
         } catch (InterruptedException e) {
-            e.printStackTrace();  //To change body of catch statement use File | Settings | File Templates.
+            e.printStackTrace();
         }
         if (cachedGraph.containsKey(dataName) && cachedGraph.get(dataName).containsKey(codeForPhases)) {
             graphCacheSemaphore.release();
@@ -663,7 +534,7 @@ public class NetworkModel extends MainPanel implements ActionListener {
             try {
                 movementCacheSemaphore.tryAcquire(1, 600, TimeUnit.SECONDS);
             } catch (InterruptedException e) {
-                e.printStackTrace();  //To change body of catch statement use File | Settings | File Templates.
+                e.printStackTrace();
             }
             if (!cachedMovement.containsKey(dataName) || !cachedMovement.get(dataName).containsKey(code)) {
                 result = findMovement(dataName, phases);
@@ -739,7 +610,7 @@ public class NetworkModel extends MainPanel implements ActionListener {
         DirectedSparseMultigraph<ModelObject, ModelEdge> localGraph
                 = getDirectedGraphOfPlayer(dataName, phases);
 
-        return prefersCorridors(localGraph, phase);
+        return prefersCorridors(localGraph);
 
     }
 
@@ -759,35 +630,35 @@ public class NetworkModel extends MainPanel implements ActionListener {
     private YES_NO_CHOICE usesStaircaseUnusually(DirectedSparseMultigraph<ModelObject, ModelEdge> localGraph, Phase phase) {
 
         if (phase == Phase.TASK_1) {
-            ModelObject b2staircaseRoom = findRoomByName("BToDown");
-            ModelObject ac2staircaseRoom = findRoomByName("ACToDown");
-            ModelObject secondFloorLib = findRoomByName("Library2");
-//            ModelObject l3staircaseRoom = findRoomByName(localGraph, "S3StaircaseRoom");
+            ModelObject b2staircaseRoom = CompleteGraph.instance().findRoomByName("BToDown");
+            ModelObject ac2staircaseRoom = CompleteGraph.instance().findRoomByName("ACToDown");
+            ModelObject secondFloorLib = CompleteGraph.instance().findRoomByName("Library2");
+//            ModelObject l3staircaseRoom = CompleteGraph.instance().findRoomByName(localGraph, "S3StaircaseRoom");
             boolean beenHere = false;
 
             if (localGraph.containsVertex(ac2staircaseRoom)) {
                 beenHere = true;
-                if (localGraph.getSuccessors(ac2staircaseRoom).contains(findRoomByName("left 2 stair")) ||
-                        localGraph.getSuccessors(ac2staircaseRoom).contains(findRoomByName("right 2 stair"))) {
+                if (localGraph.getSuccessors(ac2staircaseRoom).contains(CompleteGraph.instance().findRoomByName("left 2 stair")) ||
+                        localGraph.getSuccessors(ac2staircaseRoom).contains(CompleteGraph.instance().findRoomByName("right 2 stair"))) {
                     return YES_NO_CHOICE.YES;
                 }
             }
             if (localGraph.containsVertex(b2staircaseRoom)) {
                 beenHere = true;
-                if (localGraph.getSuccessors(b2staircaseRoom).contains(findRoomByName("B2 Stairs"))) {
+                if (localGraph.getSuccessors(b2staircaseRoom).contains(CompleteGraph.instance().findRoomByName("B2 Stairs"))) {
                     return YES_NO_CHOICE.YES;
                 }
             }
 
             if (localGraph.containsVertex(secondFloorLib)) {
                 beenHere = true;
-                if (localGraph.getSuccessors(secondFloorLib).contains(findRoomByName("LibraryG"))) {
+                if (localGraph.getSuccessors(secondFloorLib).contains(CompleteGraph.instance().findRoomByName("LibraryG"))) {
                     return YES_NO_CHOICE.YES;
                 }
             }
 //
 // else if(localGraph.containsVertex(l3staircaseRoom)) {
-//                if(localGraph.getNeighbors(l3staircaseRoom).contains(findRoomByName(localGraph, "s3to2"))){
+//                if(localGraph.getNeighbors(l3staircaseRoom).contains(CompleteGraph.instance().findRoomByName(localGraph, "s3to2"))){
 //                    return true;
 //                }
 //            }
@@ -799,32 +670,32 @@ public class NetworkModel extends MainPanel implements ActionListener {
 
 
         } else if (phase == Phase.TASK_2) {
-            ModelObject b2staircaseRoom = findRoomByName("BToDown");
-            ModelObject ac2staircaseRoom = findRoomByName("ACToDown");
-            ModelObject secondFloorLib = findRoomByName("Library2");
+            ModelObject b2staircaseRoom = CompleteGraph.instance().findRoomByName("BToDown");
+            ModelObject ac2staircaseRoom = CompleteGraph.instance().findRoomByName("ACToDown");
+            ModelObject secondFloorLib = CompleteGraph.instance().findRoomByName("Library2");
             boolean beenHere = false;
             if (localGraph.containsVertex(ac2staircaseRoom)) {
                 beenHere = true;
-                if (localGraph.getSuccessors(ac2staircaseRoom).contains(findRoomByName("left 2 stair")) ||
-                        localGraph.getSuccessors(ac2staircaseRoom).contains(findRoomByName("right 2 stair"))) {
+                if (localGraph.getSuccessors(ac2staircaseRoom).contains(CompleteGraph.instance().findRoomByName("left 2 stair")) ||
+                        localGraph.getSuccessors(ac2staircaseRoom).contains(CompleteGraph.instance().findRoomByName("right 2 stair"))) {
                     return YES_NO_CHOICE.YES;
                 }
             }
             if (localGraph.containsVertex(b2staircaseRoom)) {
                 beenHere = true;
-                if (localGraph.getSuccessors(b2staircaseRoom).contains(findRoomByName("B2 Stairs"))) {
+                if (localGraph.getSuccessors(b2staircaseRoom).contains(CompleteGraph.instance().findRoomByName("B2 Stairs"))) {
                     return YES_NO_CHOICE.YES;
                 }
             }
             if (localGraph.containsVertex(secondFloorLib)) {
                 beenHere = true;
-                if (localGraph.getSuccessors(secondFloorLib).contains(findRoomByName("LibraryG"))) {
+                if (localGraph.getSuccessors(secondFloorLib).contains(CompleteGraph.instance().findRoomByName("LibraryG"))) {
                     return YES_NO_CHOICE.YES;
                 }
             }
 
 // else if(localGraph.containsVertex(l3staircaseRoom)) {
-//                if(localGraph.getNeighbors(l3staircaseRoom).contains(findRoomByName(localGraph, "s3to2"))){
+//                if(localGraph.getNeighbors(l3staircaseRoom).contains(CompleteGraph.instance().findRoomByName(localGraph, "s3to2"))){
 //                    return true;
 //                }
 //            }
@@ -835,10 +706,10 @@ public class NetworkModel extends MainPanel implements ActionListener {
             return YES_NO_CHOICE.NO;
 
         } else if (phase == Phase.TASK_3) {
-            ModelObject secondFloorLib = findRoomByName("Library2");
+            ModelObject secondFloorLib = CompleteGraph.instance().findRoomByName("Library2");
 
             if (localGraph.containsVertex(secondFloorLib)) {
-                if (!localGraph.getSuccessors(secondFloorLib).contains(findRoomByName("LibraryG"))) {
+                if (!localGraph.getSuccessors(secondFloorLib).contains(CompleteGraph.instance().findRoomByName("LibraryG"))) {
                     return YES_NO_CHOICE.YES;
                 } else {
                     return YES_NO_CHOICE.NO;
@@ -894,17 +765,10 @@ public class NetworkModel extends MainPanel implements ActionListener {
         return result;
     }
 
-    public HashMap<String, Integer> getEdgesForEachRoom() {
-        HashMap<String, Integer> result = new HashMap<String, Integer>();
-        for (ModelObject vertex : completeGraph.getVertices()) {
-            result.put(vertex.toString(), completeGraph.degree(vertex));
-        }
-        return result;
-    }
+
 
     public int getCoverage(String dataName, Phase phase) {
         HashSet<Phase> phases = new HashSet<Phase>();
-        HashMultimap<Integer, String> result = HashMultimap.create();
         phases.clear();
         phases.add(phase);
 
@@ -912,18 +776,10 @@ public class NetworkModel extends MainPanel implements ActionListener {
                 getDirectedGraphOfPlayer(dataName, phases);
 
 
-        return findCoverage(localGraph);
+        return CompleteGraph.instance().findCoverage(localGraph);
     }
 
-    private int findCoverage(DirectedSparseMultigraph<ModelObject, ModelEdge> localGraph) {
-        int count = 0;
-        for (ModelObject vertex : completeGraph.getVertices()) {
-            if (localGraph.containsVertex(vertex)) {
-                count++;
-            }
-        }
-        return (count * 100) / completeGraph.getVertexCount();
-    }
+
 
     public double getDistanceTraveledDuringTasks(String dataName) {
         HashSet<Phase> phases = new HashSet<Phase>();
@@ -978,15 +834,15 @@ public class NetworkModel extends MainPanel implements ActionListener {
     }
 
 
-    private YES_NO_CHOICE prefersCorridors(DirectedSparseMultigraph<ModelObject, ModelEdge> localGraph, Phase phase) {
-        ModelObject db2 = findRoomByName("DB2");
-        ModelObject mb1 = findRoomByName("MB1");
-        ModelObject mb3 = findRoomByName("MB3");
-        ModelObject theLounge = findRoomByName("TheLounge");
-        ModelObject gallery = findRoomByName("Gallery");
-        ModelObject study1 = findRoomByName("Study1");
-        ModelObject mr = findRoomByName("MR");
-        ModelObject study3 = findRoomByName("Study3");
+    private YES_NO_CHOICE prefersCorridors(DirectedSparseMultigraph<ModelObject, ModelEdge> localGraph) {
+        ModelObject db2 = CompleteGraph.instance().findRoomByName("DB2");
+        ModelObject mb1 = CompleteGraph.instance().findRoomByName("MB1");
+        ModelObject mb3 = CompleteGraph.instance().findRoomByName("MB3");
+        ModelObject theLounge = CompleteGraph.instance().findRoomByName("TheLounge");
+        ModelObject gallery = CompleteGraph.instance().findRoomByName("Gallery");
+        ModelObject study1 = CompleteGraph.instance().findRoomByName("Study1");
+        ModelObject mr = CompleteGraph.instance().findRoomByName("MR");
+        ModelObject study3 = CompleteGraph.instance().findRoomByName("Study3");
 
         if (localGraph.containsVertex(db2) && localGraph.containsVertex(mb1) &&
                 localGraph.isNeighbor(db2, mb1)) {
@@ -1041,7 +897,7 @@ public class NetworkModel extends MainPanel implements ActionListener {
                     }
                 });
                 sortedEdgeSet.addAll(graph.getIncidentEdges(vertex));
-                long time = 0;
+//                long time = 0;
                 if (graph.inDegree(vertex) > graph.outDegree(vertex)) {
                     //Ending Vertex;
                     ModelEdge lastEdge = sortedEdgeSet.pollLast();
@@ -1075,203 +931,13 @@ public class NetworkModel extends MainPanel implements ActionListener {
         return result;
     }
 
-    public Collection<String> getSortedRooms() {
-
-        if (completeGraph != null) {
-            return sortedRoomNames;
-        } else {
-            return null;
-        }
-    }
-
-    public Collection<String> getFloorDegreeSortedRooms() {
-        TreeSet<String> degreeSortedRoomNames = new TreeSet<String>(new Comparator<String>() {
-
-            @Override
-            public int compare(String roomName1, String roomName2) {
-                ModelObject room1 = findRoomByName(roomName1);
-                ModelObject room2 = findRoomByName(roomName2);
-                if (completeGraph.degree(room1) != completeGraph.degree(room2)) {
-                    return completeGraph.degree(room1) - completeGraph.degree(room2);
-                } else {
-                    return roomName1.compareTo(roomName2);
-                }
-            }
-        });
-        degreeSortedRoomNames.addAll(sortedRoomNames);
-
-        if (completeGraph != null) {
-
-            ArrayList<String>[] floorRooms = new ArrayList[3];
-            for (int i = 0; i < 3; i++) {
-                floorRooms[i] = new ArrayList<String>();
-            }
 
 
-            for (String name : degreeSortedRoomNames) {
-                ModelObject vertex = NetworkModel.instance().findRoomByName(name);
-                int floor;
-                if (vertex instanceof ModelArea) {
-                    floor = NetworkModel.instance().getFloorForArea((ModelArea) vertex);
-                } else {
-                    ModelArea room = NetworkModel.instance().getRoomForId(((ModelGroup) vertex).getAreaIds().iterator().next());
-                    floor = NetworkModel.instance().getFloorForArea(room);
-                }
 
 
-                floorRooms[floor].add(name);
-
-            }
-            ArrayList<String> finalList = new ArrayList<String>();
-            for (ArrayList<String> list : floorRooms) {
-                finalList.addAll(list);
-            }
-
-            return finalList;
-        } else {
-            return null;
-        }
-    }
-
-    public Collection<String> getFloorSortedRooms() {
-
-        if (completeGraph != null) {
-
-            ArrayList<String>[] floorRooms = new ArrayList[3];
-            for (int i = 0; i < 3; i++) {
-                floorRooms[i] = new ArrayList<String>();
-            }
 
 
-            for (String name : sortedRoomNames) {
-                ModelObject vertex = NetworkModel.instance().findRoomByName(name);
-                int floor;
-                if (vertex instanceof ModelArea) {
-                    floor = NetworkModel.instance().getFloorForArea((ModelArea) vertex);
-                } else {
-                    ModelArea room = NetworkModel.instance().getRoomForId(((ModelGroup) vertex).getAreaIds().iterator().next());
-                    floor = NetworkModel.instance().getFloorForArea(room);
-                }
 
-
-                floorRooms[floor].add(name);
-
-            }
-            ArrayList<String> finalList = new ArrayList<String>();
-            for (ArrayList<String> list : floorRooms) {
-                finalList.addAll(list);
-            }
-
-            return finalList;
-        } else {
-            return null;
-        }
-    }
-
-    public int getTotalNumberOfVertices() {
-        if (completeGraph != null) {
-            return completeGraph.getVertexCount();
-        } else
-            return -1;
-
-    }
-
-
-    public Graph<ModelObject, ModelEdge> getCompleteGraph() {
-        return completeGraph;
-    }
-
-    public Collection<String> getFloorNeighbourSortedRooms() {
-
-
-        if (completeGraph != null) {
-
-            ArrayList<String>[] floorRooms = new ArrayList[3];
-            for (int i = 0; i < 3; i++) {
-                floorRooms[i] = new ArrayList<String>();
-            }
-
-
-            for (String name : sortedRoomNames) {
-                ModelObject vertex = NetworkModel.instance().findRoomByName(name);
-                int floor;
-                if (vertex instanceof ModelArea) {
-                    floor = NetworkModel.instance().getFloorForArea((ModelArea) vertex);
-                } else {
-                    ModelArea room = NetworkModel.instance().getRoomForId(((ModelGroup) vertex).getAreaIds().iterator().next());
-                    floor = NetworkModel.instance().getFloorForArea(room);
-                }
-
-
-                floorRooms[floor].add(name);
-
-            }
-            for (int i = 0; i < floorRooms.length; i++) {
-                floorRooms[i] = sortByConnections(floorRooms[i]);
-            }
-
-            ArrayList<String> finalList = new ArrayList<String>();
-            for (ArrayList<String> list : floorRooms) {
-                finalList.addAll(list);
-            }
-
-            return finalList;
-        } else {
-            return null;
-        }
-    }
-
-    private ArrayList<String> sortByConnections(ArrayList<String> floorRoom) {
-        ArrayList<String> connectionSortedRooms = new ArrayList<String>();
-        ArrayList<String> listOfRooms = new ArrayList<String>();
-        ArrayList<String> toBeProcessed = new ArrayList<String>();
-
-        listOfRooms.addAll(floorRoom);
-
-        while (!listOfRooms.isEmpty()) {
-            String room = listOfRooms.remove(0);
-
-            if (!connectionSortedRooms.contains(room)) {
-                connectionSortedRooms.add(room);
-
-            }
-            for (ModelObject neighbour : completeGraph.getNeighbors(findRoomByName(room))) {
-                if (!connectionSortedRooms.contains(neighbour.toString())) {
-                    toBeProcessed.add(neighbour.toString());
-                }
-            }
-            while (!toBeProcessed.isEmpty()) {
-                room = toBeProcessed.remove(0);
-                boolean removalStatus = listOfRooms.remove(room);
-
-                if (!removalStatus) {
-                    if (floorRoom.contains(floorRoom.contains(room))) {
-                        System.out.println("in trouble");
-                    } else {
-                        continue;
-                    }
-                }
-
-                if (!connectionSortedRooms.contains(room)) {
-                    connectionSortedRooms.add(room);
-
-                }
-                for (ModelObject neighbour : completeGraph.getNeighbors(findRoomByName(room))) {
-                    if (!connectionSortedRooms.contains(neighbour.toString())) {
-                        toBeProcessed.add(neighbour.toString());
-                    }
-                }
-
-
-            }
-        }
-        if (connectionSortedRooms.size() != floorRoom.size()) {
-            System.out.println("Size mismatch");
-        }
-        return connectionSortedRooms;
-
-
-    }
 
 
 private class SimpleFloorColoringTransformer<ModelObject, Paint> implements Transformer<ModelObject, Paint> {
@@ -1286,13 +952,13 @@ private class SimpleFloorColoringTransformer<ModelObject, Paint> implements Tran
 
         }
 
-        if (!(obj instanceof ModelArea)) {
-            area = idAreaMapping.get(((ModelGroup) obj).getAreaIds().iterator().next());
-        } else {
+        if (!(obj instanceof ModelArea))
+            area = CompleteGraph.instance().getRoomForId(((ModelGroup) obj).getAreaIds().iterator().next());
+        else {
             area = (ModelArea) obj;
         }
 
-        int floor = areaFloorMapping.get(area);
+        int floor = CompleteGraph.instance().getFloorForArea(area);
         switch (floor) {
             case 0:
                 return (Paint) Color.LIGHT_GRAY;
@@ -1313,21 +979,21 @@ private class DegreeBasedColorTransformer<ModelObject, Paint> implements Transfo
         double degreeNormalized = 0;
         Object object;
 
-        object = (Object) obj;
+        object = obj;
         modelcomponents.ModelObject object1 = (modelcomponents.ModelObject) object;
 
 
         if (NetworkModel.this.currentGraph instanceof DirectedSparseMultigraph) {
             try {
                 degree = currentGraph.inDegree(object1);
-                degreeNormalized = (double) degree / (double) completeGraph.degree(object1);
-                degree -= (NetworkModel.this.completeGraph.degree(object1));
+                degreeNormalized = (double) degree / (double) CompleteGraph.instance().getDegreeOfRoom(object1);
+                degree -= (CompleteGraph.instance().getDegreeOfRoom(object1));
             } catch (NullPointerException e) {
                 // Called at the wrong point of time...
                 return ((Paint) Color.BLACK);
             }
         } else {
-            degree = NetworkModel.this.currentGraph.degree(object1);
+            degree = currentGraph.degree(object1);
         }
 
 
@@ -1351,18 +1017,12 @@ private class DegreeBasedColorTransformer<ModelObject, Paint> implements Transfo
 //            }else{
 //                return (Paint) Color.RED;
 //            }
-
         if (degreeNormalized < 1.0) {
-
             return (Paint) Color.white;
-
         } else if (degreeNormalized <= 1.5) {
             return (Paint) Color.LIGHT_GRAY;
-
         } else if (degreeNormalized <= 2) {
-
             return (Paint) Color.YELLOW;
-
         } else if (degreeNormalized <= 2.5) {
             return (Paint) Color.GREEN;
         } else if (degreeNormalized <= 3) {
@@ -1412,10 +1072,7 @@ public class areaToLocationTransformer<ModelObject, Point2D> implements Transfor
                     (floor * 700)), (int) p.getY());
 
 
-            Point2D point = (Point2D) (new java.awt.geom.Point2D.Double(p.x, p.y));
-
-
-            return point;
+            return (Point2D) (new java.awt.geom.Point2D.Double(p.x, p.y));
         }
 
         ModelGroup group = (ModelGroup) area;
@@ -1427,7 +1084,7 @@ public class areaToLocationTransformer<ModelObject, Point2D> implements Transfor
         for (int areaId : group.getAreaIds()) {
 
 
-            ModelArea tempArea = NetworkModel.instance().getRoomForId(areaId);
+            ModelArea tempArea = CompleteGraph.instance().getRoomForId(areaId);
             Point3D tempPoint = getCenterOfRoom(tempArea);
             double x = tempPoint.getX();
             double y = tempPoint.getY();
@@ -1456,7 +1113,7 @@ public class areaToLocationTransformer<ModelObject, Point2D> implements Transfor
 
         double x = (p1.getX() + p2.getX()) / 2;
         double y = (p1.getY() + p2.getY()) / 2;
-        double z = (double) NetworkModel.instance().getFloorForArea(room);
+        double z = (double) CompleteGraph.instance().getFloorForArea(room);
         return new Point3D(x, y, z);
 
     }
@@ -1482,18 +1139,17 @@ public class areaToLocationTransformer<ModelObject, Point2D> implements Transfor
             paths.put(miPath6.getText(), nameToPathMapping.get(miPath6));
 
 
-            boolean added = false;
 
-            ModelObject startingRoom = findRoomByName("Library2");
+            ModelObject startingRoom = CompleteGraph.instance().findRoomByName("Library2");
             for (String path : paths.keySet()) {
                 if (graphIsPath(startingRoom, graph, Arrays.asList(paths.get(path)))) {
                     return path;
 
                 }
             }
-            if (!added) {
-                return "lost";
-            }
+
+
+            return "lost";
 
 
         } else if (phase == Phase.TASK_2) {
@@ -1506,7 +1162,7 @@ public class areaToLocationTransformer<ModelObject, Point2D> implements Transfor
 
             boolean added = false;
 
-            ModelObject startingRoom = findRoomByName("Gallery");
+            ModelObject startingRoom = CompleteGraph.instance().findRoomByName("Gallery");
             for (String path : pathForFloor3.keySet()) {
                 if (checkFloorPath(startingRoom, graph, Arrays.asList(pathForFloor3.get(path)), 2)) {
                     resultString += path;
@@ -1530,7 +1186,7 @@ public class areaToLocationTransformer<ModelObject, Point2D> implements Transfor
 
             added = false;
 
-            startingRoom = findRoomByName("WayToFlr3");
+            startingRoom = CompleteGraph.instance().findRoomByName("WayToFlr3");
             for (String path : pathForFloor2.keySet()) {
                 if (checkFloorPath(startingRoom, graph, Arrays.asList(pathForFloor2.get(path)), 1)) {
                     result.put(path, dataName);
@@ -1574,21 +1230,21 @@ public class areaToLocationTransformer<ModelObject, Point2D> implements Transfor
         for (ModelObject vertex : vertices) {
             ModelArea area;
             if (vertex instanceof ModelGroup) {
-                area = (ModelArea) idAreaMapping.get(((ModelGroup) (vertex)).getAreaIds().iterator().next());
+                area = (ModelArea) CompleteGraph.instance().getRoomForId(((ModelGroup) (vertex)).getAreaIds().iterator().next());
             } else {
                 area = (ModelArea) vertex;
             }
 
-            if (this.areaFloorMapping.get(area) == 0) {
+            if (CompleteGraph.instance().getFloorForArea(area) == 0) {
                 return false;
-            } else if (this.areaFloorMapping.get(area) != level) {
+            } else if (CompleteGraph.instance().getFloorForArea(area) != level) {
                 graph.removeVertex(vertex);
             }
         }
 
         List<String> pathVertices = new ArrayList<String>(pathDescription);
         for (String vertexName : pathDescription) {
-            ModelObject vertex = findRoomByName(vertexName);
+            ModelObject vertex = CompleteGraph.instance().findRoomByName(vertexName);
 //            System.out.println("Removing " + vertex + "from" + graph);
             if (graph.removeVertex(vertex)) {
                 pathVertices.remove(vertexName);
@@ -1603,11 +1259,7 @@ public class areaToLocationTransformer<ModelObject, Point2D> implements Transfor
                 return false;
             }
         } else {
-            if (graph.getVertexCount() == 0 && pathVertices.isEmpty()) {
-                return true;
-            } else {
-                return false;
-            }
+            return graph.getVertexCount() == 0 && pathVertices.isEmpty();
         }
     }
 
@@ -1618,33 +1270,15 @@ public class areaToLocationTransformer<ModelObject, Point2D> implements Transfor
         for (ModelObject vertex : graph.getSuccessors(currentRoom)) {
 
             if (vertex.toString().equalsIgnoreCase(pathDescription.get(0))) {
-                if (graph.getSuccessors(vertex).contains(currentRoom)) {
-                    // there is a loop. Go out or come in first?
+                return !graph.getSuccessors(vertex).contains(currentRoom) && graphIsPath(vertex, graph, pathDescription.subList(1, pathDescription.size()));
 
-                    // He didn't really know what he was doing!
-                    // comes in first;
-                    return false;
-
-                }
-
-                return graphIsPath(vertex, graph, pathDescription.subList(1, pathDescription.size()));
             }
         }
         return false;
 
     }
 
-    public ModelObject findRoomByName(String roomName) {
 
-        for (ModelObject vertex : completeGraph.getVertices()) {
-            if (vertex.toString().equalsIgnoreCase(roomName)) {
-                return vertex;
-            }
-        }
-        System.out.println("WARNING! COULDN'T FIND ROOM WITH NAME:" + roomName);
-//        assert false;
-        return null;
-    }
 
 
     public HashMap<String, Number> getVertexDataFor(String dataName, StatisticChoice choice, Phase phase) {
@@ -1737,7 +1371,7 @@ public class areaToLocationTransformer<ModelObject, Point2D> implements Transfor
             if (previousNumber == null) {
                 result.put(edgeStringRepresentation, 0);
             } else {
-                result.put(edgeStringRepresentation, previousNumber.intValue() + 1);
+                result.put(edgeStringRepresentation, previousNumber + 1);
             }
 
 
@@ -1795,33 +1429,20 @@ public class areaToLocationTransformer<ModelObject, Point2D> implements Transfor
         set.add(endpoints.getSecond().toString());
 
 
-        int floorOfFirst = instance().getFloorForVertex(endpoints.getFirst());
-        int floorOfSecond = instance().getFloorForVertex(endpoints.getSecond());
+        int floorOfFirst = CompleteGraph.instance().getFloorForVertex(endpoints.getFirst());
+        int floorOfSecond = CompleteGraph.instance().getFloorForVertex(endpoints.getSecond());
         if (floorOfFirst == floorOfSecond)
             return floorOfFirst + ":" + set.pollFirst() + "to" + set.pollLast();
         else
             return "Staircase:" + set.pollFirst() + "to" + set.pollLast();
     }
 
-    public int getFloorForVertex(ModelObject vertex) {
-        int floor;
-        if (vertex instanceof ModelArea) {
-            floor = NetworkModel.instance().getFloorForArea((ModelArea) vertex);
-        } else {
-            ModelArea room = NetworkModel.instance().getRoomForId(((ModelGroup) vertex).getAreaIds().iterator().next());
-            floor = NetworkModel.instance().getFloorForArea(room);
-        }
-        return floor;
-    }
 
-    public int getFloorForArea(ModelArea area) {
-        return this.areaFloorMapping.get(area);
-    }
 
 private class EdgeDurationColorTransformer<ModelEdge, Paint> implements Transformer<ModelEdge, Paint> {
     @Override
     public Paint transform(ModelEdge modelEdge) {
-        Object obj = (Object) modelEdge;
+        Object obj = modelEdge;
         modelcomponents.ModelEdge edge = (modelcomponents.ModelEdge) obj;
 
         if (currentData.equalsIgnoreCase("default")) {

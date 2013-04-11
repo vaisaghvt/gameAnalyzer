@@ -10,10 +10,7 @@ import edu.uci.ics.jung.visualization.decorators.ToStringLabeller;
 import gui.MapImagePanel;
 import gui.NetworkModel;
 import javafx.geometry.Point3D;
-import modelcomponents.ModelArea;
-import modelcomponents.ModelEdge;
-import modelcomponents.ModelGroup;
-import modelcomponents.ModelObject;
+import modelcomponents.*;
 import org.apache.commons.collections15.Transformer;
 import org.jfree.chart.ChartFactory;
 import org.jfree.chart.ChartPanel;
@@ -80,7 +77,7 @@ public class VertexChartDisplay extends ChartDisplay<HashMap<String, ? extends N
 
 
 //        Collection<String> sortedRoomNames = NetworkModel.instance().getFloorSortedRooms();
-        Collection<String> sortedRoomNames = NetworkModel.instance().getFloorDegreeSortedRooms();
+        Collection<String> sortedRoomNames = CompleteGraph.instance().getFloorDegreeSortedRooms();
 
         final DefaultCategoryDataset dataSet = new DefaultCategoryDataset();
         for (String roomName : sortedRoomNames) {
@@ -120,7 +117,7 @@ public class VertexChartDisplay extends ChartDisplay<HashMap<String, ? extends N
         SwingUtilities.invokeLater(new Runnable() {
             @Override
             public void run() {
-                Graph<ModelObject, ModelEdge> graph = NetworkModel.instance().getCompleteGraph();
+                Graph<ModelObject, ModelEdge> graph = CompleteGraph.instance().getGraph();
                 Transformer<ModelObject, Point2D> areaToPointTransformer = new AreaToLocationTransformer<ModelObject, Point2D>();
                 Layout<ModelObject, ModelEdge> layout = new StaticLayout<ModelObject, ModelEdge>(graph,
                         areaToPointTransformer);
@@ -210,7 +207,7 @@ public class VertexChartDisplay extends ChartDisplay<HashMap<String, ? extends N
             for (int areaId : group.getAreaIds()) {
 
 
-                ModelArea tempArea = NetworkModel.instance().getRoomForId(areaId);
+                ModelArea tempArea = CompleteGraph.instance().getRoomForId(areaId);
                 Point3D tempPoint = getCenterOfRoom(tempArea);
                 double x = tempPoint.getX();
                 double y = tempPoint.getY();
@@ -239,7 +236,7 @@ public class VertexChartDisplay extends ChartDisplay<HashMap<String, ? extends N
 
             double x = (p1.getX() + p2.getX()) / 2;
             double y = (p1.getY() + p2.getY()) / 2;
-            double z = (double) NetworkModel.instance().getFloorForArea(room);
+            double z = (double) CompleteGraph.instance().getFloorForArea(room);
             return new Point3D(x, y, z);
 
         }

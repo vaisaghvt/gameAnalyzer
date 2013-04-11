@@ -6,6 +6,7 @@ import com.google.common.collect.Multiset;
 import gui.NetworkModel;
 import gui.Phase;
 import gui.StatsDialog;
+import modelcomponents.CompleteGraph;
 import stats.chartdisplays.DoorRepetitionFrequencyChartDisplay;
 import stats.consoledisplays.DoorRepetitionFrequencyConsoleDisplay;
 
@@ -129,7 +130,7 @@ public class DoorRepetitionFrequencyStatisticHandler extends StatisticsHandler<D
             this.allOrOne = allOrOne;
             this.type = aggregationType;
 
-            this.roomDegree = NetworkModel.instance().getEdgesForEachRoom();
+            this.roomDegree = CompleteGraph.instance().getEdgesForEachRoom();
         }
 
         @Override

@@ -6,6 +6,7 @@ import gui.NetworkModel;
 import gui.Phase;
 import gui.StatsDialog;
 import javafx.geometry.Point3D;
+import modelcomponents.CompleteGraph;
 import modelcomponents.ModelEdge;
 import modelcomponents.ModelObject;
 import org.apache.commons.math3.stat.descriptive.moment.Mean;
@@ -72,7 +73,7 @@ public class ParallelCoordinatePlotGenerator extends StatisticsHandler<GraphDeta
         results.put("Diameter", String.format("%1$.3f", DistanceStatistics.diameter(graph)));
 
 
-        int totalVertexNumber = NetworkModel.instance().getTotalNumberOfVertices();
+        int totalVertexNumber = CompleteGraph.instance().getTotalNumberOfVertices();
         results.put("Vertex Coverage", Integer.toString((graph.getVertexCount() * 100) / totalVertexNumber));
 
 

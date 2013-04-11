@@ -5,6 +5,7 @@ import gui.NetworkModel;
 import gui.Phase;
 import gui.ProgressVisualizer;
 import gui.StatsDialog;
+import modelcomponents.CompleteGraph;
 import modelcomponents.ModelEdge;
 import modelcomponents.ModelObject;
 import randomwalk.RandomWalkOrganizer;
@@ -60,12 +61,12 @@ public class FirstOrderPathHeatMapHandler extends StatisticsHandler<PathHeatMapC
         SwingWorker<HashMap<String, HashMap<String, Integer>>, Void> firstOrderProbabilityCalculator = new SwingWorker<HashMap<String, HashMap<String, Integer>>, Void>() {
             @Override
             protected HashMap<String, HashMap<String, Integer>> doInBackground() throws Exception {
-                int numberOfRooms = NetworkModel.instance().getSortedRooms().size();
+                int numberOfRooms = CompleteGraph.instance().getSortedRooms().size();
                 int count = 0;
                 HashMap<String, HashMap<String, Integer>> nodeToNodeFrequencyTable = new HashMap<String, HashMap<String, Integer>>();
                 this.addPropertyChangeListener(pv);
                 HashMap<String, HashMap<String, HashMap<String, Double>>> result = new HashMap<String, HashMap<String, HashMap<String, Double>>>();
-                Collection<ModelObject> rooms = NetworkModel.instance().getCompleteGraph().getVertices();
+                Collection<ModelObject> rooms = CompleteGraph.instance().getVertices();
 
                 for (ModelObject vertex : rooms) {
                     pv.print("processing " + vertex.toString() + "...\n");
@@ -162,7 +163,7 @@ public class FirstOrderPathHeatMapHandler extends StatisticsHandler<PathHeatMapC
             ModelObject mainNode, HashMap<String, DirectedSparseMultigraph<ModelObject, ModelEdge>> nameToGraphMap) {
 
 
-        Collection<ModelObject> neighbours = NetworkModel.instance().getCompleteGraph().getNeighbors(mainNode);
+        Collection<ModelObject> neighbours = CompleteGraph.instance().getNeighbors(mainNode);
         DirectedSparseMultigraph<ModelObject, ModelEdge> localGraph = new DirectedSparseMultigraph<ModelObject, ModelEdge>();
 
 //        localGraph.addVertex(mainNode);

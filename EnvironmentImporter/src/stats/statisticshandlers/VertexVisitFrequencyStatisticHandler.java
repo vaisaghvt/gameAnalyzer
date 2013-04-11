@@ -5,6 +5,7 @@ import edu.uci.ics.jung.graph.DirectedSparseMultigraph;
 import gui.NetworkModel;
 import gui.Phase;
 import gui.StatsDialog;
+import modelcomponents.CompleteGraph;
 import modelcomponents.ModelEdge;
 import modelcomponents.ModelObject;
 import randomwalk.RandomWalkOrganizer;
@@ -68,16 +69,16 @@ public class VertexVisitFrequencyStatisticHandler extends StatisticsHandler<Vert
 
         int NRandom = 0;
         for (String room : randomWalkData.keySet()) {
-            int floorNumber= NetworkModel.instance().getFloorForVertex(
-                    NetworkModel.instance().findRoomByName(room));
+            int floorNumber= CompleteGraph.instance().getFloorForVertex(
+                    CompleteGraph.instance().findRoomByName(room));
 
             NRandomForFloor[floorNumber] += randomWalkData.get(room).intValue();
             NRandom+= randomWalkData.get(room).intValue();
         }
 
         for (String room : randomWalkData.keySet()) {
-            int floorNumber= NetworkModel.instance().getFloorForVertex(
-                    NetworkModel.instance().findRoomByName(room));
+            int floorNumber= CompleteGraph.instance().getFloorForVertex(
+                    CompleteGraph.instance().findRoomByName(room));
             double originalValueForRoom = randomWalkData.get(room).doubleValue();
             double scaledValue = originalValueForRoom / NRandomForFloor[floorNumber];
 //            double scaledValue = originalValueForRoom / NRandom;
@@ -97,22 +98,22 @@ public class VertexVisitFrequencyStatisticHandler extends StatisticsHandler<Vert
         int[] NRandomForFloor = new int[3];
         int[] NPersonForFloor = new int[3];
         for (String room : randomWalkData.keySet()) {
-            int floorNumber= NetworkModel.instance().getFloorForVertex(
-                    NetworkModel.instance().findRoomByName(room));
+            int floorNumber= CompleteGraph.instance().getFloorForVertex(
+                    CompleteGraph.instance().findRoomByName(room));
 //            NRandom+= randomWalkData.getValue(room).intValue();
             NRandomForFloor[floorNumber] += randomWalkData.get(room).intValue();
         }
         for (String room : personData.keySet()) {
-            int floorNumber= NetworkModel.instance().getFloorForVertex(
-                    NetworkModel.instance().findRoomByName(room));
+            int floorNumber= CompleteGraph.instance().getFloorForVertex(
+                    CompleteGraph.instance().findRoomByName(room));
 //        NPerson+= personData.getValue(room).intValue();
             NPersonForFloor[floorNumber] += personData.get(room).intValue();
 
         }
 
         for (String room : personData.keySet()) {
-            int floorNumber= NetworkModel.instance().getFloorForVertex(
-                    NetworkModel.instance().findRoomByName(room));
+            int floorNumber= CompleteGraph.instance().getFloorForVertex(
+                    CompleteGraph.instance().findRoomByName(room));
             double originalValueForRoom = personData.get(room).doubleValue();
 //            double scaledValue = (originalValueForRoom *NRandom) /NPerson;
             double scaledValue = (originalValueForRoom * NRandomForFloor[floorNumber]) / NPersonForFloor[floorNumber];

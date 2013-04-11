@@ -3,9 +3,9 @@ package randomwalk;
 import ec.util.MersenneTwister;
 import edu.uci.ics.jung.graph.DirectedGraph;
 import edu.uci.ics.jung.graph.DirectedSparseMultigraph;
-import edu.uci.ics.jung.graph.Graph;
 import gui.NetworkModel;
 import gui.ProgressVisualizer;
+import modelcomponents.CompleteGraph;
 import modelcomponents.GraphUtilities;
 import modelcomponents.ModelEdge;
 import modelcomponents.ModelObject;
@@ -60,8 +60,6 @@ public class RandomWalkOrganizer {
 
     private static HashMap<RANDOM_WALK_TYPE, Collection<DirectedSparseMultigraph<ModelObject, ModelEdge>>> randomWalkGraphs
             = new HashMap<RANDOM_WALK_TYPE, Collection<DirectedSparseMultigraph<ModelObject, ModelEdge>>>();
-    private static Graph<ModelObject, ModelEdge> completeGraph = null;
-    private static ModelObject startingLocation = null;
 
 
     private static final int MAX_SOLVER_SIZE = 5000;
@@ -70,14 +68,8 @@ public class RandomWalkOrganizer {
     }
 
 
-    public static void setRandomWalkParameters(Graph<ModelObject, ModelEdge> completeGraph, ModelObject startingLocation) {
-        RandomWalkOrganizer.completeGraph = completeGraph;
-        RandomWalkOrganizer.startingLocation = startingLocation;
-    }
-
-
     private static Collection<DirectedSparseMultigraph<ModelObject, ModelEdge>> generateRandomWalkCollection(final RANDOM_WALK_TYPE type) {
-        if (completeGraph == null || startingLocation == null) {
+        if (CompleteGraph.instance().getGraph() == null ||CompleteGraph.instance().getStartingNode() == null) {
             throw new NullPointerException();
         }
 
@@ -112,7 +104,7 @@ public class RandomWalkOrganizer {
 
                     @Override
                     public DirectedSparseMultigraph<ModelObject, ModelEdge> call() throws Exception {
-                        return type.randomWalkGenerator.generateRandomWalk(completeGraph, startingLocation);
+                        return type.randomWalkGenerator.generateRandomWalk(CompleteGraph.instance().getGraph(), CompleteGraph.instance().getStartingNode());
                     }
                 }));
             }
@@ -125,7 +117,7 @@ public class RandomWalkOrganizer {
 
                     if (tempGraph != null) {
                         resultSet.add(tempGraph);
-                        listOfGyrationRadius.add(calculateRadiusOfGyration(tempGraph, startingLocation));
+                        listOfGyrationRadius.add(calculateRadiusOfGyration(tempGraph, CompleteGraph.instance().getStartingNode()));
                         if (isStable(listOfGyrationRadius, varianceList, pv)) {
                             break;
                         } else {

@@ -4,6 +4,7 @@ import com.google.common.collect.HashMultimap;
 import gui.NetworkModel;
 import gui.Phase;
 import gui.StatsDialog;
+import modelcomponents.CompleteGraph;
 import stats.StatisticChoice;
 import stats.chartdisplays.VertexChartDisplay;
 import stats.consoledisplays.VertexConsoleDisplay;
@@ -63,7 +64,7 @@ public class VertexVisitDurationStatisticHandler extends StatisticsHandler<Verte
             this.phase = phase;
             this.allOrOne = allOrOne;
             this.type = aggregationType;
-            this.roomEdgeCountMapping = NetworkModel.instance().getEdgesForEachRoom();
+            this.roomEdgeCountMapping = CompleteGraph.instance().getEdgesForEachRoom();
         }
 
         @Override

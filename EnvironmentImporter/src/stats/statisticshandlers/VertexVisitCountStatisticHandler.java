@@ -5,6 +5,7 @@ import com.google.common.collect.Multiset;
 import gui.NetworkModel;
 import gui.Phase;
 import gui.StatsDialog;
+import modelcomponents.CompleteGraph;
 import stats.StatisticChoice;
 import stats.chartdisplays.VertexVisitChartDisplay;
 import stats.consoledisplays.VertexVisitConsoleDisplay;
@@ -40,7 +41,7 @@ public class VertexVisitCountStatisticHandler extends StatisticsHandler<VertexVi
 
     private Multiset<Double> summarizeData(HashMap<String, HashMap<String, Number>> dataNameDataMap, Phase phase) {
         Multiset<Double> result = HashMultiset.create();
-        HashMap<String, Integer> roomEdgeCountMapping = NetworkModel.instance().getEdgesForEachRoom();
+        HashMap<String, Integer> roomEdgeCountMapping = CompleteGraph.instance().getEdgesForEachRoom();
         for (String dataName : dataNameDataMap.keySet()) {
 
             HashMap<String, Number> dataForPerson = dataNameDataMap.get(dataName);

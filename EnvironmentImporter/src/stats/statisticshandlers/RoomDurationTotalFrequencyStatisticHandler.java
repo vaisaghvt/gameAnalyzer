@@ -5,6 +5,7 @@ import com.google.common.collect.Multiset;
 import gui.NetworkModel;
 import gui.Phase;
 import gui.StatsDialog;
+import modelcomponents.CompleteGraph;
 import stats.StatisticChoice;
 import stats.chartdisplays.RoomDurationTotalFrequencyChartDisplay;
 import stats.consoledisplays.RoomDurationTotalFrequencyConsoleDisplay;
@@ -78,7 +79,7 @@ public class RoomDurationTotalFrequencyStatisticHandler extends StatisticsHandle
             this.allOrOne = allOrOne;
             this.type = aggregationType;
             synchronized (NetworkModel.instance()) {
-                roomEdgeCountMapping = NetworkModel.instance().getEdgesForEachRoom();
+                roomEdgeCountMapping = CompleteGraph.instance().getEdgesForEachRoom();
             }
 
         }

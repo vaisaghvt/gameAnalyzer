@@ -6,6 +6,7 @@ import gui.NetworkModel;
 import gui.Phase;
 import gui.StatsDialog;
 import javafx.geometry.Point3D;
+import modelcomponents.CompleteGraph;
 import modelcomponents.ModelEdge;
 import modelcomponents.ModelObject;
 import org.apache.commons.lang3.math.NumberUtils;
@@ -156,7 +157,7 @@ public class GraphDetailsStatisticHandler extends StatisticsHandler<GraphDetails
         results.put("Diameter", String.format("%1$.3f", DistanceStatistics.diameter(graph)));
 
 
-        int totalVertexNumber = NetworkModel.instance().getTotalNumberOfVertices();
+        int totalVertexNumber = CompleteGraph.instance().getTotalNumberOfVertices();
         results.put("Vertex Coverage", Integer.toString((graph.getVertexCount() * 100) / totalVertexNumber));
 
 

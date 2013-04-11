@@ -2,7 +2,7 @@ package markovmodeldata;
 
 import com.google.common.collect.HashBasedTable;
 import edu.uci.ics.jung.graph.DirectedSparseMultigraph;
-import gui.NetworkModel;
+import modelcomponents.CompleteGraph;
 import modelcomponents.GraphUtilities;
 import modelcomponents.ModelEdge;
 import modelcomponents.ModelObject;
@@ -52,7 +52,7 @@ public class MarkovDataStore {
 
 
     private RecursiveHashMap generateHumanDataForOrder(int order) {
-        Collection<ModelObject> vertices = NetworkModel.instance().getCompleteGraph().getVertices();
+        Collection<ModelObject> vertices = CompleteGraph.instance().getVertices();
 //        HashMultimap<String, List<String>> pathsFromSource = HashMultimap.create();
         RecursiveHashMap requiredResult = new RecursiveHashMap(order);
         // Find all sequences of length order from vertex;
@@ -116,8 +116,8 @@ public class MarkovDataStore {
             RecursiveHashMap result = new RecursiveHashMap(n);
             for (List<String> sequence : nMinusOneTable.getSequences()) {
                 String destination = sequence.get(sequence.size() - 1);
-                ModelObject destinationNode = NetworkModel.instance().findRoomByName(destination);
-                Collection<ModelObject> neighbours = NetworkModel.instance().getCompleteGraph().getNeighbors(destinationNode);
+                ModelObject destinationNode = CompleteGraph.instance().findRoomByName(destination);
+                Collection<ModelObject> neighbours = CompleteGraph.instance().getNeighbors(destinationNode);
                 double prior = nMinusOneTable.getValue(sequence);
 
                 List<String> trimmedSequence = trimSequence(m, sequence);
@@ -151,7 +151,7 @@ public class MarkovDataStore {
 
         }
         assert result.size() == m;
-        assert result.get(result.size() - 1) == sequence.get(sequence.size() - 1);
+        assert result.get(result.size() - 1).equals(sequence.get(sequence.size() - 1));
         return result;
 
         //To change body of created methods use File | Settings | File Templates.

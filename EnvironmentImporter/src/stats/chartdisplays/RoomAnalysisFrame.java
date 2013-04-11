@@ -11,6 +11,7 @@ import edu.uci.ics.jung.visualization.decorators.ToStringLabeller;
 import gui.NetworkModel;
 import gui.Phase;
 import gui.ProgressVisualizer;
+import modelcomponents.CompleteGraph;
 import modelcomponents.ModelEdge;
 import modelcomponents.ModelObject;
 import org.apache.commons.collections15.Transformer;
@@ -346,7 +347,7 @@ public class RoomAnalysisFrame extends JFrame {
         });
 
         edgeCollection.addAll(graph.getEdges());
-        int totalSize = NetworkModel.instance().getCompleteGraph().getVertexCount();
+        int totalSize = CompleteGraph.instance().getVertexCount();
         Collection<ModelObject> visitedVertices = new HashSet<ModelObject>();
         long maxTime=0;
         for(ModelEdge edge: edgeCollection){
@@ -383,8 +384,8 @@ public class RoomAnalysisFrame extends JFrame {
 
     private void generateTemporalSecondOrderMarkov(HashMap<String, DirectedSparseMultigraph<ModelObject, ModelEdge>> nameToGraphMap, String room,
                                                    int startTime, int endTime, HashMap<String, Long> nameToMinCoverageTimeMap, HashMap<String, Long> nameToMaxCoverageTimeMap) {
-        final ModelObject mainNode = NetworkModel.instance().findRoomByName(room);
-        Collection<ModelObject> neighbours = NetworkModel.instance().getCompleteGraph().getNeighbors(mainNode);
+        final ModelObject mainNode = CompleteGraph.instance().findRoomByName(room);
+        Collection<ModelObject> neighbours = CompleteGraph.instance().getNeighbors(mainNode);
         ArrayList<DirectedSparseMultigraph<ModelObject, ModelEdge>> localGraphs = new ArrayList<DirectedSparseMultigraph<ModelObject, ModelEdge>>(MAX_NUMBER_TRACKING);
 
         for(int i=0;i<MAX_NUMBER_TRACKING;i++){
@@ -533,8 +534,8 @@ public class RoomAnalysisFrame extends JFrame {
 
     private void generateFirstOrderProbabilities(HashMap<String, DirectedSparseMultigraph<ModelObject, ModelEdge>> nameToGraphMap, String room, int startTimeSeconds, int endTimeSeconds, HashMap<String, Long> nameToMinCoverageTimeMap, HashMap<String, Long> nameToMaxCoverageTimeMap) {
 
-        ModelObject mainNode = NetworkModel.instance().findRoomByName(room);
-        Collection<ModelObject> neighbours = NetworkModel.instance().getCompleteGraph().getNeighbors(mainNode);
+        ModelObject mainNode = CompleteGraph.instance().findRoomByName(room);
+        Collection<ModelObject> neighbours = CompleteGraph.instance().getNeighbors(mainNode);
         DirectedSparseMultigraph<ModelObject, ModelEdge> localGraph = new DirectedSparseMultigraph<ModelObject, ModelEdge>();
 
         localGraph.addVertex(mainNode);
@@ -640,8 +641,8 @@ public class RoomAnalysisFrame extends JFrame {
     private void generateSecondOrderProbabilities(HashMap<String, DirectedSparseMultigraph<ModelObject, ModelEdge>> nameToGraphMap, String room,
                                                   int startTime, int endTime, HashMap<String, Long> nameToMinCoverageTimeMap,
                                                   HashMap<String, Long> nameToMaxCoverageTimeMap) {
-        ModelObject mainNode = NetworkModel.instance().findRoomByName(room);
-        Collection<ModelObject> neighbours = NetworkModel.instance().getCompleteGraph().getNeighbors(mainNode);
+        ModelObject mainNode = CompleteGraph.instance().findRoomByName(room);
+        Collection<ModelObject> neighbours = CompleteGraph.instance().getNeighbors(mainNode);
         DirectedSparseMultigraph<ModelObject, ModelEdge> localGraph = new DirectedSparseMultigraph<ModelObject, ModelEdge>();
 
 
@@ -908,7 +909,7 @@ public class RoomAnalysisFrame extends JFrame {
     private void initializeRoomList() {
 
         synchronized (roomList) {
-            roomList = new ArrayList<String>(NetworkModel.instance().getSortedRooms());
+            roomList = new ArrayList<String>(CompleteGraph.instance().getSortedRooms());
         }
 
     }

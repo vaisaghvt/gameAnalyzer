@@ -7,6 +7,7 @@ import com.google.common.collect.Ordering;
 import edu.uci.ics.jung.graph.DirectedSparseMultigraph;
 import gui.NetworkModel;
 import gui.Phase;
+import modelcomponents.CompleteGraph;
 import modelcomponents.GraphUtilities;
 import modelcomponents.ModelEdge;
 import modelcomponents.ModelObject;
@@ -855,7 +856,7 @@ public class PathPredictionFrame extends JFrame {
     private void initializeRoomList() {
 
         synchronized (roomList) {
-            roomList = new ArrayList<String>(NetworkModel.instance().getSortedRooms());
+            roomList = new ArrayList<String>(CompleteGraph.instance().getSortedRooms());
         }
 
     }

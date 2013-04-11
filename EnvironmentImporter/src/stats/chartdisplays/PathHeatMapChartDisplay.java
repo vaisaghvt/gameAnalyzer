@@ -1,6 +1,6 @@
 package stats.chartdisplays;
 
-import gui.NetworkModel;
+import modelcomponents.CompleteGraph;
 import org.jfree.chart.ChartPanel;
 import org.jfree.chart.JFreeChart;
 import org.jfree.chart.axis.AxisLocation;
@@ -52,7 +52,7 @@ public class PathHeatMapChartDisplay extends ChartDisplay<HashMap<String, HashMa
             HashMap<String, HashMap<String, Double>> data) {
         int i = 0;
         //Graph<ModelObject, ModelEdge> graph = NetworkModel.instance().getCompleteGraph();
-        Collection<String> rooms= NetworkModel.instance().getFloorNeighbourSortedRooms();
+        Collection<String> rooms= CompleteGraph.instance().getFloorNeighbourSortedRooms();
         HashMap<String, Integer> nameToCodeMapping = new HashMap<String, Integer>();
         for (String name : rooms) {
 //            System.out.println(i+":"+name);

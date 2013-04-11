@@ -4,7 +4,6 @@ import ec.util.MersenneTwister;
 import edu.uci.ics.jung.graph.DirectedGraph;
 import edu.uci.ics.jung.graph.DirectedSparseMultigraph;
 import edu.uci.ics.jung.graph.Graph;
-import gui.NetworkModel;
 import gui.ProgressVisualizer;
 import javafx.geometry.Point3D;
 import org.apache.commons.collections15.buffer.CircularFifoBuffer;
@@ -40,12 +39,12 @@ public class GraphUtilities {
         SwingWorker<HashMap<String, HashMap<String, HashMap<String, Double>>>, Void> secondOrderProbabilityCalculator = new SwingWorker<HashMap<String, HashMap<String, HashMap<String, Double>>>, Void>() {
             @Override
             protected HashMap<String, HashMap<String, HashMap<String, Double>>> doInBackground() throws Exception {
-                int numberOfRooms = NetworkModel.instance().getSortedRooms().size();
+                int numberOfRooms = CompleteGraph.instance().getSortedRooms().size();
                 int count = 0;
 
                 this.addPropertyChangeListener(pv);
                 HashMap<String, HashMap<String, HashMap<String, Double>>> result = new HashMap<String, HashMap<String, HashMap<String, Double>>>();
-                for (String room : NetworkModel.instance().getSortedRooms()) {
+                for (String room : CompleteGraph.instance().getSortedRooms()) {
                     pv.print("processing " + room + "...\n");
                     result.put(room,
                             calculateSecondOrderProbForNeighbouringRooms(graphCollection, room));
@@ -81,8 +80,8 @@ public class GraphUtilities {
 
     private static HashMap<String, HashMap<String, Double>> calculateSecondOrderProbForNeighbouringRooms(
             Collection<DirectedSparseMultigraph<ModelObject, ModelEdge>> graphCollection, String startRoom) {
-        ModelObject mainNode = NetworkModel.instance().findRoomByName(startRoom);
-        Collection<ModelObject> neighbours = NetworkModel.instance().getCompleteGraph().getNeighbors(mainNode);
+        ModelObject mainNode = CompleteGraph.instance().findRoomByName(startRoom);
+        Collection<ModelObject> neighbours = CompleteGraph.instance().getNeighbors(mainNode);
         DirectedSparseMultigraph<ModelObject, ModelEdge> localGraph = new DirectedSparseMultigraph<ModelObject, ModelEdge>();
 
 //        localGraph.addVertex(mainNode);
@@ -192,11 +191,11 @@ public class GraphUtilities {
         SwingWorker<HashMap<String, HashMap<String, Double>>, Void> firstOrderProbabilityCalculator = new SwingWorker<HashMap<String, HashMap<String, Double>>, Void>() {
             @Override
             protected HashMap<String, HashMap<String, Double>> doInBackground() throws Exception {
-                int numberOfRooms = NetworkModel.instance().getSortedRooms().size();
+                int numberOfRooms = CompleteGraph.instance().getSortedRooms().size();
                 int count = 0;
                 this.addPropertyChangeListener(pv);
                 HashMap<String, HashMap<String, Double>> result = new HashMap<String, HashMap<String, Double>>();
-                for (String room : NetworkModel.instance().getSortedRooms()) {
+                for (String room : CompleteGraph.instance().getSortedRooms()) {
                     pv.print("processing " + room + "...\n");
 
                     result.put(room,
@@ -229,8 +228,8 @@ public class GraphUtilities {
 
     private static HashMap<String, Double> calculateFirstOrderProbForNeighbouringRooms(
             Collection<DirectedSparseMultigraph<ModelObject, ModelEdge>> graphCollection, String room) {
-        ModelObject mainNode = NetworkModel.instance().findRoomByName(room);
-        Collection<ModelObject> neighbours = NetworkModel.instance().getCompleteGraph().getNeighbors(mainNode);
+        ModelObject mainNode = CompleteGraph.instance().findRoomByName(room);
+        Collection<ModelObject> neighbours = CompleteGraph.instance().getNeighbors(mainNode);
         DirectedSparseMultigraph<ModelObject, ModelEdge> localGraph = new DirectedSparseMultigraph<ModelObject, ModelEdge>();
 
         localGraph.addVertex(mainNode);
@@ -295,12 +294,12 @@ public class GraphUtilities {
             HashMap<String, HashMap<String, Double>> firstOrderProbs, HashMap<String, HashMap<String, HashMap<String, Double>>> secondOrderProbs,
             String startingRoom, final int coverageRequired) {
         try {
-            Graph<ModelObject, ModelEdge> completeGraph = NetworkModel.instance().getCompleteGraph();
+            Graph<ModelObject, ModelEdge> completeGraph = CompleteGraph.instance().getGraph();
             ModelObject startingLocation = null;
 
 
             if (completeGraph != null) {
-                startingLocation = NetworkModel.instance().findRoomByName(startingRoom);
+                startingLocation = CompleteGraph.instance().findRoomByName(startingRoom);
                 if (startingLocation == null) {
                     System.out.println("No starting location");
                     throw new NullPointerException();
@@ -358,12 +357,12 @@ public class GraphUtilities {
             String startingRoom, int pathLength) {
 
         try {
-            Graph<ModelObject, ModelEdge> completeGraph = NetworkModel.instance().getCompleteGraph();
+            Graph<ModelObject, ModelEdge> completeGraph = CompleteGraph.instance().getGraph();
             ModelObject startingLocation = null;
 
 
             if (completeGraph != null) {
-                startingLocation = NetworkModel.instance().findRoomByName(startingRoom);
+                startingLocation = CompleteGraph.instance().findRoomByName(startingRoom);
                 if (startingLocation == null) {
                     System.out.println("No starting location");
                     throw new NullPointerException();
@@ -519,7 +518,7 @@ public class GraphUtilities {
 
 
     private static ModelObject addNewVertexToPath(ModelObject lastNode, String destination, DirectedSparseMultigraph<ModelObject, ModelEdge> result, int currentLength) {
-        ModelObject newNode = NetworkModel.instance().findRoomByName(destination);
+        ModelObject newNode = CompleteGraph.instance().findRoomByName(destination);
         result.addVertex(newNode);
         ModelEdge edge = new ModelEdge();
         edge.setTime(currentLength);
@@ -652,7 +651,7 @@ public class GraphUtilities {
         int n = 0;
         for (int areaId : group.getAreaIds()) {
 
-            ModelArea tempArea = NetworkModel.instance().getRoomForId(areaId);
+            ModelArea tempArea = CompleteGraph.instance().getRoomForId(areaId);
             Point3D tempPoint = getCenterOfRoom(tempArea);
             sumX += tempPoint.getX();
             sumY += tempPoint.getY();
@@ -670,7 +669,7 @@ public class GraphUtilities {
 
         double x = (p1.getX() + p2.getX()) / 2;
         double y = (p1.getY() + p2.getY()) / 2;
-        double z = (double) NetworkModel.instance().getFloorForArea(room);
+        double z = (double) CompleteGraph.instance().getFloorForArea(room);
         return new Point3D(x, y, z);
 
     }
@@ -686,7 +685,7 @@ public class GraphUtilities {
     }
 
     public static Double calculateAverageCoverage(Collection<DirectedSparseMultigraph<ModelObject, ModelEdge>> graphCollection) {
-        int totalNumberOfVertices = NetworkModel.instance().getCompleteGraph().getVertexCount();
+        int totalNumberOfVertices = CompleteGraph.instance().getVertexCount();
         double[] coverageValues = new double[graphCollection.size()];
         int i = 0;
         for (DirectedSparseMultigraph graph : graphCollection) {
