@@ -44,7 +44,7 @@ public class MarkovDataOrganizer {
         return collectionToMarkovDataMapping.get(codeString);
     }
 
-    public MarkovDataStore getRandomWalkMarkovData(RandomWalkOrganizer.RANDOM_WALK_TYPE type){
+    public MarkovDataStore getRandomWalkMarkovData(RandomWalkOrganizer.RandomWalkType type){
 
         String codeString = "RandomWalk"+type;
         if(!collectionToMarkovDataMapping.containsKey(codeString)){

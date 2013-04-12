@@ -290,7 +290,7 @@ public class GraphUtilities {
     public static Collection<DirectedSparseMultigraph<ModelObject, ModelEdge>> generatePathsTillCoverage(
             RecursiveHashMap firstOrderProbs, RecursiveHashMap secondOrderProbs,
             String startingRoom, final int coverageRequired) {
-        try{
+        try {
             Graph<ModelObject, ModelEdge> completeGraph = CompleteGraph.instance().getGraph();
             ModelObject startingLocation;
 
@@ -339,13 +339,11 @@ public class GraphUtilities {
 
 
             return resultSet;
-        }  catch (Exception e) {
+        } catch (Exception e) {
             e.printStackTrace();
             return null;
         }
     }
-
-
 
 
     public static Collection<DirectedSparseMultigraph<ModelObject, ModelEdge>> generatePaths(
@@ -428,15 +426,14 @@ public class GraphUtilities {
 
         currentNode = addNewVertexToPath(currentNode, destination, path, 0);
 
-        int numberOfNodesRequired = coverageRequired * completeGraph.getVertexCount() /100;
-
+        int numberOfNodesRequired = coverageRequired * completeGraph.getVertexCount() / 100;
 
 
         ModelObject lastNode = startingLocation;
 
-        int hops=1;
+        int hops = 1;
 
-        while(path.getVertexCount() < numberOfNodesRequired){
+        while (path.getVertexCount() < numberOfNodesRequired) {
             ModelObject tempNode = currentNode;
             currentNode = addOneMoreHop(currentNode, lastNode, path, firstOrderProbabilities, secondOrderProbabilities, hops);
             lastNode = tempNode;
@@ -703,12 +700,12 @@ public class GraphUtilities {
     public static HashMap<String, Double> calculateNumberOfHops(Collection<DirectedSparseMultigraph<ModelObject, ModelEdge>> pathCollections) {
         double[] edgeCountArray = new double[pathCollections.size()];
         int pathNumber = 0;
-        for(DirectedSparseMultigraph<ModelObject, ModelEdge> path: pathCollections){
+        for (DirectedSparseMultigraph<ModelObject, ModelEdge> path : pathCollections) {
             edgeCountArray[pathNumber] = path.getEdgeCount();
             pathNumber++;
         }
 
-        Mean meanCalculator= new Mean();
+        Mean meanCalculator = new Mean();
         double calculatedMean = meanCalculator.evaluate(edgeCountArray);
         StandardDeviation sd = new StandardDeviation();
         double calculatedSD = sd.evaluate(edgeCountArray);
@@ -720,34 +717,36 @@ public class GraphUtilities {
     }
 
 
-    public static Collection<List<String>> findActualPathsOfLength(DirectedSparseMultigraph<ModelObject, ModelEdge> graph, ModelObject startingNode, int length) {
-        Collection<List<String>> listOfPaths = new ArrayList<List<String>>();
+    public static Collection<List<String>> findActualPathsOfLength(final DirectedSparseMultigraph<ModelObject, ModelEdge> graph, final ModelObject startingNode, final int length) {
+        assert length >= 1;
+        final ArrayList<List<String>> listOfPaths = new ArrayList<List<String>>();
+        final Collection<ModelEdge> outEdges = graph.getOutEdges(startingNode);
+//        if (length < 3) {
 
-        Collection<ModelEdge> outEdges =  graph.getOutEdges(startingNode);
-        for(ModelEdge edge:outEdges){
-
-            List<String> path = new ArrayList<String>(length);
-            path.add(startingNode.toString());
-            followTillHopCount(graph, startingNode, edge, length - 1, path);
-            if(path.size()== length){
-                listOfPaths.add(path);
-            }else {
-                System.out.println("path ignored due to insufficient size");
+            if (outEdges == null) {
+                return listOfPaths;
             }
-        }
-
+            for (final ModelEdge edge : outEdges) {
+                List<String> path = new ArrayList<String>(length);
+                path.add(startingNode.toString());
+                followTillHopCount(graph, startingNode, edge, length - 1, path);
+                if (path.size() - 1 == length) {
+                    listOfPaths.add(path);
+                }
+            }
+//        }
         return listOfPaths;
     }
 
     private static void followTillHopCount(DirectedSparseMultigraph<ModelObject, ModelEdge> graph, ModelObject startingNode, ModelEdge previousEdge, int hopsRemaining, List<String> path) {
-        if(hopsRemaining!=0){
-            ModelObject currentLocation = graph.getOpposite(startingNode, previousEdge);
-            path.add(currentLocation.toString());
+        ModelObject currentLocation = graph.getOpposite(startingNode, previousEdge);
+        path.add(currentLocation.toString());
+        if (hopsRemaining != 0) {
             ModelEdge newEdge = findNextEdge(currentLocation, previousEdge, graph);
-            if(newEdge!=null){
-                followTillHopCount(graph, startingNode, newEdge, hopsRemaining-1, path);
-            }else{
-                System.out.println("No more path to follow!");
+            if (newEdge != null) {
+                followTillHopCount(graph, currentLocation, newEdge, hopsRemaining - 1, path);
+//            } else {
+//                System.out.println("No more path to follow!");
             }
         }
     }
@@ -765,9 +764,9 @@ public class GraphUtilities {
 
         setOfEdges.addAll(graph.getOutEdges(currentLocation));
 
-        for(ModelEdge edge: setOfEdges){
+        for (ModelEdge edge : setOfEdges) {
             double nextTime = edge.getTime();
-            if(nextTime>=currentTime){
+            if (nextTime >= currentTime) {
                 return edge;
             }
         }

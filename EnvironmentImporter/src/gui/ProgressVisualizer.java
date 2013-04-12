@@ -56,11 +56,13 @@ public class ProgressVisualizer implements PropertyChangeListener {
 
 
 
+
+                progressFrame.setSize(400, 200);
+
                 synchronized (currentLocation){
-                    currentLocation = new Point(currentLocation.x+10, currentLocation.y+50);
+                    currentLocation = new Point((int) Math.floor((currentLocation.x+10) %(screenSize.getWidth()-progressFrame.getWidth())), (int) Math.floor((currentLocation.y+50) %(screenSize.getHeight()-progressFrame.getHeight())));
                 }
                 progressFrame.setLocation(currentLocation);
-                progressFrame.setSize(400, 200);
                 progressFrame.setVisible(true);
             }
         });

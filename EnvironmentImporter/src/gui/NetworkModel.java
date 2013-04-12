@@ -1286,7 +1286,7 @@ public class areaToLocationTransformer<ModelObject, Point2D> implements Transfor
 
         if (dataName.equalsIgnoreCase("random walk")) {
             if (choice == VERTEX_VISIT_FREQUENCY && phase == Phase.EXPLORATION) {
-                return RandomWalkOrganizer.calculateAverageRoomVisitFrequency(RandomWalkOrganizer.RANDOM_WALK_TYPE.UNBIASED);
+                return RandomWalkOrganizer.calculateAverageRoomVisitFrequency(RandomWalkOrganizer.RandomWalkType.UNBIASED);
             } else {
                 System.out.println("Wrong Call to Random Walk");
                 return new HashMap<String, Number>();

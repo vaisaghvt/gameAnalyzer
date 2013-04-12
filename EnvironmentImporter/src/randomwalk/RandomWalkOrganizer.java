@@ -31,16 +31,16 @@ import static modelcomponents.GraphUtilities.isStable;
 public class RandomWalkOrganizer {
 
 
-    public static RANDOM_WALK_TYPE getRandomWalkType() {
-        return (RANDOM_WALK_TYPE)
+    public static RandomWalkType getRandomWalkType() {
+        return (RandomWalkType)
                 JOptionPane.showInputDialog(new JFrame(), "Choose random walk type", "Random walk chooser",
                         JOptionPane.QUESTION_MESSAGE, null,
-                        RANDOM_WALK_TYPE.values(), RANDOM_WALK_TYPE.UNBIASED);
+                        RandomWalkType.values(), RandomWalkType.UNBIASED);
 
     }
 
 
-    public enum RANDOM_WALK_TYPE {
+    public enum RandomWalkType {
         UNBIASED(new UnbiasedRandomWalk()),
         WITH_MEMORY(new FirstOrderBiasedRandomWalk()),
         WITH_MEMORY_AND_DISTANCE(new FirstOrderBiasedWithDistance());
@@ -49,7 +49,7 @@ public class RandomWalkOrganizer {
         private final Semaphore semaphore;
 
 
-        RANDOM_WALK_TYPE(RandomWalkGenerator generator) {
+        RandomWalkType(RandomWalkGenerator generator) {
             this.randomWalkGenerator = generator;
             this.semaphore = new Semaphore(1);
         }
@@ -60,8 +60,8 @@ public class RandomWalkOrganizer {
 
     public final static MersenneTwister random = new MersenneTwister();
 
-    private static HashMap<RANDOM_WALK_TYPE, Collection<DirectedSparseMultigraph<ModelObject, ModelEdge>>> randomWalkGraphs
-            = new HashMap<RANDOM_WALK_TYPE, Collection<DirectedSparseMultigraph<ModelObject, ModelEdge>>>();
+    private static HashMap<RandomWalkType, Collection<DirectedSparseMultigraph<ModelObject, ModelEdge>>> randomWalkGraphs
+            = new HashMap<RandomWalkType, Collection<DirectedSparseMultigraph<ModelObject, ModelEdge>>>();
 
 
     private static final int MAX_SOLVER_SIZE = 5000;
@@ -70,7 +70,7 @@ public class RandomWalkOrganizer {
     }
 
 
-    private static Collection<DirectedSparseMultigraph<ModelObject, ModelEdge>> generateRandomWalkCollection(final RANDOM_WALK_TYPE type) {
+    private static Collection<DirectedSparseMultigraph<ModelObject, ModelEdge>> generateRandomWalkCollection(final RandomWalkType type) {
         if (CompleteGraph.instance().getGraph() == null ||CompleteGraph.instance().getStartingNode() == null) {
             throw new NullPointerException();
         }
@@ -159,7 +159,7 @@ public class RandomWalkOrganizer {
     }
 
 
-    public static HashMap<String, Number> calculateAverageRoomVisitFrequency(final RANDOM_WALK_TYPE type) {
+    public static HashMap<String, Number> calculateAverageRoomVisitFrequency(final RandomWalkType type) {
 
         ensureGraphExists(type);
 
@@ -187,7 +187,7 @@ public class RandomWalkOrganizer {
 
     }
 
-    private static void ensureGraphExists(final RANDOM_WALK_TYPE type) {
+    private static void ensureGraphExists(final RandomWalkType type) {
 
         if (!randomWalkGraphs.containsKey(type)) {
             final Semaphore tempSemaphore = new Semaphore(1);
@@ -223,7 +223,7 @@ public class RandomWalkOrganizer {
 
 
     public static HashMap<String, Number> calculateAverageDoorUseFrequency() {
-        RANDOM_WALK_TYPE type = getRandomWalkType();
+        RandomWalkType type = getRandomWalkType();
         ensureGraphExists(type);
 
         HashMap<String, Number> result = new HashMap<String, Number>();
@@ -256,13 +256,13 @@ public class RandomWalkOrganizer {
         } catch (InterruptedException e) {
             e.printStackTrace();
         }
-        RANDOM_WALK_TYPE type = getRandomWalkType();
+        RandomWalkType type = getRandomWalkType();
         ensureGraphExists(type);
         generatorSemaphore.release();
         return randomWalkGraphs.get(type);
     }
 
-    public static Collection<DirectedSparseMultigraph<ModelObject, ModelEdge>> getAllRandomWalkGraphs(final Semaphore generatorSemaphore, final RANDOM_WALK_TYPE type) {
+    public static Collection<DirectedSparseMultigraph<ModelObject, ModelEdge>> getAllRandomWalkGraphs(final Semaphore generatorSemaphore, final RandomWalkType type) {
         final Semaphore tempSemaphore = new Semaphore(1);
         try {
             tempSemaphore.acquire(1);
@@ -288,7 +288,7 @@ public class RandomWalkOrganizer {
         SwingWorker<HashMap<String, Double>, Void> tempWorker = new SwingWorker<HashMap<String, Double>, Void>() {
             @Override
             protected HashMap<String, Double> doInBackground() throws Exception {
-                final RANDOM_WALK_TYPE type = getRandomWalkType();
+                final RandomWalkType type = getRandomWalkType();
 //                ensureGraphExists(type);
 
                 semaphore.acquire(2);
@@ -366,7 +366,7 @@ public class RandomWalkOrganizer {
         SwingWorker<Double, Void> tempWorker = new SwingWorker<Double, Void>() {
             @Override
             protected Double doInBackground() throws Exception {
-                final RANDOM_WALK_TYPE type = getRandomWalkType();
+                final RandomWalkType type = getRandomWalkType();
                 System.out.println("here");
                 ensureGraphExists(type);
 

@@ -105,7 +105,7 @@ public class RecursiveHashMap {
     public String toString() {
         StringBuilder result = new StringBuilder();
         for (List<String> sequence : sequences) {
-            result.append(sequence + "=" + this.getValue(sequence) + "\n");
+            result.append(sequence + "=" + this.getValue(new ArrayList<String>(sequence)) + "\n");
         }
         return result.toString();
     }

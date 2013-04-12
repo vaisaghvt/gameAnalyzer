@@ -57,7 +57,7 @@ public enum StatisticChoice {
             Phase.EXPLORATION, Phase.TASK_1, Phase.TASK_2, Phase.TASK_3),
     STAT_SUMMARY(new GraphDetailsStatisticHandler(), "Detailed statistics of each agent", true, true, false),
     PARALLEL_COORDINATE_PLOT(new ParallelCoordinatePlotGenerator(), "Plot on a parallel coordinate plot", false, false,false),
-    FIRST_ORDER_HEAT_MAP(new NthOrderHeatMapHandler(), "Plot a heat map of first order markov probabilities from rooms", true, false,true,
+    HEAT_MAP(new NthOrderHeatMapHandler(), "Plot a heat map markov probabilities", true, false,true,
             Phase.EXPLORATION, Phase.TASK_1, Phase.TASK_2, Phase.TASK_3),;
 
 

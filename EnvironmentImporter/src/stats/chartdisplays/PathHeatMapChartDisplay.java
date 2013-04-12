@@ -15,6 +15,7 @@ import org.jfree.data.xy.MatrixSeriesCollection;
 import org.jfree.data.xy.XYZDataset;
 import org.jfree.ui.RectangleEdge;
 import org.jfree.ui.RectangleInsets;
+import stats.statisticshandlers.HeatMapComparisonDialog;
 
 import java.awt.*;
 import java.util.Collection;
@@ -31,6 +32,7 @@ public class PathHeatMapChartDisplay extends ChartDisplay<HashBasedTable<String,
 
 
     private HashMap<String, Integer> roomToCodeMapping;
+    private HeatMapComparisonDialog.HeatMapType type;
 
 
     @Override
@@ -174,4 +176,7 @@ public class PathHeatMapChartDisplay extends ChartDisplay<HashBasedTable<String,
     }
 
 
+    public void setType(HeatMapComparisonDialog.HeatMapType type) {
+        this.type = type;
+    }
 }

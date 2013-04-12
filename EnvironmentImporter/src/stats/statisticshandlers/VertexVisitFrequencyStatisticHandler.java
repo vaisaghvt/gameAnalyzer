@@ -47,7 +47,7 @@ public class VertexVisitFrequencyStatisticHandler extends StatisticsHandler<Vert
 
             @Override
             protected Collection<DirectedSparseMultigraph<ModelObject, ModelEdge>> doInBackground() throws Exception {
-                return RandomWalkOrganizer.getAllRandomWalkGraphs(generatorSemaphore, RandomWalkOrganizer.RANDOM_WALK_TYPE.UNBIASED);
+                return RandomWalkOrganizer.getAllRandomWalkGraphs(generatorSemaphore, RandomWalkOrganizer.RandomWalkType.UNBIASED);
             }
         };
         worker.execute();
@@ -65,7 +65,7 @@ public class VertexVisitFrequencyStatisticHandler extends StatisticsHandler<Vert
         HashMap<String, Double> result = new HashMap<String, Double>();
 
         int[] NRandomForFloor = new int[3];
-        HashMap<String, Number> randomWalkData = RandomWalkOrganizer.calculateAverageRoomVisitFrequency(RandomWalkOrganizer.RANDOM_WALK_TYPE.UNBIASED);
+        HashMap<String, Number> randomWalkData = RandomWalkOrganizer.calculateAverageRoomVisitFrequency(RandomWalkOrganizer.RandomWalkType.UNBIASED);
 
         int NRandom = 0;
         for (String room : randomWalkData.keySet()) {
@@ -93,7 +93,7 @@ public class VertexVisitFrequencyStatisticHandler extends StatisticsHandler<Vert
     private HashMap<String, Double> normalizeResult(HashMap<String, Double> personData) {
 
         HashMap<String, Double> result = new HashMap<String, Double>();
-        HashMap<String, Number> randomWalkData = RandomWalkOrganizer.calculateAverageRoomVisitFrequency(RandomWalkOrganizer.RANDOM_WALK_TYPE.UNBIASED);
+        HashMap<String, Number> randomWalkData = RandomWalkOrganizer.calculateAverageRoomVisitFrequency(RandomWalkOrganizer.RandomWalkType.UNBIASED);
         int NRandom = 0, NPerson = 0;
         int[] NRandomForFloor = new int[3];
         int[] NPersonForFloor = new int[3];

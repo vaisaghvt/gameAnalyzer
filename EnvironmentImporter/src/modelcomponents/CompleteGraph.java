@@ -26,18 +26,18 @@ public class CompleteGraph {
     private CompleteGraph() {
     }
 
-    public ModelObject getStartingNode(){
+    public ModelObject getStartingNode() {
         return startingNode;
     }
 
-    public static CompleteGraph instance(){
-        if(instance ==null){
+    public static CompleteGraph instance() {
+        if (instance == null) {
             instance = new CompleteGraph();
         }
         return instance;
     }
 
-    public void initialize(ModelFile file){
+    public void initialize(ModelFile file) {
 
         completeGraph = new UndirectedSparseGraph<ModelObject, ModelEdge>();
         idAreaMapping = new HashMap<Integer, ModelArea>();
@@ -86,7 +86,6 @@ public class CompleteGraph {
         }
 
 
-
         startingNode = this.findRoomByName("Start");
         if (startingNode == null) {
             startingNode = this.findRoomByName("StartingRoom");
@@ -97,7 +96,6 @@ public class CompleteGraph {
         for (ModelObject area : this.completeGraph.getVertices()) {
             sortedRoomNames.add(area.toString());
         }
-
 
 
     }
