@@ -176,7 +176,7 @@ public class MarkovDataStore {
 
     private RecursiveHashMap constructNFromM(int n, int m) {
         if (n <= m) {
-            return orderToDirectMarkovDataMapping.get(n);
+            return getDirectMarkovData(n);
 //        }else if (n == m + 1) {
 //            RecursiveHashMap mThOrderMap = orderToDirectMarkovDataMapping.getValue(m);
 //            RecursiveHashMap result = new RecursiveHashMap(n);
@@ -206,9 +206,11 @@ public class MarkovDataStore {
 //            return result;
 
         } else {
-            RecursiveHashMap mThOrderMap = orderToDirectMarkovDataMapping.get(m);
-            RecursiveHashMap nMinusOneTable = constructNFromM(n - 1, m);  // equals mthOrderMap if n= m+1;
             RecursiveHashMap result = new RecursiveHashMap(n);
+            try{
+
+            RecursiveHashMap nMinusOneTable = constructNFromM(n - 1, m);  // equals mthOrderMap if n= m+1;
+            RecursiveHashMap mThOrderMap = getDirectMarkovData(m);
             for (List<String> sequence : nMinusOneTable.getSequences()) {
                 String destination = sequence.get(sequence.size() - 1);
                 ModelObject destinationNode = CompleteGraph.instance().findRoomByName(destination);
@@ -218,21 +220,24 @@ public class MarkovDataStore {
                 List<String> trimmedSequence = trimSequence(m, sequence);
 
                 for (ModelObject neighbour : neighbours) {
-                    List<String> newSequence = new ArrayList<String>();
-                    newSequence.addAll(trimmedSequence);
-                    newSequence.remove(0);
+                    List<String> newSequence = new ArrayList<String>(trimmedSequence);
+//                    newSequence.addAll(trimmedSequence);
+//                    newSequence.remove(0);
                     newSequence.add(neighbour.toString());
                     double newValue = prior *
                             mThOrderMap.getValue(new ArrayList<String>(newSequence));
 
-                    List<String> newSequenceForN = new ArrayList<String>();
-                    newSequenceForN.addAll(sequence);
+                    List<String> newSequenceForN = new ArrayList<String>(sequence);
+//                    newSequenceForN.addAll();
                     newSequenceForN.add(neighbour.toString());
 
                     result.putValue(newSequenceForN, newValue);
 
 
                 }
+            }
+            }catch(Exception e){
+                e.printStackTrace();
             }
             return result;
 
