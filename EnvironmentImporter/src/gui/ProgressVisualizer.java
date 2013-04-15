@@ -17,6 +17,18 @@ import java.text.NumberFormat;
  */
 public class ProgressVisualizer implements PropertyChangeListener {
 
+    public void setProgress(final int progress) {
+        SwingUtilities.invokeLater(new Runnable() {
+            @Override
+            public void run() {
+                progressBar.setValue(progress);
+            }
+
+
+        });
+
+    }
+
     public enum DeterminateType{
         DETERMINATE,INDETERMINATE
     }

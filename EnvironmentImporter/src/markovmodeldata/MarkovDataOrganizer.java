@@ -56,7 +56,7 @@ public class MarkovDataOrganizer {
     }
 
 
-    private String findCode(Collection<String> names, Collection<Phase> phases) {
+    public static String findCode(Collection<String> names, Collection<Phase> phases) {
         TreeSet<String> sortedNames = new TreeSet<String>(names);
 
         StringBuilder finalCode= new StringBuilder();
