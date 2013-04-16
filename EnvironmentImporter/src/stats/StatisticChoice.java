@@ -21,7 +21,6 @@ public enum StatisticChoice {
     TIME_SPENT_PER_SIGNIFICANT_VERTEX(new SignificantVertexVisitDurationStatisticHandler(), "Time spent at \"significant\" vertices", true, true, false,
             Phase.EXPLORATION, Phase.TASK_1, Phase.TASK_2, Phase.TASK_3),
     ROOM_ANALYSIS(new RoomAnalysisHandler(), "Analyse rooms in detail", true, false,true),
-    PATH_PREDICTION(new PathPredictionHandler(), "Predict paths from current location", true, false,false),
 
     VERTEX_VISIT_FREQUENCY(new VertexVisitFrequencyStatisticHandler(), "Frequency of visit for each room"
             , true, true,true,  Phase.EXPLORATION, Phase.TASK_1, Phase.TASK_2, Phase.TASK_3),
@@ -57,7 +56,7 @@ public enum StatisticChoice {
             Phase.EXPLORATION, Phase.TASK_1, Phase.TASK_2, Phase.TASK_3),
     STAT_SUMMARY(new GraphDetailsStatisticHandler(), "Detailed statistics of each agent", true, true, false),
     PARALLEL_COORDINATE_PLOT(new ParallelCoordinatePlotGenerator(), "Plot on a parallel coordinate plot", false, false,false),
-    HEAT_MAP(new NthOrderHeatMapHandler(), "Plot a heat map markov probabilities", true, false,true,
+    HEAT_MAP(new NthOrderHeatMapHandler(), "Get markov data related stats", true, false,false,
             Phase.EXPLORATION, Phase.TASK_1, Phase.TASK_2, Phase.TASK_3),;
 
 

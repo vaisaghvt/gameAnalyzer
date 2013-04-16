@@ -17,6 +17,8 @@ import java.util.concurrent.ExecutionException;
 import java.util.concurrent.Semaphore;
 import java.util.concurrent.TimeUnit;
 
+import static modelcomponents.GraphUtilities.trimSequence;
+
 public class MarkovDataStore {
     private final Collection<DirectedSparseMultigraph<ModelObject, ModelEdge>> graphCollection;
     HashMap<Integer, RecursiveHashMap> orderToDirectMarkovDataMapping =
@@ -180,7 +182,7 @@ public class MarkovDataStore {
 //        }else if (n == m + 1) {
 //            RecursiveHashMap mThOrderMap = orderToDirectMarkovDataMapping.getValue(m);
 //            RecursiveHashMap result = new RecursiveHashMap(n);
-//            for (List<String> sequence : mThOrderMap.getSequences()) {
+//            for (List<String> sequence : mThOrderMap.getSequenceCodes()) {
 //                String destination = sequence.getValue(sequence.size() - 1);
 //                ModelObject destinationNode = NetworkModel.instance().findRoomByName(destination);
 //                Collection<ModelObject> neighbours = NetworkModel.instance().getCompleteGraph().getNeighbors(destinationNode);
@@ -211,7 +213,8 @@ public class MarkovDataStore {
 
             RecursiveHashMap nMinusOneTable = constructNFromM(n - 1, m);  // equals mthOrderMap if n= m+1;
             RecursiveHashMap mThOrderMap = getDirectMarkovData(m);
-            for (List<String> sequence : nMinusOneTable.getSequences()) {
+            for (String sequenceCode : nMinusOneTable.getSequenceCodes()) {
+                List<String> sequence = nMinusOneTable.getSequenceForCode(sequenceCode);
                 String destination = sequence.get(sequence.size() - 1);
                 ModelObject destinationNode = CompleteGraph.instance().findRoomByName(destination);
                 Collection<ModelObject> neighbours = CompleteGraph.instance().getNeighbors(destinationNode);
@@ -244,18 +247,6 @@ public class MarkovDataStore {
         }
     }
 
-    private List<String> trimSequence(int m, List<String> sequence) {
-        List<String> result = new ArrayList<String>();
-        for (int i = sequence.size() - 1; result.size() < m; i--) {
-            result.add(0, sequence.get(i));
-
-        }
-        assert result.size() == m;
-        assert result.get(result.size() - 1).equals(sequence.get(sequence.size() - 1));
-        return result;
-
-        //To change body of created methods use File | Settings | File Templates.
-    }
 
 
 }

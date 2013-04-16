@@ -6,7 +6,9 @@ import gui.NetworkModel;
 import gui.Phase;
 import gui.StatsDialog;
 import markovmodeldata.MarkovDataOrganizer;
+import markovmodeldata.RecursiveHashMap;
 import modelcomponents.CompleteGraph;
+import modelcomponents.GraphUtilities;
 import modelcomponents.ModelEdge;
 import modelcomponents.ModelObject;
 import randomwalk.RandomWalkOrganizer;
@@ -54,18 +56,26 @@ public class NthOrderHeatMapHandler extends StatisticsHandler<PathHeatMapConsole
 
     @Override
     public void generateAndDisplayStats(Collection<String> dataNames, Phase phase, StatsDialog.AllOrOne allOrOne, StatsDialog.AggregationType aggregationType) {
-        int order=-1;
+
         heatMapComparisonDialog = new HeatMapComparisonDialog(this);
         this.dataNames = dataNames;
         this.phase = phase;
         this.allOrOne = allOrOne;
-        this.order = order;
+        this.order = -1;
 
     }
 
     @Override
     public void actionPerformed(ActionEvent e) {
-        if(e.getSource() == heatMapComparisonDialog.generateButton){
+        graph1RandomWalkType = null;
+        graph1HumanDataType = null;
+        graph1M = 0;
+
+        graph2RandomWalkType = null;
+        graph2HumanDataType = null;
+        graph2M = 0;
+
+        if(e.getSource() == heatMapComparisonDialog.generateHeatMapButton){
             order = heatMapComparisonDialog.getOrder();
             heatMapType = heatMapComparisonDialog.getHeatMapType();
             graph1Type = heatMapComparisonDialog.getGraph1Type();
@@ -97,8 +107,50 @@ public class NthOrderHeatMapHandler extends StatisticsHandler<PathHeatMapConsole
             heatMapComparisonDialog.dispose();
         }else if(e.getSource() == heatMapComparisonDialog.closeButton){
             heatMapComparisonDialog.dispose();
+        }else if(e.getSource() == heatMapComparisonDialog.calculateHopsForCoverage){
+            order = heatMapComparisonDialog.getOrder();
+            heatMapType = heatMapComparisonDialog.getHeatMapType();
+            graph1Type = heatMapComparisonDialog.getGraph1Type();
+            if(graph1Type == HeatMapComparisonDialog.GraphType.RANDOM_WALK){
+                graph1RandomWalkType = heatMapComparisonDialog.getGraph1RandomWalkType();
+            }else{
+                graph1HumanDataType = heatMapComparisonDialog.getGraph1HumanType();
+                if(order>1 && graph1HumanDataType == HeatMapComparisonDialog.HumanType.N_FROM_M){
+                    graph1M = heatMapComparisonDialog.getGraph1m();
+                }
+            }
+            int coverageRequired = heatMapComparisonDialog.getCoverageRequired();
+
+
+
+            CalculateHopsNeededTask task = new CalculateHopsNeededTask(dataNames, phase, allOrOne, order, coverageRequired);
+            super.actualGenerateAndDisplay(task);
+            heatMapComparisonDialog.dispose();
+
+        }else if(e.getSource() ==  heatMapComparisonDialog.calculateCoverageForHopsButton){
+            order = heatMapComparisonDialog.getOrder();
+            heatMapType = heatMapComparisonDialog.getHeatMapType();
+            graph1Type = heatMapComparisonDialog.getGraph1Type();
+            if(graph1Type == HeatMapComparisonDialog.GraphType.RANDOM_WALK){
+                graph1RandomWalkType = heatMapComparisonDialog.getGraph1RandomWalkType();
+            }else{
+                graph1HumanDataType = heatMapComparisonDialog.getGraph1HumanType();
+                if(order>1 && graph1HumanDataType == HeatMapComparisonDialog.HumanType.N_FROM_M){
+                    graph1M = heatMapComparisonDialog.getGraph1m();
+                }
+            }
+            int hopsRequired = heatMapComparisonDialog.getHopsRequired();
+
+            CalculateCoverageTask task = new CalculateCoverageTask(dataNames, phase, allOrOne, order, hopsRequired);
+            super.actualGenerateAndDisplay(task);
+            heatMapComparisonDialog.dispose();
+
+
         }
     }
+
+
+
 
 
     class GenerateRequiredDataTask extends AbstractTask {
@@ -143,9 +195,9 @@ public class NthOrderHeatMapHandler extends StatisticsHandler<PathHeatMapConsole
                         @Override
                         protected Void doInBackground() throws Exception {
 
-                            data = getNthOrderMarkovData(dataNameDataMap,graph1Type,graph1RandomWalkType, graph1HumanDataType,graph1M);
+                            data = getNthOrderMarkovHeatMap(dataNameDataMap, graph1Type, graph1RandomWalkType, graph1HumanDataType, graph1M);
                             if(heatMapType == HeatMapComparisonDialog.HeatMapType.COMPARISON) {
-                                HashBasedTable<String, String, Double> data2 = getNthOrderMarkovData(dataNameDataMap, graph2Type, graph2RandomWalkType, graph2HumanDataType, graph2M);
+                                HashBasedTable<String, String, Double> data2 = getNthOrderMarkovHeatMap(dataNameDataMap, graph2Type, graph2RandomWalkType, graph2HumanDataType, graph2M);
                                 data = subtractGraph2FromGraph1(data, data2);
                             }
                             return null;
@@ -176,9 +228,9 @@ public class NthOrderHeatMapHandler extends StatisticsHandler<PathHeatMapConsole
 
                             @Override
                             protected Void doInBackground() throws Exception {
-                                data = getNthOrderMarkovData(dataNameDataMap, graph1Type, graph1RandomWalkType, graph1HumanDataType,graph1M);
+                                data = getNthOrderMarkovHeatMap(dataNameDataMap, graph1Type, graph1RandomWalkType, graph1HumanDataType, graph1M);
                                 if(heatMapType == HeatMapComparisonDialog.HeatMapType.COMPARISON) {
-                                    HashBasedTable<String, String, Double> data2 = getNthOrderMarkovData(dataNameDataMap, graph2Type, graph2RandomWalkType, graph2HumanDataType, graph2M);
+                                    HashBasedTable<String, String, Double> data2 = getNthOrderMarkovHeatMap(dataNameDataMap, graph2Type, graph2RandomWalkType, graph2HumanDataType, graph2M);
                                     data = subtractGraph2FromGraph1(data, data2);
                                 }
                                 return null;
@@ -200,20 +252,7 @@ public class NthOrderHeatMapHandler extends StatisticsHandler<PathHeatMapConsole
 
         }
 
-        private HashBasedTable<String, String, Double> getNthOrderMarkovData(HashMap<String, DirectedSparseMultigraph<ModelObject, ModelEdge>> dataNameGraphMap,
-                                                                             HeatMapComparisonDialog.GraphType graphType, RandomWalkOrganizer.RandomWalkType randomWalkType, HeatMapComparisonDialog.HumanType humanType, int mValue) {
-            if(graphType== HeatMapComparisonDialog.GraphType.RANDOM_WALK){
-                return  MarkovDataOrganizer.instance().getRandomWalkMarkovData(randomWalkType).getDirectMarkovData(order).obtainHeatMap();
-            }
-            Collection<String> nameList = dataNameGraphMap.keySet();
-            Collection<DirectedSparseMultigraph<ModelObject, ModelEdge>> graphList = dataNameGraphMap.values();
-            assert graphList.size() == nameList.size();
-            Collection<Phase> selectedPhases = Collections.singleton(phase);
-            if(humanType== HeatMapComparisonDialog.HumanType.DIRECT)
-                return MarkovDataOrganizer.instance().getMarkovDataStore(nameList,selectedPhases,graphList).getDirectMarkovData(order).obtainHeatMap();
-            else
-                return MarkovDataOrganizer.instance().getMarkovDataStore(nameList,selectedPhases,graphList).getNFromMData(order, mValue).obtainHeatMap();
-        }
+
 
         private class RandomWalkCalculator extends SwingWorker<Void, Void> {
             private HashBasedTable<String, String, Double> dataToDisplay;
@@ -270,6 +309,152 @@ public class NthOrderHeatMapHandler extends StatisticsHandler<PathHeatMapConsole
             }
 
             return result;
+        }
+    }
+
+    private HashBasedTable<String, String, Double> getNthOrderMarkovHeatMap(HashMap<String, DirectedSparseMultigraph<ModelObject, ModelEdge>> dataNameGraphMap,
+                                                                            HeatMapComparisonDialog.GraphType graphType, RandomWalkOrganizer.RandomWalkType randomWalkType, HeatMapComparisonDialog.HumanType humanType, int mValue) {
+        if(graphType== HeatMapComparisonDialog.GraphType.RANDOM_WALK){
+            return  MarkovDataOrganizer.instance().getRandomWalkMarkovData(randomWalkType).getDirectMarkovData(order).obtainHeatMap();
+        }
+        Collection<String> nameList = dataNameGraphMap.keySet();
+        Collection<DirectedSparseMultigraph<ModelObject, ModelEdge>> graphList = dataNameGraphMap.values();
+        assert graphList.size() == nameList.size();
+        Collection<Phase> selectedPhases = Collections.singleton(phase);
+        if(humanType== HeatMapComparisonDialog.HumanType.DIRECT)
+            return MarkovDataOrganizer.instance().getMarkovDataStore(nameList,selectedPhases,graphList).getDirectMarkovData(order).obtainHeatMap();
+        else
+            return MarkovDataOrganizer.instance().getMarkovDataStore(nameList,selectedPhases,graphList).getNFromMData(order, mValue).obtainHeatMap();
+    }
+
+    private class CalculateCoverageTask extends AbstractTask {
+        private final int hopsRequired;
+        private int coverage;
+        private final Phase phase;
+        private final int order;
+        HashMap<String, DirectedSparseMultigraph<ModelObject, ModelEdge>> dataNameDataMap = new HashMap<String, DirectedSparseMultigraph<ModelObject, ModelEdge>>();
+        private final StatsDialog.AllOrOne allOrOne;
+
+
+        public CalculateCoverageTask(Collection<String> dataNames, Phase phase, StatsDialog.AllOrOne allOrOne, int order, int hopsRequired) {
+            super(dataNames);
+            this.phase = phase;
+            this.allOrOne = allOrOne;
+            this.order = order;
+            this.hopsRequired = hopsRequired;
+        }
+
+        @Override
+        protected void doTasks(String dataName) {
+            if (!dataName.equals("random walk")) {
+
+                dataNameDataMap.put(dataName, NetworkModel.instance().getDirectedGraphOfPlayer(dataName, Collections.singleton(phase)));
+
+            }
+        }
+
+        @Override
+        protected void summarizeAndDisplay() {
+            SwingWorker<Void, Void> worker = new SwingWorker<Void, Void>() {
+                public RecursiveHashMap data;
+                private HashMap<String, Double> coverage;
+
+                @Override
+                protected Void doInBackground() throws Exception {
+
+                    data = getNthOrderMarkovData(dataNameDataMap, graph1Type, graph1RandomWalkType, graph1HumanDataType, graph1M);
+                    coverage = GraphUtilities.calculateCoverageForPathLength(data, hopsRequired);
+
+                    return null;
+                }
+
+                protected void done() {
+
+                    JOptionPane.showMessageDialog(new JFrame(),
+                            "order = "+order +"\n" +
+                                    "graph type = "+graph1Type +"\n"+
+                                    "random Walk Type="+(graph1RandomWalkType==null?"N/A":graph1RandomWalkType)+"\n" +
+                                    "human Map Type="+(graph1HumanDataType==null?"N/A":graph1HumanDataType)+"\n" +
+                                    "m value="+(graph1M==0?"N/A":graph1M)+"\n" +
+                                    "hops="+hopsRequired+"\n" +
+                                    "<html><font color=\"red\">COVERAGE = "+ coverage.get("mean")+"\u00B1"+coverage.get("sd") +"</font></html>","Coverage calculated", JOptionPane.INFORMATION_MESSAGE
+                    );
+                }
+            };
+            worker.execute();
+
+        }
+    }
+
+    private RecursiveHashMap getNthOrderMarkovData(HashMap<String, DirectedSparseMultigraph<ModelObject, ModelEdge>> dataNameGraphMap, HeatMapComparisonDialog.GraphType graphType, RandomWalkOrganizer.RandomWalkType randomWalkType, HeatMapComparisonDialog.HumanType humanType, int mValue) {
+        if(graphType== HeatMapComparisonDialog.GraphType.RANDOM_WALK){
+            return  MarkovDataOrganizer.instance().getRandomWalkMarkovData(randomWalkType).getDirectMarkovData(order);
+        }
+        Collection<String> nameList = dataNameGraphMap.keySet();
+        Collection<DirectedSparseMultigraph<ModelObject, ModelEdge>> graphList = dataNameGraphMap.values();
+        assert graphList.size() == nameList.size();
+        Collection<Phase> selectedPhases = Collections.singleton(phase);
+        if(humanType== HeatMapComparisonDialog.HumanType.DIRECT)
+            return MarkovDataOrganizer.instance().getMarkovDataStore(nameList, selectedPhases, graphList).getDirectMarkovData(order);
+        else
+            return MarkovDataOrganizer.instance().getMarkovDataStore(nameList, selectedPhases, graphList).getNFromMData(order, mValue);
+    }
+
+    private class CalculateHopsNeededTask extends AbstractTask {
+        private final int coverageRequired;
+
+        private final Phase phase;
+        private final int order;
+        HashMap<String, DirectedSparseMultigraph<ModelObject, ModelEdge>> dataNameDataMap = new HashMap<String, DirectedSparseMultigraph<ModelObject, ModelEdge>>();
+        private final StatsDialog.AllOrOne allOrOne;
+
+
+        public CalculateHopsNeededTask(Collection<String> dataNames, Phase phase, StatsDialog.AllOrOne allOrOne, int order, int coverageRequired) {
+            super(dataNames);
+            this.phase = phase;
+            this.allOrOne = allOrOne;
+            this.order = order;
+            this.coverageRequired = coverageRequired;
+        }
+
+        @Override
+        protected void doTasks(String dataName) {
+            if (!dataName.equals("random walk")) {
+
+                dataNameDataMap.put(dataName, NetworkModel.instance().getDirectedGraphOfPlayer(dataName, Collections.singleton(phase)));
+
+            }
+        }
+
+        @Override
+        protected void summarizeAndDisplay() {
+            SwingWorker<Void, Void> worker = new SwingWorker<Void, Void>() {
+                public RecursiveHashMap data;
+                private int hopsNeeded;
+
+                @Override
+                protected Void doInBackground() throws Exception {
+
+                    data = getNthOrderMarkovData(dataNameDataMap, graph1Type, graph1RandomWalkType, graph1HumanDataType, graph1M);
+                    hopsNeeded = GraphUtilities.calculateHopsNeededForCoverage(data, coverageRequired);
+
+                    return null;
+                }
+
+                protected void done() {
+
+                    JOptionPane.showMessageDialog(new JFrame(),
+                            "order = " + order + "\n" +
+                                    "graph type = " + graph1Type + "\n" +
+                                    "random Walk Type=" + (graph1RandomWalkType == null ? "N/A" : graph1RandomWalkType) + "\n" +
+                                    "human Map Type=" + (graph1HumanDataType == null ? "N/A" : graph1HumanDataType) + "\n" +
+                                    "m value=" + (graph1M == 0 ? "N/A" : graph1M) + "\n" +
+                                    "coverage required=" + coverageRequired + "\n" +
+                                    "<html><font color=\"red\">HOPS NEEDED = " + hopsNeeded+"</font></html>", "Hops needed calculated", JOptionPane.INFORMATION_MESSAGE
+                    );
+                }
+            };
+            worker.execute();
         }
     }
 }

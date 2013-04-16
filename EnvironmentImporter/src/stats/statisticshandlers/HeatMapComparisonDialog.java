@@ -34,12 +34,20 @@ public class HeatMapComparisonDialog extends JFrame implements ChangeListener, A
     }
 
 
-    JButton generateButton = new JButton("Generate Heat Map");
+    JButton generateHeatMapButton = new JButton("Generate Heat Map");
+    JButton calculateCoverageForHopsButton = new JButton("Calculate Coverage");
+    JButton calculateHopsForCoverage = new JButton("Calculate Hops");
     JButton closeButton = new JButton("Close Button");
     private JComboBox<HeatMapType> heatMapTypeJComboBox = new JComboBox<HeatMapType>(HeatMapType.values());
     private JPanel middlePanel = new JPanel();
     private JSlider orderSlider = new JSlider(SwingConstants.HORIZONTAL, 1, 16, 1);
     private JLabel orderLabel = new JLabel("1");
+
+    private JSlider hopsSlider = new JSlider(SwingConstants.HORIZONTAL, 1, 350, 300);
+    private JLabel hopsLabel = new JLabel("300");
+
+    private JSlider coverageSlider = new JSlider(SwingConstants.HORIZONTAL, 1, 100, 60);
+    private JLabel coverageLabel = new JLabel("60");
 
 
 
@@ -71,8 +79,8 @@ public class HeatMapComparisonDialog extends JFrame implements ChangeListener, A
             @Override
             public void run() {
                 setLayout(new BorderLayout());
-                JPanel buttonPanel = new JPanel(new GridLayout(1, 2));
-                JPanel detailsPanel = new JPanel(new GridLayout(2, 2));
+                JPanel buttonPanel = new JPanel(new GridLayout(1, 4));
+                JPanel detailsPanel = new JPanel(new GridLayout(4, 2));
 
                 detailsPanel.add(new JLabel("Choose Order"));
                 JPanel orderSliderPanel = new JPanel(new BorderLayout());
@@ -84,16 +92,36 @@ public class HeatMapComparisonDialog extends JFrame implements ChangeListener, A
                 detailsPanel.add(new JLabel("Type"));
                 detailsPanel.add(heatMapTypeJComboBox); // Alone or comparison?
 
+                detailsPanel.add(new JLabel("Hops required (for coverage)"));
+                JPanel hopsSliderPanel = new JPanel(new BorderLayout());
+                hopsSliderPanel.add(hopsSlider, BorderLayout.CENTER);
+                hopsSliderPanel.add(hopsLabel, BorderLayout.WEST);
+                detailsPanel.add(hopsSliderPanel);
+
+                detailsPanel.add(new JLabel("Coverage required (for hops"));
+                JPanel coverageSliderPanel = new JPanel(new BorderLayout());
+                coverageSliderPanel.add(coverageSlider, BorderLayout.CENTER);
+                coverageSliderPanel.add(coverageLabel, BorderLayout.WEST);
+                detailsPanel.add(coverageSliderPanel);
+
+
                 heatMapTypeJComboBox.setSelectedIndex(0);
                 heatMapType = heatMapTypeJComboBox.getItemAt(0);
 
 
                 orderSlider.addChangeListener(HeatMapComparisonDialog.this);
+                coverageSlider.addChangeListener(HeatMapComparisonDialog.this);
+                hopsSlider.addChangeListener(HeatMapComparisonDialog.this);
                 heatMapTypeJComboBox.addActionListener(HeatMapComparisonDialog.this);
-                generateButton.addActionListener(nthOrderHeatMapHandler);
+                generateHeatMapButton.addActionListener(nthOrderHeatMapHandler);
                 closeButton.addActionListener(nthOrderHeatMapHandler);
+                calculateCoverageForHopsButton.addActionListener(nthOrderHeatMapHandler);
+                calculateHopsForCoverage.addActionListener(nthOrderHeatMapHandler);
 
-                buttonPanel.add(generateButton);
+
+                buttonPanel.add(generateHeatMapButton);
+                buttonPanel.add(calculateCoverageForHopsButton);
+                buttonPanel.add(calculateHopsForCoverage);
                 buttonPanel.add(closeButton);
 
 
@@ -104,7 +132,7 @@ public class HeatMapComparisonDialog extends JFrame implements ChangeListener, A
                 add(middlePanel, BorderLayout.CENTER);
 
                 setLocation(200, 150);
-                setSize(600, 200);
+                setSize(650, 400);
                 setVisible(true);
                 setDefaultCloseOperation(DISPOSE_ON_CLOSE);
                 setResizable(false);
@@ -248,6 +276,22 @@ public class HeatMapComparisonDialog extends JFrame implements ChangeListener, A
                 }
                 graph2mValueLabel.setText(String.valueOf(graph2mSlider.getValue()));
             }
+        } else if (e.getSource() == hopsSlider) {
+            if (!hopsSlider.getValueIsAdjusting()) {
+                if (getOrder() != hopsSlider.getValue()) {
+                    hopsLabel.setText(String.valueOf(hopsSlider.getValue()));
+
+//                    generateMiddlePanel();
+                }
+            }
+        } else if (e.getSource() == coverageSlider) {
+            if (!coverageSlider.getValueIsAdjusting()) {
+                if (getOrder() != coverageSlider.getValue()) {
+                    coverageLabel.setText(String.valueOf(coverageSlider.getValue()));
+
+//                    generateMiddlePanel();
+                }
+            }
         }
     }
 
@@ -256,6 +300,17 @@ public class HeatMapComparisonDialog extends JFrame implements ChangeListener, A
         if (e.getSource() == heatMapTypeJComboBox) {
             heatMapType = heatMapTypeJComboBox.getItemAt(heatMapTypeJComboBox.getSelectedIndex());
             generateMiddlePanel();
+            if(heatMapType== HeatMapType.INDIVIDUAL){
+                calculateCoverageForHopsButton.setEnabled(true);
+                calculateHopsForCoverage.setEnabled(true);
+                hopsSlider.setEnabled(true);
+                coverageSlider.setEnabled(true);
+            } else {
+                calculateCoverageForHopsButton.setEnabled(false);
+                calculateHopsForCoverage.setEnabled(false);
+                hopsSlider.setEnabled(false);
+                coverageSlider.setEnabled(false);
+            }
         } else if (e.getSource() == graph1HumanTypeComboBox) {
             HumanType type = graph1HumanTypeComboBox.getItemAt(graph1HumanTypeComboBox.getSelectedIndex());
             switch (type) {
@@ -358,6 +413,15 @@ public class HeatMapComparisonDialog extends JFrame implements ChangeListener, A
 
     public int getOrder() {
         return Integer.parseInt(orderLabel.getText());
+    }
+
+    public int getCoverageRequired(){
+        return coverageSlider.getValue();
+    }
+
+
+    public int getHopsRequired(){
+        return hopsSlider.getValue();
     }
 
 
