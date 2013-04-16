@@ -7,7 +7,9 @@ import org.jfree.chart.JFreeChart;
 import org.jfree.chart.axis.AxisLocation;
 import org.jfree.chart.axis.NumberAxis;
 import org.jfree.chart.plot.XYPlot;
+import org.jfree.chart.renderer.GrayPaintScale;
 import org.jfree.chart.renderer.LookupPaintScale;
+import org.jfree.chart.renderer.PaintScale;
 import org.jfree.chart.renderer.xy.XYBlockRenderer;
 import org.jfree.chart.title.PaintScaleLegend;
 import org.jfree.data.xy.MatrixSeries;
@@ -78,9 +80,13 @@ public class PathHeatMapChartDisplay extends ChartDisplay<HashBasedTable<String,
                 if (!data.contains(source, destination)) {
                     series.update(sourceId, destinationId, -1.0);
                 } else {
-                    double value =  (data.get(source,destination)+1.0)/2;
+                    double value;
+                    if(type == HeatMapComparisonDialog.HeatMapType.COMPARISON)
+                        value =(data.get(source,destination)+1.0)/2; // Scale to 0 to 1 for comparison
+                    else
+                        value = data.get(source, destination);
                     if(value<0 ||value>1){
-                        System.out.println(value);
+                        System.out.println("***********Problem in value=" + value + "(" +source+","+destination+")" );
                     }
                     series.update(sourceId,destinationId, value);
                 }
@@ -111,11 +117,11 @@ public class PathHeatMapChartDisplay extends ChartDisplay<HashBasedTable<String,
 
 
         XYBlockRenderer xyblockrenderer = new XYBlockRenderer();
-
-
-
-
-        LookupPaintScale paintScale = createNewLookupPaintScale();
+        PaintScale paintScale;
+        if(this.type== HeatMapComparisonDialog.HeatMapType.COMPARISON)
+            paintScale= createNewLookupPaintScale();
+        else
+            paintScale = new GrayPaintScale();
 
 //        paintScale.add(-1.0,Color.WHITE );
         xyblockrenderer.setPaintScale(paintScale);

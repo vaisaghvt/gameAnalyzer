@@ -79,17 +79,17 @@ public class MarkovDataStore {
                 this.addPropertyChangeListener(pv);
                 RecursiveHashMap result = new RecursiveHashMap(order);
                 int i = 0;
-                for (ModelObject vertex : vertices) {
+                for (ModelObject source : vertices) {
 //            String source = vertex.toString();
 
-                    pv.print("Processing " + vertex.toString() + "...\n");
+                    pv.print("Processing " + source.toString() + "...\n");
                     pv.print("\tCalculating possible paths...\n");
                     List<List<String>> completeListOfPathsForCurrent = new ArrayList<List<String>>();
-                    completeListOfPathsForCurrent.addAll(calculatePathsFromAllGraphs(graphCollection, vertex, order));
+                    completeListOfPathsForCurrent.addAll(calculatePathsFromAllGraphs(graphCollection, source, order));
 
                     pv.print("\tSummarizing paths to markov data...\n");
                     for (List<String> path : completeListOfPathsForCurrent) {
-                        double existingOccurrenceOfPath = result.getValue(new ArrayList<String>(path));
+                        double existingOccurrenceOfPath = result.getValue(path);
                         result.putValue(path, existingOccurrenceOfPath + 1.0);
                     }
                     final int currentProgress = i++;
@@ -218,7 +218,7 @@ public class MarkovDataStore {
                 String destination = sequence.get(sequence.size() - 1);
                 ModelObject destinationNode = CompleteGraph.instance().findRoomByName(destination);
                 Collection<ModelObject> neighbours = CompleteGraph.instance().getNeighbors(destinationNode);
-                double prior = nMinusOneTable.getValue(new ArrayList<String>(sequence));
+                double prior= nMinusOneTable.getValue(new ArrayList<String>(sequence));
 
                 List<String> trimmedSequence = trimSequence(m, sequence);
 

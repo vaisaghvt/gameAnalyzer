@@ -5,11 +5,7 @@ import edu.uci.ics.jung.graph.DirectedGraph;
 import edu.uci.ics.jung.graph.DirectedSparseMultigraph;
 import gui.NetworkModel;
 import gui.ProgressVisualizer;
-import markovmodeldata.MarkovDataOrganizer;
-import markovmodeldata.MarkovDataStore;
-import markovmodeldata.RecursiveHashMap;
 import modelcomponents.CompleteGraph;
-import modelcomponents.GraphUtilities;
 import modelcomponents.ModelEdge;
 import modelcomponents.ModelObject;
 import org.apache.commons.collections15.buffer.CircularFifoBuffer;
@@ -106,7 +102,7 @@ public class RandomWalkOrganizer {
 
                     @Override
                     public DirectedSparseMultigraph<ModelObject, ModelEdge> call() throws Exception {
-                        return type.randomWalkGenerator.generateRandomWalk(CompleteGraph.instance().getGraph(), CompleteGraph.instance().getStartingNode());
+                        return type.randomWalkGenerator.generateRandomWalk(CompleteGraph.instance().getStartingNode());
                     }
                 }));
             }
