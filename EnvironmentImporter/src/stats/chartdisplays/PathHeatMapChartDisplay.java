@@ -17,7 +17,7 @@ import org.jfree.data.xy.MatrixSeriesCollection;
 import org.jfree.data.xy.XYZDataset;
 import org.jfree.ui.RectangleEdge;
 import org.jfree.ui.RectangleInsets;
-import stats.statisticshandlers.HeatMapComparisonDialog;
+import stats.statisticshandlers.MarkovDataDialog;
 
 import java.awt.*;
 import java.util.Collection;
@@ -34,7 +34,7 @@ public class PathHeatMapChartDisplay extends ChartDisplay<HashBasedTable<String,
 
 
     private HashMap<String, Integer> roomToCodeMapping;
-    private HeatMapComparisonDialog.HeatMapType type;
+    private MarkovDataDialog.HeatMapType type;
 
 
     @Override
@@ -81,7 +81,7 @@ public class PathHeatMapChartDisplay extends ChartDisplay<HashBasedTable<String,
                     series.update(sourceId, destinationId, -1.0);
                 } else {
                     double value;
-                    if(type == HeatMapComparisonDialog.HeatMapType.COMPARISON)
+                    if(type == MarkovDataDialog.HeatMapType.COMPARISON)
                         value =(data.get(source,destination)+1.0)/2; // Scale to 0 to 1 for comparison
                     else
                         value = data.get(source, destination);
@@ -118,7 +118,7 @@ public class PathHeatMapChartDisplay extends ChartDisplay<HashBasedTable<String,
 
         XYBlockRenderer xyblockrenderer = new XYBlockRenderer();
         PaintScale paintScale;
-        if(this.type== HeatMapComparisonDialog.HeatMapType.COMPARISON)
+        if(this.type== MarkovDataDialog.HeatMapType.COMPARISON)
             paintScale= createNewLookupPaintScale();
         else
             paintScale = new GrayPaintScale();
@@ -182,7 +182,7 @@ public class PathHeatMapChartDisplay extends ChartDisplay<HashBasedTable<String,
     }
 
 
-    public void setType(HeatMapComparisonDialog.HeatMapType type) {
+    public void setType(MarkovDataDialog.HeatMapType type) {
         this.type = type;
     }
 }

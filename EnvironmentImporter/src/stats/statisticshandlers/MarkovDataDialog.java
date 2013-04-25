@@ -16,7 +16,7 @@ import java.awt.event.ActionListener;
  * Time: 7:38 PM
  * To change this template use File | Settings | File Templates.
  */
-public class HeatMapComparisonDialog extends JFrame implements ChangeListener, ActionListener {
+public class MarkovDataDialog extends JFrame implements ChangeListener, ActionListener {
 
 
     public enum HeatMapType {
@@ -59,7 +59,7 @@ public class HeatMapComparisonDialog extends JFrame implements ChangeListener, A
     private JLabel graph1mValueLabel = new JLabel();
     private JLabel graph2mValueLabel = new JLabel();
 
-    public HeatMapComparisonDialog(final NthOrderHeatMapHandler nthOrderHeatMapHandler) {
+    public MarkovDataDialog(final MarkovDataStatisticHandler markovDataStatisticHandler) {
         graph1TypeComboBox.addActionListener(this);
         graph1HumanTypeComboBox.addActionListener(this);
         graph1RandomWalkTypeComboBox.addActionListener(this);
@@ -105,14 +105,14 @@ public class HeatMapComparisonDialog extends JFrame implements ChangeListener, A
                 heatMapType = heatMapTypeJComboBox.getItemAt(0);
 
 
-                orderSlider.addChangeListener(HeatMapComparisonDialog.this);
-                coverageSlider.addChangeListener(HeatMapComparisonDialog.this);
-                hopsSlider.addChangeListener(HeatMapComparisonDialog.this);
-                heatMapTypeJComboBox.addActionListener(HeatMapComparisonDialog.this);
-                generateHeatMapButton.addActionListener(nthOrderHeatMapHandler);
+                orderSlider.addChangeListener(MarkovDataDialog.this);
+                coverageSlider.addChangeListener(MarkovDataDialog.this);
+                hopsSlider.addChangeListener(MarkovDataDialog.this);
+                heatMapTypeJComboBox.addActionListener(MarkovDataDialog.this);
+                generateHeatMapButton.addActionListener(markovDataStatisticHandler);
 
-                calculateCoverageForHopsButton.addActionListener(nthOrderHeatMapHandler);
-                calculateHopsForCoverage.addActionListener(nthOrderHeatMapHandler);
+                calculateCoverageForHopsButton.addActionListener(markovDataStatisticHandler);
+                calculateHopsForCoverage.addActionListener(markovDataStatisticHandler);
 
 
                 buttonPanel.add(generateHeatMapButton);
@@ -335,6 +335,7 @@ public class HeatMapComparisonDialog extends JFrame implements ChangeListener, A
                     break;
                 case RANDOM_WALK:
                     graph1HumanTypeComboBox.setEnabled(false);
+                    graph1mSlider.setEnabled(false);
                     graph1RandomWalkTypeComboBox.setEnabled(true);
 
                     break;
@@ -365,6 +366,7 @@ public class HeatMapComparisonDialog extends JFrame implements ChangeListener, A
                     break;
                 case RANDOM_WALK:
                     graph2HumanTypeComboBox.setEnabled(false);
+                    graph2mSlider.setEnabled(false);
                     graph2RandomWalkTypeComboBox.setEnabled(true);
 
                     break;
