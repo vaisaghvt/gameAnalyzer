@@ -192,15 +192,25 @@ public class MarkovDataStatisticHandler extends StatisticsHandler<PathHeatMapCon
                 @Override
                 protected Void doInBackground() throws Exception {
 
+                    try{
                     data = getNthOrderMarkovHeatMap(dataNameDataMap, graph1Type, graph1RandomWalkType, graph1HumanDataType, graph1M);
+                    assert data!=null;
                     if (heatMapType == MarkovDataDialog.HeatMapType.COMPARISON) {
                         HashBasedTable<String, String, Double> data2 = getNthOrderMarkovHeatMap(dataNameDataMap, graph2Type, graph2RandomWalkType, graph2HumanDataType, graph2M);
                         data = subtractGraph2FromGraph1(data, data2);
+                        assert data !=null;
+                    }
+                    System.out.println("Processing done");
+                    return null; }catch(Exception e){
+                                e.printStackTrace();
                     }
                     return null;
                 }
 
                 protected void done() {
+                    System.out.println("Done started");
+                    assert data!=null;
+
                     chartDisplay.setTitle(order + "th order heat map :" + phase.toString());
                     chartDisplay.display(data);
 //                            consoleDisplay.display(data);

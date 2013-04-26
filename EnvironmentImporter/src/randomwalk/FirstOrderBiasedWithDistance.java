@@ -78,7 +78,7 @@ class FirstOrderBiasedWithDistance implements RandomWalkGenerator {
 //    private static ModelObject findNearestDestination(ModelObject lastVisited, ArrayList<ModelObject> neighbours) {
 //
 //        if (neighbours.size() == 1) {
-//            return neighbours.getValue(0);
+//            return neighbours.getProbabilityOfSequence(0);
 //        }
 //        Point3D currentCenter = getCenterOfArea(lastVisited);
 //
@@ -86,7 +86,7 @@ class FirstOrderBiasedWithDistance implements RandomWalkGenerator {
 //        ModelObject result = null;
 //        double randomNoise = random.nextDouble();
 //        if (randomNoise > SHORTEST_DISTANCE_PREFERENCE) {
-//            return neighbours.getValue((int) Math.floor(random.nextDouble() * neighbours.size()));
+//            return neighbours.getProbabilityOfSequence((int) Math.floor(random.nextDouble() * neighbours.size()));
 //        }
 //
 //

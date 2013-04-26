@@ -56,7 +56,7 @@ public class DistanceTimeChartDisplay extends ChartDisplay<HashMap<String, HashM
 
             dataset.addValue(data.get(dataName).get("distance"), "distance", dataName);
 
-//            dataset.addValue(data.getValue(dataName).getValue("distance"),"time", dataName);
+//            dataset.addValue(data.getProbabilityOfSequence(dataName).getProbabilityOfSequence("distance"),"time", dataName);
         }
         return dataset;
 
@@ -70,7 +70,7 @@ public class DistanceTimeChartDisplay extends ChartDisplay<HashMap<String, HashM
 
             dataset.addValue(data.get(dataName).get("time"), "time", dataName);
             System.out.println(dataName + ":" + data.get(dataName).get("time"));
-//            dataset.addValue(data.getValue(dataName).getValue("distance"),"time", dataName);
+//            dataset.addValue(data.getProbabilityOfSequence(dataName).getProbabilityOfSequence("distance"),"time", dataName);
         }
         return dataset;
 

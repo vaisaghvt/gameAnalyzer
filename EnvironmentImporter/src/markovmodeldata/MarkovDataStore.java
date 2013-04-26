@@ -9,10 +9,7 @@ import modelcomponents.ModelEdge;
 import modelcomponents.ModelObject;
 
 import javax.swing.*;
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.HashMap;
-import java.util.List;
+import java.util.*;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.Semaphore;
 import java.util.concurrent.TimeUnit;
@@ -89,7 +86,7 @@ public class MarkovDataStore {
 
                     pv.print("\tSummarizing paths to markov data...\n");
                     for (List<String> path : completeListOfPathsForCurrent) {
-                        double existingOccurrenceOfPath = result.getValue(path);
+                        double existingOccurrenceOfPath = result.getProbabilityOfSequence(path);  // Here it is still the raw value
                         result.putValue(path, existingOccurrenceOfPath + 1.0);
                     }
                     final int currentProgress = i++;
@@ -179,34 +176,6 @@ public class MarkovDataStore {
     private RecursiveHashMap constructNFromM(int n, int m) {
         if (n <= m) {
             return getDirectMarkovData(n);
-//        }else if (n == m + 1) {
-//            RecursiveHashMap mThOrderMap = orderToDirectMarkovDataMapping.getValue(m);
-//            RecursiveHashMap result = new RecursiveHashMap(n);
-//            for (List<String> sequence : mThOrderMap.getSequenceCodes()) {
-//                String destination = sequence.getValue(sequence.size() - 1);
-//                ModelObject destinationNode = NetworkModel.instance().findRoomByName(destination);
-//                Collection<ModelObject> neighbours = NetworkModel.instance().getCompleteGraph().getNeighbors(destinationNode);
-//                double prior = mThOrderMap.getValue(sequence);
-//
-//                for (ModelObject neighbour: neighbours) {
-//                    List<String> newSequence = new ArrayList<String>();
-//                    newSequence.addAll(sequence);
-//                    newSequence.remove(0);
-//                    newSequence.add(neighbour.toString());
-//                    double newValue = prior *
-//                            mThOrderMap.getValue(newSequence);
-//
-//                    List<String> newSequenceForN = new ArrayList<String>();
-//                    newSequenceForN.addAll(sequence);
-//                    newSequenceForN.add(neighbour.toString());
-//
-//                    result.putValue(newSequenceForN, newValue);
-//
-//
-//                }
-//            }
-//            return result;
-
         } else {
             RecursiveHashMap result = new RecursiveHashMap(n);
             try{
@@ -218,17 +187,15 @@ public class MarkovDataStore {
                 String destination = sequence.get(sequence.size() - 1);
                 ModelObject destinationNode = CompleteGraph.instance().findRoomByName(destination);
                 Collection<ModelObject> neighbours = CompleteGraph.instance().getNeighbors(destinationNode);
-                double prior= nMinusOneTable.getValue(new ArrayList<String>(sequence));
+                double prior = nMinusOneTable.getProbabilityOfSequence(new ArrayList<String>(sequence)); // gets the number of times that path occurs/ total number of paths of that length.
 
                 List<String> trimmedSequence = trimSequence(m, sequence);
 
                 for (ModelObject neighbour : neighbours) {
-                    List<String> newSequence = new ArrayList<String>(trimmedSequence);
-//                    newSequence.addAll(trimmedSequence);
-//                    newSequence.remove(0);
-                    newSequence.add(neighbour.toString());
+                    Map<String, Double> destinationProbs = mThOrderMap.getDestinationProbabilities(trimmedSequence);
+                    double probabilityOfDestinationGivenPreviousLocations=destinationProbs.get(neighbour.toString());
                     double newValue = prior *
-                            mThOrderMap.getValue(new ArrayList<String>(newSequence));
+                            probabilityOfDestinationGivenPreviousLocations;
 
                     List<String> newSequenceForN = new ArrayList<String>(sequence);
 //                    newSequenceForN.addAll();

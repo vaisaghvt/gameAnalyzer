@@ -168,7 +168,7 @@ public class RandomWalkOrganizer {
                 if (result.containsKey(vertex.toString())) {
                     count = result.get(vertex.toString()).doubleValue();
                 }
-//                int numberOfEdges = roomEdgeCountMapping.getValue(vertex.toString());
+//                int numberOfEdges = roomEdgeCountMapping.getProbabilityOfSequence(vertex.toString());
 
 //                result.putValue(vertex.toString(), (graph.inDegree(vertex) / numberOfEdges) + count);
                 result.put(vertex.toString(), (graph.inDegree(vertex) + count));

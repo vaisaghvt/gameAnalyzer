@@ -405,9 +405,9 @@ public class RoomAnalysisFrame extends JFrame {
 
         for (String name : nameToGraphMap.keySet()) {
             DirectedSparseMultigraph<ModelObject, ModelEdge> tempGraph = nameToGraphMap.get(name);
-//            long startTimeSeconds = Math.max(startTime*60000,nameToMinCoverageTimeMap.getValue(name) );
+//            long startTimeSeconds = Math.max(startTime*60000,nameToMinCoverageTimeMap.getProbabilityOfSequence(name) );
 //
-//            long endTimeSeconds = Math.min(endTime*60000, nameToMaxCoverageTimeMap.getValue(name));
+//            long endTimeSeconds = Math.min(endTime*60000, nameToMaxCoverageTimeMap.getProbabilityOfSequence(name));
 
 
 
@@ -480,7 +480,7 @@ public class RoomAnalysisFrame extends JFrame {
 //            ArrayList<ProbabilityEdge> edges = new ArrayList<ProbabilityEdge>(graphToDraw.getEdges());
 //            int size = graphToDraw.getEdges().size();
 //            for(int j=0;j<size;j++ ){
-//                ProbabilityEdge edge = edges.getValue(j);
+//                ProbabilityEdge edge = edges.getProbabilityOfSequence(j);
 //                if(edge.prob<0.1) {
 //                    graphToDraw.getEdges().remove(edge);
 //                }
@@ -991,7 +991,7 @@ public class RoomAnalysisFrame extends JFrame {
         public void stateChanged(ChangeEvent e) {
             if (e.getSource() == startTimeSelection) {
                 if (!startTimeSelection.getValueIsAdjusting()) {
-//                    System.out.println("Start time at "+startTimeSelection.getValue());
+//                    System.out.println("Start time at "+startTimeSelection.getProbabilityOfSequence());
                     final String currentValue = String.valueOf(startTimeSelection.getValue());
                     SwingUtilities.invokeLater(new Runnable() {
                         @Override
@@ -1002,7 +1002,7 @@ public class RoomAnalysisFrame extends JFrame {
                 }
             } else if (e.getSource() == endTimeSelection) {
                 if (!endTimeSelection.getValueIsAdjusting()) {
-//                    System.out.println("End time at "+endTimeSelection.getValue());
+//                    System.out.println("End time at "+endTimeSelection.getProbabilityOfSequence());
                     final String currentValue = String.valueOf(endTimeSelection.getValue());
                     SwingUtilities.invokeLater(new Runnable() {
                         @Override
@@ -1013,7 +1013,7 @@ public class RoomAnalysisFrame extends JFrame {
                 }
             } else if (e.getSource() == minCoverageSlider) {
                 if (!minCoverageSlider.getValueIsAdjusting()) {
-//                    System.out.println("Start time at "+startTimeSelection.getValue());
+//                    System.out.println("Start time at "+startTimeSelection.getProbabilityOfSequence());
                     final String currentValue = String.valueOf(minCoverageSlider.getValue());
                     SwingUtilities.invokeLater(new Runnable() {
                         @Override
@@ -1024,7 +1024,7 @@ public class RoomAnalysisFrame extends JFrame {
                 }
             } else if (e.getSource() == maxCoverageSlider) {
                 if (!maxCoverageSlider.getValueIsAdjusting()) {
-//                    System.out.println("End time at "+endTimeSelection.getValue());
+//                    System.out.println("End time at "+endTimeSelection.getProbabilityOfSequence());
                     final String currentValue = String.valueOf(maxCoverageSlider.getValue());
                     SwingUtilities.invokeLater(new Runnable() {
                         @Override

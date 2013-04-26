@@ -22,13 +22,15 @@ public class RecursiveHashMap {
     private HashBasedTable<String, String, Double> firstOrderTable;
 
     private final int order;
-    private HashMap<String, Integer> sequenceOccurenceCount;
+    private HashMap<String, Integer> sequenceOccurrenceCount;
+    private HashMap<String, Double> codeToValueMapping;
 
 
     public RecursiveHashMap(int n) {
         assert n >= 1;
         order = n;
         sequenceCodesToSequenceMapping = new HashMap<String, List<String>>();
+        codeToValueMapping = new HashMap<String, Double>();
         if (order == 1) {
             myMap = null;
             firstOrderTable = HashBasedTable.create();
@@ -38,14 +40,14 @@ public class RecursiveHashMap {
         }
     }
 
-    /** Only for highest level
+    /**
+     * Only for highest level
      * As the name suggests it puts in the value and looses the old value
-     *
      */
     private void putSequenceOccurrence(String pathCode, int value) {
 //        assert states.size() == order + 1;
 
-        this.sequenceOccurenceCount.put(pathCode, value);
+        this.sequenceOccurrenceCount.put(pathCode, value);
 
 
     }
@@ -63,6 +65,7 @@ public class RecursiveHashMap {
 
         recursiveCheckAndPutValue(statesQueue, value);
 
+        this.codeToValueMapping.put(sequenceCode, value);
         assert states.size() == initialSize;
 
     }
@@ -99,39 +102,21 @@ public class RecursiveHashMap {
      * @param stateSequence
      * @return 0 if no such path exists, value associated with path otherwise
      */
-    public double getValue(List<String> stateSequence) {
+    public double getProbabilityOfSequence(List<String> stateSequence) {
         assert stateSequence.size() == order + 1;
         if (!containsPath(stateSequence)) {
             return 0;
         }
-        List<String> sequence = new ArrayList<String>(stateSequence);
-        return recursiveGetValue(sequence);
+        // List<String> sequence = new ArrayList<String>(stateSequence);
+        String sequenceCode = findCodeForPath(stateSequence);
+        return getValueForCode(sequenceCode);
 
     }
 
-    private double recursiveGetValue(List<String> sequence) {
-        if (sequence.size() < 2) {
-            return 0;
-        }
-        if (sequence.size() == 2) {
-            assert firstOrderTable != null;
-            String penultimateLocation = sequence.get(0);
-            String destination = sequence.get(1);
-            if (firstOrderTable.contains(penultimateLocation, destination)) {
-                return firstOrderTable.get(penultimateLocation, destination);
-            } else {
-                return 0;
-            }
-        } else {
-            String oldest = sequence.remove(0);
-            if (myMap.containsKey(oldest)) {
-                return myMap.get(oldest).recursiveGetValue(sequence);
-            } else {
-                return 0;
-            }
-
-        }
+    private double getValueForCode(String sequenceCode) {
+        return codeToValueMapping.get(sequenceCode);
     }
+
 
     public Set<String> getSequenceCodes() {
         return sequenceCodesToSequenceMapping.keySet();
@@ -141,7 +126,7 @@ public class RecursiveHashMap {
     public String toString() {
         StringBuilder result = new StringBuilder();
         for (String sequenceCode : sequenceCodesToSequenceMapping.keySet()) {
-            result.append(sequenceCode + "=" + this.getValue(getSequenceForCode(sequenceCode)) + "\n");
+            result.append(sequenceCode + "=" + this.getProbabilityOfSequence(getSequenceForCode(sequenceCode)) + "\n");
         }
         return result.toString();
     }
@@ -149,17 +134,25 @@ public class RecursiveHashMap {
 
     /**
      * Normalizes on the deepest level. Also computes the sequenceOccurences
-     *
+     * <p/>
      * the table thus becomes the probability of a certain destination given a sequence of vertices
      */
     public void normalize() {
         assert order != 0;
 
-        sequenceOccurenceCount = new HashMap<String, Integer>();
-        for(String code: sequenceCodesToSequenceMapping.keySet()){
+        sequenceOccurrenceCount = new HashMap<String, Integer>();
+        double total = 0;
+        for (String code : sequenceCodesToSequenceMapping.keySet()) {
             List<String> path = getSequenceForCode(code);
-            putSequenceOccurrence(code, (int)getValue(path));
+            int rawValue = (int) getProbabilityOfSequence(path);
+            putSequenceOccurrence(code, rawValue);   // gets the raw value.
+            total += rawValue;
+        }
 
+        for (String code : sequenceCodesToSequenceMapping.keySet()) {
+            List<String> path = getSequenceForCode(code);
+            double rawValue = (double) getProbabilityOfSequence(path);
+            this.codeToValueMapping.put(code, rawValue / total);
         }
         recursiveNormalize();
 
@@ -193,39 +186,41 @@ public class RecursiveHashMap {
 
     public HashBasedTable<String, String, Double> obtainHeatMap() {
         HashBasedTable<String, String, Double> result = HashBasedTable.create();
-        HashMap<String, Integer> numberOfPathsFromSource = new HashMap<String, Integer>();
-        HashBasedTable<String, String, Integer> sourceDestinationPathNumberMapping =
+        HashMap<String, Double> probabilityOfPathsFromSource = new HashMap<String, Double>();
+        HashBasedTable<String, String, Double> sourceDestinationPathProbabilities =
                 HashBasedTable.create();
 
-        for (String code : sequenceCodesToSequenceMapping.keySet()) {
-            List<String> path = getSequenceForCode(code);
-            String source = path.get(0);
-            String destination = path.get(path.size() - 1);
-            int numberOfActualOccurrences = sequenceOccurenceCount.get(code);
-            if (!numberOfPathsFromSource.containsKey(source)) {
-                numberOfPathsFromSource.put(source, 0);
-            }
-            numberOfPathsFromSource.put(source, numberOfPathsFromSource.get(source) + numberOfActualOccurrences);
 
-
-            if (!sourceDestinationPathNumberMapping.contains(source, destination)) {
-                sourceDestinationPathNumberMapping.put(source, destination, 0);
-            }
-            sourceDestinationPathNumberMapping.put(source, destination,
-                    sourceDestinationPathNumberMapping.get(source, destination) + numberOfActualOccurrences);
-        }
-
-        for (String source : numberOfPathsFromSource.keySet()) {
-            int totalNumberOfPathsFromSource = numberOfPathsFromSource.get(source);
-
-            for (String destination : sourceDestinationPathNumberMapping.columnKeySet()) {
-                if (sourceDestinationPathNumberMapping.contains(source, destination)) {
-                    int pathsToDestinationFromSource = sourceDestinationPathNumberMapping.get(source, destination);
-                    result.put(source, destination, (double) pathsToDestinationFromSource / (double) totalNumberOfPathsFromSource);
+            for (String code : sequenceCodesToSequenceMapping.keySet()) {
+                List<String> path = getSequenceForCode(code);
+                String source = path.get(0);
+                String destination = path.get(path.size() - 1);
+                double probabilityOfPath = getValueForCode(code);
+                if (!probabilityOfPathsFromSource.containsKey(source)) {
+                    probabilityOfPathsFromSource.put(source, 0.0);
                 }
+                probabilityOfPathsFromSource.put(source, probabilityOfPathsFromSource.get(source) + probabilityOfPath);
+
+
+                if (!sourceDestinationPathProbabilities.contains(source, destination)) {
+                    sourceDestinationPathProbabilities.put(source, destination, 0.0);
+                }
+                sourceDestinationPathProbabilities.put(source, destination,
+                        sourceDestinationPathProbabilities.get(source, destination) + probabilityOfPath);
             }
 
-        }
+            for (String source : probabilityOfPathsFromSource.keySet()) {
+                double totalProbabilityOfPathsFromSource = probabilityOfPathsFromSource.get(source);
+
+                for (String destination : sourceDestinationPathProbabilities.columnKeySet()) {
+                    if (sourceDestinationPathProbabilities.contains(source, destination)) {
+                        double probabilityOfPathsToDestinationFromSource = sourceDestinationPathProbabilities.get(source, destination);
+                        result.put(source, destination, probabilityOfPathsToDestinationFromSource / totalProbabilityOfPathsFromSource);
+                    }
+                }
+
+            }  //TODO : verify this
+
 
         return result;
     }
@@ -272,7 +267,7 @@ public class RecursiveHashMap {
 
     public List<String> getPathFromRoom(String source, MersenneTwister random) {
 
-        if(sequenceOccurenceCount==null){
+        if (sequenceOccurrenceCount == null) {
             System.out.println("Problem!!!! Does not make sense to generate path from estimation");
             assert false;
         }
@@ -283,7 +278,7 @@ public class RecursiveHashMap {
             List<String> path = getSequenceForCode(code);
             if (path.get(0).equals(source)) {
 
-                pathToOccurrenceMapping.put(code, sequenceOccurenceCount.get(code));
+                pathToOccurrenceMapping.put(code, sequenceOccurrenceCount.get(code));
             }
         }
 
@@ -294,7 +289,7 @@ public class RecursiveHashMap {
         }
         HashMap<String, Double> result = new HashMap<String, Double>();
         for (String key : pathToOccurrenceMapping.keySet()) {
-            result.put(key, (double)pathToOccurrenceMapping.get(key) / (double)total);
+            result.put(key, (double) pathToOccurrenceMapping.get(key) / (double) total);
         }
 
         double value = 0.0;
