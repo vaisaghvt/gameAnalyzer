@@ -86,8 +86,8 @@ public class MarkovDataStore {
 
                     pv.print("\tSummarizing paths to markov data...\n");
                     for (List<String> path : completeListOfPathsForCurrent) {
-                        double existingOccurrenceOfPath = result.getProbabilityOfSequence(path);  // Here it is still the raw value
-                        result.putValue(path, existingOccurrenceOfPath + 1.0);
+
+                        result.incrementSequenceOccurrenceCount(path);
                     }
                     final int currentProgress = i++;
                     setProgress((currentProgress * 100) / vertices.size());
@@ -192,16 +192,24 @@ public class MarkovDataStore {
                 List<String> trimmedSequence = trimSequence(m, sequence);
 
                 for (ModelObject neighbour : neighbours) {
+                    String neighbourString = neighbour.toString();
                     Map<String, Double> destinationProbs = mThOrderMap.getDestinationProbabilities(trimmedSequence);
-                    double probabilityOfDestinationGivenPreviousLocations=destinationProbs.get(neighbour.toString());
-                    double newValue = prior *
+                    double probabilityOfDestinationGivenPreviousLocations;
+                    if(destinationProbs!=null){
+                    probabilityOfDestinationGivenPreviousLocations = destinationProbs.containsKey(neighbourString)
+                                                                            ? destinationProbs.get(neighbourString)
+                                                                            : 0;
+                    }else{
+                        probabilityOfDestinationGivenPreviousLocations =0 ;
+                    }
+                        double newValue = prior *
                             probabilityOfDestinationGivenPreviousLocations;
 
                     List<String> newSequenceForN = new ArrayList<String>(sequence);
 //                    newSequenceForN.addAll();
                     newSequenceForN.add(neighbour.toString());
 
-                    result.putValue(newSequenceForN, newValue);
+                    result.putSequenceOccurrenceProbability(newSequenceForN, newValue);
 
 
                 }

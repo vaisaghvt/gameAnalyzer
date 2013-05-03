@@ -107,8 +107,8 @@ public class MarkovDataStatisticHandler extends StatisticsHandler<PathHeatMapCon
 
             GenerateRequiredDataTask task = new GenerateRequiredDataTask(dataNames, phase, order);
             super.actualGenerateAndDisplay(task);
-            markovDataDialog.dispose();
-        }else if (e.getSource() == markovDataDialog.calculateHopsForCoverage) {
+//            markovDataDialog.dispose();
+        } else if (e.getSource() == markovDataDialog.calculateHopsForCoverage) {
             order = markovDataDialog.getOrder();
             heatMapType = markovDataDialog.getHeatMapType();
             graph1Type = markovDataDialog.getGraph1Type();
@@ -122,11 +122,11 @@ public class MarkovDataStatisticHandler extends StatisticsHandler<PathHeatMapCon
             }
             int coverageRequired = markovDataDialog.getCoverageRequired();
 
-            if (graph1HumanDataType == MarkovDataDialog.HumanType.DIRECT) {
+            if (graph1Type == MarkovDataDialog.GraphType.RANDOM_WALK || graph1HumanDataType == MarkovDataDialog.HumanType.DIRECT) {
 
                 CalculateHopsNeededTask task = new CalculateHopsNeededTask(dataNames, phase, order, coverageRequired);
                 super.actualGenerateAndDisplay(task);
-                markovDataDialog.dispose();
+//                markovDataDialog.dispose();
             } else {
                 JOptionPane.showMessageDialog(new JFrame(), "Cannot generate this data for NFromM!", "Invalid parameter",
                         JOptionPane.ERROR_MESSAGE);
@@ -145,10 +145,10 @@ public class MarkovDataStatisticHandler extends StatisticsHandler<PathHeatMapCon
                 }
             }
             int hopsRequired = markovDataDialog.getHopsRequired();
-            if (graph1HumanDataType == MarkovDataDialog.HumanType.DIRECT) {
+            if (graph1Type == MarkovDataDialog.GraphType.RANDOM_WALK || graph1HumanDataType == MarkovDataDialog.HumanType.DIRECT) {
                 CalculateCoverageTask task = new CalculateCoverageTask(dataNames, phase, order, hopsRequired);
                 super.actualGenerateAndDisplay(task);
-                markovDataDialog.dispose();
+//                markovDataDialog.dispose();
             } else {
                 JOptionPane.showMessageDialog(new JFrame(), "Cannot generate this data for NFromM!", "Invalid parameter",
                         JOptionPane.ERROR_MESSAGE);
@@ -192,29 +192,37 @@ public class MarkovDataStatisticHandler extends StatisticsHandler<PathHeatMapCon
                 @Override
                 protected Void doInBackground() throws Exception {
 
-                    try{
-                    data = getNthOrderMarkovHeatMap(dataNameDataMap, graph1Type, graph1RandomWalkType, graph1HumanDataType, graph1M);
-                    assert data!=null;
-                    if (heatMapType == MarkovDataDialog.HeatMapType.COMPARISON) {
-                        HashBasedTable<String, String, Double> data2 = getNthOrderMarkovHeatMap(dataNameDataMap, graph2Type, graph2RandomWalkType, graph2HumanDataType, graph2M);
-                        data = subtractGraph2FromGraph1(data, data2);
-                        assert data !=null;
-                    }
-                    System.out.println("Processing done");
-                    return null; }catch(Exception e){
-                                e.printStackTrace();
+                    try {
+                        data = getNthOrderMarkovHeatMap(dataNameDataMap, graph1Type, graph1RandomWalkType, graph1HumanDataType, graph1M);
+                        assert data != null;
+                        if (heatMapType == MarkovDataDialog.HeatMapType.COMPARISON) {
+                            HashBasedTable<String, String, Double> data2 = getNthOrderMarkovHeatMap(dataNameDataMap, graph2Type, graph2RandomWalkType, graph2HumanDataType, graph2M);
+                            data = subtractGraph2FromGraph1(data, data2);
+                            assert data != null;
+                        }
+                        System.out.println("Processing done");
+                        return null;
+                    } catch (Exception e) {
+                        e.printStackTrace();
                     }
                     return null;
                 }
 
                 protected void done() {
                     System.out.println("Done started");
-                    assert data!=null;
+                    assert data != null;
+
+//                    if(heatMapType == MarkovDataDialog.HeatMapType.INDIVIDUAL){
+//                        System.out.println("ENTROPY=" + calculateEntropy(data));
+//                    }
+
 
                     chartDisplay.setTitle(order + "th order heat map :" + phase.toString());
                     chartDisplay.display(data);
 //                            consoleDisplay.display(data);
                 }
+
+
             };
             worker.execute();
 
@@ -254,7 +262,7 @@ public class MarkovDataStatisticHandler extends StatisticsHandler<PathHeatMapCon
         }
     }
 
-    private HashBasedTable<String, String, Double> getNthOrderMarkovHeatMap(HashMap<String,DirectedSparseMultigraph<ModelObject, ModelEdge>> dataNameGraphMap,
+    private HashBasedTable<String, String, Double> getNthOrderMarkovHeatMap(HashMap<String, DirectedSparseMultigraph<ModelObject, ModelEdge>> dataNameGraphMap,
                                                                             MarkovDataDialog.GraphType graphType,
                                                                             RandomWalkOrganizer.RandomWalkType randomWalkType,
                                                                             MarkovDataDialog.HumanType humanType,
@@ -404,7 +412,7 @@ public class MarkovDataStatisticHandler extends StatisticsHandler<PathHeatMapCon
                                     "human Map Type=" + (graph1HumanDataType == null ? "N/A" : graph1HumanDataType) + "\n" +
                                     "m value=" + (graph1M == 0 ? "N/A" : graph1M) + "\n" +
                                     "coverage required=" + coverageRequired + "\n" +
-                                    "<html><font color=\"red\">HOPS NEEDED = " +  doubleFormat.format(hopsNeeded.get("mean")) + " \u00B1 " +
+                                    "<html><font color=\"red\">HOPS NEEDED = " + doubleFormat.format(hopsNeeded.get("mean")) + " \u00B1 " +
                                     doubleFormat.format(hopsNeeded.get("sd")) + "</font></html>", "Hops needed calculated", JOptionPane.INFORMATION_MESSAGE
                     );
                 }

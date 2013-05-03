@@ -170,7 +170,7 @@ public class RandomWalkOrganizer {
                 }
 //                int numberOfEdges = roomEdgeCountMapping.getProbabilityOfSequence(vertex.toString());
 
-//                result.putValue(vertex.toString(), (graph.inDegree(vertex) / numberOfEdges) + count);
+//                result.putDestinationGivenSeqProbability(vertex.toString(), (graph.inDegree(vertex) / numberOfEdges) + count);
                 result.put(vertex.toString(), (graph.inDegree(vertex) + count));
 
             }

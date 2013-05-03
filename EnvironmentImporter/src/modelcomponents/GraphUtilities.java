@@ -213,7 +213,7 @@ public class GraphUtilities {
         List<String> path = new ArrayList<String>();
 //        path.addVertex(startingLocation);
         String startRoom = startingLocation.toString();
-        path.add(startRoom);
+//        path.add(startRoom);
 
 
 //        String destination = getDestination(
@@ -223,8 +223,12 @@ public class GraphUtilities {
 //        }
 //        ModelObject currentNode = addNewVertexToPath(destination, path);
 
+        try{
         List<String> startingPath = markovData.getPathFromRoom(startRoom, random);
-
+        if(startingPath == null){
+            System.out.println("Problem  here");
+            assert false;
+        }
         path.addAll(startingPath);
         ModelObject currentNode = CompleteGraph.instance().findRoomByName(path.get(path.size()-1));
         if (pathLength == markovData.getOrder()) {
@@ -232,7 +236,7 @@ public class GraphUtilities {
         }
 
 
-        for (int hops = markovData.getOrder(); hops < pathLength; hops++) {
+        while(path.size()<pathLength) {
             ModelObject tempNode = currentNode;
             currentNode = addOneMoreHop(path, markovData);
 
@@ -242,15 +246,25 @@ public class GraphUtilities {
             }
         }
 
+        assert path.size() == pathLength;
         return path;
-
+        }catch(Exception e){
+            e.printStackTrace();
+            return null;
+        }
     }
 
     private static ModelObject addOneMoreHop(List<String> path,RecursiveHashMap markovData) {
         List<String> trimmedPath = trimSequence(markovData.getOrder(),path);
 
         Map<String, Double> nextLocationProbabilities = markovData.getDestinationProbabilities(trimmedPath);
-        String destination = getDestination(nextLocationProbabilities);
+        String destination;
+        if(nextLocationProbabilities!=null){
+            destination = getDestination(nextLocationProbabilities);
+        }else {
+            System.out.println("Approximation needed!");
+            destination = getDestination(getRandomWalkProbabilities(CompleteGraph.instance().findRoomByName(path.get(path.size() - 1))));
+        }
 //        if (destination.equals(lastNode.toString())) {
 //            System.out.println("Source and destination are same!!");
 //        }
@@ -258,6 +272,17 @@ public class GraphUtilities {
         return addNewVertexToPath( destination, path);
 
 
+    }
+
+    private static Map<String, Double> getRandomWalkProbabilities(ModelObject room) {
+        Collection<ModelObject> neighbourSet = CompleteGraph.instance().getNeighbors(room);
+        Map<String, Double> result = new HashMap<String, Double>();
+        Double value = 1.0/ neighbourSet.size();
+        for(ModelObject neighbour: neighbourSet){
+            String neighbourString = neighbour.toString();
+            result.put(neighbourString, value);
+        }
+        return result;
     }
 
 

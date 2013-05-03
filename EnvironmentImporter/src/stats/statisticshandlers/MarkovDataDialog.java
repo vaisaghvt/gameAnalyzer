@@ -252,14 +252,15 @@ public class MarkovDataDialog extends JFrame implements ChangeListener, ActionLi
     @Override
     public void stateChanged(ChangeEvent e) {
         if (e.getSource() == orderSlider) {
+            orderLabel.setText(String.valueOf(orderSlider.getValue()));
             if (!orderSlider.getValueIsAdjusting()) {
-                if (getOrder() != orderSlider.getValue()) {
+//                if (getOrder() != orderSlider.getValue()) {
 
 
                     generateMiddlePanel();
-                }
+//                }
             }
-            orderLabel.setText(String.valueOf(orderSlider.getValue()));
+
         } else if (e.getSource() == graph1mSlider) {
             if (!graph1mSlider.getValueIsAdjusting()) {
                 if (graph1mSlider.getValue() >= getOrder()) {
@@ -317,8 +318,9 @@ public class MarkovDataDialog extends JFrame implements ChangeListener, ActionLi
                         graph1mSlider.setValue(1);
                         graph1mSlider.setEnabled(true);
                         graph1mValueLabel.setText("1");
+                    }else{
+                        graph1mValueLabel.setText("");
                     }
-                    graph1mValueLabel.setText("");
                     break;
                 case DIRECT:
                     graph1mSlider.setEnabled(false);
