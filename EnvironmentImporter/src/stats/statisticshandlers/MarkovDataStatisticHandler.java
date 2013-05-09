@@ -23,6 +23,7 @@ import java.text.NumberFormat;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.HashMap;
+import java.util.Map;
 
 /**
  * Created with IntelliJ IDEA.
@@ -198,6 +199,7 @@ public class MarkovDataStatisticHandler extends StatisticsHandler<PathHeatMapCon
                         if (heatMapType == MarkovDataDialog.HeatMapType.COMPARISON) {
                             HashBasedTable<String, String, Double> data2 = getNthOrderMarkovHeatMap(dataNameDataMap, graph2Type, graph2RandomWalkType, graph2HumanDataType, graph2M);
                             data = subtractGraph2FromGraph1(data, data2);
+                            System.out.println("Total difference="+amountOfDifference(data));
                             assert data != null;
                         }
                         System.out.println("Processing done");
@@ -211,12 +213,6 @@ public class MarkovDataStatisticHandler extends StatisticsHandler<PathHeatMapCon
                 protected void done() {
                     System.out.println("Done started");
                     assert data != null;
-
-//                    if(heatMapType == MarkovDataDialog.HeatMapType.INDIVIDUAL){
-//                        System.out.println("ENTROPY=" + calculateEntropy(data));
-//                    }
-
-
                     chartDisplay.setTitle(order + "th order heat map :" + phase.toString());
                     chartDisplay.display(data);
 //                            consoleDisplay.display(data);
@@ -262,6 +258,18 @@ public class MarkovDataStatisticHandler extends StatisticsHandler<PathHeatMapCon
         }
     }
 
+    private String amountOfDifference(HashBasedTable<String, String, Double> data) {
+        Map<String, Map<String, Double>> rowMap = data.rowMap();
+        double sum = 0.0;
+        for(String source :rowMap.keySet()){
+            for(String destination: rowMap.get(source).keySet()){
+                sum += Math.abs(rowMap.get(source).get(destination));
+            }
+
+        }
+        return String.valueOf(sum);
+    }
+
     private HashBasedTable<String, String, Double> getNthOrderMarkovHeatMap(HashMap<String, DirectedSparseMultigraph<ModelObject, ModelEdge>> dataNameGraphMap,
                                                                             MarkovDataDialog.GraphType graphType,
                                                                             RandomWalkOrganizer.RandomWalkType randomWalkType,
@@ -284,7 +292,6 @@ public class MarkovDataStatisticHandler extends StatisticsHandler<PathHeatMapCon
 
     private class CalculateCoverageTask extends AbstractTask {
         private final int hopsRequired;
-        private int coverage;
         private final Phase phase;
         private final int order;
         HashMap<String, DirectedSparseMultigraph<ModelObject, ModelEdge>> dataNameDataMap =

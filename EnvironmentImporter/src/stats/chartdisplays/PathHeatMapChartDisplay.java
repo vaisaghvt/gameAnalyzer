@@ -30,11 +30,9 @@ import java.util.Collection;
 import java.util.HashMap;
 
 /**
- * Created with IntelliJ IDEA.
  * User: vaisagh
  * Date: 2/1/13
  * Time: 1:13 PM
- * To change this template use File | Settings | File Templates.
  */
 public class PathHeatMapChartDisplay extends ChartDisplay<HashBasedTable<String, String, Double>> implements ActionListener, WindowListener {
 
@@ -242,12 +240,10 @@ public class PathHeatMapChartDisplay extends ChartDisplay<HashBasedTable<String,
 
     @Override
     public void windowOpened(WindowEvent e) {
-        //To change body of implemented methods use File | Settings | File Templates.
     }
 
     @Override
     public void windowClosing(WindowEvent e) {
-        //To change body of implemented methods use File | Settings | File Templates.
     }
 
     @Override
@@ -257,21 +253,17 @@ public class PathHeatMapChartDisplay extends ChartDisplay<HashBasedTable<String,
 
     @Override
     public void windowIconified(WindowEvent e) {
-        //To change body of implemented methods use File | Settings | File Templates.
     }
 
     @Override
     public void windowDeiconified(WindowEvent e) {
-        //To change body of implemented methods use File | Settings | File Templates.
     }
 
     @Override
     public void windowActivated(WindowEvent e) {
-        //To change body of implemented methods use File | Settings | File Templates.
     }
 
     @Override
     public void windowDeactivated(WindowEvent e) {
-        //To change body of implemented methods use File | Settings | File Templates.
     }
 }

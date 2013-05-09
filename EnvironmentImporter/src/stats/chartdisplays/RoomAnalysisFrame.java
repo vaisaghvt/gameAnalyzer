@@ -15,6 +15,16 @@ import modelcomponents.CompleteGraph;
 import modelcomponents.ModelEdge;
 import modelcomponents.ModelObject;
 import org.apache.commons.collections15.Transformer;
+import org.jfree.chart.ChartFactory;
+import org.jfree.chart.ChartPanel;
+import org.jfree.chart.JFreeChart;
+import org.jfree.chart.axis.SubCategoryAxis;
+import org.jfree.chart.plot.CategoryPlot;
+import org.jfree.chart.plot.PlotOrientation;
+import org.jfree.chart.renderer.category.GroupedStackedBarRenderer;
+import org.jfree.data.KeyToGroupMap;
+import org.jfree.data.category.CategoryDataset;
+import org.jfree.data.category.DefaultCategoryDataset;
 
 import javax.imageio.ImageIO;
 import javax.swing.*;
@@ -27,17 +37,17 @@ import java.awt.image.BufferedImage;
 import java.io.File;
 import java.text.DecimalFormat;
 import java.util.*;
+import java.util.List;
 import java.util.concurrent.ExecutionException;
 
 /**
- * Created with IntelliJ IDEA.
+
  * User: vaisagh
  * Date: 14/3/13
  * Time: 11:10 AM
- * To change this template use File | Settings | File Templates.
  */
 public class RoomAnalysisFrame extends JFrame {
-    private static final int MAX_NUMBER_TRACKING = 10;
+    private static final int MAX_NUMBER_TRACKING = 20;
     private JPanel dataPanel;
     private JPanel chartDisplayPanel = new JPanel();
     private Collection<JFrame> poppedOutFrames = new HashSet<JFrame>();
@@ -71,6 +81,7 @@ public class RoomAnalysisFrame extends JFrame {
     private RoomDataListener roomDataListener;
     private VisualizationViewer<ModelObject, ? extends ModelEdge> currentVisualizationViewer;
     private String currentTitle;
+    private JComboBox<String> sourceComboBox;
 
     public RoomAnalysisFrame(Collection<String> dataNames) {
         roomDataListener = new RoomDataListener();
@@ -124,16 +135,16 @@ public class RoomAnalysisFrame extends JFrame {
 
     private JPanel createButtonPanel() {
 
-        LimitedBoundedRangeModel startModel = new LimitedBoundedRangeModel(null, LimitedBoundedRangeModel.MAX_OR_MIN.MAX,0,45);
-        LimitedBoundedRangeModel endModel = new LimitedBoundedRangeModel(startModel, LimitedBoundedRangeModel.MAX_OR_MIN.MIN,0,45);
+        LimitedBoundedRangeModel startModel = new LimitedBoundedRangeModel(null, LimitedBoundedRangeModel.MAX_OR_MIN.MAX, 0, 45);
+        LimitedBoundedRangeModel endModel = new LimitedBoundedRangeModel(startModel, LimitedBoundedRangeModel.MAX_OR_MIN.MIN, 0, 45);
         startModel.limit = endModel;
         startTimeSelection = new JSlider(startModel);
         startTimeSelection.setValue(0);
         endTimeSelection = new JSlider(endModel);
         endTimeSelection.setValue(45);
 
-        LimitedBoundedRangeModel minCoverage = new LimitedBoundedRangeModel(null, LimitedBoundedRangeModel.MAX_OR_MIN.MAX,0,100);
-        LimitedBoundedRangeModel maxCoverage = new LimitedBoundedRangeModel(minCoverage, LimitedBoundedRangeModel.MAX_OR_MIN.MIN,0,100);
+        LimitedBoundedRangeModel minCoverage = new LimitedBoundedRangeModel(null, LimitedBoundedRangeModel.MAX_OR_MIN.MAX, 0, 100);
+        LimitedBoundedRangeModel maxCoverage = new LimitedBoundedRangeModel(minCoverage, LimitedBoundedRangeModel.MAX_OR_MIN.MIN, 0, 100);
         minCoverage.limit = maxCoverage;
         minCoverageSlider = new JSlider(minCoverage);
         minCoverageSlider.setValue(0);
@@ -144,16 +155,17 @@ public class RoomAnalysisFrame extends JFrame {
         generateButton.addActionListener(roomDataListener);
         closeButton.addActionListener(roomDataListener);
         displayTypeJComboBox = new JComboBox<DisplayType>();
-        for(DisplayType type : DisplayType.values()){
+        for (DisplayType type : DisplayType.values()) {
             displayTypeJComboBox.addItem(type);
         }
         displayTypeJComboBox.setEditable(false);
 
 
-        JPanel buttonPanel = new JPanel(new GridLayout(11, 2));
+        JPanel buttonPanel = new JPanel(new GridLayout(12, 2));
 
         buttonPanel.add(new JLabel("Choose room :"));
-        buttonPanel.add(getRoomButtonComboBox());
+        buttonPanel.add(generateRoomButtonComboBox());
+        roomButtonComboBox.addActionListener(roomDataListener);
 
         buttonPanel.add(new JLabel("Select phases"));
         buttonPanel.add(explorationCheckBox);
@@ -197,6 +209,10 @@ public class RoomAnalysisFrame extends JFrame {
         maxCoveragePanel.add(maxCoverageLabel, BorderLayout.WEST);
         buttonPanel.add(maxCoveragePanel);
 
+        buttonPanel.add(new JLabel("Choose source:"));
+        sourceComboBox = new JComboBox<String>();
+        buttonPanel.add(sourceComboBox);
+
         maxCoverageSlider.addChangeListener(roomDataListener);
         minCoverageSlider.addChangeListener(roomDataListener);
 
@@ -220,6 +236,7 @@ public class RoomAnalysisFrame extends JFrame {
             }
         });
 
+
         final HashSet<Phase> selectedPhases = new HashSet<Phase>();
         if (explorationCheckBox.isSelected()) {
             selectedPhases.add(Phase.EXPLORATION);
@@ -242,7 +259,7 @@ public class RoomAnalysisFrame extends JFrame {
             final int endTimeSeconds = endTimeSelection.getValue();
             final int minCoverageValue = minCoverageSlider.getValue();
             final int maxCoverageValue = maxCoverageSlider.getValue();
-
+            final String selectedSource = sourceComboBox.getItemAt(sourceComboBox.getSelectedIndex());
 
             SwingUtilities.invokeLater(new Runnable() {
                 @Override
@@ -270,7 +287,7 @@ public class RoomAnalysisFrame extends JFrame {
                             generateFirstOrderProbabilities(nameToGraphMap, room, startTimeSeconds, endTimeSeconds, nameToMinCoverageTimeMap, nameToMaxCoverageTimeMap);
                             break;
                         case TEMPORAL_SECOND_ORDER_MARKOV:
-                            generateTemporalSecondOrderMarkov(nameToGraphMap, room, startTimeSeconds, endTimeSeconds, nameToMinCoverageTimeMap, nameToMaxCoverageTimeMap);
+                            generateTemporalSecondOrderMarkov(nameToGraphMap, room, selectedSource);
                             break;
                     }
                     return null;
@@ -307,20 +324,19 @@ public class RoomAnalysisFrame extends JFrame {
             protected HashMap<String, Long> doInBackground() throws Exception {
                 pv = new ProgressVisualizer("Calculating coverage times", ProgressVisualizer.DeterminateType.DETERMINATE);
                 this.addPropertyChangeListener(pv);
-                int i=0;
+                int i = 0;
                 HashMap<String, Long> result = new HashMap<String, Long>();
-                for(String name:nameToGraphMap.keySet()){
+                for (String name : nameToGraphMap.keySet()) {
                     DirectedSparseMultigraph<ModelObject, ModelEdge> graph = nameToGraphMap.get(name);
-                    pv.print("processing "+name+"...\n");
+                    pv.print("processing " + name + "...\n");
                     long timeAtCoverage = findTimeAtCoverage(coverage, graph);
                     result.put(name, timeAtCoverage);
-                    final int currentProgress = i;
-                    setProgress((currentProgress*100) /nameToGraphMap.keySet().size());
+                    setProgress((i * 100) / nameToGraphMap.keySet().size());
 
 
                 }
 
-                 pv.finish();
+                pv.finish();
                 return result;
             }
 
@@ -331,9 +347,9 @@ public class RoomAnalysisFrame extends JFrame {
         try {
             return worker.get();
         } catch (InterruptedException e) {
-            e.printStackTrace();  //To change body of catch statement use File | Settings | File Templates.
+            e.printStackTrace();
         } catch (ExecutionException e) {
-            e.printStackTrace();  //To change body of catch statement use File | Settings | File Templates.
+            e.printStackTrace();
         }
         return null;
     }
@@ -349,12 +365,12 @@ public class RoomAnalysisFrame extends JFrame {
         edgeCollection.addAll(graph.getEdges());
         int totalSize = CompleteGraph.instance().getVertexCount();
         Collection<ModelObject> visitedVertices = new HashSet<ModelObject>();
-        long maxTime=0;
-        for(ModelEdge edge: edgeCollection){
+        long maxTime = 0;
+        for (ModelEdge edge : edgeCollection) {
             Pair<ModelObject> vertices = graph.getEndpoints(edge);
             visitedVertices.addAll(vertices);
             int currentCoverage = ((visitedVertices.size() * 100) / totalSize);
-            if(currentCoverage>=coverage){
+            if (currentCoverage >= coverage) {
                 return edge.getTime();
             }
             maxTime = edge.getTime();
@@ -383,12 +399,19 @@ public class RoomAnalysisFrame extends JFrame {
     }
 
     private void generateTemporalSecondOrderMarkov(HashMap<String, DirectedSparseMultigraph<ModelObject, ModelEdge>> nameToGraphMap, String room,
-                                                   int startTime, int endTime, HashMap<String, Long> nameToMinCoverageTimeMap, HashMap<String, Long> nameToMaxCoverageTimeMap) {
+                                                   String selectedSource) {
+        ModelObject sourceFilterRoom;
+        if (selectedSource.equals("-")) {
+            sourceFilterRoom = null;
+        } else {
+            sourceFilterRoom = CompleteGraph.instance().findRoomByName(selectedSource);
+        }
+
         final ModelObject mainNode = CompleteGraph.instance().findRoomByName(room);
         Collection<ModelObject> neighbours = CompleteGraph.instance().getNeighbors(mainNode);
         ArrayList<DirectedSparseMultigraph<ModelObject, ModelEdge>> localGraphs = new ArrayList<DirectedSparseMultigraph<ModelObject, ModelEdge>>(MAX_NUMBER_TRACKING);
 
-        for(int i=0;i<MAX_NUMBER_TRACKING;i++){
+        for (int i = 0; i < MAX_NUMBER_TRACKING; i++) {
             DirectedSparseMultigraph<ModelObject, ModelEdge> localGraph = new DirectedSparseMultigraph<ModelObject, ModelEdge>();
             for (ModelObject node : neighbours) {
                 localGraph.addVertex(node);
@@ -397,10 +420,7 @@ public class RoomAnalysisFrame extends JFrame {
         }
 
 
-
-
 //        localGraph.addVertex(mainNode);
-
 
 
         for (String name : nameToGraphMap.keySet()) {
@@ -408,7 +428,6 @@ public class RoomAnalysisFrame extends JFrame {
 //            long startTimeSeconds = Math.max(startTime*60000,nameToMinCoverageTimeMap.getProbabilityOfSequence(name) );
 //
 //            long endTimeSeconds = Math.min(endTime*60000, nameToMaxCoverageTimeMap.getProbabilityOfSequence(name));
-
 
 
             if (!tempGraph.containsVertex(mainNode)) {
@@ -424,7 +443,7 @@ public class RoomAnalysisFrame extends JFrame {
 
             for (ModelEdge edge : tempGraph.getIncidentEdges(mainNode)) {
 //                if (edge.getTime() >= startTimeSeconds && edge.getTime() <= endTimeSeconds)
-                    edgeCollection.add(edge);
+                edgeCollection.add(edge);
             }
 
 
@@ -451,21 +470,23 @@ public class RoomAnalysisFrame extends JFrame {
 //                );
 
             }
-            if(tempGraph.inDegree(mainNode)!= tempGraph.outDegree(mainNode)){
+            if (tempGraph.inDegree(mainNode) != tempGraph.outDegree(mainNode)) {
                 System.out.println("YOU're screwed!!!");
             }
 
-            int visitNumber =0;
+            int visitNumber = 0;
 
             int size = edgeCollection.size();
-            DirectedSparseMultigraph<ModelObject,ModelEdge> localGraph = localGraphs.get(visitNumber);
+            DirectedSparseMultigraph<ModelObject, ModelEdge> localGraph = localGraphs.get(visitNumber);
             for (int i = 0; i < size / 2; i++) {
                 ModelEdge incoming = edgeCollection.pollFirst();
                 ModelEdge outgoing = edgeCollection.pollFirst();
                 ModelObject from = tempGraph.getOpposite(mainNode, incoming);
+
                 ModelObject to = tempGraph.getOpposite(mainNode, outgoing);
-                localGraph.addEdge(new ModelEdge(), from, to);
-                if(visitNumber<MAX_NUMBER_TRACKING-1 && isLeaving(outgoing, tempGraph, to, mainNode)){
+                if (sourceFilterRoom == null || sourceFilterRoom.equals(from))
+                    localGraph.addEdge(new ModelEdge(), from, to);
+                if (visitNumber < MAX_NUMBER_TRACKING - 1 && isLeaving(outgoing, tempGraph, to, mainNode)) {
                     visitNumber++;
                     localGraph = localGraphs.get(visitNumber);
                 }
@@ -473,40 +494,126 @@ public class RoomAnalysisFrame extends JFrame {
         }
 
 
-        for(int i=0;i<MAX_NUMBER_TRACKING;i++){
-            DirectedSparseMultigraph<ModelObject, ModelEdge> localGraph = localGraphs.get(i);
-            final DirectedSparseMultigraph<ModelObject, ProbabilityEdge> graphToDraw = convertToProbabilities(localGraph);
-
-//            ArrayList<ProbabilityEdge> edges = new ArrayList<ProbabilityEdge>(graphToDraw.getEdges());
-//            int size = graphToDraw.getEdges().size();
-//            for(int j=0;j<size;j++ ){
-//                ProbabilityEdge edge = edges.getProbabilityOfSequence(j);
-//                if(edge.prob<0.1) {
-//                    graphToDraw.getEdges().remove(edge);
-//                }
+//        if (sourceFilterRoom == null) {
+//            for (int i = 0; i < MAX_NUMBER_TRACKING; i++) {
+//                DirectedSparseMultigraph<ModelObject, ModelEdge> localGraph = localGraphs.get(i);
+//                final DirectedSparseMultigraph<ModelObject, ProbabilityEdge> graphToDraw = convertToProbabilities(localGraph);
+//
+////            ArrayList<ProbabilityEdge> edges = new ArrayList<ProbabilityEdge>(graphToDraw.getEdges());
+////            int size = graphToDraw.getEdges().size();
+////            for(int j=0;j<size;j++ ){
+////                ProbabilityEdge edge = edges.getProbabilityOfSequence(j);
+////                if(edge.prob<0.1) {
+////                    graphToDraw.getEdges().remove(edge);
+////                }
+////            }
+//                final int currentAttemptNumber = i;
+//                SwingUtilities.invokeLater(new Runnable() {
+//                    @Override
+//                    public void run() {
+//                        JPanel panel = drawInPanel(graphToDraw, mainNode);
+//                        JFrame frame = new JFrame();
+//                        frame.getContentPane().add(panel);
+//                        frame.setVisible(true);
+//                        frame.setSize(600, 600);
+//                        frame.revalidate();
+//
+//                        frame.setTitle("For attempt number :" + (currentAttemptNumber + 1));
+//                    }
+//                });
 //            }
-            final int currentAttemptNumber = i;
-            SwingUtilities.invokeLater(new Runnable() {
-                @Override
-                public void run() {
-                    JPanel panel = drawInPanel(graphToDraw, mainNode);
-                    JFrame frame = new JFrame();
-                    frame.getContentPane().add(panel);
-                    frame.setVisible(true);
-                    frame.setSize(600,600);
-                    frame.revalidate();
+//        } else {
+            final CategoryDataset dataSet = createDataSet(localGraphs);
+            final JFreeChart chart = createChart(dataSet);
+            final ChartPanel chartPanel = new ChartPanel(chart);
+            chartPanel.setPreferredSize(new Dimension(500, 270));
+            JFrame chartFrame = new JFrame(room);
 
-                    frame.setTitle("For attempt number :"+ (currentAttemptNumber+1));
-                }
-            });
-        }
+            chartFrame.setContentPane(chartPanel);
+            chartFrame.setVisible(true);
+            chartFrame.setSize(new Dimension(520, 300));
+            chartFrame.setLocation(0, 0);
+        chartFrame.setDefaultCloseOperation(DISPOSE_ON_CLOSE);
+
+
+//        }
 
 
     }
 
+    private JFreeChart createChart(CategoryDataset dataset) {
+        final JFreeChart stackedChart = ChartFactory.createStackedBarChart("Through "+roomButtonComboBox.getItemAt(roomButtonComboBox.getSelectedIndex()), "Category", "Value",
+                dataset, PlotOrientation.VERTICAL, true, true, false);
+
+        //create group
+        GroupedStackedBarRenderer renderer = new GroupedStackedBarRenderer();
+        List rowKeys = dataset.getRowKeys();
+        KeyToGroupMap map=null;
+
+        HashSet<String> sourceSet = new HashSet<String>();
 
 
-    private boolean isLeaving(ModelEdge incomingEdge, DirectedSparseMultigraph<ModelObject, ModelEdge> graph,ModelObject mainNode, ModelObject from) {
+        for(Object row: rowKeys){
+            String sourceDestinationMap = row.toString();
+            String[] parts  =  sourceDestinationMap.split(":");
+            String source = parts[0];
+
+
+            if(map==null){
+                 map = new KeyToGroupMap(source);
+            }
+            map.mapKeyToGroup(sourceDestinationMap, source);
+
+            sourceSet.add(source);
+
+        }
+
+        SubCategoryAxis dom_axis = new SubCategoryAxis("Choice / Attempt");
+        //Margin between group
+//        dom_axis.setCategoryMargin(0.1);
+//        for(String key: sourceSet){
+//            dom_axis.addSubCategory(key);
+//        }
+        //end
+
+
+
+        renderer.setSeriesToGroupMap(map);
+        //margin between bar.
+        renderer.setItemMargin(0.03);
+        //end
+
+
+
+        CategoryPlot plot = (CategoryPlot) stackedChart.getPlot();
+        plot.setDomainAxis(dom_axis);
+        plot.setRenderer(renderer);
+
+        return stackedChart;
+    }
+
+    private CategoryDataset createDataSet(ArrayList<DirectedSparseMultigraph<ModelObject, ModelEdge>> localGraphs) {
+        DefaultCategoryDataset dataset = new DefaultCategoryDataset();
+
+        for (int i = 0; i < MAX_NUMBER_TRACKING; i++) {
+            DirectedSparseMultigraph<ModelObject, ModelEdge> localGraph = localGraphs.get(i);
+            final DirectedSparseMultigraph<ModelObject, ProbabilityEdge> graphToDraw = convertToProbabilities(localGraph);
+            for(ProbabilityEdge edge: graphToDraw.getEdges()){
+               String source = graphToDraw.getSource(edge).toString();
+               String destination = graphToDraw.getDest(edge).toString();
+               double value = edge.prob; //TODO: with frequency instead of probability
+
+                String valueForBar = source +":"+ destination;
+                String category = "Attempt "+ (i+1);
+                dataset.addValue(value, valueForBar, category);
+
+            }
+
+        }
+        return dataset;
+    }
+
+    private boolean isLeaving(ModelEdge incomingEdge, DirectedSparseMultigraph<ModelObject, ModelEdge> graph, ModelObject mainNode, ModelObject from) {
         long timeOfIncomingEdge = incomingEdge.getTime();
         TreeSet<ModelEdge> edgeCollection = new TreeSet<ModelEdge>(new Comparator<ModelEdge>() {
             @Override
@@ -517,13 +624,12 @@ public class RoomAnalysisFrame extends JFrame {
 
         edgeCollection.addAll(graph.getOutEdges(mainNode));
 
-        for(ModelEdge edge :edgeCollection){
-            if(edge.getTime()>= timeOfIncomingEdge){
+        for (ModelEdge edge : edgeCollection) {
+            if (edge.getTime() >= timeOfIncomingEdge) {
                 ModelObject destination = graph.getOpposite(mainNode, edge);
-                if(destination.toString().equals(from.toString())){
+                if (destination.toString().equals(from.toString())) {
                     return false;
-                }
-                else {
+                } else {
                     return true;
                 }
             }
@@ -628,7 +734,7 @@ public class RoomAnalysisFrame extends JFrame {
                     System.out.println("Cycle");
                 }
 
-                summarizedGraph.addEdge(new ProbabilityEdge(nodeToNodeProbabilities.get(source).get(dest),nodeToNodeTravelFrequency.get(source).get(dest)), source, dest);
+                summarizedGraph.addEdge(new ProbabilityEdge(nodeToNodeProbabilities.get(source).get(dest), nodeToNodeTravelFrequency.get(source).get(dest)), source, dest);
 
             }
 
@@ -653,9 +759,9 @@ public class RoomAnalysisFrame extends JFrame {
 
         for (String name : nameToGraphMap.keySet()) {
             DirectedSparseMultigraph<ModelObject, ModelEdge> tempGraph = nameToGraphMap.get(name);
-            long startTimeSeconds = Math.max(startTime*60000,nameToMinCoverageTimeMap.get(name) );
+            long startTimeSeconds = Math.max(startTime * 60000, nameToMinCoverageTimeMap.get(name));
 
-            long endTimeSeconds = Math.min(endTime*60000, nameToMaxCoverageTimeMap.get(name));
+            long endTimeSeconds = Math.min(endTime * 60000, nameToMaxCoverageTimeMap.get(name));
             if (!tempGraph.containsVertex(mainNode)) {
                 continue;
             }
@@ -696,7 +802,7 @@ public class RoomAnalysisFrame extends JFrame {
                 );
 
             }
-            if(tempGraph.inDegree(mainNode)!= tempGraph.outDegree(mainNode)){
+            if (tempGraph.inDegree(mainNode) != tempGraph.outDegree(mainNode)) {
                 System.out.println("YOU're screwed!!!");
             }
             int size = edgeCollection.size();
@@ -715,7 +821,7 @@ public class RoomAnalysisFrame extends JFrame {
 
     }
 
-    private JPanel drawInPanel(DirectedSparseMultigraph<ModelObject, ProbabilityEdge> graphToDraw,final  ModelObject mainNode) {
+    private JPanel drawInPanel(DirectedSparseMultigraph<ModelObject, ProbabilityEdge> graphToDraw, final ModelObject mainNode) {
         Layout<ModelObject, ProbabilityEdge> layout = new SpringLayout2<ModelObject, ProbabilityEdge>(graphToDraw);
 
 
@@ -753,7 +859,6 @@ public class RoomAnalysisFrame extends JFrame {
 //                if (style.equals(DisplayType.SECOND_ORDER_MARKOV)) {
         tempVisualizationViewer.getRenderContext().setEdgeLabelTransformer(new ToStringLabeller());
 //                }
-
 
 
         tempVisualizationViewer.revalidate();
@@ -832,7 +937,7 @@ public class RoomAnalysisFrame extends JFrame {
                 HashMap<String, DirectedSparseMultigraph<ModelObject, ModelEdge>> result = new HashMap<String, DirectedSparseMultigraph<ModelObject, ModelEdge>>();
                 final int size = dataNames.size();
                 int i = 1;
-                 this.addPropertyChangeListener(pv);
+                this.addPropertyChangeListener(pv);
                 for (String dataName : dataNames) {
                     final String tempDataName = dataName;
                     pv.print("Processing " + tempDataName + "...\n");
@@ -857,7 +962,6 @@ public class RoomAnalysisFrame extends JFrame {
             }
 
 
-
         };
 
         tempWorker.execute();
@@ -867,7 +971,7 @@ public class RoomAnalysisFrame extends JFrame {
     }
 
 
-    public JComboBox<String> getRoomButtonComboBox() {
+    public JComboBox<String> generateRoomButtonComboBox() {
         roomButtonComboBox = new JComboBox<String>();
         synchronized (roomList) {
             if (roomList != null && !roomList.isEmpty()) {
@@ -892,7 +996,7 @@ public class RoomAnalysisFrame extends JFrame {
 
     public enum DisplayType {
         FIRST_ORDER_MARKOV("1st order markov"),
-        SECOND_ORDER_MARKOV("2nd order markov"),        
+        SECOND_ORDER_MARKOV("2nd order markov"),
         TEMPORAL_SECOND_ORDER_MARKOV("Temporal 2nd order markov");
         private final String name;
 
@@ -935,7 +1039,24 @@ public class RoomAnalysisFrame extends JFrame {
 
         @Override
         public void actionPerformed(ActionEvent event) {
-            if (event.getSource() == closeButton) {
+            if (event.getSource() == roomButtonComboBox) {
+                final String currentRoom = roomButtonComboBox.getItemAt(roomButtonComboBox.getSelectedIndex());
+                SwingUtilities.invokeLater(new Runnable() {
+                    @Override
+                    public void run() {
+                        Collection<ModelObject> neighbours = CompleteGraph.instance().
+                                getNeighbors(CompleteGraph.instance().findRoomByName(currentRoom));
+                        sourceComboBox.removeAllItems();
+                        sourceComboBox.addItem("-");
+                        for (ModelObject neighbour : neighbours) {
+                            String neighbourString = neighbour.toString();
+                            sourceComboBox.addItem(neighbourString);
+                        }
+
+                        sourceComboBox.setSelectedIndex(0);
+                    }
+                });
+            } else if (event.getSource() == closeButton) {
                 SwingUtilities.invokeLater(
                         new Runnable() {
                             @Override
@@ -1067,13 +1188,13 @@ public class RoomAnalysisFrame extends JFrame {
 
         public ProbabilityEdge(Double value, Integer freq) {
             this.prob = value;
-            this.freq= freq;
+            this.freq = freq;
         }
 
         @Override
         public String toString() {
-            String valueString= new DecimalFormat("#.000").format(prob);
-            return valueString+"("+freq+")";
+            String valueString = new DecimalFormat("#.000").format(prob);
+            return valueString + "(" + freq + ")";
         }
     }
 
