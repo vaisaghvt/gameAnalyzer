@@ -1,0 +1,101 @@
+0:1LeftCorridor1
+1:ToVG1
+2:1MainJunc
+3:1LeftCorridor2
+4:VG1
+5:Exit
+6:1RightCorridor1
+7:Start
+8:LeftGStairCorr
+9:1LeftCorridor3
+10:ToVG2
+11:1RightCorridor2
+12:26
+13:29
+14:left G main
+15:1LeftCorridor4
+16:VG2
+17:1RightCorridor3
+18:RightGStairCorr
+19:Kitchen
+20:SPCorr
+21:Conf 2
+22:Pool
+23:1LeftCorridor5
+24:Dine 1
+25:1Library
+26:BG Stairs
+27:Dine 2
+28:right G Main
+29:KP
+30:SLP
+31:1LeftCorridor6
+32:1LeftCorridor7
+33:Bath2
+34:L Study
+35:Conf
+36:SpecLounge
+37:Disco
+38:2CorrA1
+39:2CorrA2
+40:2CorrMain
+41:2CorrA3
+42:2DormCorr
+43:2CorrC1
+44:ACToDown
+45:2CorrA4
+46:Dorm 1
+47:Dorm 2
+48:WayToFlr3
+49:2CorrC2
+50:left 2 stair
+51:right 2 stair
+52:2nowhereCorr
+53:2CorrA5
+54:s2to3
+55:2CorrC3
+56:Dorm4
+57:Dorm3
+58:2CorrA6
+59:2Library
+60:DB2
+61:DB1
+62:Bath 1
+63:2CorrA7
+64:MB1
+65:SB2
+66:TheLounge
+67:SB1
+68:SB4
+69:SB3
+70:2PassB
+71:MB3
+72:2CorrB5
+73:2CorrB4
+74:MB2
+75:2CorrB3
+76:Sauna
+77:2CorrB2
+78:2CorrB1
+79:BToDown
+80:B2 Stairs
+81:3Corr1
+82:Study1
+83:S3StaircaseRoom
+84:3Corr2
+85:Gallery
+86:s3to2
+87:3Corr4
+88:3Corr3
+89:3Corr7
+90:3Corr5
+91:MR
+92:3Corr6
+93:3Corr8
+94:Study3
+95:PR2
+96:PR6
+97:PR3
+98:PR1
+99:PR5
+100:PR4

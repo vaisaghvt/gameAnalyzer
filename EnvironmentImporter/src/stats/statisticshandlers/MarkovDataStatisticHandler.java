@@ -24,6 +24,8 @@ import java.util.Collection;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.concurrent.Semaphore;
+import java.util.concurrent.TimeUnit;
 
 /**
  * Created with IntelliJ IDEA.
@@ -35,6 +37,7 @@ import java.util.Map;
 public class MarkovDataStatisticHandler extends StatisticsHandler<PathHeatMapConsoleDisplay, PathHeatMapChartDisplay>
         implements ActionListener {
 
+    private boolean findAllTillOrder = true;
     private int order;
     private Collection<String> dataNames;
     private Phase phase;
@@ -121,18 +124,54 @@ public class MarkovDataStatisticHandler extends StatisticsHandler<PathHeatMapCon
                     graph1M = markovDataDialog.getGraph1m();
                 }
             }
-            int coverageRequired = markovDataDialog.getCoverageRequired();
+            final int coverageRequired = markovDataDialog.getCoverageRequired();
 
-            if (graph1Type == MarkovDataDialog.GraphType.RANDOM_WALK || graph1HumanDataType == MarkovDataDialog.HumanType.DIRECT) {
+            SwingWorker<Void, Void> calculator = new SwingWorker<Void, Void>() {
+                @Override
+                protected Void doInBackground() throws Exception {
+                    if (graph1Type == MarkovDataDialog.GraphType.RANDOM_WALK || graph1HumanDataType == MarkovDataDialog.HumanType.DIRECT) {
+                        if (findAllTillOrder) {
+                            final Semaphore lock = new Semaphore(1);
 
-                CalculateHopsNeededTask task = new CalculateHopsNeededTask(dataNames, phase, order, coverageRequired);
-                super.actualGenerateAndDisplay(task);
+                            int usedOrder;
+                            for (int i = order; i >= Math.max(0, order-5); i--) {
+                                if (i == 0) {
+                                    graph1Type = MarkovDataDialog.GraphType.RANDOM_WALK;
+
+                                    usedOrder = 1;
+                                } else {
+                                    usedOrder = i;
+                                    graph1Type = MarkovDataDialog.GraphType.HUMAN_DATA;
+                                }
+
+                                final int actualUsedOrder = usedOrder;
+
+
+                                CalculateHopsNeededTask task = new CalculateHopsNeededTask(dataNames, phase, actualUsedOrder, coverageRequired, lock);
+
+                                try {
+                                    lock.tryAcquire(1, 300, TimeUnit.SECONDS);
+                                } catch (InterruptedException e1) {
+                                    e1.printStackTrace();  //To change body of catch statement use File | Settings | File Templates.
+                                }
+
+                                MarkovDataStatisticHandler.super.actualGenerateAndDisplay(task);
+                            }
+
+
+                        }
+
+
 //                markovDataDialog.dispose();
-            } else {
-                JOptionPane.showMessageDialog(new JFrame(), "Cannot generate this data for NFromM!", "Invalid parameter",
-                        JOptionPane.ERROR_MESSAGE);
-            }
+                    } else {
+                        JOptionPane.showMessageDialog(new JFrame(), "Cannot generate this data for NFromM!", "Invalid parameter",
+                                JOptionPane.ERROR_MESSAGE);
+                    }
+                    return null;
+                }
 
+            };
+            calculator.execute();
         } else if (e.getSource() == markovDataDialog.calculateCoverageForHopsButton) {
             order = markovDataDialog.getOrder();
             heatMapType = markovDataDialog.getHeatMapType();
@@ -145,16 +184,46 @@ public class MarkovDataStatisticHandler extends StatisticsHandler<PathHeatMapCon
                     graph1M = markovDataDialog.getGraph1m();
                 }
             }
-            int hopsRequired = markovDataDialog.getHopsRequired();
-            if (graph1Type == MarkovDataDialog.GraphType.RANDOM_WALK || graph1HumanDataType == MarkovDataDialog.HumanType.DIRECT) {
-                CalculateCoverageTask task = new CalculateCoverageTask(dataNames, phase, order, hopsRequired);
-                super.actualGenerateAndDisplay(task);
-//                markovDataDialog.dispose();
-            } else {
-                JOptionPane.showMessageDialog(new JFrame(), "Cannot generate this data for NFromM!", "Invalid parameter",
-                        JOptionPane.ERROR_MESSAGE);
-            }
+            final int hopsRequired = markovDataDialog.getHopsRequired();
+            SwingWorker<Void, Void> calculator = new SwingWorker<Void, Void>() {
+                @Override
+                protected Void doInBackground() throws Exception {
+                    if (graph1Type == MarkovDataDialog.GraphType.RANDOM_WALK || graph1HumanDataType == MarkovDataDialog.HumanType.DIRECT) {
+                        if (findAllTillOrder) {
+                            final Semaphore lock = new Semaphore(1);
+                            int usedOrder;
+                            for (int i = order; i >= Math.max(0, order-5); i--) {
+                                if (i == 0) {
+                                    graph1Type = MarkovDataDialog.GraphType.RANDOM_WALK;
 
+                                    usedOrder = 1;
+                                } else {
+                                    usedOrder = i;
+                                    graph1Type = MarkovDataDialog.GraphType.HUMAN_DATA;
+                                }
+
+
+                                CalculateCoverageTask task = new CalculateCoverageTask(dataNames, phase, usedOrder, hopsRequired, lock);
+
+                                try {
+                                    lock.tryAcquire(1, 300, TimeUnit.SECONDS);
+                                } catch (InterruptedException e1) {
+                                    e1.printStackTrace();  //To change body of catch statement use File | Settings | File Templates.
+                                }
+                                MarkovDataStatisticHandler.super.actualGenerateAndDisplay(task);
+//                markovDataDialog.dispose();
+
+                            }
+
+                        }
+                    } else {
+                        JOptionPane.showMessageDialog(new JFrame(), "Cannot generate this data for NFromM!", "Invalid parameter",
+                                JOptionPane.ERROR_MESSAGE);
+                    }
+                    return null;
+                }
+            };
+            calculator.execute();
 
         }
     }
@@ -199,7 +268,9 @@ public class MarkovDataStatisticHandler extends StatisticsHandler<PathHeatMapCon
                         if (heatMapType == MarkovDataDialog.HeatMapType.COMPARISON) {
                             HashBasedTable<String, String, Double> data2 = getNthOrderMarkovHeatMap(dataNameDataMap, graph2Type, graph2RandomWalkType, graph2HumanDataType, graph2M);
                             data = subtractGraph2FromGraph1(data, data2);
-                            System.out.println("Total difference="+amountOfDifference(data));
+//                            System.out.println();
+//                            System.out.println("Total difference=" + (amountOfDifference(data)/(data.cellSet().size()*2)));
+                            System.out.println("Total difference=" + amountOfDifference(data));
                             assert data != null;
                         }
                         System.out.println("Processing done");
@@ -258,16 +329,16 @@ public class MarkovDataStatisticHandler extends StatisticsHandler<PathHeatMapCon
         }
     }
 
-    private String amountOfDifference(HashBasedTable<String, String, Double> data) {
+    private double amountOfDifference(HashBasedTable<String, String, Double> data) {
         Map<String, Map<String, Double>> rowMap = data.rowMap();
         double sum = 0.0;
-        for(String source :rowMap.keySet()){
-            for(String destination: rowMap.get(source).keySet()){
+        for (String source : rowMap.keySet()) {
+            for (String destination : rowMap.get(source).keySet()) {
                 sum += Math.abs(rowMap.get(source).get(destination));
             }
 
         }
-        return String.valueOf(sum);
+        return sum;
     }
 
     private HashBasedTable<String, String, Double> getNthOrderMarkovHeatMap(HashMap<String, DirectedSparseMultigraph<ModelObject, ModelEdge>> dataNameGraphMap,
@@ -294,16 +365,19 @@ public class MarkovDataStatisticHandler extends StatisticsHandler<PathHeatMapCon
         private final int hopsRequired;
         private final Phase phase;
         private final int order;
+        private final Semaphore lock;
         HashMap<String, DirectedSparseMultigraph<ModelObject, ModelEdge>> dataNameDataMap =
                 new HashMap<String, DirectedSparseMultigraph<ModelObject, ModelEdge>>();
 
 
-        public CalculateCoverageTask(Collection<String> dataNames, Phase phase, int order, int hopsRequired) {
+        public CalculateCoverageTask(Collection<String> dataNames, Phase phase, int order, int hopsRequired, Semaphore lock) {
             super(dataNames);
             this.phase = phase;
 
             this.order = order;
             this.hopsRequired = hopsRequired;
+            this.lock = lock;
+
         }
 
         @Override
@@ -334,17 +408,21 @@ public class MarkovDataStatisticHandler extends StatisticsHandler<PathHeatMapCon
 
                 protected void done() {
                     NumberFormat doubleFormat = new DecimalFormat("######.000");
-                    JOptionPane.showMessageDialog(new JFrame(),
-                            "order = " + order + "\n" +
-                                    "graph type = " + graph1Type + "\n" +
-                                    "random Walk Type=" + (graph1RandomWalkType == null ? "N/A" : graph1RandomWalkType) + "\n" +
-                                    "human Map Type=" + (graph1HumanDataType == null ? "N/A" : graph1HumanDataType) + "\n" +
-                                    "m value=" + (graph1M == 0 ? "N/A" : graph1M) + "\n" +
-                                    "hops=" + hopsRequired + "\n" +
-                                    "<html><font color=\"red\">COVERAGE = " + doubleFormat.format(coverage.get("mean")) + " \u00B1 " +
-                                    doubleFormat.format(coverage.get("sd")) + "</font></html>", "Coverage calculated",
-                            JOptionPane.INFORMATION_MESSAGE
-                    );
+//                    JOptionPane.showMessageDialog(new JFrame(),
+//                            "order = " + order + "\n" +
+//                                    "graph type = " + graph1Type + "\n" +
+//                                    "random Walk Type=" + (graph1RandomWalkType == null ? "N/A" : graph1RandomWalkType) + "\n" +
+//                                    "human Map Type=" + (graph1HumanDataType == null ? "N/A" : graph1HumanDataType) + "\n" +
+//                                    "m value=" + (graph1M == 0 ? "N/A" : graph1M) + "\n" +
+//                                    "hops=" + hopsRequired + "\n" +
+//                                    "<html><font color=\"red\">COVERAGE = " + doubleFormat.format(coverage.get("mean")) + " \u00B1 " +
+//                                    doubleFormat.format(coverage.get("sd")) + "</font></html>", "Coverage calculated",
+//                            JOptionPane.INFORMATION_MESSAGE
+//                    );
+                    System.out.println("Order="+order+";Hops="+hopsRequired+";COVERAGE = " + doubleFormat.format(coverage.get("mean")) + " \u00B1 " +
+                            doubleFormat.format(coverage.get("sd")));
+
+                    CalculateCoverageTask.this.lock.release();
                 }
             };
             worker.execute();
@@ -374,15 +452,19 @@ public class MarkovDataStatisticHandler extends StatisticsHandler<PathHeatMapCon
 
         private final Phase phase;
         private final int order;
+        private final Semaphore lock;
         HashMap<String, DirectedSparseMultigraph<ModelObject, ModelEdge>> dataNameDataMap = new HashMap<String, DirectedSparseMultigraph<ModelObject, ModelEdge>>();
 
 
-        public CalculateHopsNeededTask(Collection<String> dataNames, Phase phase, int order, int coverageRequired) {
+        public CalculateHopsNeededTask(Collection<String> dataNames, Phase phase, int order, int coverageRequired, Semaphore lock) {
             super(dataNames);
             this.phase = phase;
 
             this.order = order;
             this.coverageRequired = coverageRequired;
+            this.lock = lock;
+
+
         }
 
         @Override
@@ -412,16 +494,20 @@ public class MarkovDataStatisticHandler extends StatisticsHandler<PathHeatMapCon
                 protected void done() {
 
                     NumberFormat doubleFormat = new DecimalFormat("######.000");
-                    JOptionPane.showMessageDialog(new JFrame(),
-                            "order = " + order + "\n" +
-                                    "graph type = " + graph1Type + "\n" +
-                                    "random Walk Type=" + (graph1RandomWalkType == null ? "N/A" : graph1RandomWalkType) + "\n" +
-                                    "human Map Type=" + (graph1HumanDataType == null ? "N/A" : graph1HumanDataType) + "\n" +
-                                    "m value=" + (graph1M == 0 ? "N/A" : graph1M) + "\n" +
-                                    "coverage required=" + coverageRequired + "\n" +
-                                    "<html><font color=\"red\">HOPS NEEDED = " + doubleFormat.format(hopsNeeded.get("mean")) + " \u00B1 " +
-                                    doubleFormat.format(hopsNeeded.get("sd")) + "</font></html>", "Hops needed calculated", JOptionPane.INFORMATION_MESSAGE
-                    );
+//                    JOptionPane.showMessageDialog(new JFrame(),
+//                            "order = " + order + "\n" +
+//                                    "graph type = " + graph1Type + "\n" +
+//                                    "random Walk Type=" + (graph1RandomWalkType == null ? "N/A" : graph1RandomWalkType) + "\n" +
+//                                    "human Map Type=" + (graph1HumanDataType == null ? "N/A" : graph1HumanDataType) + "\n" +
+//                                    "m value=" + (graph1M == 0 ? "N/A" : graph1M) + "\n" +
+//                                    "coverage required=" + coverageRequired + "\n" +
+//                                    "<html><font color=\"red\">HOPS NEEDED = " + doubleFormat.format(hopsNeeded.get("mean")) + " \u00B1 " +
+//                                    doubleFormat.format(hopsNeeded.get("sd")) + "</font></html>", "Hops needed calculated", JOptionPane.INFORMATION_MESSAGE
+//                    );
+                    System.out.println("Order="+order+";Coverage="+coverageRequired+";Hops = " + doubleFormat.format(hopsNeeded.get("mean")) + " \u00B1 " +
+                            doubleFormat.format(hopsNeeded.get("sd")));
+
+                    CalculateHopsNeededTask.this.lock.release();
                 }
             };
             worker.execute();

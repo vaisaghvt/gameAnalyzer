@@ -21,7 +21,7 @@ public enum StatisticChoice {
     TIME_SPENT_PER_SIGNIFICANT_VERTEX(new SignificantVertexVisitDurationStatisticHandler(), "Time spent at \"significant\" vertices", true, true, false,
             Phase.EXPLORATION, Phase.TASK_1, Phase.TASK_2, Phase.TASK_3),
     ROOM_ANALYSIS(new RoomAnalysisHandler(), "Analyse rooms in detail", true, false,true),
-
+    HOP_COVERAGE_CALCULATOR(new HopAndCoverageCalculator(), "Find hop and coverag of data", false, false, false),
     VERTEX_VISIT_FREQUENCY(new VertexVisitFrequencyStatisticHandler(), "Frequency of visit for each room"
             , true, true,true,  Phase.EXPLORATION, Phase.TASK_1, Phase.TASK_2, Phase.TASK_3),
     DOOR_USE_FREQUENCY(new DoorUseFrequencyStatisticHandler(), "Frequency of use of each door"

@@ -3,16 +3,16 @@
 	<floor>
 		<id>0</id>
 		<room>
-			<id>23</id>
-			<name>SLP</name>
-			<corner0 y="-152" x="-88"/>
-			<corner1 y="-132" x="-76"/>
-		</room>
-		<room>
 			<id>35</id>
 			<name>ToVG2</name>
 			<corner0 y="-152" x="-57"/>
 			<corner1 y="-146" x="-53"/>
+		</room>
+		<room>
+			<id>23</id>
+			<name>SLP</name>
+			<corner0 y="-152" x="-88"/>
+			<corner1 y="-132" x="-76"/>
 		</room>
 		<room>
 			<id>48</id>
@@ -61,16 +61,16 @@
 			<corner1 y="-101" x="-74"/>
 		</room>
 		<room>
-			<id>39</id>
-			<name>Disco</name>
-			<corner0 y="-122" x="-64"/>
-			<corner1 y="-101" x="-43"/>
-		</room>
-		<room>
 			<id>15</id>
 			<name>1LeftCorridor2</name>
 			<corner0 y="-159" x="-95"/>
 			<corner1 y="-155" x="-90"/>
+		</room>
+		<room>
+			<id>39</id>
+			<name>Disco</name>
+			<corner0 y="-122" x="-64"/>
+			<corner1 y="-101" x="-43"/>
 		</room>
 		<room>
 			<id>17</id>
@@ -145,16 +145,10 @@
 			<corner1 y="-160" x="-32"/>
 		</room>
 		<room>
-			<id>32</id>
-			<name>ToVG1</name>
-			<corner0 y="-152" x="-73"/>
-			<corner1 y="-146" x="-69"/>
-		</room>
-		<room>
-			<id>20</id>
-			<name>1LeftCorridor6</name>
-			<corner0 y="-122" x="-120"/>
-			<corner1 y="-118" x="-67"/>
+			<id>42</id>
+			<name>SpecLounge</name>
+			<corner0 y="-97" x="-102"/>
+			<corner1 y="-82" x="-74"/>
 		</room>
 		<room>
 			<id>8</id>
@@ -163,10 +157,16 @@
 			<corner1 y="-152" x="-6"/>
 		</room>
 		<room>
-			<id>42</id>
-			<name>SpecLounge</name>
-			<corner0 y="-97" x="-102"/>
-			<corner1 y="-82" x="-74"/>
+			<id>20</id>
+			<name>1LeftCorridor6</name>
+			<corner0 y="-122" x="-120"/>
+			<corner1 y="-118" x="-67"/>
+		</room>
+		<room>
+			<id>32</id>
+			<name>ToVG1</name>
+			<corner0 y="-152" x="-73"/>
+			<corner1 y="-146" x="-69"/>
 		</room>
 		<room>
 			<id>21</id>
@@ -175,28 +175,28 @@
 			<corner1 y="-124" x="-90"/>
 		</room>
 		<room>
-			<id>36</id>
-			<name>VG2</name>
-			<corner0 y="-145" x="-57"/>
-			<corner1 y="-134" x="-53"/>
-		</room>
-		<room>
 			<id>37</id>
 			<name>1MainJunc</name>
 			<corner0 y="-160" x="-67"/>
 			<corner1 y="-155" x="-58"/>
 		</room>
 		<room>
-			<id>24</id>
-			<name>Pool</name>
-			<corner0 y="-155" x="-114"/>
-			<corner1 y="-151" x="-104"/>
+			<id>36</id>
+			<name>VG2</name>
+			<corner0 y="-145" x="-57"/>
+			<corner1 y="-134" x="-53"/>
 		</room>
 		<room>
 			<id>19</id>
 			<name>1LeftCorridor5</name>
 			<corner0 y="-143" x="-120"/>
 			<corner1 y="-123" x="-116"/>
+		</room>
+		<room>
+			<id>24</id>
+			<name>Pool</name>
+			<corner0 y="-155" x="-114"/>
+			<corner1 y="-151" x="-104"/>
 		</room>
 		<room>
 			<id>28</id>
@@ -231,11 +231,11 @@
 			<connectingArea>15</connectingArea>
 		</link>
 		<link>
-			<id>31</id>
-			<corner0 y="-133" x="-68"/>
-			<corner1 y="-130" x="-67"/>
-			<connectingArea>26</connectingArea>
-			<connectingArea>28</connectingArea>
+			<id>296</id>
+			<corner0 y="-79" x="-42"/>
+			<corner1 y="-77" x="-39"/>
+			<connectingArea>290</connectingArea>
+			<connectingArea>5</connectingArea>
 		</link>
 		<link>
 			<id>75</id>
@@ -245,11 +245,11 @@
 			<connectingArea>46</connectingArea>
 		</link>
 		<link>
-			<id>296</id>
-			<corner0 y="-79" x="-42"/>
-			<corner1 y="-77" x="-39"/>
-			<connectingArea>290</connectingArea>
-			<connectingArea>5</connectingArea>
+			<id>31</id>
+			<corner0 y="-133" x="-68"/>
+			<corner1 y="-130" x="-67"/>
+			<connectingArea>26</connectingArea>
+			<connectingArea>28</connectingArea>
 		</link>
 		<link>
 			<id>82</id>
@@ -259,11 +259,11 @@
 			<connectingArea>8</connectingArea>
 		</link>
 		<link>
-			<id>67</id>
-			<corner0 y="-119" x="-95"/>
-			<corner1 y="-114" x="-94"/>
-			<connectingArea>20</connectingArea>
-			<connectingArea>44</connectingArea>
+			<id>51</id>
+			<corner0 y="-162" x="-65"/>
+			<corner1 y="-159" x="-61"/>
+			<connectingArea>38</connectingArea>
+			<connectingArea>37</connectingArea>
 		</link>
 		<link>
 			<id>52</id>
@@ -273,11 +273,11 @@
 			<connectingArea>14</connectingArea>
 		</link>
 		<link>
-			<id>51</id>
-			<corner0 y="-162" x="-65"/>
-			<corner1 y="-159" x="-61"/>
-			<connectingArea>38</connectingArea>
-			<connectingArea>37</connectingArea>
+			<id>67</id>
+			<corner0 y="-119" x="-95"/>
+			<corner1 y="-114" x="-94"/>
+			<connectingArea>20</connectingArea>
+			<connectingArea>44</connectingArea>
 		</link>
 		<link>
 			<id>58</id>
@@ -392,18 +392,18 @@
 			<connectingArea>291</connectingArea>
 		</link>
 		<link>
-			<id>65</id>
-			<corner0 y="-119" x="-70"/>
-			<corner1 y="-114" x="-68"/>
-			<connectingArea>20</connectingArea>
-			<connectingArea>41</connectingArea>
-		</link>
-		<link>
 			<id>80</id>
 			<corner0 y="-125" x="-38"/>
 			<corner1 y="-121" x="-31"/>
 			<connectingArea>3</connectingArea>
 			<connectingArea>5</connectingArea>
+		</link>
+		<link>
+			<id>65</id>
+			<corner0 y="-119" x="-70"/>
+			<corner1 y="-114" x="-68"/>
+			<connectingArea>20</connectingArea>
+			<connectingArea>41</connectingArea>
 		</link>
 		<link>
 			<id>55</id>
@@ -420,11 +420,11 @@
 			<connectingArea>7</connectingArea>
 		</link>
 		<link>
-			<id>54</id>
-			<corner0 y="-156" x="-72"/>
-			<corner1 y="-151" x="-70"/>
-			<connectingArea>32</connectingArea>
-			<connectingArea>14</connectingArea>
+			<id>66</id>
+			<corner0 y="-120" x="-82"/>
+			<corner1 y="-114" x="-79"/>
+			<connectingArea>20</connectingArea>
+			<connectingArea>43</connectingArea>
 		</link>
 		<link>
 			<id>76</id>
@@ -434,11 +434,11 @@
 			<connectingArea>47</connectingArea>
 		</link>
 		<link>
-			<id>66</id>
-			<corner0 y="-120" x="-82"/>
-			<corner1 y="-114" x="-79"/>
-			<connectingArea>20</connectingArea>
-			<connectingArea>43</connectingArea>
+			<id>54</id>
+			<corner0 y="-156" x="-72"/>
+			<corner1 y="-151" x="-70"/>
+			<connectingArea>32</connectingArea>
+			<connectingArea>14</connectingArea>
 		</link>
 		<link>
 			<id>49</id>
@@ -448,18 +448,18 @@
 			<connectingArea>36</connectingArea>
 		</link>
 		<link>
-			<id>68</id>
-			<corner0 y="-119" x="-109"/>
-			<corner1 y="-114" x="-108"/>
-			<connectingArea>20</connectingArea>
-			<connectingArea>45</connectingArea>
-		</link>
-		<link>
 			<id>277</id>
 			<corner0 y="-159" x="-59"/>
 			<corner1 y="-157" x="-56"/>
 			<connectingArea>37</connectingArea>
 			<connectingArea>9</connectingArea>
+		</link>
+		<link>
+			<id>68</id>
+			<corner0 y="-119" x="-109"/>
+			<corner1 y="-114" x="-108"/>
+			<connectingArea>20</connectingArea>
+			<connectingArea>45</connectingArea>
 		</link>
 		<link>
 			<id>78</id>
@@ -469,13 +469,6 @@
 			<connectingArea>10</connectingArea>
 		</link>
 		<link>
-			<id>64</id>
-			<corner0 y="-125" x="-120"/>
-			<corner1 y="-120" x="-117"/>
-			<connectingArea>19</connectingArea>
-			<connectingArea>20</connectingArea>
-		</link>
-		<link>
 			<id>74</id>
 			<corner0 y="-161" x="-95"/>
 			<corner1 y="-158" x="-91"/>
@@ -483,17 +476,24 @@
 			<connectingArea>15</connectingArea>
 		</link>
 		<link>
-			<id>81</id>
-			<corner0 y="-145" x="-40"/>
-			<corner1 y="-138" x="-37"/>
-			<connectingArea>48</connectingArea>
-			<connectingArea>5</connectingArea>
+			<id>64</id>
+			<corner0 y="-125" x="-120"/>
+			<corner1 y="-120" x="-117"/>
+			<connectingArea>19</connectingArea>
+			<connectingArea>20</connectingArea>
 		</link>
 		<link>
 			<id>79</id>
 			<corner0 y="-91" x="-37"/>
 			<corner1 y="-86" x="-32"/>
 			<connectingArea>4</connectingArea>
+			<connectingArea>5</connectingArea>
+		</link>
+		<link>
+			<id>81</id>
+			<corner0 y="-145" x="-40"/>
+			<corner1 y="-138" x="-37"/>
+			<connectingArea>48</connectingArea>
 			<connectingArea>5</connectingArea>
 		</link>
 		<link>
@@ -524,16 +524,16 @@
 			<corner1 y="-73" x="-49"/>
 		</staircase>
 		<staircase>
-			<id>46</id>
-			<name>left G main</name>
-			<corner0 y="-167" x="-89"/>
-			<corner1 y="-162" x="-74"/>
-		</staircase>
-		<staircase>
 			<id>47</id>
 			<name>right G Main</name>
 			<corner0 y="-167" x="-53"/>
 			<corner1 y="-162" x="-37"/>
+		</staircase>
+		<staircase>
+			<id>46</id>
+			<name>left G main</name>
+			<corner0 y="-167" x="-89"/>
+			<corner1 y="-162" x="-74"/>
 		</staircase>
 		<staircase>
 			<id>83</id>
@@ -552,16 +552,16 @@
 	<floor>
 		<id>1</id>
 		<room>
-			<id>156</id>
-			<name>SB2</name>
-			<corner0 y="-91" x="-89"/>
-			<corner1 y="-80" x="-83"/>
-		</room>
-		<room>
 			<id>165</id>
 			<name>Dorm4</name>
 			<corner0 y="-122" x="-73"/>
 			<corner1 y="-107" x="-59"/>
+		</room>
+		<room>
+			<id>156</id>
+			<name>SB2</name>
+			<corner0 y="-91" x="-89"/>
+			<corner1 y="-80" x="-83"/>
 		</room>
 		<room>
 			<id>178</id>
@@ -570,16 +570,16 @@
 			<corner1 y="-101" x="-36"/>
 		</room>
 		<room>
-			<id>92</id>
-			<name>2CorrMain</name>
-			<corner0 y="-159" x="-90"/>
-			<corner1 y="-155" x="-41"/>
-		</room>
-		<room>
 			<id>119</id>
 			<name>2CorrB4</name>
 			<corner0 y="-129" x="-96"/>
 			<corner1 y="-118" x="-92"/>
+		</room>
+		<room>
+			<id>92</id>
+			<name>2CorrMain</name>
+			<corner0 y="-159" x="-90"/>
+			<corner1 y="-155" x="-41"/>
 		</room>
 		<room>
 			<id>95</id>
@@ -600,10 +600,10 @@
 			<corner1 y="-93" x="-92"/>
 		</room>
 		<room>
-			<id>120</id>
-			<name>2CorrB3</name>
-			<corner0 y="-129" x="-91"/>
-			<corner1 y="-125" x="-76"/>
+			<id>124</id>
+			<name>BToDown</name>
+			<corner0 y="-152" x="-50"/>
+			<corner1 y="-145" x="-43"/>
 		</room>
 		<room>
 			<id>122</id>
@@ -612,10 +612,10 @@
 			<corner1 y="-144" x="-51"/>
 		</room>
 		<room>
-			<id>124</id>
-			<name>BToDown</name>
-			<corner0 y="-152" x="-50"/>
-			<corner1 y="-145" x="-43"/>
+			<id>120</id>
+			<name>2CorrB3</name>
+			<corner0 y="-129" x="-91"/>
+			<corner1 y="-125" x="-76"/>
 		</room>
 		<room>
 			<id>199</id>
@@ -690,16 +690,16 @@
 			<corner1 y="-93" x="-72"/>
 		</room>
 		<room>
-			<id>91</id>
-			<name>WayToFlr3</name>
-			<corner0 y="-154" x="-96"/>
-			<corner1 y="-146" x="-91"/>
-		</room>
-		<room>
 			<id>121</id>
 			<name>2CorrB2</name>
 			<corner0 y="-152" x="-81"/>
 			<corner1 y="-130" x="-76"/>
+		</room>
+		<room>
+			<id>91</id>
+			<name>WayToFlr3</name>
+			<corner0 y="-154" x="-96"/>
+			<corner1 y="-146" x="-91"/>
 		</room>
 		<room>
 			<id>90</id>
@@ -738,16 +738,16 @@
 			<corner1 y="-74" x="-41"/>
 		</room>
 		<room>
-			<id>103</id>
-			<name>2CorrA6</name>
-			<corner0 y="-100" x="-71"/>
-			<corner1 y="-75" x="-67"/>
-		</room>
-		<room>
 			<id>203</id>
 			<name>DB2</name>
 			<corner0 y="-162" x="-120"/>
 			<corner1 y="-148" x="-110"/>
+		</room>
+		<room>
+			<id>103</id>
+			<name>2CorrA6</name>
+			<corner0 y="-100" x="-71"/>
+			<corner1 y="-75" x="-67"/>
 		</room>
 		<room>
 			<id>117</id>
@@ -780,16 +780,16 @@
 			<corner1 y="-150" x="-7"/>
 		</room>
 		<room>
-			<id>206</id>
-			<name>DB1</name>
-			<corner0 y="-162" x="-108"/>
-			<corner1 y="-148" x="-99"/>
-		</room>
-		<room>
 			<id>297</id>
 			<name>2PassB</name>
 			<corner0 y="-123" x="-120"/>
 			<corner1 y="-117" x="-110"/>
+		</room>
+		<room>
+			<id>206</id>
+			<name>DB1</name>
+			<corner0 y="-162" x="-108"/>
+			<corner1 y="-148" x="-99"/>
 		</room>
 		<link>
 			<id>136</id>
@@ -799,11 +799,11 @@
 			<connectingArea>120</connectingArea>
 		</link>
 		<link>
-			<id>189</id>
-			<corner0 y="-161" x="-67"/>
-			<corner1 y="-157" x="-58"/>
-			<connectingArea>129</connectingArea>
-			<connectingArea>92</connectingArea>
+			<id>188</id>
+			<corner0 y="-151" x="-15"/>
+			<corner1 y="-147" x="-12"/>
+			<connectingArea>187</connectingArea>
+			<connectingArea>95</connectingArea>
 		</link>
 		<link>
 			<id>207</id>
@@ -813,11 +813,11 @@
 			<connectingArea>206</connectingArea>
 		</link>
 		<link>
-			<id>188</id>
-			<corner0 y="-151" x="-15"/>
-			<corner1 y="-147" x="-12"/>
-			<connectingArea>187</connectingArea>
-			<connectingArea>95</connectingArea>
+			<id>189</id>
+			<corner0 y="-161" x="-67"/>
+			<corner1 y="-157" x="-58"/>
+			<connectingArea>129</connectingArea>
+			<connectingArea>92</connectingArea>
 		</link>
 		<link>
 			<id>180</id>
@@ -827,18 +827,18 @@
 			<connectingArea>178</connectingArea>
 		</link>
 		<link>
-			<id>190</id>
-			<corner0 y="-166" x="-71"/>
-			<corner1 y="-163" x="-68"/>
-			<connectingArea>129</connectingArea>
-			<connectingArea>131</connectingArea>
-		</link>
-		<link>
 			<id>205</id>
 			<corner0 y="-149" x="-117"/>
 			<corner1 y="-145" x="-114"/>
 			<connectingArea>203</connectingArea>
 			<connectingArea>199</connectingArea>
+		</link>
+		<link>
+			<id>190</id>
+			<corner0 y="-166" x="-71"/>
+			<corner1 y="-163" x="-68"/>
+			<connectingArea>129</connectingArea>
+			<connectingArea>131</connectingArea>
 		</link>
 		<link>
 			<id>155</id>
@@ -848,18 +848,18 @@
 			<connectingArea>106</connectingArea>
 		</link>
 		<link>
-			<id>134</id>
-			<corner0 y="-151" x="-52"/>
-			<corner1 y="-148" x="-49"/>
-			<connectingArea>124</connectingArea>
-			<connectingArea>122</connectingArea>
-		</link>
-		<link>
 			<id>303</id>
 			<corner0 y="-118" x="-116"/>
 			<corner1 y="-114" x="-114"/>
 			<connectingArea>117</connectingArea>
 			<connectingArea>297</connectingArea>
+		</link>
+		<link>
+			<id>134</id>
+			<corner0 y="-151" x="-52"/>
+			<corner1 y="-148" x="-49"/>
+			<connectingArea>124</connectingArea>
+			<connectingArea>122</connectingArea>
 		</link>
 		<link>
 			<id>195</id>
@@ -960,10 +960,10 @@
 			<connectingArea>95</connectingArea>
 		</link>
 		<link>
-			<id>183</id>
-			<corner0 y="-147" x="-37"/>
-			<corner1 y="-145" x="-34"/>
-			<connectingArea>95</connectingArea>
+			<id>182</id>
+			<corner0 y="-144" x="-39"/>
+			<corner1 y="-142" x="-37"/>
+			<connectingArea>98</connectingArea>
 			<connectingArea>94</connectingArea>
 		</link>
 		<link>
@@ -974,18 +974,18 @@
 			<connectingArea>107</connectingArea>
 		</link>
 		<link>
-			<id>182</id>
-			<corner0 y="-144" x="-39"/>
-			<corner1 y="-142" x="-37"/>
-			<connectingArea>98</connectingArea>
+			<id>183</id>
+			<corner0 y="-147" x="-37"/>
+			<corner1 y="-145" x="-34"/>
+			<connectingArea>95</connectingArea>
 			<connectingArea>94</connectingArea>
 		</link>
 		<link>
-			<id>194</id>
-			<corner0 y="-156" x="-95"/>
-			<corner1 y="-153" x="-93"/>
-			<connectingArea>88</connectingArea>
-			<connectingArea>91</connectingArea>
+			<id>300</id>
+			<corner0 y="-122" x="-111"/>
+			<corner1 y="-119" x="-108"/>
+			<connectingArea>297</connectingArea>
+			<connectingArea>298</connectingArea>
 		</link>
 		<link>
 			<id>170</id>
@@ -995,11 +995,11 @@
 			<connectingArea>165</connectingArea>
 		</link>
 		<link>
-			<id>300</id>
-			<corner0 y="-122" x="-111"/>
-			<corner1 y="-119" x="-108"/>
-			<connectingArea>297</connectingArea>
-			<connectingArea>298</connectingArea>
+			<id>194</id>
+			<corner0 y="-156" x="-95"/>
+			<corner1 y="-153" x="-93"/>
+			<connectingArea>88</connectingArea>
+			<connectingArea>91</connectingArea>
 		</link>
 		<link>
 			<id>191</id>
@@ -1016,18 +1016,18 @@
 			<connectingArea>107</connectingArea>
 		</link>
 		<link>
-			<id>153</id>
-			<corner0 y="-82" x="-105"/>
-			<corner1 y="-78" x="-102"/>
-			<connectingArea>152</connectingArea>
-			<connectingArea>106</connectingArea>
-		</link>
-		<link>
 			<id>163</id>
 			<corner0 y="-98" x="-74"/>
 			<corner1 y="-96" x="-70"/>
 			<connectingArea>103</connectingArea>
 			<connectingArea>162</connectingArea>
+		</link>
+		<link>
+			<id>153</id>
+			<corner0 y="-82" x="-105"/>
+			<corner1 y="-78" x="-102"/>
+			<connectingArea>152</connectingArea>
+			<connectingArea>106</connectingArea>
 		</link>
 		<link>
 			<id>209</id>
@@ -1051,18 +1051,18 @@
 			<connectingArea>106</connectingArea>
 		</link>
 		<link>
-			<id>159</id>
-			<corner0 y="-82" x="-78"/>
-			<corner1 y="-78" x="-75"/>
-			<connectingArea>158</connectingArea>
-			<connectingArea>106</connectingArea>
-		</link>
-		<link>
 			<id>193</id>
 			<corner0 y="-161" x="-94"/>
 			<corner1 y="-158" x="-93"/>
 			<connectingArea>88</connectingArea>
 			<connectingArea>90</connectingArea>
+		</link>
+		<link>
+			<id>159</id>
+			<corner0 y="-82" x="-78"/>
+			<corner1 y="-78" x="-75"/>
+			<connectingArea>158</connectingArea>
+			<connectingArea>106</connectingArea>
 		</link>
 		<link>
 			<id>210</id>
@@ -1100,11 +1100,11 @@
 			<connectingArea>124</connectingArea>
 		</link>
 		<link>
-			<id>173</id>
-			<corner0 y="-102" x="-70"/>
-			<corner1 y="-99" x="-68"/>
-			<connectingArea>102</connectingArea>
-			<connectingArea>103</connectingArea>
+			<id>197</id>
+			<corner0 y="-126" x="-85"/>
+			<corner1 y="-123" x="-83"/>
+			<connectingArea>196</connectingArea>
+			<connectingArea>120</connectingArea>
 		</link>
 		<link>
 			<id>204</id>
@@ -1114,11 +1114,11 @@
 			<connectingArea>203</connectingArea>
 		</link>
 		<link>
-			<id>197</id>
-			<corner0 y="-126" x="-85"/>
-			<corner1 y="-123" x="-83"/>
-			<connectingArea>196</connectingArea>
-			<connectingArea>120</connectingArea>
+			<id>173</id>
+			<corner0 y="-102" x="-70"/>
+			<corner1 y="-99" x="-68"/>
+			<connectingArea>102</connectingArea>
+			<connectingArea>103</connectingArea>
 		</link>
 		<staircase>
 			<id>131</id>
@@ -1139,16 +1139,16 @@
 			<corner1 y="-139" x="-91"/>
 		</staircase>
 		<staircase>
-			<id>281</id>
-			<name>2LibS</name>
-			<corner0 y="-82" x="-66"/>
-			<corner1 y="-74" x="-50"/>
-		</staircase>
-		<staircase>
 			<id>130</id>
 			<name>right 2 stair</name>
 			<corner0 y="-167" x="-56"/>
 			<corner1 y="-162" x="-47"/>
+		</staircase>
+		<staircase>
+			<id>281</id>
+			<name>2LibS</name>
+			<corner0 y="-82" x="-66"/>
+			<corner1 y="-74" x="-50"/>
 		</staircase>
 		<group>
 			<id>313</id>
@@ -1239,16 +1239,16 @@
 			<corner1 y="-115" x="-52"/>
 		</room>
 		<room>
-			<id>226</id>
-			<name>PR4</name>
-			<corner0 y="-113" x="-75"/>
-			<corner1 y="-106" x="-66"/>
-		</room>
-		<room>
 			<id>306</id>
 			<name>S3StaircaseRoom</name>
 			<corner0 y="-153" x="-89"/>
 			<corner1 y="-148" x="-82"/>
+		</room>
+		<room>
+			<id>226</id>
+			<name>PR4</name>
+			<corner0 y="-113" x="-75"/>
+			<corner1 y="-106" x="-66"/>
 		</room>
 		<room>
 			<id>307</id>
@@ -1263,16 +1263,16 @@
 			<corner1 y="-131" x="-29"/>
 		</room>
 		<room>
-			<id>214</id>
-			<name>3Corr2</name>
-			<corner0 y="-152" x="-65"/>
-			<corner1 y="-148" x="-61"/>
-		</room>
-		<room>
 			<id>220</id>
 			<name>3Corr7</name>
 			<corner0 y="-129" x="-75"/>
 			<corner1 y="-124" x="-66"/>
+		</room>
+		<room>
+			<id>214</id>
+			<name>3Corr2</name>
+			<corner0 y="-152" x="-65"/>
+			<corner1 y="-148" x="-61"/>
 		</room>
 		<link>
 			<id>242</id>
@@ -1352,17 +1352,17 @@
 			<connectingArea>223</connectingArea>
 		</link>
 		<link>
-			<id>253</id>
-			<corner0 y="-101" x="-62"/>
-			<corner1 y="-99" x="-59"/>
-			<connectingArea>231</connectingArea>
-			<connectingArea>224</connectingArea>
-		</link>
-		<link>
 			<id>254</id>
 			<corner0 y="-102" x="-67"/>
 			<corner1 y="-99" x="-64"/>
 			<connectingArea>230</connectingArea>
+			<connectingArea>224</connectingArea>
+		</link>
+		<link>
+			<id>253</id>
+			<corner0 y="-101" x="-62"/>
+			<corner1 y="-99" x="-59"/>
+			<connectingArea>231</connectingArea>
 			<connectingArea>224</connectingArea>
 		</link>
 		<link>
@@ -1415,18 +1415,18 @@
 			<connectingArea>224</connectingArea>
 		</link>
 		<link>
-			<id>240</id>
-			<corner0 y="-128" x="-77"/>
-			<corner1 y="-126" x="-74"/>
-			<connectingArea>220</connectingArea>
-			<connectingArea>219</connectingArea>
-		</link>
-		<link>
 			<id>251</id>
 			<corner0 y="-119" x="-67"/>
 			<corner1 y="-117" x="-64"/>
 			<connectingArea>225</connectingArea>
 			<connectingArea>224</connectingArea>
+		</link>
+		<link>
+			<id>240</id>
+			<corner0 y="-128" x="-77"/>
+			<corner1 y="-126" x="-74"/>
+			<connectingArea>220</connectingArea>
+			<connectingArea>219</connectingArea>
 		</link>
 		<staircase>
 			<id>216</id>
