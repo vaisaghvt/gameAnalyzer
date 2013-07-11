@@ -37,7 +37,7 @@ import java.util.concurrent.TimeUnit;
 public class MarkovDataStatisticHandler extends StatisticsHandler<PathHeatMapConsoleDisplay, PathHeatMapChartDisplay>
         implements ActionListener {
 
-    private boolean findAllTillOrder = true;
+    private boolean FIND_ALL_TILL_ORDER = false;
     private int order;
     private Collection<String> dataNames;
     private Phase phase;
@@ -130,12 +130,14 @@ public class MarkovDataStatisticHandler extends StatisticsHandler<PathHeatMapCon
                 @Override
                 protected Void doInBackground() throws Exception {
                     if (graph1Type == MarkovDataDialog.GraphType.RANDOM_WALK || graph1HumanDataType == MarkovDataDialog.HumanType.DIRECT) {
-                        if (findAllTillOrder) {
-                            final Semaphore lock = new Semaphore(1);
+                        final Semaphore lock = new Semaphore(1);
+                        if (FIND_ALL_TILL_ORDER) {
+
 
                             int usedOrder;
                             for (int i = order; i >= Math.max(0, order-5); i--) {
                                 if (i == 0) {
+
                                     graph1Type = MarkovDataDialog.GraphType.RANDOM_WALK;
 
                                     usedOrder = 1;
@@ -158,6 +160,18 @@ public class MarkovDataStatisticHandler extends StatisticsHandler<PathHeatMapCon
                                 MarkovDataStatisticHandler.super.actualGenerateAndDisplay(task);
                             }
 
+
+                        } else{
+
+                            CalculateHopsNeededTask task = new CalculateHopsNeededTask(dataNames, phase, order, coverageRequired, lock);
+
+                            try {
+                                lock.tryAcquire(1, 300, TimeUnit.SECONDS);
+                            } catch (InterruptedException e1) {
+                                e1.printStackTrace();  //To change body of catch statement use File | Settings | File Templates.
+                            }
+
+                            MarkovDataStatisticHandler.super.actualGenerateAndDisplay(task);
 
                         }
 
@@ -189,8 +203,9 @@ public class MarkovDataStatisticHandler extends StatisticsHandler<PathHeatMapCon
                 @Override
                 protected Void doInBackground() throws Exception {
                     if (graph1Type == MarkovDataDialog.GraphType.RANDOM_WALK || graph1HumanDataType == MarkovDataDialog.HumanType.DIRECT) {
-                        if (findAllTillOrder) {
-                            final Semaphore lock = new Semaphore(1);
+                        final Semaphore lock = new Semaphore(1);
+                        if (FIND_ALL_TILL_ORDER) {
+
                             int usedOrder;
                             for (int i = order; i >= Math.max(0, order-5); i--) {
                                 if (i == 0) {
@@ -215,6 +230,15 @@ public class MarkovDataStatisticHandler extends StatisticsHandler<PathHeatMapCon
 
                             }
 
+                        } else {
+                            CalculateCoverageTask task = new CalculateCoverageTask(dataNames, phase, order, hopsRequired, lock);
+
+                            try {
+                                lock.tryAcquire(1, 300, TimeUnit.SECONDS);
+                            } catch (InterruptedException e1) {
+                                e1.printStackTrace();  //To change body of catch statement use File | Settings | File Templates.
+                            }
+                            MarkovDataStatisticHandler.super.actualGenerateAndDisplay(task);
                         }
                     } else {
                         JOptionPane.showMessageDialog(new JFrame(), "Cannot generate this data for NFromM!", "Invalid parameter",

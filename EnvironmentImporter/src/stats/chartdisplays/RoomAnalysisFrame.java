@@ -444,34 +444,55 @@ public class RoomAnalysisFrame extends JFrame {
         List<List<String>> pathList = getPathList(nameToGraphMap);
 
         String[][] straightCorridorList = new String[][]{
-                {"1LeftCorridor4", "1LeftCorridor3", "1LeftCorridor2"},
-                {"1LeftCorridor2", "1LeftCorridor3", "1LeftCorridor4"},
-                {"1LeftCorridor4", "1LeftCorridor5", "1LeftCorridor6"},
-                {"1LeftCorridor6", "1LeftCorridor5", "1LeftCorridor4"},
-                {"2CorrMain", "2CorrA1", "2CorrA2"},
-                {"2CorrA2", "2CorrA1", "2CorrMain"},
+                {"1Corner34", "1LeftCorridor3", "1LeftCorridor2"},
+                {"1LeftCorridor2", "1LeftCorridor3", "1Corner34"},
+                {"1Corner45", "1LeftCorridor5", "1Corner56L"},
+                {"1Corner56L", "1LeftCorridor5", "1Corner45"},
+                {"1Corner12R", "1RightCorridor2", "1RightCorridor3"},
+                {"1RightCorridor3", "1RightCorridor2", "1Corner12R"},
                 {"2CorrA4", "2CorrA3", "2CorrA2"},
                 {"2CorrA2", "2CorrA3", "2CorrA4"},
-                {"2CorrB2", "2CorrB1", "BToDown"},
-                {"BToDown", "2CorrB1", "2CorrB2"},
-                {"2CorrB1", "2CorrB2", "2CorrB3"},
-                {"2CorrB3", "2CorrB2", "2CorrB1"},
+                {"2CornerB12", "2CorrB1", "BToDown"},
+                {"BToDown", "2CorrB1", "2CornerB12"},
+                {"2CornerB12", "2CorrB2", "2Corner23"},
+                {"2Corner23", "2CorrB2", "2CornerB12"},
                 {"2CorrB3", "2CorrB4", "2CorrB5"},
                 {"2CorrB5", "2CorrB4", "2CorrB3"},
                 {"2CorrC3", "2CorrC2", "2CorrC1"},
                 {"2CorrC1", "2CorrC2", "2CorrC3"},
                 {"3Corr2", "3Corr4", "3Corr5"},
-                {"3Corr5", "3Corr4", "3Corr2"},
-//        };
-//
-//        String[][] staircaseCorridorList = new String[][]{
+                {"3Corr5", "3Corr4", "3Corr2"}
+        };
+
+        String[][] staircaseCorridorList = new String[][]{
                 {"LeftGStairCorr", "left G main", "left 2 stair"},
                 {"left 2 stair", "left G main", "LeftGStairCorr"},
                 {"RightGStairCorr", "right G main", "right 2 stair"},
                 {"right 2 stair", "right G main", "RightGStairCorr"},
                 {"ACToDown", "right 2 stair", "right G main"},
-                {"right G main", "right 2 stair", "ACToDown"},
+                {"right G main", "right 2 stair", "ACToDown"}
         };
+
+        String[][] simpleCornerList = new String[][]{
+                {"2CorrC1", "2CorrC2", "2CorrC3"},
+                {"2CorrC3", "2CorrC2", "2CorrC1"},
+                {"2CorrMain", "2CorrA1", "2CorrA2"},
+                {"2CorrA2", "2CorrA1", "2CorrMain"},
+                {"1LeftCorridor3","1Corner34",  "1LeftCorridor4"},
+                {"1LeftCorridor4", "1Corner34" , "1LeftCorridor3"},
+                {"1LeftCorridor4","1Corner45",  "1LeftCorridor5"},
+                {"1LeftCorridor5", "1Corner45" , "1LeftCorridor4"},
+                {"1LeftCorridor5","1Corner56L",  "1LeftCorridor6"},
+                {"1LeftCorridor6", "1Corner56L" , "1LeftCorridor5"},
+                {"1LeftCorridor7","1Corner67L",  "1LeftCorridor6"},
+                {"1LeftCorridor6", "1Corner67L" , "1LeftCorridor7"},
+                {"2CorrB2", "2Corner23", "2CorrB3"},
+                {"2CorrB3", "2Corner23", "2CorrB2"},
+                {"2CorrB2", "2CornerB12", "2CorrB1"},
+                {"2CorrB1", "2CornerB12", "2CorrB2"},
+                {"2CorrA5", "2CornerA56", "2CorrA6"},
+                {"2CorrA6", "2CornerA56", "2CorrA5"}
+        }    ;
 
         String[][] roomToRoomLineOfSightList = new String[][]{
                 {"2CorrC3", "DB2", "MB1"},
@@ -483,7 +504,7 @@ public class RoomAnalysisFrame extends JFrame {
                 {"MR", "Study3", "3Corr8"},
                 {"Gallery", "Study1", "3Corr1"},
                 {"3Corr1", "Study1", "Gallery"},
-                {"Study1", "Gallery", "3Corr7"},
+                {"Study1", "Gallery", "3Corr7"}
 //                {"SPCorr","Conf 2","1LeftCorridor4"},
 
         };
@@ -499,7 +520,8 @@ public class RoomAnalysisFrame extends JFrame {
         LinkedHashMap<String, LinkedHashMap<CorridorMovementType, Integer>> resultHashMap = new LinkedHashMap<String, LinkedHashMap<CorridorMovementType, Integer>>();
 
         resultHashMap.put("Straight Corridor", calculateMap(pathList, straightCorridorList));
-//        resultHashMap.put("Staircase Corridor", new LinkedHashMap<String, Integer>());
+        resultHashMap.put("Staircase Corridor", calculateMap(pathList, staircaseCorridorList));
+        resultHashMap.put("Simple Corner", calculateMap(pathList, simpleCornerList));
         resultHashMap.put("Room To Room Visible", calculateMap(pathList, roomToRoomLineOfSightList));
         resultHashMap.put("Room To Room invisible", calculateMap(pathList, roomToRoomNoLineOfSightList));
 
@@ -658,6 +680,11 @@ public class RoomAnalysisFrame extends JFrame {
 
                 String pathPreviousRoom = path.get(roomNumber - 1);
                 String pathNextRoom = path.get(roomNumber + 1);
+                if(pathPreviousRoom.equalsIgnoreCase(dormCorrString)&& pathNextRoom.equalsIgnoreCase(dormCorrString)){
+//                    System.out.println("Signs of trouble!");
+                    //same attempt ...not tracking. continue to next.
+                    continue;
+                }
                 if(pathPreviousRoom.equalsIgnoreCase(dormCorrString) && (pathNextRoom.equalsIgnoreCase(corrA1) ||pathNextRoom.equalsIgnoreCase(corrA3))){
                     visitNumber++;
                     currentAttemptKey = "Visit " + visitNumber;
