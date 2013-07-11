@@ -1,15 +1,13 @@
 package stats.statisticshandlers;
 
 import gui.Phase;
+import gui.ProgressVisualizer;
 import gui.StatsDialog;
 import stats.chartdisplays.ChartDisplay;
 import stats.consoledisplays.ConsoleDisplay;
 
 import javax.swing.*;
-import javax.swing.text.DefaultCaret;
 import java.awt.*;
-import java.beans.PropertyChangeEvent;
-import java.beans.PropertyChangeListener;
 import java.util.Collection;
 import java.util.Set;
 import java.util.concurrent.*;
@@ -39,7 +37,7 @@ public abstract class StatisticsHandler<T extends ConsoleDisplay, V extends Char
 
     public <U extends AbstractTask> void actualGenerateAndDisplay(U task) {
         if (!task.getDataNames().isEmpty()) {
-            task.setProgressVisualizer(new ProgressVisualizer("Processing data"));
+            task.setProgressVisualizer(new ProgressVisualizer("Processing data", ProgressVisualizer.DeterminateType.DETERMINATE));
 
             task.execute();
         } else {
@@ -99,7 +97,7 @@ public abstract class StatisticsHandler<T extends ConsoleDisplay, V extends Char
             try {
                 dataRunningSemaphore.acquire(dataNames.size());
             } catch (InterruptedException e) {
-                e.printStackTrace();  //To change body of catch statement use File | Settings | File Templates.
+                e.printStackTrace();
             }
         }
 
@@ -181,78 +179,6 @@ public abstract class StatisticsHandler<T extends ConsoleDisplay, V extends Char
     }
 
 
-    public static class ProgressVisualizer implements PropertyChangeListener {
-        private JFrame progressFrame;
-        private JTextArea taskOutput;
-        private JProgressBar progressBar;
-
-        public ProgressVisualizer(final String title) {
-            SwingUtilities.invokeLater(new Runnable() {
-
-
-                @Override
-                public void run() {
-                    progressBar = new JProgressBar(0, 100);
-                    progressBar.setValue(0);
-                    progressBar.setStringPainted(true);
-                    taskOutput = new JTextArea(5, 20);
-                    taskOutput.setMargin(new Insets(5, 5, 5, 5));
-                    taskOutput.setEditable(false);
-                    DefaultCaret caret = (DefaultCaret) taskOutput.getCaret();
-                    caret.setUpdatePolicy(DefaultCaret.ALWAYS_UPDATE);
-                    progressFrame = new JFrame(title);
-                    progressFrame.setLayout(new BorderLayout());
-                    progressFrame.add(progressBar, BorderLayout.NORTH);
-                    progressFrame.add(new JScrollPane(taskOutput), BorderLayout.CENTER);
-                    progressFrame.setDefaultCloseOperation(WindowConstants.DO_NOTHING_ON_CLOSE);
-                    Dimension screenSize = Toolkit.getDefaultToolkit().getScreenSize();
-                    double width = screenSize.getWidth();
-                    double height = screenSize.getHeight();
-                    progressFrame.setLocation((int) Math.floor(width / 2 - 200), (int) Math.floor(height / 2 - 100));
-                    progressFrame.setSize(400, 200);
-                    progressFrame.setVisible(true);
-                }
-            });
-        }
-
-
-        public void finish() {
-            SwingUtilities.invokeLater(new Runnable() {
-                @Override
-                public void run() {
-
-                    progressFrame.dispose();
-                }
-            });
-        }
-
-
-        @Override
-        public void propertyChange(PropertyChangeEvent event) {
-            if ("progress".equals(event.getPropertyName())) {
-                final int progress = (Integer) event.getNewValue();
-//            progressBar.setIndeterminate(false);
-                SwingUtilities.invokeLater(new Runnable() {
-                    @Override
-                    public void run() {
-                        progressBar.setValue(progress);
-                    }
-
-
-                });
-            }
-        }
-
-        public void print(final String s) {
-            SwingUtilities.invokeLater(new Runnable() {
-                @Override
-                public void run() {
-                    taskOutput.append(s);
-                    taskOutput.validate();
-                }
-            });
-        }
-    }
 
 
 }

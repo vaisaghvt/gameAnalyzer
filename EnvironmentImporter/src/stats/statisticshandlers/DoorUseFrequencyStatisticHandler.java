@@ -4,7 +4,7 @@ import com.google.common.collect.HashMultimap;
 import gui.NetworkModel;
 import gui.Phase;
 import gui.StatsDialog;
-import randomwalk.RandomWalk;
+import randomwalk.RandomWalkOrganizer;
 import stats.StatisticChoice;
 import stats.chartdisplays.DoorUseChartDisplay;
 import stats.consoledisplays.DoorUseConsoleDisplay;
@@ -39,7 +39,9 @@ public class DoorUseFrequencyStatisticHandler extends StatisticsHandler<DoorUseC
     private HashMap<String, Double> normalizeResult(HashMap<String, Double> personData) {
 
         HashMap<String, Double> result = new HashMap<String, Double>();
-        HashMap<String, Number> randomWalkData = RandomWalk.calculateAverageDoorUseFrequency();
+
+
+        HashMap<String, Number> randomWalkData = RandomWalkOrganizer.calculateAverageDoorUseFrequency();
         int NRandom = 0, NPerson = 0;
         for (String room : randomWalkData.keySet()) {
             NRandom += randomWalkData.get(room).intValue();

@@ -1,16 +1,23 @@
 package stats.statisticshandlers;
 
 import com.google.common.collect.HashMultimap;
+import edu.uci.ics.jung.graph.DirectedSparseMultigraph;
 import gui.NetworkModel;
 import gui.Phase;
 import gui.StatsDialog;
-import randomwalk.RandomWalk;
+import modelcomponents.CompleteGraph;
+import modelcomponents.ModelEdge;
+import modelcomponents.ModelObject;
+import randomwalk.RandomWalkOrganizer;
 import stats.StatisticChoice;
 import stats.chartdisplays.VertexChartDisplay;
 import stats.consoledisplays.VertexConsoleDisplay;
 
+import javax.swing.*;
 import java.util.Collection;
 import java.util.HashMap;
+import java.util.concurrent.Semaphore;
+import java.util.concurrent.TimeUnit;
 
 /**
  * Created with IntelliJ IDEA.
@@ -30,23 +37,52 @@ public class VertexVisitFrequencyStatisticHandler extends StatisticsHandler<Vert
     @Override
     public void generateAndDisplayStats(Collection<String> dataNames, Phase phase, StatsDialog.AllOrOne allOrOne, StatsDialog.AggregationType aggregationType) {
         GenerateRequiredDataTask task = new GenerateRequiredDataTask(dataNames, StatisticChoice.VERTEX_VISIT_FREQUENCY, phase, allOrOne, aggregationType);
+        final Semaphore generatorSemaphore = new Semaphore(1);
+        try {
+            generatorSemaphore.acquire();
+        } catch (InterruptedException e) {
+
+        }
+        SwingWorker<Collection<DirectedSparseMultigraph<ModelObject, ModelEdge>>, Void> worker = new SwingWorker<Collection<DirectedSparseMultigraph<ModelObject, ModelEdge>>, Void>(){
+
+            @Override
+            protected Collection<DirectedSparseMultigraph<ModelObject, ModelEdge>> doInBackground() throws Exception {
+                return RandomWalkOrganizer.getAllRandomWalkGraphs(generatorSemaphore, RandomWalkOrganizer.RandomWalkType.UNBIASED);
+            }
+        };
+        worker.execute();
+        try {
+            generatorSemaphore.tryAcquire(1, 600, TimeUnit.SECONDS);
+        } catch (InterruptedException e) {
+            e.printStackTrace();  //To change body of catch statement use File | Settings | File Templates.
+        }
+
         super.actualGenerateAndDisplay(task);
 
     }
 
-    private HashMap<String, Double> normalizeResultForRandomWalk(HashMap<String, Double> personData) {
+    private HashMap<String, Double> normalizeResultForRandomWalk() {
         HashMap<String, Double> result = new HashMap<String, Double>();
 
-        int NRandom = 0;
+        int[] NRandomForFloor = new int[3];
+        HashMap<String, Number> randomWalkData = RandomWalkOrganizer.calculateAverageRoomVisitFrequency(RandomWalkOrganizer.RandomWalkType.UNBIASED);
 
-        for (String room : personData.keySet()) {
-            NRandom += personData.get(room).intValue();
+        int NRandom = 0;
+        for (String room : randomWalkData.keySet()) {
+            int floorNumber= CompleteGraph.instance().getFloorForVertex(
+                    CompleteGraph.instance().findRoomByName(room));
+
+            NRandomForFloor[floorNumber] += randomWalkData.get(room).intValue();
+            NRandom+= randomWalkData.get(room).intValue();
         }
 
-        for (String room : personData.keySet()) {
-            double originalValueForRoom = personData.get(room).doubleValue();
-            double scaledValue = originalValueForRoom / NRandom;
-//            double normalizedValue = scaledValue / randomWalkData.get(room).doubleValue();
+        for (String room : randomWalkData.keySet()) {
+            int floorNumber= CompleteGraph.instance().getFloorForVertex(
+                    CompleteGraph.instance().findRoomByName(room));
+            double originalValueForRoom = randomWalkData.get(room).doubleValue();
+            double scaledValue = originalValueForRoom / NRandomForFloor[floorNumber];
+//            double scaledValue = originalValueForRoom / NRandom;
+//            double normalizedValue = scaledValue / randomWalkData.getProbabilityOfSequence(room).doubleValue();
             result.put(room, scaledValue);
         }
 
@@ -57,18 +93,30 @@ public class VertexVisitFrequencyStatisticHandler extends StatisticsHandler<Vert
     private HashMap<String, Double> normalizeResult(HashMap<String, Double> personData) {
 
         HashMap<String, Double> result = new HashMap<String, Double>();
-        HashMap<String, Number> randomWalkData = RandomWalk.calculateAverageRoomVisitFrequency();
+        HashMap<String, Number> randomWalkData = RandomWalkOrganizer.calculateAverageRoomVisitFrequency(RandomWalkOrganizer.RandomWalkType.UNBIASED);
         int NRandom = 0, NPerson = 0;
+        int[] NRandomForFloor = new int[3];
+        int[] NPersonForFloor = new int[3];
         for (String room : randomWalkData.keySet()) {
-            NRandom += randomWalkData.get(room).intValue();
+            int floorNumber= CompleteGraph.instance().getFloorForVertex(
+                    CompleteGraph.instance().findRoomByName(room));
+//            NRandom+= randomWalkData.getProbabilityOfSequence(room).intValue();
+            NRandomForFloor[floorNumber] += randomWalkData.get(room).intValue();
         }
         for (String room : personData.keySet()) {
-            NPerson += personData.get(room).intValue();
+            int floorNumber= CompleteGraph.instance().getFloorForVertex(
+                    CompleteGraph.instance().findRoomByName(room));
+//        NPerson+= personData.getProbabilityOfSequence(room).intValue();
+            NPersonForFloor[floorNumber] += personData.get(room).intValue();
+
         }
 
         for (String room : personData.keySet()) {
+            int floorNumber= CompleteGraph.instance().getFloorForVertex(
+                    CompleteGraph.instance().findRoomByName(room));
             double originalValueForRoom = personData.get(room).doubleValue();
-            double scaledValue = (originalValueForRoom * NRandom) / NPerson;
+//            double scaledValue = (originalValueForRoom *NRandom) /NPerson;
+            double scaledValue = (originalValueForRoom * NRandomForFloor[floorNumber]) / NPersonForFloor[floorNumber];
             double normalizedValue = scaledValue / randomWalkData.get(room).doubleValue();
             result.put(room, normalizedValue);
         }
@@ -120,11 +168,13 @@ public class VertexVisitFrequencyStatisticHandler extends StatisticsHandler<Vert
 
             }
             if (dataName.equals("random walk")) {
-                result = normalizeResultForRandomWalk(result);
+                result = normalizeResultForRandomWalk();
             } else {
                 result = normalizeResult(result);
             }
-            nameToResultMapping.put(dataName, result);
+            synchronized (nameToResultMapping){
+                nameToResultMapping.put(dataName, result);
+            }
         }
 
         @Override

@@ -35,8 +35,9 @@ public class DoorRepetitionFrequencyChartDisplay extends ChartDisplay<Multiset<D
     private final SliderMenuItem miBinSize = new SliderMenuItem("BIN_SIZE", 1, 60, 1);
     private final JButton regenerate = new JButton("regenerate");
     private JFrame binSizeFrame;
-    private Multiset<Double> data;
     private JLabel statusLabel = new JLabel();
+    private Multiset<Double> data;
+
 
     @Override
     public void display(Multiset<Double> data) {

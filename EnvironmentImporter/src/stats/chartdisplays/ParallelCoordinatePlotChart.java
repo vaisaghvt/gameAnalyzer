@@ -165,7 +165,7 @@ public class ParallelCoordinatePlotChart extends ChartDisplay<HashMap<String, Ha
 //        final StandardLegend legend = (StandardLegend) chart.getLegend();
         //      legend.setDisplaySeriesShapes(true);
 
-        // get a reference to the plot for further customisation...
+        // getProbabilityOfSequence a reference to the plot for further customisation...
         final XYPlot plot = chart.getXYPlot();
         plot.setBackgroundPaint(Color.lightGray);
         //    plot.setAxisOffset(new Spacer(Spacer.ABSOLUTE, 5.0, 5.0, 5.0, 5.0));

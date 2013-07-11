@@ -3,6 +3,7 @@ package stats.statisticshandlers;
 import gui.NetworkModel;
 import gui.Phase;
 import gui.StatsDialog;
+import modelcomponents.CompleteGraph;
 import stats.StatisticChoice;
 import stats.chartdisplays.SignificantVertexChartDisplay;
 import stats.consoledisplays.SignificantVertexConsoleDisplay;
@@ -66,7 +67,7 @@ public class SignificantVertexVisitDurationStatisticHandler extends StatisticsHa
             result.put(summaryName, initialMap);
         }
         int n = 1;
-        HashMap<String, Integer> roomEdgeCountMapping = NetworkModel.instance().getEdgesForEachRoom();
+        HashMap<String, Integer> roomEdgeCountMapping = CompleteGraph.instance().getEdgesForEachRoom();
         for (String dataName : dataNameDataMap.keySet()) {
 
             HashMap<String, Number> dataForPerson = dataNameDataMap.get(dataName);
