@@ -13,6 +13,7 @@ import org.apache.commons.math3.stat.descriptive.moment.StandardDeviation;
 import org.apache.commons.math3.stat.descriptive.moment.Variance;
 
 import java.awt.*;
+import java.io.*;
 import java.text.DecimalFormat;
 import java.text.NumberFormat;
 import java.util.*;
@@ -496,6 +497,55 @@ public class GraphUtilities {
         return (count * 100) / CompleteGraph.instance().getVertexCount();
     }
 
+    private static void storeCoverageNumbersInFile(String fileName, Collection<DirectedSparseMultigraph<ModelObject, ModelEdge>> graphCollection) {
+//        int totalNumberOfVertices = CompleteGraph.instance().getVertexCount();
+        double[] coverageValues = new double[graphCollection.size()];
+        int i = 0;
+        for (DirectedSparseMultigraph graph : graphCollection) {
+
+            coverageValues[i] = calculateCoverage(graph);
+            i++;
+        }
+
+        File file = new File(fileName);
+        PrintWriter writer = null;
+        try {
+            writer = new PrintWriter(new BufferedWriter(new FileWriter(file)));
+        } catch (IOException ex) {
+            ex.printStackTrace();
+        }
+
+        NumberFormat doubleFormat = new DecimalFormat("######.000");
+        for (double hopCount : coverageValues) {
+            writer.println(doubleFormat.format(hopCount));
+        }
+        writer.close();
+
+    }
+
+    private static void storeHopNumbersInFile(String fileName, Collection<List<String>> pathCollection) {
+        int[] hopCountList = new int[pathCollection.size()];
+        int i = 0;
+        for (List<String> path : pathCollection) {
+            hopCountList[i] = path.size();
+            i++;
+        }
+
+        File file = new File(fileName);
+        PrintWriter writer = null;
+        try {
+            writer = new PrintWriter(new BufferedWriter(new FileWriter(file)));
+        } catch (IOException ex) {
+            ex.printStackTrace();
+        }
+
+        for (int hopCount : hopCountList) {
+            writer.println(hopCount);
+        }
+        writer.close();
+
+    }
+
     private static HashMap<String, Double> calculateAverageNumberOfHops(Collection<List<String>> pathCollection) {
         double[] hopCountList = new double[pathCollection.size()];
         int i = 0;
@@ -622,19 +672,23 @@ public class GraphUtilities {
         return null;
     }
 
-    public static HashMap<String, Double> calculateHopsNeededForCoverage(RecursiveHashMap data, int coverageRequired) {
+    public static HashMap<String, Double> calculateHopsNeededForCoverage(RecursiveHashMap data, int coverageRequired, String fileName) {
 
 
         Collection<List<String>> generatedPaths = generatePathsTillCoverage(data,
                 coverageRequired);
+        storeHopNumbersInFile(fileName, generatedPaths);
         return calculateAverageNumberOfHops(generatedPaths);
     }
 
 
-    public static HashMap<String, Double> calculateCoverageForPathLength(RecursiveHashMap data, int hopsRequired) {
+
+
+    public static HashMap<String, Double> calculateCoverageForPathLength(RecursiveHashMap data, int hopsRequired, String fileName) {
         assert hopsRequired >= data.getOrder();
         Collection<DirectedSparseMultigraph<ModelObject, ModelEdge>> generatedPaths = generatePathsForPathLength(data,
                 hopsRequired);
+        storeCoverageNumbersInFile(fileName, generatedPaths);
         return calculateAverageCoverage(generatedPaths);
     }
 
