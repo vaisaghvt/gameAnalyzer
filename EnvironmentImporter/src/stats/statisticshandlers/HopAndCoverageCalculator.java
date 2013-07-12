@@ -176,8 +176,7 @@ public class HopAndCoverageCalculator extends StatisticsHandler<PathConsoleDispl
         private JLabel coverageLabel = new JLabel("60% ");
 
         public FindTypeFrame(){
-            HopAndCoverageCalculator.this.coverageRequired =60;
-            HopAndCoverageCalculator.this.numberOfHops =300;
+
             SwingUtilities.invokeLater(new Runnable() {
                 @Override
                 public void run() {

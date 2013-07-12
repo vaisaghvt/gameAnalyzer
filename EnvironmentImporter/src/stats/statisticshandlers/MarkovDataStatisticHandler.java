@@ -18,6 +18,7 @@ import stats.consoledisplays.PathHeatMapConsoleDisplay;
 import javax.swing.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.io.File;
 import java.text.DecimalFormat;
 import java.text.NumberFormat;
 import java.util.Collection;
@@ -425,9 +426,21 @@ public class MarkovDataStatisticHandler extends StatisticsHandler<PathHeatMapCon
 
                     data = getNthOrderMarkovData(dataNameDataMap, graph1Type, graph1RandomWalkType, graph1HumanDataType,
                             graph1M);
-                    coverage = GraphUtilities.calculateCoverageForPathLength(data, hopsRequired);
-
+                    File directory=new File("coverage");
+                    if (!directory.exists()) {
+                        if (!directory.mkdir()) {
+                            System.out.println("Type Directory could not be created for " + directory);
+                        }
+                    }
+                    if (directory.exists()) {
+                        String fileName = "coverage"+ File.separatorChar + graph1Type + "-"+hopsRequired+"-"+ order;
+                        if(graph1Type== MarkovDataDialog.GraphType.RANDOM_WALK){
+                            fileName += "-"+graph1RandomWalkType;
+                        }
+                        coverage = GraphUtilities.calculateCoverageForPathLength(data, hopsRequired, fileName);
+                    }
                     return null;
+
                 }
 
                 protected void done() {
@@ -510,7 +523,19 @@ public class MarkovDataStatisticHandler extends StatisticsHandler<PathHeatMapCon
                 protected Void doInBackground() throws Exception {
 
                     data = getNthOrderMarkovData(dataNameDataMap, graph1Type, graph1RandomWalkType, graph1HumanDataType, graph1M);
-                    hopsNeeded = GraphUtilities.calculateHopsNeededForCoverage(data, coverageRequired);
+                    File directory=new File("hops");
+                    if (!directory.exists()) {
+                        if (!directory.mkdir()) {
+                            System.out.println("Type Directory could not be created for " + directory);
+                        }
+                    }
+                    if (directory.exists()) {
+                        String fileName = "hops"+ File.separatorChar +graph1Type+"-"+coverageRequired+"-"+ order;
+                        if(graph1Type== MarkovDataDialog.GraphType.RANDOM_WALK){
+                            fileName += "-"+graph1RandomWalkType;
+                        }
+                        hopsNeeded = GraphUtilities.calculateHopsNeededForCoverage(data, coverageRequired, fileName);
+                    }
 
                     return null;
                 }
