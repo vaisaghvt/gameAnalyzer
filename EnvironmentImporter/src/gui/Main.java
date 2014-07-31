@@ -124,8 +124,15 @@ public class Main extends JFrame implements ActionListener, MouseListener, Mouse
             mChoosePhase.setEnabled(false);
 
             mainPanel.setDocument(current);
+            SwingUtilities.invokeLater(new Runnable() {
+                @Override
+                public void run() {
+                    System.out.println("here");
+                    mainPanel.repaint();
+                    mainPanel.revalidate();
+                }
+            });
 
-            mainPanel.revalidate();
         } else {
             this.setTitle(APPLICATION_TITLE);
             miSave.setEnabled(false);

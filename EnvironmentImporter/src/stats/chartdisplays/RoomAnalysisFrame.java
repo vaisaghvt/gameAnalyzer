@@ -1,5 +1,6 @@
 package stats.chartdisplays;
 
+import com.google.common.collect.HashMultimap;
 import edu.uci.ics.jung.algorithms.layout.Layout;
 import edu.uci.ics.jung.algorithms.layout.SpringLayout2;
 import edu.uci.ics.jung.graph.DirectedSparseMultigraph;
@@ -22,6 +23,7 @@ import org.jfree.chart.axis.SubCategoryAxis;
 import org.jfree.chart.plot.CategoryPlot;
 import org.jfree.chart.plot.PlotOrientation;
 import org.jfree.chart.renderer.category.GroupedStackedBarRenderer;
+import org.jfree.chart.renderer.category.StandardBarPainter;
 import org.jfree.data.KeyToGroupMap;
 import org.jfree.data.category.CategoryDataset;
 import org.jfree.data.category.DefaultCategoryDataset;
@@ -34,7 +36,7 @@ import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.image.BufferedImage;
-import java.io.File;
+import java.io.*;
 import java.text.DecimalFormat;
 import java.util.*;
 import java.util.List;
@@ -297,6 +299,12 @@ public class RoomAnalysisFrame extends JFrame {
                         case GROUPED_STACK_CHART_FOR_CORR_A2:
                             generateGroupedStackChartForCorrA2(nameToGraphMap);
                             break;
+                        case ORDER_FOR_ROOM_VISITATION:
+                            orderForRoomVisitation(nameToGraphMap);
+                            break;
+                        case CUMULATIVE_FREQUENCY_VISITS:
+                            cumulativeFrequencyOfVisits(nameToGraphMap, room);
+                            break;
                     }
                     return null;
                 }
@@ -321,6 +329,70 @@ public class RoomAnalysisFrame extends JFrame {
         }
     }
 
+    private void cumulativeFrequencyOfVisits(HashMap<String, DirectedSparseMultigraph<ModelObject, ModelEdge>> nameToGraphMap, String roomName) {
+
+        HashMultimap<String, Long> nameToVisitTimeMapping = HashMultimap.create();
+        for(String name: nameToGraphMap.keySet()){
+            DirectedSparseMultigraph<ModelObject, ModelEdge> tempGraph = nameToGraphMap.get(name);
+//            System.out.println(name);
+
+            TreeSet<ModelEdge> edgeCollection = new TreeSet<ModelEdge>(new Comparator<ModelEdge>() {
+                @Override
+                public int compare(ModelEdge o1, ModelEdge o2) {
+                    return (int) (o1.getTime() - o2.getTime());
+                }
+            });
+            edgeCollection.addAll(tempGraph.getEdges());
+
+
+            boolean starting = true;
+            for (ModelEdge edge : edgeCollection) {
+                ModelObject sourceRoom = CompleteGraph.instance().findRoomByName(tempGraph.getSource(edge).toString());
+                boolean connectedSource = CompleteGraph.instance().getDegreeOfRoom(sourceRoom)>1;
+                if (starting) {
+
+
+                    if(tempGraph.getSource(edge).toString().equalsIgnoreCase(roomName)){
+                        nameToVisitTimeMapping.put(name, 0l);
+//                        System.out.println(0);
+                    }
+                    starting = false;
+                }
+
+                if(tempGraph.getDest(edge).toString().equalsIgnoreCase(roomName)){
+//                    System.out.println(edge.getTime());
+                    nameToVisitTimeMapping.put(name, edge.getTime());
+                }
+//                path.add(tempGraph.getDest(edge).toString());
+            }
+
+//            assert path != null && path.size() > 0;
+
+
+        }
+
+        File file = new File(roomName+".csv");
+        PrintWriter writer = null;
+        try {
+            writer = new PrintWriter(new BufferedWriter(new FileWriter(file)));
+        } catch (IOException ex) {
+            ex.printStackTrace();
+        }
+        for (String name: nameToVisitTimeMapping.keySet()){
+            writer.print(name);
+            System.out.println(name);
+            TreeSet<Long> values = new TreeSet<Long> (nameToVisitTimeMapping.get(name));
+            for(Long value: values){
+                writer.print(","+value);
+            }
+            writer.println();
+        }
+        writer.close();
+//        System.out.println(nameToVisitTimeMapping);
+
+
+    }
+
     private void generateGroupedStackChartForDormCorridor(HashMap<String,DirectedSparseMultigraph<ModelObject, ModelEdge>> nameToGraphMap) {
         List<List<String>> pathList = getPathList(nameToGraphMap);
 
@@ -328,15 +400,16 @@ public class RoomAnalysisFrame extends JFrame {
                 calculateDecisionForEachAttemptDormCorr(pathList);
 
 
+
         final CategoryDataset dataSet = createAggregatedDataSetForDormCorr(resultHashMap);
         final JFreeChart chart = createAggregatedChart(dataSet);
         final ChartPanel chartPanel = new ChartPanel(chart);
-        chartPanel.setPreferredSize(new Dimension(500, 270));
+        chartPanel.setPreferredSize(new Dimension(1280, 880));
         JFrame chartFrame = new JFrame("Summarized charts");
 
         chartFrame.setContentPane(chartPanel);
         chartFrame.setVisible(true);
-        chartFrame.setSize(new Dimension(520, 300));
+        chartFrame.setSize(new Dimension(1300, 900));
         chartFrame.setLocation(0, 0);
         chartFrame.setDefaultCloseOperation(DISPOSE_ON_CLOSE);
     }
@@ -422,21 +495,125 @@ public class RoomAnalysisFrame extends JFrame {
                 calculateDecisionForEachAttemptCorrA2(pathList);
 
 
+
         final CategoryDataset dataSet = createAggregatedDataSetForCorrA2(resultHashMap);
+
         final JFreeChart chart = createAggregatedChart(dataSet);
         final ChartPanel chartPanel = new ChartPanel(chart);
-        chartPanel.setPreferredSize(new Dimension(500, 270));
+        chartPanel.setPreferredSize(new Dimension(1280, 880));
         JFrame chartFrame = new JFrame("Summarized charts");
 
         chartFrame.setContentPane(chartPanel);
         chartFrame.setVisible(true);
-        chartFrame.setSize(new Dimension(520, 300));
+        chartFrame.setSize(new Dimension(1300, 900));
         chartFrame.setLocation(0, 0);
         chartFrame.setDefaultCloseOperation(DISPOSE_ON_CLOSE);
 
     }
 
 
+    private void orderForRoomVisitation(HashMap<String, DirectedSparseMultigraph<ModelObject, ModelEdge>> nameToGraphMap) {
+        List<List<String>> pathList = getPathList(nameToGraphMap);
+
+        String[][] orderlyPath = new String[][]{
+                {"2CorrA67", "2CorrA7", "SB1", "2CorrA7", "SB2", "2CorrA7", "SB3", "2CorrA7", "SB4", "2CorrA7", "TheLounge"},
+                {"TheLounge", "2CorrA7", "SB4", "2CorrA7", "SB3", "2CorrA7", "SB2", "2CorrA7", "SB1", "2CorrA7", "2CorrA67"},
+        };
+
+
+        LinkedHashMap<String, LinkedHashMap<PathMovementType, Integer>> resultHashMap = new LinkedHashMap<String, LinkedHashMap<PathMovementType, Integer>>();
+
+        resultHashMap.put("Straight Corridor", calculateMapForDistance(pathList, orderlyPath));
+
+//           System.out.println("Yayee!");
+
+
+
+        final CategoryDataset dataSet = createAggregatedDataSetForSequential(resultHashMap);
+        final JFreeChart chart = createAggregatedChart(dataSet);
+        final ChartPanel chartPanel = new ChartPanel(chart);
+        chartPanel.setPreferredSize(new Dimension(1280, 880));
+        JFrame chartFrame = new JFrame("Summarized charts");
+
+        chartFrame.setContentPane(chartPanel);
+        chartFrame.setVisible(true);
+        chartFrame.setSize(new Dimension(1300, 900));
+        chartFrame.setLocation(0, 0);
+        chartFrame.setDefaultCloseOperation(DISPOSE_ON_CLOSE);
+
+    }
+
+    private CategoryDataset createAggregatedDataSetForSequential(LinkedHashMap<String, LinkedHashMap<PathMovementType, Integer>> resultHashMap) {
+        DefaultCategoryDataset dataset = new DefaultCategoryDataset();
+
+        for (String category : resultHashMap.keySet()) {
+
+
+            double total = resultHashMap.get(category).get(PathMovementType.SEQUENTIAL) + resultHashMap.get(category).get(PathMovementType.NON_SEQUENTIAL);
+
+            dataset.addValue((double) resultHashMap.get(category).get(PathMovementType.SEQUENTIAL) / total, PathMovementType.SEQUENTIAL.toString(), category);
+            dataset.addValue((double) resultHashMap.get(category).get(PathMovementType.NON_SEQUENTIAL) / total, PathMovementType.NON_SEQUENTIAL.toString(), category);
+
+        }
+        return dataset;
+    }
+
+    private LinkedHashMap<PathMovementType, Integer> calculateMapForDistance
+            (List<List<String>> listOfPaths, String[][] requiredPathList) {
+        LinkedHashMap<PathMovementType, Integer> occurrenceMap = new LinkedHashMap<PathMovementType, Integer>();
+        occurrenceMap.put(PathMovementType.SEQUENTIAL, 0);
+        occurrenceMap.put(PathMovementType.NON_SEQUENTIAL, 0);
+        for (String[] requiredPath : requiredPathList) {
+            updateSequentialOccurrenceMap(listOfPaths, requiredPath, occurrenceMap);
+
+        }
+
+        return occurrenceMap;
+
+    }
+
+    private void updateSequentialOccurrenceMap(List<List<String>> pathList, String[] requiredPath,
+                                               LinkedHashMap<PathMovementType, Integer> occurrenceMap) {
+        assert occurrenceMap != null;
+        assert pathList != null;
+        assert requiredPath != null && requiredPath.length > 2;
+        String startingRoom = requiredPath[0];
+        String secondRoom = requiredPath[1];
+
+        int currentPosition  = 2;
+        boolean matched = false;
+        for (List<String> path : pathList) {
+            matched=false;
+            currentPosition=2;
+            for (int roomNumber = 0; roomNumber < (path.size()-requiredPath.length); roomNumber++) {
+                if (!path.get(roomNumber).equalsIgnoreCase(startingRoom) || !path.get(roomNumber+1).equalsIgnoreCase(secondRoom)) {
+                    continue;
+                }
+                while(currentPosition< requiredPath.length){
+                    String pathNextRoom = path.get(roomNumber + currentPosition);
+                    String roomInRequired = requiredPath[currentPosition];
+                    if(!pathNextRoom.equalsIgnoreCase(roomInRequired)){
+                        occurrenceMap.put(PathMovementType.NON_SEQUENTIAL, occurrenceMap.get(PathMovementType.NON_SEQUENTIAL)+1);
+                        matched = true;
+                        System.out.println(PathMovementType.NON_SEQUENTIAL.toString());
+                        break;
+                    }
+                    currentPosition++;
+                }
+
+                //TODO : REALLY??
+
+                if(!matched){
+
+                    System.out.println(PathMovementType.SEQUENTIAL.toString());
+                    occurrenceMap.
+                            put(PathMovementType.SEQUENTIAL,
+                                    occurrenceMap.get(PathMovementType.SEQUENTIAL) + 1);
+                }
+                break;
+            }
+        }
+    }
 
 
     private void generateGroupedStackChartForSimpleCorridor(HashMap<String, DirectedSparseMultigraph<ModelObject, ModelEdge>> nameToGraphMap) {
@@ -531,12 +708,12 @@ public class RoomAnalysisFrame extends JFrame {
         final CategoryDataset dataSet = createAggregatedDataSetForSimpleCorridor(resultHashMap);
         final JFreeChart chart = createAggregatedChart(dataSet);
         final ChartPanel chartPanel = new ChartPanel(chart);
-        chartPanel.setPreferredSize(new Dimension(500, 270));
+        chartPanel.setPreferredSize(new Dimension(1280, 880));
         JFrame chartFrame = new JFrame("Summarized charts");
 
         chartFrame.setContentPane(chartPanel);
         chartFrame.setVisible(true);
-        chartFrame.setSize(new Dimension(520, 300));
+        chartFrame.setSize(new Dimension(1300, 900));
         chartFrame.setLocation(0, 0);
         chartFrame.setDefaultCloseOperation(DISPOSE_ON_CLOSE);
 
@@ -549,18 +726,24 @@ public class RoomAnalysisFrame extends JFrame {
         final JFreeChart stackedChart = ChartFactory.createStackedBarChart("Summarized", "Type", "Probability",
                 dataSet, PlotOrientation.VERTICAL, true, true, false);
 
-        //create group
         GroupedStackedBarRenderer renderer = new GroupedStackedBarRenderer();
+        ((GroupedStackedBarRenderer)renderer).setBarPainter(new StandardBarPainter());
 
         //margin between bar.
-        renderer.setItemMargin(0.03);
+//        renderer.setItemMargin(0.25);
+        renderer.setMaximumBarWidth(.09);
         //end
+
 
 
         CategoryPlot plot = (CategoryPlot) stackedChart.getPlot();
 //        plot.setDomainAxis(domainAxis);
         plot.setRenderer(renderer);
+        plot.setDomainGridlinesVisible(true);
+        plot.setRangeGridlinesVisible(true);
+        plot.setBackgroundPaint(Color.white);
 
+        plot.getRangeAxis().setRange(0,1.0);
         return stackedChart;
     }
 
@@ -587,6 +770,7 @@ public class RoomAnalysisFrame extends JFrame {
         DefaultCategoryDataset dataSet = new DefaultCategoryDataset();
 
 
+
         for (String category : resultHashMap.keySet()) {
 
 
@@ -595,11 +779,15 @@ public class RoomAnalysisFrame extends JFrame {
                 continue;
             }
 
+
             dataSet.addValue((double) resultHashMap.get(category).get(TurnDecision.NO_TURN) / total, TurnDecision.NO_TURN.toString(), category);
             dataSet.addValue((double) resultHashMap.get(category).get(TurnDecision.TURN) / total, TurnDecision.TURN.toString(), category);
             dataSet.addValue((double) resultHashMap.get(category).get(TurnDecision.BACK) / total, TurnDecision.BACK.toString(), category);
 
         }
+
+
+
         return dataSet;
     }
     private CategoryDataset createAggregatedDataSetForDormCorr(LinkedHashMap<String, LinkedHashMap<DormCorridorBehavior, Integer>> resultHashMap) {
@@ -1474,7 +1662,9 @@ public class RoomAnalysisFrame extends JFrame {
         TEMPORAL_SECOND_ORDER_MARKOV("Temporal 2nd order markov"),
         GROUPED_STACK_CHART_FOR_DORM_CORR("Dorm Corridor Summary"),
         GROUPED_STACK_CHART_FOR_CORR_A2("Corr A2 Corridor Summary"),
-        GROUPED_STACK_CHART_FOR_SIMPLE_CORRIDOR("Simple Corridor Summary");
+        GROUPED_STACK_CHART_FOR_SIMPLE_CORRIDOR("Simple Corridor Summary"),
+        ORDER_FOR_ROOM_VISITATION("Order for Room Visitation."),
+        CUMULATIVE_FREQUENCY_VISITS("Cumulative frequency of visits");
         private final String name;
 
         DisplayType(String s) {
@@ -1729,6 +1919,10 @@ public class RoomAnalysisFrame extends JFrame {
 
     public enum CorridorMovementType {
         PASS_THROUGH, RETURN;
+    }
+
+    public enum PathMovementType {
+        SEQUENTIAL, NON_SEQUENTIAL;
     }
 
     public enum TurnDecision {

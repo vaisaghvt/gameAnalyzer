@@ -89,6 +89,7 @@ public class MarkovDataStatisticHandler extends StatisticsHandler<PathHeatMapCon
             graph1Type = markovDataDialog.getGraph1Type();
             if (graph1Type == MarkovDataDialog.GraphType.RANDOM_WALK) {
                 graph1RandomWalkType = markovDataDialog.getGraph1RandomWalkType();
+
             } else {
                 graph1HumanDataType = markovDataDialog.getGraph1HumanType();
                 if (order > 1 && graph1HumanDataType == MarkovDataDialog.HumanType.N_FROM_M) {
@@ -407,7 +408,9 @@ public class MarkovDataStatisticHandler extends StatisticsHandler<PathHeatMapCon
 
         @Override
         protected void doTasks(String dataName) {
-            if (!dataName.equals("random walk")) {
+
+//            if (!dataName.equals("random walk")) {
+            if (graph1Type != MarkovDataDialog.GraphType.RANDOM_WALK) {
 
                 dataNameDataMap.put(dataName, NetworkModel.instance().getDirectedGraphOfPlayer(dataName,
                         Collections.singleton(phase)));
@@ -426,6 +429,8 @@ public class MarkovDataStatisticHandler extends StatisticsHandler<PathHeatMapCon
 
                     data = getNthOrderMarkovData(dataNameDataMap, graph1Type, graph1RandomWalkType, graph1HumanDataType,
                             graph1M);
+//                    System.out.println("Taken number of paths="+data.getNumberOfTakenPaths() );
+//                    System.out.println("Possible number of paths="+ CompleteGraph.instance().countPathsOfLength(order));
                     File directory=new File("coverage");
                     if (!directory.exists()) {
                         if (!directory.mkdir()) {
@@ -456,6 +461,7 @@ public class MarkovDataStatisticHandler extends StatisticsHandler<PathHeatMapCon
 //                                    doubleFormat.format(coverage.get("sd")) + "</font></html>", "Coverage calculated",
 //                            JOptionPane.INFORMATION_MESSAGE
 //                    );
+
                     System.out.println("Order="+order+";Hops="+hopsRequired+";COVERAGE = " + doubleFormat.format(coverage.get("mean")) + " \u00B1 " +
                             doubleFormat.format(coverage.get("sd")));
 
@@ -506,8 +512,8 @@ public class MarkovDataStatisticHandler extends StatisticsHandler<PathHeatMapCon
 
         @Override
         protected void doTasks(String dataName) {
-            if (!dataName.equals("random walk")) {
-
+//            if (!dataName.equals("random walk")) {
+            if (graph1Type != MarkovDataDialog.GraphType.RANDOM_WALK) {
                 dataNameDataMap.put(dataName, NetworkModel.instance().getDirectedGraphOfPlayer(dataName, Collections.singleton(phase)));
 
             }

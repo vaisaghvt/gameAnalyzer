@@ -31,6 +31,13 @@ public class MarkovDataStore {
     }
 
 
+    public int getNumberOfTakenPathsOfOrder(int order){
+        RecursiveHashMap map = getDirectMarkovData(order);
+        return map.getNumberOfTakenPaths();
+
+    }
+
+
     public RecursiveHashMap getDirectMarkovData(int order) {
         if (!containsDirectMarkovData(order)) {
             putDirectMarkovData(order, generateDirectDataForOrder(order));

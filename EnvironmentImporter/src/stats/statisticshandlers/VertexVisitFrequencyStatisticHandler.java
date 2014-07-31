@@ -1,6 +1,6 @@
 package stats.statisticshandlers;
 
-import com.google.common.collect.HashMultimap;
+import com.google.common.collect.ArrayListMultimap;
 import edu.uci.ics.jung.graph.DirectedSparseMultigraph;
 import gui.NetworkModel;
 import gui.Phase;
@@ -80,8 +80,8 @@ public class VertexVisitFrequencyStatisticHandler extends StatisticsHandler<Vert
             int floorNumber= CompleteGraph.instance().getFloorForVertex(
                     CompleteGraph.instance().findRoomByName(room));
             double originalValueForRoom = randomWalkData.get(room).doubleValue();
-            double scaledValue = originalValueForRoom / NRandomForFloor[floorNumber];
-//            double scaledValue = originalValueForRoom / NRandom;
+//            double scaledValue = originalValueForRoom / NRandomForFloor[floorNumber];
+            double scaledValue = originalValueForRoom / NRandom;
 //            double normalizedValue = scaledValue / randomWalkData.getProbabilityOfSequence(room).doubleValue();
             result.put(room, scaledValue);
         }
@@ -95,19 +95,21 @@ public class VertexVisitFrequencyStatisticHandler extends StatisticsHandler<Vert
         HashMap<String, Double> result = new HashMap<String, Double>();
         HashMap<String, Number> randomWalkData = RandomWalkOrganizer.calculateAverageRoomVisitFrequency(RandomWalkOrganizer.RandomWalkType.UNBIASED);
         int NRandom = 0, NPerson = 0;
-        int[] NRandomForFloor = new int[3];
-        int[] NPersonForFloor = new int[3];
+//        int[] NRandomForFloor = new int[3];
+//        int[] NPersonForFloor = new int[3];
         for (String room : randomWalkData.keySet()) {
             int floorNumber= CompleteGraph.instance().getFloorForVertex(
                     CompleteGraph.instance().findRoomByName(room));
 //            NRandom+= randomWalkData.getProbabilityOfSequence(room).intValue();
-            NRandomForFloor[floorNumber] += randomWalkData.get(room).intValue();
+            NRandom+= randomWalkData.get(room).intValue();
+//            NRandomForFloor[floorNumber] += randomWalkData.get(room).intValue();
         }
         for (String room : personData.keySet()) {
             int floorNumber= CompleteGraph.instance().getFloorForVertex(
                     CompleteGraph.instance().findRoomByName(room));
 //        NPerson+= personData.getProbabilityOfSequence(room).intValue();
-            NPersonForFloor[floorNumber] += personData.get(room).intValue();
+//            NPersonForFloor[floorNumber] += personData.get(room).intValue();
+            NPerson += personData.get(room).intValue();
 
         }
 
@@ -115,8 +117,8 @@ public class VertexVisitFrequencyStatisticHandler extends StatisticsHandler<Vert
             int floorNumber= CompleteGraph.instance().getFloorForVertex(
                     CompleteGraph.instance().findRoomByName(room));
             double originalValueForRoom = personData.get(room).doubleValue();
-//            double scaledValue = (originalValueForRoom *NRandom) /NPerson;
-            double scaledValue = (originalValueForRoom * NRandomForFloor[floorNumber]) / NPersonForFloor[floorNumber];
+            double scaledValue = (originalValueForRoom *NRandom) /NPerson;
+//            double scaledValue = (originalValueForRoom * NRandomForFloor[floorNumber]) / NPersonForFloor[floorNumber];
             double normalizedValue = scaledValue / randomWalkData.get(room).doubleValue();
             result.put(room, normalizedValue);
         }
@@ -124,11 +126,14 @@ public class VertexVisitFrequencyStatisticHandler extends StatisticsHandler<Vert
         return result;
     }
 
-    private HashMap<String, Double> aggregateData(HashMultimap<String, Double> data, StatsDialog.AggregationType aggregationType) {
+    private HashMap<String, Double> aggregateData(ArrayListMultimap<String, Double> data, StatsDialog.AggregationType aggregationType) {
         HashMap<String, Double> result = new HashMap<String, Double>();
-
+                             System.out.println();
         for (String roomName : data.keySet()) {
+            System.out.print(roomName+":");
+            System.out.println("sd=");
             result.put(roomName, StatisticsHandler.aggregate(data.get(roomName), aggregationType));
+            System.out.print("mean =" +result.get(roomName));
         }
         return result;
 
@@ -190,7 +195,7 @@ public class VertexVisitFrequencyStatisticHandler extends StatisticsHandler<Vert
                 }
             } else {
 
-                HashMultimap<String, Double> resultGrouped = HashMultimap.create();
+                ArrayListMultimap<String, Double> resultGrouped = ArrayListMultimap.create();
                 for (String dataName : nameToResultMapping.keySet()) {
 
                     for (String roomName : nameToResultMapping.get(dataName).keySet()) {

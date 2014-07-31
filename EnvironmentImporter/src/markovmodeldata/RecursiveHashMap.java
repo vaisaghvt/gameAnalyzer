@@ -2,6 +2,7 @@ package markovmodeldata;
 
 import com.google.common.collect.HashBasedTable;
 import ec.util.MersenneTwister;
+import modelcomponents.CompleteGraph;
 
 import java.util.*;
 
@@ -19,7 +20,8 @@ public class RecursiveHashMap {
     /**
      * Only exists when degree =1;
      */
-    private HashBasedTable<String, String, Double> firstOrderTable;
+    private HashBasedTable<String, String, Double> firstOrderProbabilityTable;
+    private HashBasedTable<String, String, Integer> firstOrderRawValueTable;
 
     private final int order;
     private HashMap<String, Integer> sequenceOccurrenceCount;
@@ -34,10 +36,12 @@ public class RecursiveHashMap {
         sequenceOccurrenceCount = new HashMap<String, Integer>();
         if (order == 1) {
             myMap = null;
-            firstOrderTable = HashBasedTable.create();
+            firstOrderProbabilityTable = HashBasedTable.create();
+            firstOrderRawValueTable = HashBasedTable.create();
         } else {
             myMap = new HashMap<String, RecursiveHashMap>();
-            firstOrderTable = null;
+            firstOrderProbabilityTable = null;
+            firstOrderRawValueTable = null;
         }
     }
 
@@ -83,7 +87,7 @@ public class RecursiveHashMap {
         } else {
             assert this.order == 1;
             assert this.myMap == null;
-            this.firstOrderTable.put(currentOldest, states.pollFirst(), value);
+            this.firstOrderProbabilityTable.put(currentOldest, states.pollFirst(), value);
         }
     }
 
@@ -155,18 +159,18 @@ public class RecursiveHashMap {
 
     private void recursiveNormalize() {
         if (order == 1) {
-            for (String source : firstOrderTable.rowKeySet()) {
+            for (String source : firstOrderProbabilityTable.rowKeySet()) {
                 double totalForSource = 0;
-                for (String destination : firstOrderTable.columnKeySet()) {
-                    if (firstOrderTable.contains(source, destination)) {
-                        totalForSource += firstOrderTable.get(source, destination);
-
+                for (String destination : firstOrderProbabilityTable.columnKeySet()) {
+                    if (firstOrderProbabilityTable.contains(source, destination)) {
+                        totalForSource += firstOrderProbabilityTable.get(source, destination);
+                        firstOrderRawValueTable.put(source, destination, firstOrderProbabilityTable.get(source, destination).intValue());
                     }
                 }
-                for (String destination : firstOrderTable.columnKeySet()) {
-                    if (firstOrderTable.contains(source, destination)) {
-                        firstOrderTable.put(source, destination,
-                                firstOrderTable.get(source, destination) / totalForSource);
+                for (String destination : firstOrderProbabilityTable.columnKeySet()) {
+                    if (firstOrderProbabilityTable.contains(source, destination)) {
+                        firstOrderProbabilityTable.put(source, destination,
+                                firstOrderProbabilityTable.get(source, destination) / totalForSource);
                     }
                 }
             }
@@ -225,24 +229,24 @@ public class RecursiveHashMap {
         ArrayList<String> newStateSequence = new ArrayList<String>(stateSequence);
         return recursiveGetDestinationProbabilities(newStateSequence);
 
-
     }
 
     private Map<String, Double> recursiveGetDestinationProbabilities(
             ArrayList<String> sequence) {
         ArrayList<String> stateSequence = new ArrayList<String>(sequence);
         if (stateSequence.size() == 1) {
-            assert firstOrderTable != null;
+            assert firstOrderProbabilityTable != null;
             String penultimateLocation = stateSequence.get(0);
-            if (firstOrderTable.containsRow(penultimateLocation)) {
-                return firstOrderTable.rowMap().get(penultimateLocation);
+            if (firstOrderProbabilityTable.containsRow(penultimateLocation)) {
+                return firstOrderProbabilityTable.rowMap().get(penultimateLocation);
+
             } else {
                 return null;
             }
         } else {
             String oldest = stateSequence.remove(0);
             if (myMap.containsKey(oldest)) {
-                return myMap.get(oldest).getDestinationProbabilities(stateSequence);
+                return myMap.get(oldest).recursiveGetDestinationProbabilities(stateSequence);
             } else {
                 return null;
             }
@@ -325,4 +329,44 @@ public class RecursiveHashMap {
         //Hack for recursive normalize to work properly
         this.putDestinationGivenSeqProbability(path, currentValue+1);
     }
+
+    public int getNumberOfTakenPaths() {
+        return this.sequenceCodesToSequenceMapping.keySet().size();
+    }
+
+
+    public Float getDecisionBase(List<String> stateSequence) {
+        assert stateSequence.size() == order;
+        ArrayList<String> newStateSequence = new ArrayList<String>(stateSequence);
+        return recursiveGetDestinationBase(newStateSequence);
+
+    }
+
+    private Float recursiveGetDestinationBase(
+            ArrayList<String> sequence) {
+        ArrayList<String> stateSequence = new ArrayList<String>(sequence);
+        if (stateSequence.size() == 1) {
+            assert firstOrderRawValueTable != null;
+            String penultimateLocation = stateSequence.get(0);
+            if (firstOrderRawValueTable.containsRow(penultimateLocation)) {
+                Map<String, Integer> map = firstOrderRawValueTable.rowMap().get(penultimateLocation);
+                int total =0;
+                for(String key: map.keySet()){
+                    total+=map.get(key);
+                }
+                return ((float) total/ (float)CompleteGraph.instance().getDegreeOfRoom(CompleteGraph.instance().findRoomByName(penultimateLocation)));
+            } else {
+                return 0.0f;
+            }
+        } else {
+            String oldest = stateSequence.remove(0);
+            if (myMap.containsKey(oldest)) {
+                return myMap.get(oldest).recursiveGetDestinationBase(stateSequence);
+            } else {
+                return 0.0f;
+            }
+
+        }
+    }
+
 }

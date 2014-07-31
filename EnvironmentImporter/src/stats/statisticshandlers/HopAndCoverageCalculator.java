@@ -1,6 +1,5 @@
 package stats.statisticshandlers;
 
-import com.google.common.collect.HashMultimap;
 import edu.uci.ics.jung.graph.DirectedSparseMultigraph;
 import gui.NetworkModel;
 import gui.Phase;
@@ -10,6 +9,7 @@ import modelcomponents.ModelEdge;
 import modelcomponents.ModelObject;
 import org.apache.commons.math3.stat.descriptive.moment.Mean;
 import org.apache.commons.math3.stat.descriptive.moment.StandardDeviation;
+import randomwalk.RandomWalkOrganizer;
 import stats.chartdisplays.PathChartDisplay;
 import stats.consoledisplays.PathConsoleDisplay;
 
@@ -19,10 +19,12 @@ import javax.swing.event.ChangeListener;
 import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.io.*;
 import java.text.DecimalFormat;
 import java.text.NumberFormat;
 import java.util.*;
 import java.util.List;
+import java.util.concurrent.Semaphore;
 
 /**
  * Created with IntelliJ IDEA.
@@ -34,8 +36,23 @@ import java.util.List;
 public class HopAndCoverageCalculator extends StatisticsHandler<PathConsoleDisplay,
         PathChartDisplay> implements ActionListener {
 
+    private static final RandomWalkOrganizer.RandomWalkType[] RANDOM_WALK_TYPES = {
+//            RandomWalkOrganizer.RandomWalkType.UNBIASED,
+//            RandomWalkOrganizer.RandomWalkType.WITH_FIRST_ORDER_MEMORY,
+//            RandomWalkOrganizer.RandomWalkType.WITH_SECOND_ORDER_MEMORY,
+//            RandomWalkOrganizer.RandomWalkType.WITH_THIRD_ORDER_MEMORY,
+//            RandomWalkOrganizer.RandomWalkType.WITH_FOURTH_ORDER_MEMORY,
+//            RandomWalkOrganizer.RandomWalkType.WITH_FIFTH_ORDER_MEMORY,
+//            RandomWalkOrganizer.RandomWalkType.WITH_SIXTH_ORDER_MEMORY,
+            RandomWalkOrganizer.RandomWalkType.WITH_SEVENTH_ORDER_MEMORY,
+            RandomWalkOrganizer.RandomWalkType.WITH_EIGHTH_ORDER_MEMORY,
+            RandomWalkOrganizer.RandomWalkType.WITH_NINTH_ORDER_MEMORY,
+            RandomWalkOrganizer.RandomWalkType.WITH_TENTH_ORDER_MEMORY,
+            RandomWalkOrganizer.RandomWalkType.WITH_ELEVENTH_ORDER_MEMORY,
+            RandomWalkOrganizer.RandomWalkType.WITH_TWELFTH_ORDER_MEMORY,
+    };
     int numberOfHops =300;
-    double coverageRequired =50;
+    int coverageRequired =50;
 
     JButton calculateCoverage = new JButton("Calculate Coverage");
     JButton calculateHops = new JButton("Calculate Hops");
@@ -77,7 +94,7 @@ public class HopAndCoverageCalculator extends StatisticsHandler<PathConsoleDispl
     class CoverageTask extends AbstractTask {
         private final int hopsUsed;
         List<Double> coverageList = new ArrayList<Double>();
-        HashMultimap<String, String> result = HashMultimap.create();
+//        HashMultimap<String, String> result = HashMultimap.create();
 
 
         public CoverageTask(Collection<String> dataNames, int hopsUsed) {
@@ -100,26 +117,68 @@ public class HopAndCoverageCalculator extends StatisticsHandler<PathConsoleDispl
 
         @Override
         protected void summarizeAndDisplay(){
-            HashMap<String, Double> result = findMeanAndSD(coverageList);
+            File directory=new File("coverage");
+            if (!directory.exists()) {
+                if (!directory.mkdir()) {
+                    System.out.println("Type Directory could not be created for " + directory);
+                }
+            }
+            String fileName="";
+            if (directory.exists()) {
+                fileName = "coverage"+ File.separatorChar +"ACTUAL"+"-"+hopsUsed+"-"+ 0;
+            }else {
+                System.out.println("Directory couldn't be created. Mess up!");
+            }
 
+            HashMap<String, Double> result = findMeanAndSD(coverageList, fileName);
             NumberFormat doubleFormat = new DecimalFormat("######.000");
-            JOptionPane.showMessageDialog(new JFrame(),
-                    "hops Used=" + hopsUsed + "\n" +
-                            "<html><font color=\"red\">Coverage = " + doubleFormat.format(result.get("mean")) + " \u00B1 " +
-                            doubleFormat.format(result.get("sd")) + "</font></html>", "Coverage calculated", JOptionPane.INFORMATION_MESSAGE
-            );
+            System.out.println("Human Coverage = " + doubleFormat.format(result.get("mean")) + " \u00B1 " +
+                    doubleFormat.format(result.get("sd")));
+
+            for(RandomWalkOrganizer.RandomWalkType type: RANDOM_WALK_TYPES){
+
+                Collection<DirectedSparseMultigraph<ModelObject, ModelEdge>> graphCollection
+                        = RandomWalkOrganizer.getAllRandomWalkGraphs(new Semaphore(1), type);
+                List<Double> randomWalkCoverageList = new ArrayList<Double>();
+                for(DirectedSparseMultigraph<ModelObject, ModelEdge> graph: graphCollection){
+                    randomWalkCoverageList.add(GraphUtilities.calculateCoverageForHops(graph, hopsUsed));
+                }
+                fileName = "coverage"+ File.separatorChar +"RANDOM_WALK"+"-"+hopsUsed+"-"+0+"-"+type;
+
+                result = findMeanAndSD(randomWalkCoverageList, fileName);
+                System.out.println(type+" Coverage = " + doubleFormat.format(result.get("mean")) + " \u00B1 " +
+                        doubleFormat.format(result.get("sd")));
+
+
+            }
+
 
 
         }
     }
 
-    private<T extends Number> HashMap<String, Double> findMeanAndSD(List<T> valueList) {
+    private<T extends Number> HashMap<String, Double> findMeanAndSD(List<T> valueList, String fileName) {
         double[] values = new double[valueList.size()];
         int count = 0;
         for (T number : valueList) {
             values[count] = number.doubleValue();
             count++;
         }
+
+        File file = new File(fileName);
+        PrintWriter writer = null;
+        try {
+            writer = new PrintWriter(new BufferedWriter(new FileWriter(file)));
+        } catch (IOException ex) {
+            ex.printStackTrace();
+        }
+
+        for (T value : valueList) {
+            writer.println(value);
+        }
+        writer.close();
+
+
 
         Mean meanCalculator = new Mean();
         double calculatedMean = meanCalculator.evaluate(values);
@@ -134,11 +193,11 @@ public class HopAndCoverageCalculator extends StatisticsHandler<PathConsoleDispl
 
 
     class HopsTask extends StatisticsHandler.AbstractTask {
-        private final double coverageRequired;
-        HashMultimap<String, String> result = HashMultimap.create();
+        private final int coverageRequired;
+//        HashMultimap<String, String> result = HashMultimap.create();
         List<Integer> hopsTaken = new ArrayList<Integer>();
 
-        public HopsTask(Collection<String> dataNames, double coverageRequired) {
+        public HopsTask(Collection<String> dataNames, int coverageRequired) {
             super(dataNames);
             this.coverageRequired = coverageRequired;
 
@@ -149,19 +208,49 @@ public class HopAndCoverageCalculator extends StatisticsHandler<PathConsoleDispl
             DirectedSparseMultigraph<ModelObject, ModelEdge> path
                     = NetworkModel.instance().getDirectedGraphOfPlayer(dataName,
                     Collections.singleton(Phase.EXPLORATION));
-
+            System.out.println(path.getEdgeCount());
             hopsTaken.add(GraphUtilities.calculateHopsForCoverage(path, coverageRequired));
         }
 
         @Override
         protected void summarizeAndDisplay(){
-            HashMap<String, Double> result = findMeanAndSD(hopsTaken);
+            File directory=new File("hops");
+            if (!directory.exists()) {
+                if (!directory.mkdir()) {
+                    System.out.println("Type Directory could not be created for " + directory);
+                }
+            }
+            String fileName="";
+            if (directory.exists()) {
+                fileName = "hops"+ File.separatorChar +"ACTUAL"+"-"+coverageRequired+"-"+ 0;
+            }else {
+                System.out.println("Directory couldn't be created. Mess up!");
+            }
+            HashMap<String, Double> result = findMeanAndSD(hopsTaken, fileName);
             NumberFormat doubleFormat = new DecimalFormat("######.000");
-            JOptionPane.showMessageDialog(new JFrame(),
-                            "coverage required=" + coverageRequired + "\n" +
-                            "<html><font color=\"red\">HOPS NEEDED = " + doubleFormat.format(result.get("mean")) + " \u00B1 " +
-                            doubleFormat.format(result.get("sd")) + "</font></html>", "Hops needed calculated", JOptionPane.INFORMATION_MESSAGE
-            );
+            System.out.println("Human hops = " + doubleFormat.format(result.get("mean")) + " \u00B1 " +
+                    doubleFormat.format(result.get("sd")));
+
+            for(RandomWalkOrganizer.RandomWalkType type: RANDOM_WALK_TYPES){
+                Collection<DirectedSparseMultigraph<ModelObject, ModelEdge>> graphCollection
+                        = RandomWalkOrganizer.getAllRandomWalkGraphs(new Semaphore(1), type);
+                List<Integer> randomWalkHopsTaken = new ArrayList<Integer>();
+                for(DirectedSparseMultigraph<ModelObject, ModelEdge> graph: graphCollection){
+                    randomWalkHopsTaken.add(GraphUtilities.calculateHopsForCoverage(graph, coverageRequired));
+                }
+                fileName = "hops"+ File.separatorChar +"RANDOM_WALK"+"-"+coverageRequired+"-"+0+"-"+type;
+
+                result = findMeanAndSD(randomWalkHopsTaken, fileName);
+                System.out.println(type+" hops = " + doubleFormat.format(result.get("mean")) + " \u00B1 " +
+                        doubleFormat.format(result.get("sd")));
+
+            }
+//            NumberFormat doubleFormat = new DecimalFormat("######.000");
+//            JOptionPane.showMessageDialog(new JFrame(),
+//                            "coverage required=" + coverageRequired + "\n" +
+//                            "<html><font color=\"red\">HOPS NEEDED = " + doubleFormat.format(result.get("mean")) + " \u00B1 " +
+//                            doubleFormat.format(result.get("sd")) + "</font></html>", "Hops needed calculated", JOptionPane.INFORMATION_MESSAGE
+//            );
 
         }
     }
@@ -169,11 +258,11 @@ public class HopAndCoverageCalculator extends StatisticsHandler<PathConsoleDispl
 
     private class FindTypeFrame extends JFrame implements ChangeListener {
 
-        private JSlider hopsSlider = new JSlider(SwingConstants.HORIZONTAL, 1, 350, 300);
+        private JSlider hopsSlider = new JSlider(SwingConstants.HORIZONTAL, 1, 10000, 300);
         private JLabel hopsLabel = new JLabel("300");
 
-        private JSlider coverageSlider = new JSlider(SwingConstants.HORIZONTAL, 1, 100, 60);
-        private JLabel coverageLabel = new JLabel("60% ");
+        private JSlider coverageSlider = new JSlider(SwingConstants.HORIZONTAL, 1, 100, 50);
+        private JLabel coverageLabel = new JLabel("50% ");
 
         public FindTypeFrame(){
 
@@ -230,7 +319,7 @@ public class HopAndCoverageCalculator extends StatisticsHandler<PathConsoleDispl
         public void stateChanged(ChangeEvent e) {
             if(e.getSource()== coverageSlider){
                 coverageLabel.setText(String.valueOf(coverageSlider.getValue()));
-                HopAndCoverageCalculator.this.coverageRequired = Double.parseDouble(coverageLabel.getText());
+                HopAndCoverageCalculator.this.coverageRequired = Integer.parseInt(coverageLabel.getText());
 //                System.out.println(HopAndCoverageCalculator.this.coverageRequired);
             } else if(e.getSource() == hopsSlider){
                 hopsLabel.setText(String.valueOf(hopsSlider.getValue()));
