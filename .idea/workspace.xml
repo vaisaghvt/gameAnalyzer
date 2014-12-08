@@ -2,24 +2,11 @@
 <project version="4">
   <component name="ChangeListManager">
     <list default="true" id="1a8d5762-3820-4d06-a7d2-ae74b759bb18" name="Default" comment="">
-      <change type="DELETED" beforePath="$PROJECT_DIR$/EnvironmentImporter/src/stats/chartdisplays/PathPredictionChartDisplay.java" afterPath="" />
-      <change type="DELETED" beforePath="$PROJECT_DIR$/EnvironmentImporter/src/stats/chartdisplays/PathPredictionFrame.java" afterPath="" />
-      <change type="DELETED" beforePath="$PROJECT_DIR$/EnvironmentImporter/src/stats/consoledisplays/PathPredictionConsoleDisplay.java" afterPath="" />
-      <change type="DELETED" beforePath="$PROJECT_DIR$/EnvironmentImporter/src/stats/statisticshandlers/PathPredictionHandler.java" afterPath="" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/EnvironmentImporter/src/modelcomponents/GraphUtilities.java" afterPath="$PROJECT_DIR$/EnvironmentImporter/src/modelcomponents/GraphUtilities.java" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/EnvironmentImporter/src/stats/statisticshandlers/HeatMapComparisonDialog.java" afterPath="$PROJECT_DIR$/EnvironmentImporter/src/stats/statisticshandlers/HeatMapComparisonDialog.java" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/EnvironmentImporter/src/markovmodeldata/MarkovDataOrganizer.java" afterPath="$PROJECT_DIR$/EnvironmentImporter/src/markovmodeldata/MarkovDataOrganizer.java" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/EnvironmentImporter/src/markovmodeldata/MarkovDataStore.java" afterPath="$PROJECT_DIR$/EnvironmentImporter/src/markovmodeldata/MarkovDataStore.java" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/EnvironmentImporter/src/stats/statisticshandlers/NthOrderHeatMapHandler.java" afterPath="$PROJECT_DIR$/EnvironmentImporter/src/stats/statisticshandlers/NthOrderHeatMapHandler.java" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/EnvironmentImporter/src/gui/ProgressVisualizer.java" afterPath="$PROJECT_DIR$/EnvironmentImporter/src/gui/ProgressVisualizer.java" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/EnvironmentImporter/src/randomwalk/RandomWalkOrganizer.java" afterPath="$PROJECT_DIR$/EnvironmentImporter/src/randomwalk/RandomWalkOrganizer.java" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/EnvironmentImporter/src/markovmodeldata/RecursiveHashMap.java" afterPath="$PROJECT_DIR$/EnvironmentImporter/src/markovmodeldata/RecursiveHashMap.java" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/EnvironmentImporter/src/stats/StatisticChoice.java" afterPath="$PROJECT_DIR$/EnvironmentImporter/src/stats/StatisticChoice.java" />
       <change type="MODIFICATION" beforePath="$PROJECT_DIR$/.idea/workspace.xml" afterPath="$PROJECT_DIR$/.idea/workspace.xml" />
     </list>
     <ignored path="gameAnalyzer.iws" />
     <ignored path=".idea/workspace.xml" />
-    <file path="/Dummy.txt" changelist="1a8d5762-3820-4d06-a7d2-ae74b759bb18" time="1366014824671" ignored="false" />
+    <file path="/Dummy.txt" changelist="1a8d5762-3820-4d06-a7d2-ae74b759bb18" time="1374642622632" ignored="false" />
     <file path="/fragment.java" changelist="1a8d5762-3820-4d06-a7d2-ae74b759bb18" time="1365768613100" ignored="false" />
     <file path="/VertexChartDisplay.java" changelist="1a8d5762-3820-4d06-a7d2-ae74b759bb18" time="1365656673622" ignored="false" />
     <file path="/ChartDisplay.java" changelist="1a8d5762-3820-4d06-a7d2-ae74b759bb18" time="1362743829096" ignored="false" />
@@ -80,6 +67,24 @@
     <file path="/MarkovDataOrganizer.java" changelist="1a8d5762-3820-4d06-a7d2-ae74b759bb18" time="1366031070951" ignored="false" />
     <file path="/NthOrderHeatMapHandler.java" changelist="1a8d5762-3820-4d06-a7d2-ae74b759bb18" time="1366027438724" ignored="false" />
     <file path="/HeatMapComparisonDialog.java" changelist="1a8d5762-3820-4d06-a7d2-ae74b759bb18" time="1366016415477" ignored="false" />
+    <file path="$APPLICATION_HOME_DIR$/lib/idea.jar!/standardSchemas/xhtml1-frameset.xsd" changelist="1a8d5762-3820-4d06-a7d2-ae74b759bb18" time="1374636354349" ignored="false" />
+    <file path="$APPLICATION_HOME_DIR$/lib/idea.jar!/standardSchemas/xml.xsd" changelist="1a8d5762-3820-4d06-a7d2-ae74b759bb18" time="1374636354349" ignored="false" />
+    <file path="$APPLICATION_HOME_DIR$/lib/idea.jar!/standardSchemas/xinclude.xsd" changelist="1a8d5762-3820-4d06-a7d2-ae74b759bb18" time="1374636354349" ignored="false" />
+    <file path="$APPLICATION_HOME_DIR$/lib/idea.jar!/standardSchemas/XMLSchema-instance.xsd" changelist="1a8d5762-3820-4d06-a7d2-ae74b759bb18" time="1374636354349" ignored="false" />
+    <file path="$APPLICATION_HOME_DIR$/lib/idea.jar!/standardSchemas/xslt-2_0.xsd" changelist="1a8d5762-3820-4d06-a7d2-ae74b759bb18" time="1374636354349" ignored="false" />
+    <file path="$APPLICATION_HOME_DIR$/lib/idea.jar!/standardSchemas/xhtml1-transitional.xsd" changelist="1a8d5762-3820-4d06-a7d2-ae74b759bb18" time="1374636354349" ignored="false" />
+    <file path="$APPLICATION_HOME_DIR$/lib/idea.jar!/standardSchemas/html5/xhtml5.xsd" changelist="1a8d5762-3820-4d06-a7d2-ae74b759bb18" time="1374636354349" ignored="false" />
+    <file path="$APPLICATION_HOME_DIR$/plugins/xpath/lib/xpath.jar!/org/intellij/lang/xpath/xslt/resources/documentation.xml" changelist="1a8d5762-3820-4d06-a7d2-ae74b759bb18" time="1374636354350" ignored="false" />
+    <file path="$APPLICATION_HOME_DIR$/plugins/xpath/lib/xpath.jar!/org/intellij/lang/xpath/xslt/resources/xslt-schema.xsd" changelist="1a8d5762-3820-4d06-a7d2-ae74b759bb18" time="1374636354350" ignored="false" />
+    <file path="$APPLICATION_HOME_DIR$/lib/idea.jar!/standardSchemas/xhtml1-strict.xsd" changelist="1a8d5762-3820-4d06-a7d2-ae74b759bb18" time="1374636354350" ignored="false" />
+    <file path="$APPLICATION_HOME_DIR$/plugins/xpath/lib/xpath.jar!/org/intellij/lang/xpath/xslt/resources/documentation.xsl" changelist="1a8d5762-3820-4d06-a7d2-ae74b759bb18" time="1374636354350" ignored="false" />
+    <file path="$APPLICATION_HOME_DIR$/lib/idea.jar!/standardSchemas/xslt-1_0.xsd" changelist="1a8d5762-3820-4d06-a7d2-ae74b759bb18" time="1374636354350" ignored="false" />
+    <file path="$APPLICATION_HOME_DIR$/plugins/maven/lib/maven.jar!/schemas/maven-4.0.0.xsd" changelist="1a8d5762-3820-4d06-a7d2-ae74b759bb18" time="1374636354350" ignored="false" />
+    <file path="$APPLICATION_HOME_DIR$/plugins/maven/lib/maven.jar!/schemas/settings-1.0.0.xsd" changelist="1a8d5762-3820-4d06-a7d2-ae74b759bb18" time="1374636354350" ignored="false" />
+    <file path="$APPLICATION_HOME_DIR$/plugins/maven/lib/maven.jar!/schemas/profiles-1.0.0.xsd" changelist="1a8d5762-3820-4d06-a7d2-ae74b759bb18" time="1374636354350" ignored="false" />
+    <file path="$APPLICATION_HOME_DIR$/lib/idea.jar!/standardSchemas/catalog.xsd" changelist="1a8d5762-3820-4d06-a7d2-ae74b759bb18" time="1374636354350" ignored="false" />
+    <file path="$APPLICATION_HOME_DIR$/lib/idea.jar!/standardSchemas/XMLSchema.xsd" changelist="1a8d5762-3820-4d06-a7d2-ae74b759bb18" time="1374636354350" ignored="false" />
+    <file path="$APPLICATION_HOME_DIR$/lib/idea.jar!/resources/relaxng.rng" changelist="1a8d5762-3820-4d06-a7d2-ae74b759bb18" time="1374636354350" ignored="false" />
     <option name="TRACKING_ENABLED" value="true" />
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -171,7 +176,7 @@
         <option name="LOG_MESSAGE" value="" />
       </breakpoint>
     </line_breakpoints>
-    <breakpoint_any>
+    <breakpoint_any default_suspend_policy="SuspendAll" default_condition_enabled="true">
       <breakpoint>
         <option name="NOTIFY_CAUGHT" value="true" />
         <option name="NOTIFY_UNCAUGHT" value="true" />
@@ -207,6 +212,7 @@
         <option name="LOG_MESSAGE" value="" />
       </breakpoint>
     </breakpoint_any>
+    <ui_properties default_suspend_policy="SuspendAll" default_condition_enabled="true" />
     <breakpoint_rules />
     <ui_properties />
   </component>
@@ -219,7 +225,7 @@
       <file leaf-file-name="RecursiveHashMap.java" pinned="false" current="true" current-in-tab="true">
         <entry file="file://$PROJECT_DIR$/EnvironmentImporter/src/markovmodeldata/RecursiveHashMap.java">
           <provider selected="true" editor-type-id="text-editor">
-            <state line="235" column="0" selection-start="8439" selection-end="8439" vertical-scroll-proportion="-0.041493777">
+            <state line="235" column="0" selection-start="8439" selection-end="8439" vertical-scroll-proportion="0.0">
               <folding>
                 <element signature="e#5094#5111#0" expanded="true" />
                 <element signature="e#8157#8173#0" expanded="true" />
@@ -228,55 +234,10 @@
           </provider>
         </entry>
       </file>
-      <file leaf-file-name="ArrayList.java" pinned="false" current="false" current-in-tab="false">
-        <entry file="jar:///Library/Java/JavaVirtualMachines/jdk1.7.0_13.jdk/Contents/Home/src.zip!/java/util/ArrayList.java">
+      <file leaf-file-name="GraphUtilities.java" pinned="false" current="false" current-in-tab="false">
+        <entry file="file://$PROJECT_DIR$/EnvironmentImporter/src/modelcomponents/GraphUtilities.java">
           <provider selected="true" editor-type-id="text-editor">
-            <state line="529" column="0" selection-start="19200" selection-end="19200" vertical-scroll-proportion="0.0">
-              <folding />
-            </state>
-          </provider>
-        </entry>
-      </file>
-      <file leaf-file-name="MarkovDataStore.java" pinned="false" current="false" current-in-tab="false">
-        <entry file="file://$PROJECT_DIR$/EnvironmentImporter/src/markovmodeldata/MarkovDataStore.java">
-          <provider selected="true" editor-type-id="text-editor">
-            <state line="216" column="72" selection-start="8648" selection-end="8648" vertical-scroll-proportion="0.0">
-              <folding />
-            </state>
-          </provider>
-        </entry>
-      </file>
-      <file leaf-file-name="MarkovDataOrganizer.java" pinned="false" current="false" current-in-tab="false">
-        <entry file="file://$PROJECT_DIR$/EnvironmentImporter/src/markovmodeldata/MarkovDataOrganizer.java">
-          <provider selected="true" editor-type-id="text-editor">
-            <state line="58" column="17" selection-start="1964" selection-end="1964" vertical-scroll-proportion="0.0">
-              <folding />
-            </state>
-          </provider>
-        </entry>
-      </file>
-      <file leaf-file-name="RandomWalkOrganizer.java" pinned="false" current="false" current-in-tab="false">
-        <entry file="file://$PROJECT_DIR$/EnvironmentImporter/src/randomwalk/RandomWalkOrganizer.java">
-          <provider selected="true" editor-type-id="text-editor">
-            <state line="278" column="0" selection-start="10524" selection-end="10524" vertical-scroll-proportion="0.0">
-              <folding />
-            </state>
-          </provider>
-        </entry>
-      </file>
-      <file leaf-file-name="ProgressVisualizer.java" pinned="false" current="false" current-in-tab="false">
-        <entry file="file://$PROJECT_DIR$/EnvironmentImporter/src/gui/ProgressVisualizer.java">
-          <provider selected="true" editor-type-id="text-editor">
-            <state line="19" column="38" selection-start="500" selection-end="500" vertical-scroll-proportion="0.0">
-              <folding />
-            </state>
-          </provider>
-        </entry>
-      </file>
-      <file leaf-file-name="StatisticChoice.java" pinned="false" current="false" current-in-tab="false">
-        <entry file="file://$PROJECT_DIR$/EnvironmentImporter/src/stats/StatisticChoice.java">
-          <provider selected="true" editor-type-id="text-editor">
-            <state line="61" column="45" selection-start="4412" selection-end="4412" vertical-scroll-proportion="0.0">
+            <state line="241" column="0" selection-start="9121" selection-end="9121" vertical-scroll-proportion="0.0">
               <folding />
             </state>
           </provider>
@@ -291,29 +252,56 @@
           </provider>
         </entry>
       </file>
-      <file leaf-file-name="GraphUtilities.java" pinned="false" current="false" current-in-tab="false">
-        <entry file="file://$PROJECT_DIR$/EnvironmentImporter/src/modelcomponents/GraphUtilities.java">
+      <file leaf-file-name="StatisticChoice.java" pinned="false" current="false" current-in-tab="false">
+        <entry file="file://$PROJECT_DIR$/EnvironmentImporter/src/stats/StatisticChoice.java">
           <provider selected="true" editor-type-id="text-editor">
-            <state line="241" column="0" selection-start="9121" selection-end="9121" vertical-scroll-proportion="0.0">
-              <folding>
-                <element signature="e#6042#6092#0" expanded="true" />
-                <element signature="e#7713#7737#0" expanded="true" />
-                <element signature="e#8533#8541#0" expanded="true" />
-                <element signature="e#12462#12473#0" expanded="true" />
-                <element signature="e#12474#12702#0" expanded="true" />
-                <element signature="e#12691#12692#0" expanded="true" />
-                <element signature="e#13455#13466#0" expanded="true" />
-                <element signature="e#13467#13695#0" expanded="true" />
-                <element signature="e#13684#13685#0" expanded="true" />
-                <element signature="e#16437#16453#0" expanded="true" />
-                <element signature="e#17268#17284#0" expanded="true" />
-                <element signature="e#17677#17691#0" expanded="true" />
-                <element signature="e#17991#17999#0" expanded="true" />
-                <element signature="e#19257#19268#0" expanded="true" />
-                <element signature="e#19269#19497#0" expanded="true" />
-                <element signature="e#19486#19487#0" expanded="true" />
-                <element signature="e#20443#20451#0" expanded="true" />
-              </folding>
+            <state line="61" column="45" selection-start="4412" selection-end="4412" vertical-scroll-proportion="0.0">
+              <folding />
+            </state>
+          </provider>
+        </entry>
+      </file>
+      <file leaf-file-name="ProgressVisualizer.java" pinned="false" current="false" current-in-tab="false">
+        <entry file="file://$PROJECT_DIR$/EnvironmentImporter/src/gui/ProgressVisualizer.java">
+          <provider selected="true" editor-type-id="text-editor">
+            <state line="19" column="38" selection-start="500" selection-end="500" vertical-scroll-proportion="0.0">
+              <folding />
+            </state>
+          </provider>
+        </entry>
+      </file>
+      <file leaf-file-name="RandomWalkOrganizer.java" pinned="false" current="false" current-in-tab="false">
+        <entry file="file://$PROJECT_DIR$/EnvironmentImporter/src/randomwalk/RandomWalkOrganizer.java">
+          <provider selected="true" editor-type-id="text-editor">
+            <state line="278" column="0" selection-start="10524" selection-end="10524" vertical-scroll-proportion="0.0">
+              <folding />
+            </state>
+          </provider>
+        </entry>
+      </file>
+      <file leaf-file-name="MarkovDataOrganizer.java" pinned="false" current="false" current-in-tab="false">
+        <entry file="file://$PROJECT_DIR$/EnvironmentImporter/src/markovmodeldata/MarkovDataOrganizer.java">
+          <provider selected="true" editor-type-id="text-editor">
+            <state line="58" column="17" selection-start="1964" selection-end="1964" vertical-scroll-proportion="0.0">
+              <folding />
+            </state>
+          </provider>
+        </entry>
+      </file>
+      <file leaf-file-name="MarkovDataStore.java" pinned="false" current="false" current-in-tab="false">
+        <entry file="file://$PROJECT_DIR$/EnvironmentImporter/src/markovmodeldata/MarkovDataStore.java">
+          <provider selected="true" editor-type-id="text-editor">
+            <state line="216" column="72" selection-start="8648" selection-end="8648" vertical-scroll-proportion="0.0">
+              <folding />
+            </state>
+          </provider>
+        </entry>
+      </file>
+      <file leaf-file-name="ArrayList.java" pinned="false" current="false" current-in-tab="false">
+        <entry file="jar:///Library/Java/JavaVirtualMachines/jdk1.7.0_13.jdk/Contents/Home/src.zip!/java/util/ArrayList.java">
+          <provider selected="true" editor-type-id="text-editor">
+            <state line="529" column="0" selection-start="19200" selection-end="19200" vertical-scroll-proportion="0.0">
+              <folding />
             </state>
           </provider>
         </entry>
@@ -356,8 +344,10 @@
     </option>
   </component>
   <component name="ProjectFrameBounds">
-    <option name="width" value="1920" />
-    <option name="height" value="1080" />
+    <option name="x" value="858" />
+    <option name="y" value="22" />
+    <option name="width" value="1062" />
+    <option name="height" value="970" />
   </component>
   <component name="ProjectInspectionProfilesVisibleTreeState">
     <entry key="Project Default">
@@ -407,6 +397,7 @@
       <sortByType />
     </navigator>
     <panes>
+      <pane id="PackagesPane" />
       <pane id="ProjectPane">
         <subPane>
           <PATH>
@@ -611,7 +602,6 @@
           </PATH>
         </subPane>
       </pane>
-      <pane id="PackagesPane" />
       <pane id="Scope" />
     </panes>
   </component>
@@ -630,12 +620,12 @@
     <property name="MemberChooser.copyJavadoc" value="false" />
     <property name="GoToClass.toSaveIncludeLibraries" value="false" />
     <property name="restartRequiresConfirmation" value="true" />
-    <property name="FullScreen" value="true" />
     <property name="MemberChooser.showClasses" value="true" />
+    <property name="FullScreen" value="false" />
     <property name="GoToClass.includeLibraries" value="false" />
-    <property name="dynamic.classpath" value="false" />
-    <property name="options.splitter.details.proportions" value="0.2" />
     <property name="options.searchVisible" value="true" />
+    <property name="options.splitter.details.proportions" value="0.2" />
+    <property name="dynamic.classpath" value="false" />
   </component>
   <component name="RecentsManager">
     <key name="CopyClassDialog.RECENTS_KEY">
@@ -665,6 +655,19 @@
       <option name="PORT" value="5005" />
       <method />
     </configuration>
+    <configuration default="true" type="Applet" factoryName="Applet">
+      <module name="" />
+      <option name="MAIN_CLASS_NAME" />
+      <option name="HTML_FILE_NAME" />
+      <option name="HTML_USED" value="false" />
+      <option name="WIDTH" value="400" />
+      <option name="HEIGHT" value="300" />
+      <option name="POLICY_FILE" value="$APPLICATION_HOME_DIR$/bin/appletviewer.policy" />
+      <option name="VM_PARAMETERS" />
+      <option name="ALTERNATIVE_JRE_PATH_ENABLED" value="false" />
+      <option name="ALTERNATIVE_JRE_PATH" />
+      <method />
+    </configuration>
     <configuration default="true" type="TestNG" factoryName="TestNG">
       <module name="" />
       <option name="ALTERNATIVE_JRE_PATH_ENABLED" value="false" />
@@ -690,19 +693,6 @@
       <envs />
       <properties />
       <listeners />
-      <method />
-    </configuration>
-    <configuration default="true" type="Applet" factoryName="Applet">
-      <module name="" />
-      <option name="MAIN_CLASS_NAME" />
-      <option name="HTML_FILE_NAME" />
-      <option name="HTML_USED" value="false" />
-      <option name="WIDTH" value="400" />
-      <option name="HEIGHT" value="300" />
-      <option name="POLICY_FILE" value="$APPLICATION_HOME_DIR$/bin/appletviewer.policy" />
-      <option name="VM_PARAMETERS" />
-      <option name="ALTERNATIVE_JRE_PATH_ENABLED" value="false" />
-      <option name="ALTERNATIVE_JRE_PATH" />
       <method />
     </configuration>
     <configuration default="true" type="Application" factoryName="Application">
@@ -804,28 +794,28 @@
     <servers />
   </component>
   <component name="ToolWindowManager">
-    <frame x="0" y="0" width="1920" height="1080" extended-state="0" />
-    <editor active="true" />
+    <frame x="858" y="22" width="1062" height="970" extended-state="0" />
+    <editor active="false" />
     <layout>
       <window_info id="Changes" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.3299389" sideWeight="0.5" order="7" side_tool="false" content_ui="tabs" />
       <window_info id="JetGradle" active="false" anchor="right" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.33" sideWeight="0.5" order="5" side_tool="true" content_ui="tabs" />
       <window_info id="Palette" active="false" anchor="right" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.33" sideWeight="0.5" order="3" side_tool="false" content_ui="tabs" />
-      <window_info id="Find" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.39002037" sideWeight="0.6275347" order="1" side_tool="false" content_ui="tabs" />
       <window_info id="Ant Build" active="false" anchor="right" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.25" sideWeight="0.5" order="1" side_tool="false" content_ui="tabs" />
-      <window_info id="Debug" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="true" weight="0.45723015" sideWeight="0.74813235" order="3" side_tool="false" content_ui="tabs" />
-      <window_info id="Event Log" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="true" weight="0.45723015" sideWeight="0.25186765" order="7" side_tool="true" content_ui="tabs" />
+      <window_info id="Debug" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.45723015" sideWeight="0.74813235" order="3" side_tool="false" content_ui="tabs" />
+      <window_info id="Event Log" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="true" weight="0.5269953" sideWeight="0.25186765" order="7" side_tool="true" content_ui="tabs" />
       <window_info id="Favorites" active="false" anchor="left" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.33" sideWeight="0.5" order="2" side_tool="true" content_ui="tabs" />
       <window_info id="Version Control" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.33" sideWeight="0.5" order="7" side_tool="false" content_ui="tabs" />
-      <window_info id="Messages" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.33095723" sideWeight="0.45144078" order="7" side_tool="false" content_ui="tabs" />
       <window_info id="TODO" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.33" sideWeight="0.5" order="6" side_tool="false" content_ui="tabs" />
-      <window_info id="Structure" active="false" anchor="left" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="true" weight="0.18569905" sideWeight="0.28004074" order="1" side_tool="true" content_ui="tabs" />
+      <window_info id="Structure" active="false" anchor="left" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="true" weight="0.34251967" sideWeight="0.24530517" order="1" side_tool="true" content_ui="tabs" />
       <window_info id="Maven Projects" active="false" anchor="right" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.33" sideWeight="0.5" order="4" side_tool="true" content_ui="tabs" />
       <window_info id="Commander" active="false" anchor="right" auto_hide="false" internal_type="SLIDING" type="SLIDING" visible="false" weight="0.4" sideWeight="0.5" order="0" side_tool="false" content_ui="tabs" />
-      <window_info id="Project" active="false" anchor="left" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="true" weight="0.18569905" sideWeight="0.2617108" order="0" side_tool="false" content_ui="combo" />
+      <window_info id="Project" active="true" anchor="left" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="true" weight="0.34251967" sideWeight="0.22769953" order="0" side_tool="false" content_ui="combo" />
       <window_info id="Run" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.44195518" sideWeight="0.7934899" order="2" side_tool="false" content_ui="tabs" />
       <window_info id="Cvs" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.25" sideWeight="0.5" order="4" side_tool="false" content_ui="tabs" />
       <window_info id="Problems" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.33" sideWeight="0.5" order="8" side_tool="false" content_ui="tabs" />
       <window_info id="Message" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.33" sideWeight="0.5" order="0" side_tool="false" content_ui="tabs" />
+      <window_info id="Find" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.39002037" sideWeight="0.6275347" order="1" side_tool="false" content_ui="tabs" />
+      <window_info id="Messages" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.33095723" sideWeight="0.45144078" order="7" side_tool="false" content_ui="tabs" />
       <window_info id="Hierarchy" active="false" anchor="right" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.25" sideWeight="0.65" order="2" side_tool="false" content_ui="combo" />
       <window_info id="Inspection" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.4" sideWeight="0.5" order="5" side_tool="false" content_ui="tabs" />
     </layout>
@@ -897,9 +887,7 @@
   <component name="editorHistoryManager">
     <entry file="file://$PROJECT_DIR$/EnvironmentImporter/src/randomwalk/UnbiasedRandomWalk.java">
       <provider selected="true" editor-type-id="text-editor">
-        <state line="33" column="0" selection-start="1238" selection-end="1238" vertical-scroll-proportion="0.0">
-          <folding />
-        </state>
+        <state line="33" column="0" selection-start="1238" selection-end="1238" vertical-scroll-proportion="0.0" />
       </provider>
     </entry>
     <entry file="jar://$PROJECT_DIR$/ec.jar!/ec/util/MersenneTwister.class">
@@ -909,30 +897,22 @@
     </entry>
     <entry file="file://$PROJECT_DIR$/EnvironmentImporter/src/stats/statisticshandlers/StatisticsHandler.java">
       <provider selected="true" editor-type-id="text-editor">
-        <state line="37" column="41" selection-start="1043" selection-end="1043" vertical-scroll-proportion="0.0">
-          <folding />
-        </state>
+        <state line="37" column="41" selection-start="1043" selection-end="1043" vertical-scroll-proportion="0.0" />
       </provider>
     </entry>
     <entry file="file://$PROJECT_DIR$/EnvironmentImporter/src/stats/chartdisplays/PathHeatMapChartDisplay.java">
       <provider selected="true" editor-type-id="text-editor">
-        <state line="79" column="0" selection-start="2920" selection-end="2920" vertical-scroll-proportion="0.0">
-          <folding />
-        </state>
+        <state line="79" column="0" selection-start="2920" selection-end="2920" vertical-scroll-proportion="0.0" />
       </provider>
     </entry>
     <entry file="file://$PROJECT_DIR$/EnvironmentImporter/src/stats/chartdisplays/RoomAnalysisFrame.java">
       <provider selected="true" editor-type-id="text-editor">
-        <state line="416" column="55" selection-start="16708" selection-end="16708" vertical-scroll-proportion="0.0">
-          <folding />
-        </state>
+        <state line="416" column="55" selection-start="16708" selection-end="16708" vertical-scroll-proportion="0.0" />
       </provider>
     </entry>
     <entry file="file://$PROJECT_DIR$/EnvironmentImporter/src/stats/statisticshandlers/HeatMapComparisonDialog.java">
       <provider selected="true" editor-type-id="text-editor">
-        <state line="38" column="66" selection-start="936" selection-end="936" vertical-scroll-proportion="0.0">
-          <folding />
-        </state>
+        <state line="38" column="66" selection-start="936" selection-end="936" vertical-scroll-proportion="0.0" />
       </provider>
     </entry>
     <entry file="file://$PROJECT_DIR$/EnvironmentImporter/src/stats/StatisticChoice.java">
@@ -986,43 +966,23 @@
     </entry>
     <entry file="jar://$PROJECT_DIR$/guava-14.0-rc1.jar!/com/google/common/collect/StandardTable.class">
       <provider selected="true" editor-type-id="text-editor">
-        <state line="0" column="0" selection-start="0" selection-end="0" vertical-scroll-proportion="-0.0">
-          <folding />
+        <state line="0" column="0" selection-start="0" selection-end="0" vertical-scroll-proportion="-0.0" />
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/EnvironmentImporter/src/markovmodeldata/RecursiveHashMap.java">
+      <provider selected="true" editor-type-id="text-editor">
+        <state line="235" column="0" selection-start="8439" selection-end="8439" vertical-scroll-proportion="0.0">
+          <folding>
+            <element signature="e#5094#5111#0" expanded="true" />
+            <element signature="e#8157#8173#0" expanded="true" />
+          </folding>
         </state>
       </provider>
     </entry>
     <entry file="file://$PROJECT_DIR$/EnvironmentImporter/src/modelcomponents/GraphUtilities.java">
       <provider selected="true" editor-type-id="text-editor">
         <state line="241" column="0" selection-start="9121" selection-end="9121" vertical-scroll-proportion="0.0">
-          <folding>
-            <element signature="e#6042#6092#0" expanded="true" />
-            <element signature="e#7713#7737#0" expanded="true" />
-            <element signature="e#8533#8541#0" expanded="true" />
-            <element signature="e#12462#12473#0" expanded="true" />
-            <element signature="e#12474#12702#0" expanded="true" />
-            <element signature="e#12691#12692#0" expanded="true" />
-            <element signature="e#13455#13466#0" expanded="true" />
-            <element signature="e#13467#13695#0" expanded="true" />
-            <element signature="e#13684#13685#0" expanded="true" />
-            <element signature="e#16437#16453#0" expanded="true" />
-            <element signature="e#17268#17284#0" expanded="true" />
-            <element signature="e#17677#17691#0" expanded="true" />
-            <element signature="e#17991#17999#0" expanded="true" />
-            <element signature="e#19257#19268#0" expanded="true" />
-            <element signature="e#19269#19497#0" expanded="true" />
-            <element signature="e#19486#19487#0" expanded="true" />
-            <element signature="e#20443#20451#0" expanded="true" />
-          </folding>
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/EnvironmentImporter/src/markovmodeldata/RecursiveHashMap.java">
-      <provider selected="true" editor-type-id="text-editor">
-        <state line="235" column="0" selection-start="8439" selection-end="8439" vertical-scroll-proportion="-0.041493777">
-          <folding>
-            <element signature="e#5094#5111#0" expanded="true" />
-            <element signature="e#8157#8173#0" expanded="true" />
-          </folding>
+          <folding />
         </state>
       </provider>
     </entry>
