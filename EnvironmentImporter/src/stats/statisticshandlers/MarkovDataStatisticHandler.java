@@ -11,20 +11,29 @@ import modelcomponents.CompleteGraph;
 import modelcomponents.GraphUtilities;
 import modelcomponents.ModelEdge;
 import modelcomponents.ModelObject;
+import org.jfree.chart.ChartFactory;
+import org.jfree.chart.ChartPanel;
+import org.jfree.chart.JFreeChart;
+import org.jfree.chart.plot.CategoryPlot;
+import org.jfree.chart.plot.PlotOrientation;
+import org.jfree.chart.renderer.category.GroupedStackedBarRenderer;
+import org.jfree.chart.renderer.category.StandardBarPainter;
+import org.jfree.data.category.CategoryDataset;
+import org.jfree.data.category.DefaultCategoryDataset;
 import randomwalk.RandomWalkOrganizer;
 import stats.chartdisplays.PathHeatMapChartDisplay;
+import stats.chartdisplays.RoomAnalysisFrame;
 import stats.consoledisplays.PathHeatMapConsoleDisplay;
 
 import javax.swing.*;
+import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.io.File;
 import java.text.DecimalFormat;
 import java.text.NumberFormat;
-import java.util.Collection;
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.Map;
+import java.util.*;
+import java.util.List;
 import java.util.concurrent.Semaphore;
 import java.util.concurrent.TimeUnit;
 
@@ -234,6 +243,45 @@ public class MarkovDataStatisticHandler extends StatisticsHandler<PathHeatMapCon
 
                         } else {
                             CalculateCoverageTask task = new CalculateCoverageTask(dataNames, phase, order, hopsRequired, lock);
+
+                            try {
+                                lock.tryAcquire(1, 300, TimeUnit.SECONDS);
+                            } catch (InterruptedException e1) {
+                                e1.printStackTrace();  //To change body of catch statement use File | Settings | File Templates.
+                            }
+                            MarkovDataStatisticHandler.super.actualGenerateAndDisplay(task);
+                        }
+                    } else {
+                        JOptionPane.showMessageDialog(new JFrame(), "Cannot generate this data for NFromM!", "Invalid parameter",
+                                JOptionPane.ERROR_MESSAGE);
+                    }
+                    return null;
+                }
+            };
+            calculator.execute();
+
+        } else if (e.getSource() == markovDataDialog.calculateCorridorGraph) {
+            order = markovDataDialog.getOrder();
+            heatMapType = markovDataDialog.getHeatMapType();
+            graph1Type = markovDataDialog.getGraph1Type();
+            if (graph1Type == MarkovDataDialog.GraphType.RANDOM_WALK) {
+                graph1RandomWalkType = markovDataDialog.getGraph1RandomWalkType();
+            } else {
+                graph1HumanDataType = markovDataDialog.getGraph1HumanType();
+                if (order > 1 && graph1HumanDataType == MarkovDataDialog.HumanType.N_FROM_M) {
+                    graph1M = markovDataDialog.getGraph1m();
+                }
+            }
+            final int hopsRequired = markovDataDialog.getHopsRequired();
+            SwingWorker<Void, Void> calculator = new SwingWorker<Void, Void>() {
+                @Override
+                protected Void doInBackground() throws Exception {
+                    if (graph1Type == MarkovDataDialog.GraphType.RANDOM_WALK || graph1HumanDataType == MarkovDataDialog.HumanType.DIRECT) {
+                        final Semaphore lock = new Semaphore(1);
+                        if (FIND_ALL_TILL_ORDER) {
+                            throw new UnsupportedOperationException();
+                        } else {
+                            CalculateCorridorPrefTask task = new CalculateCorridorPrefTask(dataNames, phase, order, hopsRequired, lock);
 
                             try {
                                 lock.tryAcquire(1, 300, TimeUnit.SECONDS);
@@ -568,5 +616,334 @@ public class MarkovDataStatisticHandler extends StatisticsHandler<PathHeatMapCon
             worker.execute();
         }
     }
+
+
+    private class CalculateCorridorPrefTask extends AbstractTask {
+        private final int hopsRequired;
+        private final Phase phase;
+        private final int order;
+        private final Semaphore lock;
+        HashMap<String, DirectedSparseMultigraph<ModelObject, ModelEdge>> dataNameDataMap =
+                new HashMap<String, DirectedSparseMultigraph<ModelObject, ModelEdge>>();
+
+
+        public CalculateCorridorPrefTask(Collection<String> dataNames, Phase phase, int order, int hopsRequired, Semaphore lock) {
+            super(dataNames);
+            this.phase = phase;
+
+            this.order = order;
+            this.hopsRequired = hopsRequired;
+            this.lock = lock;
+
+        }
+
+        @Override
+        protected void doTasks(String dataName) {
+
+//            if (!dataName.equals("random walk")) {
+            if (graph1Type != MarkovDataDialog.GraphType.RANDOM_WALK) {
+
+                dataNameDataMap.put(dataName, NetworkModel.instance().getDirectedGraphOfPlayer(dataName,
+                        Collections.singleton(phase)));
+
+            }
+        }
+
+        @Override
+        protected void summarizeAndDisplay() {
+            SwingWorker<Void, Void> worker = new SwingWorker<Void, Void>() {
+                public RecursiveHashMap data;
+                private HashMap<String, Double> coverage;
+                public HashMap<String, DirectedSparseMultigraph<ModelObject, ModelEdge>> dataMap;
+
+                @Override
+                protected Void doInBackground() throws Exception {
+
+                    data = getNthOrderMarkovData(dataNameDataMap, graph1Type, graph1RandomWalkType, graph1HumanDataType,
+                            graph1M);
+//                    System.out.println("Taken number of paths="+data.getNumberOfTakenPaths() );
+//                    System.out.println("Possible number of paths="+ CompleteGraph.instance().countPathsOfLength(order));
+//                    File directory=new File("coverage");
+//                    if (!directory.exists()) {
+//                        if (!directory.mkdir()) {
+//                            System.out.println("Type Directory could not be created for " + directory);
+//                        }
+//                    }
+//                    if (directory.exists()) {
+//                        String fileName = "coverage"+ File.separatorChar + graph1Type + "-"+hopsRequired+"-"+ order;
+//                        if(graph1Type== MarkovDataDialog.GraphType.RANDOM_WALK){
+//                            fileName += "-"+graph1RandomWalkType;
+//                        }
+//                        coverage = GraphUtilities.calculateCoverageForPathLength(data, hopsRequired, fileName);
+//                    }
+                    dataMap = GraphUtilities.getGeneratedPathsForHops(data, hopsRequired);
+
+                    return null;
+
+                }
+
+                protected void done() {
+                    MarkovDataStatisticHandler.generateGroupedStackChartForSimpleCorridor(dataMap);
+//                    NumberFormat doubleFormat = new DecimalFormat("######.000");
+//                    JOptionPane.showMessageDialog(new JFrame(),
+//                            "order = " + order + "\n" +
+//                                    "graph type = " + graph1Type + "\n" +
+//                                    "random Walk Type=" + (graph1RandomWalkType == null ? "N/A" : graph1RandomWalkType) + "\n" +
+//                                    "human Map Type=" + (graph1HumanDataType == null ? "N/A" : graph1HumanDataType) + "\n" +
+//                                    "m value=" + (graph1M == 0 ? "N/A" : graph1M) + "\n" +
+//                                    "hops=" + hopsRequired + "\n" +
+//                                    "<html><font color=\"red\">COVERAGE = " + doubleFormat.format(coverage.get("mean")) + " \u00B1 " +
+//                                    doubleFormat.format(coverage.get("sd")) + "</font></html>", "Coverage calculated",
+//                            JOptionPane.INFORMATION_MESSAGE
+//                    );
+
+//                    System.out.println("Order="+order+";Hops="+hopsRequired+";COVERAGE = " + doubleFormat.format(coverage.get("mean")) + " \u00B1 " +
+//                            doubleFormat.format(coverage.get("sd")));
+//
+//                    CalculateCorridorPrefTask.this.lock.release();
+                }
+            };
+            worker.execute();
+
+        }
+    }
+
+
+    public static void generateGroupedStackChartForSimpleCorridor(HashMap<String, DirectedSparseMultigraph<ModelObject, ModelEdge>> nameToGraphMap) {
+
+        List<List<String>> pathList = getPathList(nameToGraphMap);
+
+        String[][] straightCorridorList = new String[][]{
+                {"1Corner34", "1LeftCorridor3", "1LeftCorridor2"},
+                {"1LeftCorridor2", "1LeftCorridor3", "1Corner34"},
+                {"1Corner45", "1LeftCorridor5", "1Corner56L"},
+                {"1Corner56L", "1LeftCorridor5", "1Corner45"},
+                {"1Corner12R", "1RightCorridor2", "1RightCorridor3"},
+                {"1RightCorridor3", "1RightCorridor2", "1Corner12R"},
+                {"2CorrA4", "2CorrA3", "2CorrA2"},
+                {"2CorrA2", "2CorrA3", "2CorrA4"},
+                {"2CornerB12", "2CorrB1", "BToDown"},
+                {"BToDown", "2CorrB1", "2CornerB12"},
+                {"2CornerB12", "2CorrB2", "2Corner23"},
+                {"2Corner23", "2CorrB2", "2CornerB12"},
+                {"2CorrB3", "2CorrB4", "2CorrB5"},
+                {"2CorrB5", "2CorrB4", "2CorrB3"},
+                {"2CorrC3", "2CorrC2", "2CorrC1"},
+                {"2CorrC1", "2CorrC2", "2CorrC3"},
+                {"3Corr2", "3Corr4", "3Corr5"},
+                {"3Corr5", "3Corr4", "3Corr2"}
+        };
+
+        String[][] staircaseCorridorList = new String[][]{
+                {"LeftGStairCorr", "left G main", "left 2 stair"},
+                {"left 2 stair", "left G main", "LeftGStairCorr"},
+                {"RightGStairCorr", "right G main", "right 2 stair"},
+                {"right 2 stair", "right G main", "RightGStairCorr"},
+                {"ACToDown", "right 2 stair", "right G main"},
+                {"right G main", "right 2 stair", "ACToDown"}
+        };
+
+        String[][] simpleCornerList = new String[][]{
+                {"2CorrC1", "2CorrC2", "2CorrC3"},
+                {"2CorrC3", "2CorrC2", "2CorrC1"},
+                {"2CorrMain", "2CorrA1", "2CorrA2"},
+                {"2CorrA2", "2CorrA1", "2CorrMain"},
+                {"1LeftCorridor3","1Corner34",  "1LeftCorridor4"},
+                {"1LeftCorridor4", "1Corner34" , "1LeftCorridor3"},
+                {"1LeftCorridor4","1Corner45",  "1LeftCorridor5"},
+                {"1LeftCorridor5", "1Corner45" , "1LeftCorridor4"},
+                {"1LeftCorridor5","1Corner56L",  "1LeftCorridor6"},
+                {"1LeftCorridor6", "1Corner56L" , "1LeftCorridor5"},
+                {"1LeftCorridor7","1Corner67L",  "1LeftCorridor6"},
+                {"1LeftCorridor6", "1Corner67L" , "1LeftCorridor7"},
+                {"2CorrB2", "2Corner23", "2CorrB3"},
+                {"2CorrB3", "2Corner23", "2CorrB2"},
+                {"2CorrB2", "2CornerB12", "2CorrB1"},
+                {"2CorrB1", "2CornerB12", "2CorrB2"},
+                {"2CorrA5", "2CornerA56", "2CorrA6"},
+                {"2CorrA6", "2CornerA56", "2CorrA5"}
+        }    ;
+
+        String[][] roomToRoomLineOfSightList = new String[][]{
+                {"2CorrC3", "DB2", "MB1"},
+                {"MB1", "DB2", "2CorrC3"},
+                {"DB2", "MB1", "2PassB"},
+                {"2PassB", "MB1", "DB2"},
+                {"2PassB", "MB3", "TheLounge"},
+                {"Study3", "MR", "3Corr3"},
+                {"MR", "Study3", "3Corr8"},
+                {"Gallery", "Study1", "3Corr1"},
+                {"3Corr1", "Study1", "Gallery"},
+                {"Study1", "Gallery", "3Corr7"}
+//                {"SPCorr","Conf 2","1LeftCorridor4"},
+
+        };
+
+        String[][] roomToRoomNoLineOfSightList = new String[][]{
+                {"TheLounge", "MB3", "2PassB"},
+                {"3Corr3", "MR", "Study3"},
+                {"3Corr8", "Study3", "MR"},  //Debatable need to think about it
+                {"3Corr7", "Gallery", "Study1"},
+//                {"SPCorr","Conf 2","1LeftCorridor6"},
+        };
+
+        LinkedHashMap<String, LinkedHashMap<RoomAnalysisFrame.CorridorMovementType, Integer>> resultHashMap = new LinkedHashMap<String, LinkedHashMap<RoomAnalysisFrame.CorridorMovementType, Integer>>();
+
+        resultHashMap.put("Straight Corridor", calculateMap(pathList, straightCorridorList));
+        resultHashMap.put("Staircase Corridor", calculateMap(pathList, staircaseCorridorList));
+        resultHashMap.put("Simple Corner", calculateMap(pathList, simpleCornerList));
+        resultHashMap.put("Room To Room Visible", calculateMap(pathList, roomToRoomLineOfSightList));
+        resultHashMap.put("Room To Room invisible", calculateMap(pathList, roomToRoomNoLineOfSightList));
+
+//           System.out.println("Yayee!");
+
+
+        final CategoryDataset dataSet = createAggregatedDataSetForSimpleCorridor(resultHashMap);
+        final JFreeChart chart = createAggregatedChart(dataSet);
+        final ChartPanel chartPanel = new ChartPanel(chart);
+        chartPanel.setPreferredSize(new Dimension(1280, 880));
+        JFrame chartFrame = new JFrame("Summarized charts");
+
+        chartFrame.setContentPane(chartPanel);
+        chartFrame.setVisible(true);
+        chartFrame.setSize(new Dimension(1300, 900));
+        chartFrame.setLocation(0, 0);
+        chartFrame.setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
+
+
+//        }
+
+    }
+
+
+    private static JFreeChart createAggregatedChart(CategoryDataset dataSet) {
+        final JFreeChart stackedChart = ChartFactory.createStackedBarChart("Summarized", "Type", "Probability",
+                dataSet, PlotOrientation.VERTICAL, true, true, false);
+
+        GroupedStackedBarRenderer renderer = new GroupedStackedBarRenderer();
+        ((GroupedStackedBarRenderer)renderer).setBarPainter(new StandardBarPainter());
+
+        //margin between bar.
+//        renderer.setItemMargin(0.25);
+        renderer.setMaximumBarWidth(.09);
+        //end
+
+
+
+        CategoryPlot plot = (CategoryPlot) stackedChart.getPlot();
+//        plot.setDomainAxis(domainAxis);
+        plot.setRenderer(renderer);
+        plot.setDomainGridlinesVisible(true);
+        plot.setRangeGridlinesVisible(true);
+        plot.setBackgroundPaint(Color.white);
+
+        plot.getRangeAxis().setRange(0,1.0);
+        return stackedChart;
+    }
+
+
+    private static CategoryDataset createAggregatedDataSetForSimpleCorridor(
+            LinkedHashMap<String,
+                    LinkedHashMap<RoomAnalysisFrame.CorridorMovementType, Integer>> resultHashMap) {
+
+        DefaultCategoryDataset dataset = new DefaultCategoryDataset();
+
+        for (String category : resultHashMap.keySet()) {
+            System.out.println(category);
+
+            double total = resultHashMap.get(category).get(RoomAnalysisFrame.CorridorMovementType.PASS_THROUGH) + resultHashMap.get(category).get(RoomAnalysisFrame.CorridorMovementType.RETURN);
+
+            dataset.addValue((double) resultHashMap.get(category).get(RoomAnalysisFrame.CorridorMovementType.PASS_THROUGH) / total, RoomAnalysisFrame.CorridorMovementType.PASS_THROUGH.toString(), category);
+            dataset.addValue((double) resultHashMap.get(category).get(RoomAnalysisFrame.CorridorMovementType.RETURN) / total, RoomAnalysisFrame.CorridorMovementType.RETURN.toString(), category);
+
+            System.out.println((double) resultHashMap.get(category).get(RoomAnalysisFrame.CorridorMovementType.PASS_THROUGH) / total);
+            System.out.println((double) resultHashMap.get(category).get(RoomAnalysisFrame.CorridorMovementType.PASS_THROUGH) / total);
+        }
+        return dataset;
+
+    }
+    public static List<List<String>> getPathList(HashMap<String, DirectedSparseMultigraph<ModelObject, ModelEdge>> nameToGraphMap) {
+        List<List<String>> listOfPaths = new ArrayList<List<String>>();
+        for (String name : nameToGraphMap.keySet()) {
+            DirectedSparseMultigraph<ModelObject, ModelEdge> tempGraph = nameToGraphMap.get(name);
+            TreeSet<ModelEdge> edgeCollection = new TreeSet<ModelEdge>(new Comparator<ModelEdge>() {
+                @Override
+                public int compare(ModelEdge o1, ModelEdge o2) {
+                    return (int) (o1.getTime() - o2.getTime());
+                }
+            });
+            edgeCollection.addAll(tempGraph.getEdges());
+
+            List<String> path = new ArrayList<String>();
+            boolean starting = true;
+            for (ModelEdge edge : edgeCollection) {
+                if (starting) {
+                    path.add(tempGraph.getSource(edge).toString());
+                    starting = false;
+                }
+                path.add(tempGraph.getDest(edge).toString());
+            }
+            assert path != null && path.size() > 0;
+            listOfPaths.add(path);
+        }
+        assert listOfPaths.size() == nameToGraphMap.size();
+        return listOfPaths;
+    }
+
+    private static LinkedHashMap<RoomAnalysisFrame.CorridorMovementType, Integer> calculateMap
+            (List<List<String>> listOfPaths, String[][] straightCorridorList) {
+        LinkedHashMap<RoomAnalysisFrame.CorridorMovementType, Integer> occurrenceMap = new LinkedHashMap<RoomAnalysisFrame.CorridorMovementType, Integer>();
+        occurrenceMap.put(RoomAnalysisFrame.CorridorMovementType.PASS_THROUGH, 0);
+        occurrenceMap.put(RoomAnalysisFrame.CorridorMovementType.RETURN, 0);
+        for (String[] corridor : straightCorridorList) {
+            updatePassThroughOccurrenceMap(listOfPaths, corridor, occurrenceMap);
+
+        }
+
+        return occurrenceMap;
+
+    }
+
+    private static void updatePassThroughOccurrenceMap(List<List<String>> pathList, String[] corridor, LinkedHashMap<RoomAnalysisFrame.CorridorMovementType, Integer> occurrenceMap) {
+        assert occurrenceMap != null;
+        assert pathList != null;
+        assert corridor != null && corridor.length == 3;
+        String corridorStartingRoom = corridor[0];
+        String corridorCenterRoom = corridor[1];
+        String corridorEndingRoom = corridor[2];
+
+        for (List<String> path : pathList) {
+            for (int roomNumber = 1; roomNumber < path.size() - 1; roomNumber++) {
+                if (!path.get(roomNumber).equalsIgnoreCase(corridorCenterRoom)) {
+                    continue;
+                }
+                String pathPreviousRoom = path.get(roomNumber - 1);
+
+
+                if (!corridorStartingRoom.equalsIgnoreCase(pathPreviousRoom)) {
+                    continue;
+                }
+
+                String pathNextRoom = path.get(roomNumber + 1);
+
+                if (pathNextRoom.equalsIgnoreCase(corridorEndingRoom)) {
+                    occurrenceMap.put(
+                            RoomAnalysisFrame.CorridorMovementType.PASS_THROUGH,
+                            occurrenceMap.get(RoomAnalysisFrame.CorridorMovementType.PASS_THROUGH) + 1);
+                } else if (pathNextRoom.equalsIgnoreCase(corridorStartingRoom)) {
+                    occurrenceMap.put(
+                            RoomAnalysisFrame.CorridorMovementType.RETURN,
+                            occurrenceMap.get(RoomAnalysisFrame.CorridorMovementType.RETURN) + 1);
+
+                } else {
+                    System.out.println("Incorrect call to function");
+                    assert false;
+                }
+            }
+        }
+
+    }
+
+
 }
 

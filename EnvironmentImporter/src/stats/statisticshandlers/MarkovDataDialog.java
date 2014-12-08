@@ -35,6 +35,7 @@ public class MarkovDataDialog extends JFrame implements ChangeListener, ActionLi
     JButton generateHeatMapButton = new JButton("Generate Heat Map");
     JButton calculateCoverageForHopsButton = new JButton("Calculate Coverage");
     JButton calculateHopsForCoverage = new JButton("Calculate Hops");
+    JButton calculateCorridorGraph = new JButton("Calculate Corridors");
     private JComboBox<HeatMapType> heatMapTypeJComboBox = new JComboBox<HeatMapType>(HeatMapType.values());
     private JPanel middlePanel = new JPanel();
     private JSlider orderSlider = new JSlider(SwingConstants.HORIZONTAL, 1, 16, 1);
@@ -75,7 +76,7 @@ public class MarkovDataDialog extends JFrame implements ChangeListener, ActionLi
             @Override
             public void run() {
                 setLayout(new BorderLayout());
-                JPanel buttonPanel = new JPanel(new GridLayout(1, 3));
+                JPanel buttonPanel = new JPanel(new GridLayout(1, 4));
                 JPanel detailsPanel = new JPanel(new GridLayout(4, 2));
 
                 detailsPanel.add(new JLabel("Choose Order"));
@@ -113,11 +114,13 @@ public class MarkovDataDialog extends JFrame implements ChangeListener, ActionLi
 
                 calculateCoverageForHopsButton.addActionListener(markovDataStatisticHandler);
                 calculateHopsForCoverage.addActionListener(markovDataStatisticHandler);
+                calculateCorridorGraph.addActionListener(markovDataStatisticHandler);
 
 
                 buttonPanel.add(generateHeatMapButton);
                 buttonPanel.add(calculateCoverageForHopsButton);
                 buttonPanel.add(calculateHopsForCoverage);
+                buttonPanel.add(calculateCorridorGraph);
 
 
                 add(detailsPanel, BorderLayout.NORTH);
@@ -302,11 +305,13 @@ public class MarkovDataDialog extends JFrame implements ChangeListener, ActionLi
             if (heatMapType == HeatMapType.INDIVIDUAL) {
                 calculateCoverageForHopsButton.setEnabled(true);
                 calculateHopsForCoverage.setEnabled(true);
+                calculateCorridorGraph.setEnabled(true);
                 hopsSlider.setEnabled(true);
                 coverageSlider.setEnabled(true);
             } else {
                 calculateCoverageForHopsButton.setEnabled(false);
                 calculateHopsForCoverage.setEnabled(false);
+                calculateCorridorGraph.setEnabled(false);
                 hopsSlider.setEnabled(false);
                 coverageSlider.setEnabled(false);
             }

@@ -44,12 +44,12 @@ public class HopAndCoverageCalculator extends StatisticsHandler<PathConsoleDispl
 //            RandomWalkOrganizer.RandomWalkType.WITH_FOURTH_ORDER_MEMORY,
 //            RandomWalkOrganizer.RandomWalkType.WITH_FIFTH_ORDER_MEMORY,
 //            RandomWalkOrganizer.RandomWalkType.WITH_SIXTH_ORDER_MEMORY,
-            RandomWalkOrganizer.RandomWalkType.WITH_SEVENTH_ORDER_MEMORY,
-            RandomWalkOrganizer.RandomWalkType.WITH_EIGHTH_ORDER_MEMORY,
-            RandomWalkOrganizer.RandomWalkType.WITH_NINTH_ORDER_MEMORY,
-            RandomWalkOrganizer.RandomWalkType.WITH_TENTH_ORDER_MEMORY,
-            RandomWalkOrganizer.RandomWalkType.WITH_ELEVENTH_ORDER_MEMORY,
-            RandomWalkOrganizer.RandomWalkType.WITH_TWELFTH_ORDER_MEMORY,
+//            RandomWalkOrganizer.RandomWalkType.WITH_SEVENTH_ORDER_MEMORY,
+//            RandomWalkOrganizer.RandomWalkType.WITH_EIGHTH_ORDER_MEMORY,
+//            RandomWalkOrganizer.RandomWalkType.WITH_NINTH_ORDER_MEMORY,
+//            RandomWalkOrganizer.RandomWalkType.WITH_TENTH_ORDER_MEMORY,
+//            RandomWalkOrganizer.RandomWalkType.WITH_ELEVENTH_ORDER_MEMORY,
+//            RandomWalkOrganizer.RandomWalkType.WITH_TWELFTH_ORDER_MEMORY,
     };
     int numberOfHops =300;
     int coverageRequired =50;
@@ -106,11 +106,20 @@ public class HopAndCoverageCalculator extends StatisticsHandler<PathConsoleDispl
         @Override
         protected void doTasks(String dataName) {
 
-            DirectedSparseMultigraph<ModelObject, ModelEdge> path
-                    = NetworkModel.instance().getDirectedGraphOfPlayer(dataName,
-                    Collections.singleton(Phase.EXPLORATION));
+            ArrayList<Phase> phasesToConsider = new ArrayList<Phase>();
+            phasesToConsider.add(Phase.TASK_1);
+            phasesToConsider.add(Phase.TASK_2);
+            phasesToConsider.add(Phase.TASK_3);
 
-            coverageList.add(GraphUtilities.calculateCoverageForHops(path, hopsUsed));
+            DirectedSparseMultigraph<ModelObject, ModelEdge> path
+                    = NetworkModel.instance().getDirectedGraphOfPlayer(dataName,phasesToConsider
+                    );
+            System.out.println(hopsUsed);
+            if(path!=null) {
+
+                coverageList.add(GraphUtilities.calculateCoverageForHops(path, hopsUsed));
+//                System.out.println(value);
+            }
 
 
         }
@@ -135,22 +144,22 @@ public class HopAndCoverageCalculator extends StatisticsHandler<PathConsoleDispl
             System.out.println("Human Coverage = " + doubleFormat.format(result.get("mean")) + " \u00B1 " +
                     doubleFormat.format(result.get("sd")));
 
-            for(RandomWalkOrganizer.RandomWalkType type: RANDOM_WALK_TYPES){
-
-                Collection<DirectedSparseMultigraph<ModelObject, ModelEdge>> graphCollection
-                        = RandomWalkOrganizer.getAllRandomWalkGraphs(new Semaphore(1), type);
-                List<Double> randomWalkCoverageList = new ArrayList<Double>();
-                for(DirectedSparseMultigraph<ModelObject, ModelEdge> graph: graphCollection){
-                    randomWalkCoverageList.add(GraphUtilities.calculateCoverageForHops(graph, hopsUsed));
-                }
-                fileName = "coverage"+ File.separatorChar +"RANDOM_WALK"+"-"+hopsUsed+"-"+0+"-"+type;
-
-                result = findMeanAndSD(randomWalkCoverageList, fileName);
-                System.out.println(type+" Coverage = " + doubleFormat.format(result.get("mean")) + " \u00B1 " +
-                        doubleFormat.format(result.get("sd")));
-
-
-            }
+//            for(RandomWalkOrganizer.RandomWalkType type: RANDOM_WALK_TYPES){
+//
+//                Collection<DirectedSparseMultigraph<ModelObject, ModelEdge>> graphCollection
+//                        = RandomWalkOrganizer.getAllRandomWalkGraphs(new Semaphore(1), type);
+//                List<Double> randomWalkCoverageList = new ArrayList<Double>();
+//                for(DirectedSparseMultigraph<ModelObject, ModelEdge> graph: graphCollection){
+//                    randomWalkCoverageList.add(GraphUtilities.calculateCoverageForHops(graph, hopsUsed));
+//                }
+//                fileName = "coverage"+ File.separatorChar +"RANDOM_WALK"+"-"+hopsUsed+"-"+0+"-"+type;
+//
+//                result = findMeanAndSD(randomWalkCoverageList, fileName);
+//                System.out.println(type+" Coverage = " + doubleFormat.format(result.get("mean")) + " \u00B1 " +
+//                        doubleFormat.format(result.get("sd")));
+//
+//
+//            }
 
 
 
@@ -205,9 +214,14 @@ public class HopAndCoverageCalculator extends StatisticsHandler<PathConsoleDispl
 
         @Override
         protected void doTasks(String dataName) {
+            ArrayList<Phase> phasesToConsider = new ArrayList<Phase>();
+            phasesToConsider.add(Phase.TASK_1);
+            phasesToConsider.add(Phase.TASK_2);
+            phasesToConsider.add(Phase.TASK_3);
+
             DirectedSparseMultigraph<ModelObject, ModelEdge> path
-                    = NetworkModel.instance().getDirectedGraphOfPlayer(dataName,
-                    Collections.singleton(Phase.EXPLORATION));
+                    = NetworkModel.instance().getDirectedGraphOfPlayer(dataName,phasesToConsider
+            );
             System.out.println(path.getEdgeCount());
             hopsTaken.add(GraphUtilities.calculateHopsForCoverage(path, coverageRequired));
         }

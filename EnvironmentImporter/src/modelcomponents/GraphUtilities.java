@@ -663,7 +663,21 @@ public class GraphUtilities {
     }
 
 
+    public static HashMap<String, DirectedSparseMultigraph<ModelObject, ModelEdge>> getGeneratedPathsForHops(RecursiveHashMap data, int hopsRequired) {
+        assert hopsRequired >= data.getOrder();
+        Collection<DirectedSparseMultigraph<ModelObject, ModelEdge>> generatedPaths = generatePathsForPathLength(data,
+                hopsRequired);
 
+        HashMap<String, DirectedSparseMultigraph<ModelObject, ModelEdge>> result = new HashMap<String, DirectedSparseMultigraph<ModelObject, ModelEdge>>();
+        int num =0;
+        for(DirectedSparseMultigraph<ModelObject, ModelEdge> path: generatedPaths){
+            num++;
+            result.put(String.valueOf(num), path);
+        }
+        return result;
+//        storeCoverageNumbersInFile(fileName, generatedPaths);
+//        return calculateAverageCoverage(generatedPaths);
+    }
 
     public static HashMap<String, Double> calculateCoverageForPathLength(RecursiveHashMap data, int hopsRequired, String fileName) {
         assert hopsRequired >= data.getOrder();
@@ -700,7 +714,17 @@ public class GraphUtilities {
     }
 
     private static List<String> convertGraphToPath(DirectedSparseMultigraph<ModelObject, ModelEdge> graph) {
-        ModelObject currentVertex = CompleteGraph.instance().getStartingNode();
+//        List<String> path = convertGraphToPath(graph);
+
+        TreeSet<ModelEdge> allEdges = new TreeSet<ModelEdge>(new Comparator<ModelEdge>() {
+            @Override
+            public int compare(ModelEdge o1, ModelEdge o2) {
+                return (int) (o1.getTime() - o2.getTime());
+            }
+        });
+        allEdges.addAll(graph.getEdges());
+        ModelObject currentVertex = graph.getSource(allEdges.pollFirst());
+        
 
         List<String> path = new ArrayList<String>();
         TreeSet<ModelEdge> adjacentEdges = new TreeSet<ModelEdge>(new Comparator<ModelEdge>() {
@@ -711,6 +735,10 @@ public class GraphUtilities {
         });
 
         adjacentEdges.addAll(graph.getOutEdges(currentVertex));
+        if(adjacentEdges.isEmpty()){
+            System.out.println(currentVertex.getId()+" is strange "+ path);
+            return path;
+        }
         ModelEdge currentEdge = adjacentEdges.pollFirst();
         long currentTime = currentEdge.getTime();
         while (currentEdge != null) {
@@ -747,7 +775,7 @@ public class GraphUtilities {
         HashSet<String> roomsDiscovered = new HashSet<String>();
         int hops = 0;
 
-        while (hops < hopsUsed && path.size() != 0) {
+        while (hops < hopsUsed && !path.isEmpty()) {
             roomsDiscovered.add(path.remove(0));
             hops++;
         }

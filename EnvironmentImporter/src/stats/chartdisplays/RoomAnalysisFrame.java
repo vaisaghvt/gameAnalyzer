@@ -616,7 +616,7 @@ public class RoomAnalysisFrame extends JFrame {
     }
 
 
-    private void generateGroupedStackChartForSimpleCorridor(HashMap<String, DirectedSparseMultigraph<ModelObject, ModelEdge>> nameToGraphMap) {
+    public void generateGroupedStackChartForSimpleCorridor(HashMap<String, DirectedSparseMultigraph<ModelObject, ModelEdge>> nameToGraphMap) {
 
         List<List<String>> pathList = getPathList(nameToGraphMap);
 
@@ -754,13 +754,15 @@ public class RoomAnalysisFrame extends JFrame {
         DefaultCategoryDataset dataset = new DefaultCategoryDataset();
 
         for (String category : resultHashMap.keySet()) {
-
+                              System.out.println(category);
 
             double total = resultHashMap.get(category).get(CorridorMovementType.PASS_THROUGH) + resultHashMap.get(category).get(CorridorMovementType.RETURN);
 
             dataset.addValue((double) resultHashMap.get(category).get(CorridorMovementType.PASS_THROUGH) / total, CorridorMovementType.PASS_THROUGH.toString(), category);
             dataset.addValue((double) resultHashMap.get(category).get(CorridorMovementType.RETURN) / total, CorridorMovementType.RETURN.toString(), category);
 
+            System.out.println((double) resultHashMap.get(category).get(CorridorMovementType.PASS_THROUGH) / total);
+            System.out.println((double) resultHashMap.get(category).get(CorridorMovementType.PASS_THROUGH) / total);
         }
         return dataset;
 
