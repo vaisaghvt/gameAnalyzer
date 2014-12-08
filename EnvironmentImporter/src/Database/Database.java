@@ -21,11 +21,11 @@ public class Database {
 
     private static Database _singletonDB = null;
 //    private static final String DATABASE_ADDRESS = "minecraftserverdb.cgxlckabowed.us-east-1.rds.amazonaws.com";
-    private static final String DATABASE_ADDRESS = "155.69.151.100";
+    private static final String DATABASE_ADDRESS = "localhost";
     private static final String DATABASE_PORT = "3306";
     private static final String DATABASE_NAME = "mc_statistician";
     private static final String USERNAME = "root";
-    private static final String PASSWORD = "j0g@b0n!t0";
+    private static final String PASSWORD = "";
 
     private static final String[] queries =
             {"SELECT x, z " +
