@@ -1,8 +1,8 @@
 package randomwalk;
 
 import edu.uci.ics.jung.graph.DirectedSparseMultigraph;
-import edu.uci.ics.jung.graph.Graph;
 import javafx.geometry.Point3D;
+import modelcomponents.CompleteGraph;
 import modelcomponents.ModelEdge;
 import modelcomponents.ModelObject;
 
@@ -25,9 +25,9 @@ class FirstOrderBiasedWithDistance implements RandomWalkGenerator {
     private static final int REQUIRED_COVERAGE = 90;
     private static final double SHORTEST_DISTANCE_PREFERENCE = 0.15;
 
-    public DirectedSparseMultigraph<ModelObject, ModelEdge> generateRandomWalk(Graph<ModelObject, ModelEdge> graph, ModelObject startingLocation) {
+    public DirectedSparseMultigraph<ModelObject, ModelEdge> generateRandomWalk(ModelObject startingLocation) {
         DirectedSparseMultigraph<ModelObject, ModelEdge> currentGraph = new DirectedSparseMultigraph<ModelObject, ModelEdge>();
-        int coverage = calculateCoverage(graph, currentGraph);
+        int coverage = calculateCoverage(currentGraph);
         int time = 0;
         ModelObject currentLocation = startingLocation;
         currentGraph.addVertex(currentLocation);
@@ -37,7 +37,7 @@ class FirstOrderBiasedWithDistance implements RandomWalkGenerator {
 
         while (coverage < REQUIRED_COVERAGE) {
             neighbours.clear();
-            neighbours.addAll(graph.getNeighbors(currentLocation));
+            neighbours.addAll(CompleteGraph.instance().getNeighbors(currentLocation));
             if (neighbours.size() > 1 && lastVisited != null) {
                 neighbours.remove(lastVisited);
             }
@@ -67,7 +67,7 @@ class FirstOrderBiasedWithDistance implements RandomWalkGenerator {
             currentGraph.addEdge(edge, currentLocation, next);
             lastVisited = currentLocation;
             currentLocation = next;
-            coverage = calculateCoverage(graph, currentGraph);
+            coverage = calculateCoverage(currentGraph);
 
         }
 
@@ -78,7 +78,7 @@ class FirstOrderBiasedWithDistance implements RandomWalkGenerator {
 //    private static ModelObject findNearestDestination(ModelObject lastVisited, ArrayList<ModelObject> neighbours) {
 //
 //        if (neighbours.size() == 1) {
-//            return neighbours.getValue(0);
+//            return neighbours.getProbabilityOfSequence(0);
 //        }
 //        Point3D currentCenter = getCenterOfArea(lastVisited);
 //
@@ -86,7 +86,7 @@ class FirstOrderBiasedWithDistance implements RandomWalkGenerator {
 //        ModelObject result = null;
 //        double randomNoise = random.nextDouble();
 //        if (randomNoise > SHORTEST_DISTANCE_PREFERENCE) {
-//            return neighbours.getValue((int) Math.floor(random.nextDouble() * neighbours.size()));
+//            return neighbours.getProbabilityOfSequence((int) Math.floor(random.nextDouble() * neighbours.size()));
 //        }
 //
 //

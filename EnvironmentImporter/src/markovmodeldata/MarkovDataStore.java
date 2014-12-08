@@ -9,10 +9,7 @@ import modelcomponents.ModelEdge;
 import modelcomponents.ModelObject;
 
 import javax.swing.*;
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.HashMap;
-import java.util.List;
+import java.util.*;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.Semaphore;
 import java.util.concurrent.TimeUnit;
@@ -31,6 +28,13 @@ public class MarkovDataStore {
 
     public boolean containsDirectMarkovData(int order) {
         return orderToDirectMarkovDataMapping.containsKey(order);
+    }
+
+
+    public int getNumberOfTakenPathsOfOrder(int order){
+        RecursiveHashMap map = getDirectMarkovData(order);
+        return map.getNumberOfTakenPaths();
+
     }
 
 
@@ -79,18 +83,18 @@ public class MarkovDataStore {
                 this.addPropertyChangeListener(pv);
                 RecursiveHashMap result = new RecursiveHashMap(order);
                 int i = 0;
-                for (ModelObject vertex : vertices) {
+                for (ModelObject source : vertices) {
 //            String source = vertex.toString();
 
-                    pv.print("Processing " + vertex.toString() + "...\n");
+                    pv.print("Processing " + source.toString() + "...\n");
                     pv.print("\tCalculating possible paths...\n");
                     List<List<String>> completeListOfPathsForCurrent = new ArrayList<List<String>>();
-                    completeListOfPathsForCurrent.addAll(calculatePathsFromAllGraphs(graphCollection, vertex, order));
+                    completeListOfPathsForCurrent.addAll(calculatePathsFromAllGraphs(graphCollection, source, order));
 
                     pv.print("\tSummarizing paths to markov data...\n");
                     for (List<String> path : completeListOfPathsForCurrent) {
-                        double existingOccurrenceOfPath = result.getValue(new ArrayList<String>(path));
-                        result.putValue(path, existingOccurrenceOfPath + 1.0);
+
+                        result.incrementSequenceOccurrenceCount(path);
                     }
                     final int currentProgress = i++;
                     setProgress((currentProgress * 100) / vertices.size());
@@ -179,34 +183,6 @@ public class MarkovDataStore {
     private RecursiveHashMap constructNFromM(int n, int m) {
         if (n <= m) {
             return getDirectMarkovData(n);
-//        }else if (n == m + 1) {
-//            RecursiveHashMap mThOrderMap = orderToDirectMarkovDataMapping.getValue(m);
-//            RecursiveHashMap result = new RecursiveHashMap(n);
-//            for (List<String> sequence : mThOrderMap.getSequenceCodes()) {
-//                String destination = sequence.getValue(sequence.size() - 1);
-//                ModelObject destinationNode = NetworkModel.instance().findRoomByName(destination);
-//                Collection<ModelObject> neighbours = NetworkModel.instance().getCompleteGraph().getNeighbors(destinationNode);
-//                double prior = mThOrderMap.getValue(sequence);
-//
-//                for (ModelObject neighbour: neighbours) {
-//                    List<String> newSequence = new ArrayList<String>();
-//                    newSequence.addAll(sequence);
-//                    newSequence.remove(0);
-//                    newSequence.add(neighbour.toString());
-//                    double newValue = prior *
-//                            mThOrderMap.getValue(newSequence);
-//
-//                    List<String> newSequenceForN = new ArrayList<String>();
-//                    newSequenceForN.addAll(sequence);
-//                    newSequenceForN.add(neighbour.toString());
-//
-//                    result.putValue(newSequenceForN, newValue);
-//
-//
-//                }
-//            }
-//            return result;
-
         } else {
             RecursiveHashMap result = new RecursiveHashMap(n);
             try{
@@ -218,23 +194,29 @@ public class MarkovDataStore {
                 String destination = sequence.get(sequence.size() - 1);
                 ModelObject destinationNode = CompleteGraph.instance().findRoomByName(destination);
                 Collection<ModelObject> neighbours = CompleteGraph.instance().getNeighbors(destinationNode);
-                double prior = nMinusOneTable.getValue(new ArrayList<String>(sequence));
+                double prior = nMinusOneTable.getProbabilityOfSequence(new ArrayList<String>(sequence)); // gets the number of times that path occurs/ total number of paths of that length.
 
                 List<String> trimmedSequence = trimSequence(m, sequence);
 
                 for (ModelObject neighbour : neighbours) {
-                    List<String> newSequence = new ArrayList<String>(trimmedSequence);
-//                    newSequence.addAll(trimmedSequence);
-//                    newSequence.remove(0);
-                    newSequence.add(neighbour.toString());
-                    double newValue = prior *
-                            mThOrderMap.getValue(new ArrayList<String>(newSequence));
+                    String neighbourString = neighbour.toString();
+                    Map<String, Double> destinationProbs = mThOrderMap.getDestinationProbabilities(trimmedSequence);
+                    double probabilityOfDestinationGivenPreviousLocations;
+                    if(destinationProbs!=null){
+                    probabilityOfDestinationGivenPreviousLocations = destinationProbs.containsKey(neighbourString)
+                                                                            ? destinationProbs.get(neighbourString)
+                                                                            : 0;
+                    }else{
+                        probabilityOfDestinationGivenPreviousLocations =0 ;
+                    }
+                        double newValue = prior *
+                            probabilityOfDestinationGivenPreviousLocations;
 
                     List<String> newSequenceForN = new ArrayList<String>(sequence);
 //                    newSequenceForN.addAll();
                     newSequenceForN.add(neighbour.toString());
 
-                    result.putValue(newSequenceForN, newValue);
+                    result.putSequenceOccurrenceProbability(newSequenceForN, newValue);
 
 
                 }

@@ -20,25 +20,26 @@ import java.util.List;
 public class Database {
 
     private static Database _singletonDB = null;
+//    private static final String DATABASE_ADDRESS = "minecraftserverdb.cgxlckabowed.us-east-1.rds.amazonaws.com";
     private static final String DATABASE_ADDRESS = "155.69.151.100";
     private static final String DATABASE_PORT = "3306";
     private static final String DATABASE_NAME = "mc_statistician";
-    private static final String USERNAME = "vaisagh";
-    private static final String PASSWORD = "vaisaghviswanathan";
+    private static final String USERNAME = "root";
+    private static final String PASSWORD = "j0g@b0n!t0";
 
     private static final String[] queries =
             {"SELECT x, z " +
-                    "FROM mc_statistician.IdPlayerMapping as idp, mc_statistician.playerlocationforanalysis as plfa " +
-                    "where name = \"newgroundfloor\" " +
-                    "and y <= 24 " +
-                    "and plfa.uuid = idp.uuid and plfa.minTime = idp.startTime",
+                    "FROM mc_statistician.playerLocationForAnalysis " +
+                    "where uuid = (select uuid from  mc_statistician.IdPlayerMapping where name = \"newgroundfloor\") and minTime = (select startTime from  mc_statistician.IdPlayerMapping where name = \"newgroundfloor\")  and y <= 24 ",
+
                     "SELECT x, z " +
-                            "FROM mc_statistician.IdPlayerMapping as idp, mc_statistician.playerlocationforanalysis as plfa " +
-                            "where name = \"newsecondfloor2\"" +
-                            "and y <= 33 and y > 24 " +
-                            "and plfa.uuid = idp.uuid and plfa.minTime = idp.startTime",
+                            "FROM mc_statistician.IdPlayerMapping as idp, mc_statistician.playerLocationForAnalysis as plfa " +
+                            "where name = \"newsecondfloor2\" " +
+                            "and plfa.uuid = idp.uuid and plfa.minTime = idp.startTime " +
+                            "and y > 24 and y <= 33  "
+                            ,
                     "SELECT x, z " +
-                            "FROM mc_statistician.IdPlayerMapping as idp, mc_statistician.playerlocationforanalysis as plfa " +
+                            "FROM mc_statistician.IdPlayerMapping as idp, mc_statistician.playerLocationForAnalysis as plfa " +
                             "where name = \"newthirdfloor\" " +
                             "and y > 33 " +
                             "and plfa.uuid = idp.uuid and plfa.minTime = idp.startTime"};
@@ -82,12 +83,14 @@ public class Database {
 
     private void initializeData() {
         for (String query : queries) {
+            System.out.println(query);
             List<Map<String, String>> results = executeSynchQuery(query);
             ArrayList<Point> listOfPoints = new ArrayList<Point>();
             int minX = Integer.MAX_VALUE;
             int minY = Integer.MAX_VALUE;
             int maxX = Integer.MIN_VALUE;
             int maxY = Integer.MIN_VALUE;
+            System.out.println(results.size());
             for (Map<String, String> row : results) {
                 int x = Integer.parseInt(row.get("x"));
                 int y = Integer.parseInt(row.get("z"));
@@ -154,7 +157,7 @@ public class Database {
 
 
         String positionQuery = "SELECT time, x, y, z " +
-                "FROM mc_statistician.IdPlayerMapping as idp, mc_statistician.playerlocationforanalysis as plfa " +
+                "FROM mc_statistician.IdPlayerMapping as idp, mc_statistician.playerLocationForAnalysis as plfa " +
                 "where name = \"" + dataName + "\" and plfa.uuid = idp.uuid and plfa.minTime = idp.startTime" + whereQuery + ";";
         List<Map<String, String>> results = executeSynchQuery(positionQuery);
 
@@ -224,12 +227,12 @@ public class Database {
         String st;
         if (i > 12) {
             st = "select lo.leverID, time-st.startTime as t " +
-                    "from mc_statistician.leveropentime as lo, (select startTime from mc_statistician.idplayermapping where name=\"" + dataName + "\") as st " +
+                    "from mc_statistician.LeverOpenTime as lo, (select startTime from mc_statistician.IdPlayerMapping where name=\"" + dataName + "\") as st " +
                     "where name=\"" + dataName + "\" and leverID =" + i + ";";
         } else {
             st = "select lo.leverID, time-st.startTime as t " +
-                    "from mc_statistician.leveropentime as lo, " +
-                    "(select startTime from mc_statistician.idplayermapping " +
+                    "from mc_statistician.LeverOpenTime as lo, " +
+                    "(select startTime from mc_statistician.IdPlayerMapping " +
                     "where name=\"" + dataName + "\") as st " +
                     "where name=\"" + dataName + "\" and leverID NOT IN(13,14,15) ORDER BY t desc;";
         }
@@ -328,7 +331,7 @@ public class Database {
 
     private void initializeDataNames() {
         this.dataNames = new ArrayList<String>();
-        String positionQuery = "SELECT distinct name FROM mc_statistician.idplayermapping where obsolete =0;";
+        String positionQuery = "SELECT distinct name FROM mc_statistician.IdPlayerMapping where obsolete =0;";
         List<Map<String, String>> results = executeSynchQuery(positionQuery);
 
 

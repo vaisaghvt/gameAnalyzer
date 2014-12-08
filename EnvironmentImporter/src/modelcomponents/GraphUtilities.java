@@ -4,6 +4,7 @@ import ec.util.MersenneTwister;
 import edu.uci.ics.jung.graph.DirectedGraph;
 import edu.uci.ics.jung.graph.DirectedSparseMultigraph;
 import edu.uci.ics.jung.graph.Graph;
+import edu.uci.ics.jung.graph.UndirectedSparseGraph;
 import gui.ProgressVisualizer;
 import javafx.geometry.Point3D;
 import markovmodeldata.RecursiveHashMap;
@@ -13,6 +14,9 @@ import org.apache.commons.math3.stat.descriptive.moment.StandardDeviation;
 import org.apache.commons.math3.stat.descriptive.moment.Variance;
 
 import java.awt.*;
+import java.io.*;
+import java.text.DecimalFormat;
+import java.text.NumberFormat;
 import java.util.*;
 import java.util.List;
 
@@ -27,145 +31,152 @@ public class GraphUtilities {
 
     private final static MersenneTwister random = new MersenneTwister();
     private static final double EPSILON = 0.0000001;
-    private static final int PATHS_TO_GENERATE = 5000;
+    private static final int PATHS_TO_GENERATE = 30000;
 
 
-//    public static Collection<DirectedSparseMultigraph<ModelObject, ModelEdge>> generatePathsTillCoverage(
-//            RecursiveHashMap markovData, final int coverageRequired) {
-//        try {
-//            Graph<ModelObject, ModelEdge> completeGraph = CompleteGraph.instance().getGraph();
-//            ModelObject startingLocation;
-//
-//
-//            if (completeGraph != null) {
-//                startingLocation = CompleteGraph.instance().findRoomByName(startingRoom);
-//                if (startingLocation == null) {
-//                    System.out.println("No starting location");
-//                    throw new NullPointerException();
-//                }
-//
-//            } else {
-//                System.out.println("No graph to load.");
-//                throw new NullPointerException();
-//            }
-//
-//
+    public static Collection<List<String>> generatePathsTillCoverage(
+            RecursiveHashMap markovData, final int coverageRequired) {
+        Graph<ModelObject, ModelEdge> completeGraph = CompleteGraph.instance().getGraph();
+        String startingRoom = CompleteGraph.instance().getStartingNode().toString();
+        ModelObject startingLocation;
+
+
+        if (completeGraph != null) {
+            startingLocation = CompleteGraph.instance().findRoomByName(startingRoom);
+            if (startingLocation == null) {
+                System.out.println("No starting location");
+                throw new NullPointerException();
+            }
+
+        } else {
+            System.out.println("No graph to load.");
+            throw new NullPointerException();
+        }
+
+
 //            CircularFifoBuffer<Double> varianceList = new CircularFifoBuffer<Double>(5);
-//
-//            Collection<DirectedSparseMultigraph<ModelObject, ModelEdge>> resultSet =
-//                    new HashSet<DirectedSparseMultigraph<ModelObject, ModelEdge>>();
+
+        Collection<List<String>> resultSet = new ArrayList<List<String>>();
+//        List<Float> decisionBase = new ArrayList<Float>();
 //            List<Double> listOfGyrationRadius = new ArrayList<Double>();
-//            ProgressVisualizer progressVisualizer = new ProgressVisualizer("Generating path data", ProgressVisualizer.DeterminateType.INDETERMINATE);
-//            int count = 0;
-//            while (true) {
-//
-//                DirectedSparseMultigraph<ModelObject, ModelEdge> tempGraph = generatePathForCoverage(completeGraph, startingLocation, coverageRequired, firstOrderProbs, secondOrderProbs);
-//                resultSet.add(tempGraph);
-//                listOfGyrationRadius.add(calculateRadiusOfGyration(tempGraph, startingLocation));
-//                if (isStable(listOfGyrationRadius, varianceList, progressVisualizer)) {
-//
-//                    break;
-//                } else {
-//                    count++;
-//                    if (count % 50 == 0) {
-//
-//                        progressVisualizer.displayStability(count);
-//
-//                    }
-//                }
-//
-//
-////            System.out.println(resultSet.size());
-//            }
-//            progressVisualizer.finish();
-//
-//
-//            return resultSet;
-//        } catch (Exception e) {
-//            e.printStackTrace();
-//            return null;
-//        }
-//    }
+        ProgressVisualizer progressVisualizer = new ProgressVisualizer("Generating path data", ProgressVisualizer.DeterminateType.DETERMINATE);
+
+        for (int count = 0; count < PATHS_TO_GENERATE; count++) {
+            List<String> path = generatePathForCoverage(startingLocation, coverageRequired, markovData);
+
+//            decisionBase.add(Float.parseFloat(path.get(0)));
+//            path.remove(0);
+
+            resultSet.add(path);
+//            DirectedSparseMultigraph<ModelObject, ModelEdge> tempGraph = convertPathToGraph(path);
+//            resultSet.add(tempGraph);
+            if (count % 100 == 0)
+                progressVisualizer.print("graphNumber" + count + "\n");
+
+            progressVisualizer.setProgress((count * 100) / PATHS_TO_GENERATE);
+
+        }
+        progressVisualizer.finish();
+
+//        NumberFormat doubleFormat = new DecimalFormat("######.000");
+//        HashMap<String, Double> decisionBaseSummary = findMeanAndSD(decisionBase);
+//        System.out.println("Decision Base = " + doubleFormat.format(decisionBaseSummary.get("mean")) + " \u00B1 " +
+//                doubleFormat.format(decisionBaseSummary.get("sd")));
+
+        return resultSet;
+    }
 
 
-//    //TODO: Can replace this with something in MarkovDataStore
-//    private static DirectedSparseMultigraph<ModelObject, ModelEdge> generatePathForCoverage(Graph<ModelObject, ModelEdge> completeGraph, ModelObject startingLocation,
-//                                                                                            int coverageRequired, RecursiveHashMap markovData) {
-//        DirectedSparseMultigraph<ModelObject, ModelEdge> path = new DirectedSparseMultigraph<ModelObject, ModelEdge>();
+    //TODO: Can replace this with something in MarkovDataStore
+    private static List<String> generatePathForCoverage(ModelObject startingLocation, int coverageRequired, RecursiveHashMap markovData) {
+        List<String> path = new ArrayList<String>();
+        List<Float> decisionBase = new ArrayList<Float>();
+
 //        path.addVertex(startingLocation);
-//        String startRoom = startingLocation.toString();
-//
-//
-//        ModelObject currentNode = startingLocation;
-//
-//        String destination = getDestination(firstOrderProbabilities.getDestinationProbabilities(startRoom));
-//
-//
+        String startRoom = startingLocation.toString();
+        path.add(startRoom);
+        int verticesRequired = (coverageRequired * CompleteGraph.instance().getTotalNumberOfVertices()) / 100;
+        HashSet<String> vertexSet = new HashSet<String>(verticesRequired);
+
+        vertexSet.add(startRoom);
+
+
+//        String destination = getDestination(
+//                markovData.obtainHeatMap().rowMap().get(startRoom)); // TODO : verify that this works correctly.
 //        if (destination.equals(startRoom)) {
 //            System.out.println("Source same as destination");
 //        }
-//
-//        currentNode = addNewVertexToPath(currentNode, destination, path, 0);
-//
-//        int numberOfNodesRequired = coverageRequired * completeGraph.getVertexCount() / 100;
-//
-//
-//        ModelObject lastNode = startingLocation;
-//
-//        int hops = 1;
-//
-//        while (path.getVertexCount() < numberOfNodesRequired) {
-//            ModelObject tempNode = currentNode;
-//            currentNode = addOneMoreHop(currentNode, lastNode, path, firstOrderProbabilities, hops);
-//            lastNode = tempNode;
-//            if (currentNode == lastNode) {
-//                System.out.println("Error!!");
-//            }
-//            hops++;
+//        ModelObject currentNode = addNewVertexToPath(destination, path);
+
+        List<String> startingPath = markovData.getPathFromRoom(startRoom, random);
+
+        path.addAll(startingPath);
+        vertexSet.addAll(startingPath);
+        ModelObject currentNode = CompleteGraph.instance().findRoomByName(path.get(path.size() - 1));
+//        if (pathLength == markovData.getOrder()) {
+//            return path;
 //        }
-//
-//        return path;
-//    }
-//
+
+
+        while (vertexSet.size() < verticesRequired) {
+            ModelObject tempNode = currentNode;
+            currentNode = addOneMoreHop(path, markovData, decisionBase);
+            vertexSet.add(currentNode.toString());
+            if (currentNode == tempNode) {
+                assert false;
+                System.out.println("Error!!");
+            }
+        }
+//        System.out.println("Total Approximation="+((approximations[0] *100)/path.size()));
+
+//        path.add(0, String.valueOf(findMeanAndSD(decisionBase).get("mean")));
+
+        return path;
+    }
+
+    //
     public static Collection<DirectedSparseMultigraph<ModelObject, ModelEdge>> generatePathsForPathLength(
             RecursiveHashMap markovData,
             int pathLength) {
 
-        try {
-            Graph<ModelObject, ModelEdge> completeGraph = CompleteGraph.instance().getGraph();
-            String startingRoom = CompleteGraph.instance().getStartingNode().toString();
-            ModelObject startingLocation;
+
+        Graph<ModelObject, ModelEdge> completeGraph = CompleteGraph.instance().getGraph();
+        String startingRoom = CompleteGraph.instance().getStartingNode().toString();
+        ModelObject startingLocation;
 
 
-            if (completeGraph != null) {
-                startingLocation = CompleteGraph.instance().findRoomByName(startingRoom);
-                if (startingLocation == null) {
-                    System.out.println("No starting location");
-                    throw new NullPointerException();
-                }
-
-            } else {
-                System.out.println("No graph to load.");
+        if (completeGraph != null) {
+            startingLocation = CompleteGraph.instance().findRoomByName(startingRoom);
+            if (startingLocation == null) {
+                System.out.println("No starting location");
                 throw new NullPointerException();
             }
+
+        } else {
+            System.out.println("No graph to load.");
+            throw new NullPointerException();
+        }
 
 
 //            CircularFifoBuffer<Double> varianceList = new CircularFifoBuffer<Double>(5);
 
-            Collection<DirectedSparseMultigraph<ModelObject, ModelEdge>> resultSet =
-                    new HashSet<DirectedSparseMultigraph<ModelObject, ModelEdge>>();
+        Collection<DirectedSparseMultigraph<ModelObject, ModelEdge>> resultSet =
+                new ArrayList<DirectedSparseMultigraph<ModelObject, ModelEdge>>();
 //            List<Double> listOfGyrationRadius = new ArrayList<Double>();
-            ProgressVisualizer progressVisualizer = new ProgressVisualizer("Generating path data", ProgressVisualizer.DeterminateType.DETERMINATE);
+        ProgressVisualizer progressVisualizer = new ProgressVisualizer("Generating path data", ProgressVisualizer.DeterminateType.DETERMINATE);
 
-            for(int count=0;count<PATHS_TO_GENERATE; count++) {
-                List<String> path = generatePathForLength(startingLocation, pathLength, markovData);
+        List<Float> decisionBase = new ArrayList<Float>();
+        for (int count = 0; count < PATHS_TO_GENERATE; count++) {
+            List<String> path = generatePathForLength(startingLocation, pathLength, markovData);
+            decisionBase.add(Float.parseFloat(path.get(0)));
+            path.remove(0);
 
-                DirectedSparseMultigraph<ModelObject, ModelEdge> tempGraph = convertPathToGraph(path);
-                resultSet.add(tempGraph);
-                if(count%100==0)
-                    progressVisualizer.print("graphNumber"+ count+"\n");
+            DirectedSparseMultigraph<ModelObject, ModelEdge> tempGraph = convertPathToGraph(path);
+            resultSet.add(tempGraph);
+            if (count % 100 == 0)
+                progressVisualizer.print("graphNumber" + count + "\n");
 
-                progressVisualizer.setProgress((count*100) /PATHS_TO_GENERATE);
+            progressVisualizer.setProgress((count * 100) / PATHS_TO_GENERATE);
 
 //                listOfGyrationRadius.add(calculateRadiusOfGyration(tempGraph, startingLocation));
 //                if (isStable(listOfGyrationRadius, varianceList, progressVisualizer)) {
@@ -182,32 +193,50 @@ public class GraphUtilities {
 
 
 //            System.out.println(resultSet.size());
-            }
-            progressVisualizer.finish();
-
-
-            return resultSet;
-        } catch (Exception e) {
-            e.printStackTrace();
-            return null;
         }
+        progressVisualizer.finish();
+        NumberFormat doubleFormat = new DecimalFormat("######.000");
+        HashMap<String, Double> decisionBaseSummary = findMeanAndSD(decisionBase);
+        System.out.println("Decision Base = " + doubleFormat.format(decisionBaseSummary.get("mean")) + " \u00B1 " +
+                doubleFormat.format(decisionBaseSummary.get("sd")));
+        return resultSet;
+
+    }
+
+    static private <T extends Number> HashMap<String, Double> findMeanAndSD(List<T> valueList) {
+        double[] values = new double[valueList.size()];
+        int count = 0;
+        for (T number : valueList) {
+            values[count] = number.doubleValue();
+            count++;
+        }
+
+        Mean meanCalculator = new Mean();
+        double calculatedMean = meanCalculator.evaluate(values);
+        StandardDeviation sd = new StandardDeviation();
+        double calculatedSD = sd.evaluate(values);
+
+        HashMap<String, Double> result = new HashMap<String, Double>();
+        result.put("mean", calculatedMean);
+        result.put("sd", calculatedSD);
+        return result;
     }
 
     private static DirectedSparseMultigraph<ModelObject, ModelEdge> convertPathToGraph(List<String> path) {
         DirectedSparseMultigraph<ModelObject, ModelEdge> resultGraph = new DirectedSparseMultigraph<ModelObject, ModelEdge>();
-        ModelObject currentRoom =null;
-        ModelObject lastRoom=null;
-        int count=0;
-        for(String vertex: path){
+        ModelObject currentRoom = null;
+        ModelObject lastRoom = null;
+        int count = 0;
+        for (String vertex : path) {
 
 
-            if(currentRoom!=null){
+            if (currentRoom != null) {
                 lastRoom = currentRoom;
 
             }
             currentRoom = CompleteGraph.instance().findRoomByName(vertex);
             resultGraph.addVertex(currentRoom);
-            if(lastRoom!=null){
+            if (lastRoom != null) {
                 ModelEdge edge = new ModelEdge();
                 edge.setTime(count++);
                 resultGraph.addEdge(edge, lastRoom, currentRoom);
@@ -223,11 +252,11 @@ public class GraphUtilities {
             ModelObject startingLocation, int pathLength,
             RecursiveHashMap markovData) {
 
-
+        List<Float> decisionBase = new ArrayList<Float>();
         List<String> path = new ArrayList<String>();
 //        path.addVertex(startingLocation);
         String startRoom = startingLocation.toString();
-        path.add(startRoom);
+//        path.add(startRoom);
 
 
 //        String destination = getDestination(
@@ -237,46 +266,78 @@ public class GraphUtilities {
 //        }
 //        ModelObject currentNode = addNewVertexToPath(destination, path);
 
-        List<String> startingPath = markovData.getPathFromRoom(startRoom, random);
-
-        path.addAll(startingPath);
-        ModelObject currentNode = CompleteGraph.instance().findRoomByName(path.get(path.size()-1));
-        if (pathLength == markovData.getOrder()) {
-            return path;
-        }
-
-
-        for (int hops = markovData.getOrder(); hops < pathLength; hops++) {
-            ModelObject tempNode = currentNode;
-            currentNode = addOneMoreHop(path, markovData);
-
-            if (currentNode == tempNode) {
+        try {
+            List<String> startingPath = markovData.getPathFromRoom(startRoom, random);
+            if (startingPath == null) {
+                System.out.println("Problem  here");
                 assert false;
-                System.out.println("Error!!");
             }
+            path.addAll(startingPath);
+            ModelObject currentNode = CompleteGraph.instance().findRoomByName(path.get(path.size() - 1));
+            if (pathLength == markovData.getOrder()) {
+                return path;
+            }
+
+
+            while (path.size() < pathLength) {
+                ModelObject tempNode = currentNode;
+                currentNode = addOneMoreHop(path, markovData, decisionBase);
+
+                if (currentNode == tempNode) {
+                    assert false;
+                    System.out.println("Error!!");
+                }
+            }
+
+//            if(approximations[0]>0){
+//                System.out.println("Total Approximation="+((approximations[0] *100)/path.size())+"%");
+//            }
+            path.add(0, String.valueOf(findMeanAndSD(decisionBase).get("mean")));
+
+            assert path.size() == pathLength+1;
+            return path;
+        } catch (Exception e) {
+            e.printStackTrace();
+            return null;
         }
-
-        return path;
-
     }
 
-    private static ModelObject addOneMoreHop(List<String> path,RecursiveHashMap markovData) {
-        List<String> trimmedPath = trimSequence(markovData.getOrder(),path);
+    private static ModelObject addOneMoreHop(List<String> path, RecursiveHashMap markovData, List<Float> decisionBase) {
+        List<String> trimmedPath = trimSequence(markovData.getOrder(), path);
 
+//        decisionBase.add(markovData.getDecisionBase(trimmedPath));
         Map<String, Double> nextLocationProbabilities = markovData.getDestinationProbabilities(trimmedPath);
-        String destination = getDestination(nextLocationProbabilities);
+        String destination;
+        if (nextLocationProbabilities != null) {
+            destination = getDestination(nextLocationProbabilities);
+        } else {
+
+            destination = getDestination(getRandomWalkProbabilities(CompleteGraph.instance().findRoomByName(path.get(path.size() - 1))));
+        }
 //        if (destination.equals(lastNode.toString())) {
 //            System.out.println("Source and destination are same!!");
 //        }
 
-        return addNewVertexToPath( destination, path);
+        return addNewVertexToPath(destination, path);
 
 
+    }
+
+    private static Map<String, Double> getRandomWalkProbabilities(ModelObject room) {
+        Collection<ModelObject> neighbourSet = CompleteGraph.instance().getNeighbors(room);
+        Map<String, Double> result = new HashMap<String, Double>();
+        Double value = 1.0 / neighbourSet.size();
+        for (ModelObject neighbour : neighbourSet) {
+            String neighbourString = neighbour.toString();
+            result.put(neighbourString, value);
+        }
+        return result;
     }
 
 
     /**
      * Adds new vertex to the path
+     *
      * @param destination
      * @param result
      * @return returns the room object
@@ -430,23 +491,90 @@ public class GraphUtilities {
 
     }
 
-    public static int calculateCoverage(Graph<ModelObject, ModelEdge> completeGraph, DirectedGraph<ModelObject, ModelEdge> graph) {
-        int count = 0;
-        for (ModelObject vertex : completeGraph.getVertices()) {
-            if (graph.containsVertex(vertex)) {
-                count++;
-            }
-        }
-        return (count * 100) / completeGraph.getVertexCount();
+    public static int calculateCoverage(DirectedGraph<ModelObject, ModelEdge> graph) {
+
+        int count = graph.getVertexCount();
+        return (count * 100) / CompleteGraph.instance().getVertexCount();
     }
 
-    public static HashMap<String, Double> calculateAverageCoverage(Collection<DirectedSparseMultigraph<ModelObject, ModelEdge>> graphCollection) {
-        int totalNumberOfVertices = CompleteGraph.instance().getVertexCount();
+    private static void storeCoverageNumbersInFile(String fileName, Collection<DirectedSparseMultigraph<ModelObject, ModelEdge>> graphCollection) {
+//        int totalNumberOfVertices = CompleteGraph.instance().getVertexCount();
         double[] coverageValues = new double[graphCollection.size()];
         int i = 0;
         for (DirectedSparseMultigraph graph : graphCollection) {
-            int verticesInGraph = graph.getVertexCount();
-            coverageValues[i] = (double) (verticesInGraph*100) / (double) totalNumberOfVertices;
+
+            coverageValues[i] = calculateCoverage(graph);
+            i++;
+        }
+
+        File file = new File(fileName);
+        PrintWriter writer = null;
+        try {
+            writer = new PrintWriter(new BufferedWriter(new FileWriter(file)));
+        } catch (IOException ex) {
+            ex.printStackTrace();
+        }
+
+        NumberFormat doubleFormat = new DecimalFormat("######.000");
+        for (double hopCount : coverageValues) {
+            writer.println(doubleFormat.format(hopCount));
+        }
+        writer.close();
+
+    }
+
+    private static void storeHopNumbersInFile(String fileName, Collection<List<String>> pathCollection) {
+        int[] hopCountList = new int[pathCollection.size()];
+        int i = 0;
+        for (List<String> path : pathCollection) {
+            hopCountList[i] = path.size();
+            i++;
+        }
+
+        File file = new File(fileName);
+        PrintWriter writer = null;
+        try {
+            writer = new PrintWriter(new BufferedWriter(new FileWriter(file)));
+        } catch (IOException ex) {
+            ex.printStackTrace();
+        }
+
+        for (int hopCount : hopCountList) {
+            writer.println(hopCount);
+        }
+        writer.close();
+
+    }
+
+    private static HashMap<String, Double> calculateAverageNumberOfHops(Collection<List<String>> pathCollection) {
+        double[] hopCountList = new double[pathCollection.size()];
+        int i = 0;
+        for (List<String> path : pathCollection) {
+
+            hopCountList[i] = path.size();
+            i++;
+        }
+
+        Mean meanEvaluator = new Mean();
+        double mean = meanEvaluator.evaluate(hopCountList);
+
+        StandardDeviation standardDeviationEvaluator = new StandardDeviation();
+        double sd = standardDeviationEvaluator.evaluate(hopCountList, mean);
+
+        HashMap<String, Double> result = new HashMap<String, Double>();
+        result.put("mean", mean);
+        result.put("sd", sd);
+
+        return result;
+    }
+
+    public static HashMap<String, Double> calculateAverageCoverage(Collection<DirectedSparseMultigraph<ModelObject, ModelEdge>> graphCollection) {
+//        int totalNumberOfVertices = CompleteGraph.instance().getVertexCount();
+        double[] coverageValues = new double[graphCollection.size()];
+        int i = 0;
+        for (DirectedSparseMultigraph graph : graphCollection) {
+
+            coverageValues[i] = calculateCoverage(graph);
             i++;
         }
 
@@ -463,28 +591,8 @@ public class GraphUtilities {
         return result;
 
 
-
     }
 
-
-    public static HashMap<String, Double> calculateNumberOfHops(Collection<DirectedSparseMultigraph<ModelObject, ModelEdge>> pathCollections) {
-        double[] edgeCountArray = new double[pathCollections.size()];
-        int pathNumber = 0;
-        for (DirectedSparseMultigraph<ModelObject, ModelEdge> path : pathCollections) {
-            edgeCountArray[pathNumber] = path.getEdgeCount();
-            pathNumber++;
-        }
-
-        Mean meanCalculator = new Mean();
-        double calculatedMean = meanCalculator.evaluate(edgeCountArray);
-        StandardDeviation sd = new StandardDeviation();
-        double calculatedSD = sd.evaluate(edgeCountArray);
-
-        HashMap<String, Double> result = new HashMap<String, Double>();
-        result.put("mean", calculatedMean);
-        result.put("sd", calculatedSD);
-        return result;
-    }
 
 
     public static Collection<List<String>> findActualPathsOfLength(final DirectedSparseMultigraph<ModelObject, ModelEdge> graph, final ModelObject startingNode, final int length) {
@@ -493,17 +601,17 @@ public class GraphUtilities {
         final Collection<ModelEdge> outEdges = graph.getOutEdges(startingNode);
 //        if (length < 3) {
 
-            if (outEdges == null) {
-                return listOfPaths;
+        if (outEdges == null) {
+            return listOfPaths;
+        }
+        for (final ModelEdge edge : outEdges) {
+            List<String> path = new ArrayList<String>(length);
+            path.add(startingNode.toString());
+            followTillHopCount(graph, startingNode, edge, length - 1, path);
+            if (path.size() - 1 == length) {
+                listOfPaths.add(path);
             }
-            for (final ModelEdge edge : outEdges) {
-                List<String> path = new ArrayList<String>(length);
-                path.add(startingNode.toString());
-                followTillHopCount(graph, startingNode, edge, length - 1, path);
-                if (path.size() - 1 == length) {
-                    listOfPaths.add(path);
-                }
-            }
+        }
 //        }
         return listOfPaths;
     }
@@ -545,15 +653,23 @@ public class GraphUtilities {
         return null;
     }
 
-    public static int calculateHopsNeededForCoverage(RecursiveHashMap data, int coverageRequired) {
+    public static HashMap<String, Double> calculateHopsNeededForCoverage(RecursiveHashMap data, int coverageRequired, String fileName) {
 
-        return coverageRequired;
+
+        Collection<List<String>> generatedPaths = generatePathsTillCoverage(data,
+                coverageRequired);
+        storeHopNumbersInFile(fileName, generatedPaths);
+        return calculateAverageNumberOfHops(generatedPaths);
     }
 
-    public static HashMap<String, Double> calculateCoverageForPathLength(RecursiveHashMap data, int hopsRequired) {
+
+
+
+    public static HashMap<String, Double> calculateCoverageForPathLength(RecursiveHashMap data, int hopsRequired, String fileName) {
         assert hopsRequired >= data.getOrder();
         Collection<DirectedSparseMultigraph<ModelObject, ModelEdge>> generatedPaths = generatePathsForPathLength(data,
                 hopsRequired);
+        storeCoverageNumbersInFile(fileName, generatedPaths);
         return calculateAverageCoverage(generatedPaths);
     }
 
@@ -567,7 +683,124 @@ public class GraphUtilities {
         assert result.size() == m;
         assert result.get(result.size() - 1).equals(sequence.get(sequence.size() - 1));
         return result;
-
-        //To change body of created methods use File | Settings | File Templates.
     }
+
+    public static Integer calculateHopsForCoverage(DirectedSparseMultigraph<ModelObject, ModelEdge> graph, double coverageRequired) {
+        List<String> path = convertGraphToPath(graph);
+
+        int roomsRequired = (int) Math.floor(coverageRequired * CompleteGraph.instance().getVertexCount() / 100);
+        HashSet<String> roomsDiscovered = new HashSet<String>();
+        int hops = 0;
+        while (roomsDiscovered.size() < roomsRequired && path.size() != 0) {
+            roomsDiscovered.add(path.remove(0));
+            hops++;
+        }
+        return hops;
+
+    }
+
+    private static List<String> convertGraphToPath(DirectedSparseMultigraph<ModelObject, ModelEdge> graph) {
+        ModelObject currentVertex = CompleteGraph.instance().getStartingNode();
+
+        List<String> path = new ArrayList<String>();
+        TreeSet<ModelEdge> adjacentEdges = new TreeSet<ModelEdge>(new Comparator<ModelEdge>() {
+            @Override
+            public int compare(ModelEdge o1, ModelEdge o2) {
+                return (int) (o1.getTime() - o2.getTime());
+            }
+        });
+
+        adjacentEdges.addAll(graph.getOutEdges(currentVertex));
+        ModelEdge currentEdge = adjacentEdges.pollFirst();
+        long currentTime = currentEdge.getTime();
+        while (currentEdge != null) {
+            currentVertex = graph.getOpposite(currentVertex, currentEdge);
+            path.add(currentVertex.toString());
+            adjacentEdges.clear();
+            adjacentEdges.addAll(graph.getOutEdges(currentVertex));
+            currentEdge = adjacentEdges.pollFirst();
+            if (currentEdge == null) {
+                break;
+            }
+            long time = currentEdge.getTime();
+            while (time < currentTime) {
+                currentEdge = adjacentEdges.pollFirst();
+                if (currentEdge == null) {
+                    break;
+                }
+                time = currentEdge.getTime();
+            }
+            if (currentEdge == null) {
+                break;
+            }
+            currentTime = time;
+
+        }
+
+        return path;
+
+    }
+
+    public static Double calculateCoverageForHops(DirectedSparseMultigraph<ModelObject, ModelEdge> graph, int hopsUsed) {
+        List<String> path = convertGraphToPath(graph);
+//        int roomsRequired = (int) Math.floor(coverageRequired * CompleteGraph.instance().getVertexCount());
+        HashSet<String> roomsDiscovered = new HashSet<String>();
+        int hops = 0;
+
+        while (hops < hopsUsed && path.size() != 0) {
+            roomsDiscovered.add(path.remove(0));
+            hops++;
+        }
+        return (roomsDiscovered.size() * 100.0) / CompleteGraph.instance().getVertexCount();
+
+    }
+
+    public static int findPossiblePathsOfLength(UndirectedSparseGraph<ModelObject, ModelEdge> graph, ModelObject startingNode, int length) {
+        Collection<String> paths = new LinkedHashSet<String>();
+        int numberOfPaths = 0;
+
+        assert length >= 1;
+        final Collection<ModelEdge> outEdges = graph.getOutEdges(startingNode);
+//        if (length < 3) {
+
+        if (outEdges == null) {
+
+            return numberOfPaths;
+        }
+        for (final ModelEdge edge : outEdges) {
+            List<String> path = new ArrayList<String>(length);
+            path.add(startingNode.toString());
+            numberOfPaths += followUndirectedTillHopCount(graph, startingNode, edge, length - 1, path);
+
+        }
+//        }
+        return numberOfPaths;
+
+    }
+
+    private static int followUndirectedTillHopCount( UndirectedSparseGraph<ModelObject, ModelEdge> graph,
+                                                     ModelObject startingNode, ModelEdge previousEdge,
+                                                     int hopsRemaining, List<String> path) {
+
+
+        ModelObject currentLocation = graph.getOpposite(startingNode, previousEdge);
+        path.add(currentLocation.toString());
+        final Collection<ModelEdge> outEdges = graph.getOutEdges(currentLocation);
+        if (hopsRemaining != 0) {
+            int numberOfPaths =0;
+            for (final ModelEdge edge : outEdges) {
+                List<String> newPath = new ArrayList<String>();
+                newPath.addAll(path);
+                numberOfPaths+= followUndirectedTillHopCount(graph, currentLocation, edge, hopsRemaining - 1, path);
+            }
+            return numberOfPaths;
+        } else {
+            return 1;
+        }
+
+    }
+
+
+
+
 }

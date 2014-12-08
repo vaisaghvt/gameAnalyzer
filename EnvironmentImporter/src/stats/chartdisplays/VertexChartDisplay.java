@@ -279,6 +279,35 @@ public class VertexChartDisplay extends ChartDisplay<HashMap<String, ? extends N
             if(!data.containsKey(modelObject.toString())){
                 return (Paint) Color.black;
             }
+
+
+
+
+
+
+
+
+            if(modelObject.toString().equalsIgnoreCase("Study3")||
+                    modelObject.toString().equalsIgnoreCase("B2 Stairs")||
+                    modelObject.toString().equalsIgnoreCase("BToDown")||
+                    modelObject.toString().equalsIgnoreCase("Start")||
+                    modelObject.toString().equalsIgnoreCase("2DormCorr")||
+                    modelObject.toString().equalsIgnoreCase("2CorrA2")||
+                    modelObject.toString().equalsIgnoreCase("2CorrMain")||
+                    modelObject.toString().equalsIgnoreCase("Exit")||
+                    modelObject.toString().equalsIgnoreCase("SLP")||
+                    modelObject.toString().equalsIgnoreCase("SpecLounge")||
+                    modelObject.toString().equalsIgnoreCase("L Study")||
+                    modelObject.toString().equalsIgnoreCase("left 2 stair")||
+                    modelObject.toString().equalsIgnoreCase("right 2 stair")||
+                    modelObject.toString().equalsIgnoreCase("2CorrB2")||
+                    modelObject.toString().equalsIgnoreCase("2CorrB1")||
+                    modelObject.toString().equalsIgnoreCase("Dine 1")||
+                    modelObject.toString().equalsIgnoreCase("Pool")||
+                    modelObject.toString().equalsIgnoreCase("Disco")||
+                    modelObject.toString().equalsIgnoreCase("Conf")) {
+
+
             double value = data.get(modelObject.toString()).doubleValue();
             if(value >1.05){
 
@@ -288,6 +317,9 @@ public class VertexChartDisplay extends ChartDisplay<HashMap<String, ? extends N
 //
                 return  (Paint) Color.green;
             } else {
+                return (Paint)Color.white;
+            }
+            }else{
                 return (Paint)Color.white;
             }
         }

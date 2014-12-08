@@ -43,7 +43,7 @@ public class RoomDurationBreakupFrequencyStatisticHandler extends StatisticsHand
         Multiset<Long> data = HashMultiset.create();
 
 
-//            HashMultimap<String, Long> tempResult = result.getValue(dataName);
+//            HashMultimap<String, Long> tempResult = result.getProbabilityOfSequence(dataName);
         for (String roomName : result.keySet()) {
             Set<Long> durationsForRoom = result.get(roomName);
             for (Long duration : durationsForRoom) {

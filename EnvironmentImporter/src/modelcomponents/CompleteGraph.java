@@ -22,6 +22,7 @@ public class CompleteGraph {
     private HashMap<Integer, ModelGroup> areaIdGroupMapping;
     private ModelObject startingNode;
     private Collection<String> sortedRoomNames;
+    private HashMap<Integer, Long> lengthOfPathToNumberMapping;
 
     private CompleteGraph() {
     }
@@ -43,6 +44,7 @@ public class CompleteGraph {
         idAreaMapping = new HashMap<Integer, ModelArea>();
         areaFloorMapping = new HashMap<ModelArea, Integer>();
         areaIdGroupMapping = new HashMap<Integer, ModelGroup>();
+        lengthOfPathToNumberMapping = new HashMap<Integer, Long>();
 
         for (ModelFloor floor : file.getFloors()) {
             for (ModelGroup group : floor.getGroups()) {
@@ -401,5 +403,25 @@ public class CompleteGraph {
 
     public Collection<ModelObject> getVertices() {
         return completeGraph.getVertices();
+    }
+
+    public long countPathsOfLength(int length) {
+
+        if(lengthOfPathToNumberMapping.containsKey(length)){
+            return lengthOfPathToNumberMapping.get(length);
+        }
+        long numberOfPaths =0;
+        int count =0;
+        int total = completeGraph.getVertexCount();
+        try {
+        for(ModelObject startingPoint: completeGraph.getVertices()){
+            System.out.print(count++ +"/"+total+";");
+            numberOfPaths+=GraphUtilities.findPossiblePathsOfLength(completeGraph, startingPoint, length);
+        }    }catch (Exception e){
+            e.printStackTrace();
+        }
+        lengthOfPathToNumberMapping.put(length, numberOfPaths);
+
+        return lengthOfPathToNumberMapping.get(length);
     }
 }

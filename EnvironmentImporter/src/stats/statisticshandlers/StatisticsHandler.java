@@ -9,7 +9,6 @@ import stats.consoledisplays.ConsoleDisplay;
 import javax.swing.*;
 import java.awt.*;
 import java.util.Collection;
-import java.util.Set;
 import java.util.concurrent.*;
 
 /**
@@ -47,7 +46,7 @@ public abstract class StatisticsHandler<T extends ConsoleDisplay, V extends Char
     }
 
 
-    public static double aggregate(Set<? extends Number> doubles, StatsDialog.AggregationType aggregationType) {
+    public static double aggregate(java.util.List<? extends Number> doubles, StatsDialog.AggregationType aggregationType) {
         double result = 0.0;
         switch (aggregationType) {
 
@@ -64,8 +63,17 @@ public abstract class StatisticsHandler<T extends ConsoleDisplay, V extends Char
                     result += value.doubleValue();
                     n++;
                 }
+                double mean = result/n;
 
-                return result / n;
+                double diffsum =0.0f;
+
+                for(Number value: doubles) {
+                    diffsum +=  (value.doubleValue()- mean) * (value.doubleValue()-mean) / doubles.size();
+
+                }
+                double sd = Math.sqrt(diffsum);
+                System.out.print(sd);
+                return mean;
             case MIN:
 
                 for (Number value : doubles) {

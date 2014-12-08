@@ -5,11 +5,7 @@ import edu.uci.ics.jung.graph.DirectedGraph;
 import edu.uci.ics.jung.graph.DirectedSparseMultigraph;
 import gui.NetworkModel;
 import gui.ProgressVisualizer;
-import markovmodeldata.MarkovDataOrganizer;
-import markovmodeldata.MarkovDataStore;
-import markovmodeldata.RecursiveHashMap;
 import modelcomponents.CompleteGraph;
-import modelcomponents.GraphUtilities;
 import modelcomponents.ModelEdge;
 import modelcomponents.ModelObject;
 import org.apache.commons.collections15.buffer.CircularFifoBuffer;
@@ -43,7 +39,21 @@ public class RandomWalkOrganizer {
     public enum RandomWalkType {
         UNBIASED(new UnbiasedRandomWalk()),
         WITH_MEMORY(new FirstOrderBiasedRandomWalk()),
-        WITH_MEMORY_AND_DISTANCE(new FirstOrderBiasedWithDistance());
+        WITH_MEMORY_AND_DISTANCE(new FirstOrderBiasedWithDistance()),
+        WITH_FIRST_ORDER_MEMORY(new NthOrderBiasedRandomWalk(1)),
+        WITH_SECOND_ORDER_MEMORY(new NthOrderBiasedRandomWalk(2)),
+        WITH_THIRD_ORDER_MEMORY(new NthOrderBiasedRandomWalk(3)),
+        WITH_FOURTH_ORDER_MEMORY(new NthOrderBiasedRandomWalk(4)),
+        WITH_FIFTH_ORDER_MEMORY(new NthOrderBiasedRandomWalk(5)),
+        WITH_SIXTH_ORDER_MEMORY(new NthOrderBiasedRandomWalk(6)),
+        WITH_SEVENTH_ORDER_MEMORY(new NthOrderBiasedRandomWalk(7)),
+        WITH_EIGHTH_ORDER_MEMORY(new NthOrderBiasedRandomWalk(8)),
+        WITH_NINTH_ORDER_MEMORY(new NthOrderBiasedRandomWalk(9)),
+        WITH_TENTH_ORDER_MEMORY(new NthOrderBiasedRandomWalk(10)),
+        WITH_ELEVENTH_ORDER_MEMORY(new NthOrderBiasedRandomWalk(11)),
+        WITH_TWELFTH_ORDER_MEMORY(new NthOrderBiasedRandomWalk(12)),
+        WITH_THIRTEENTH_ORDER_MEMORY(new NthOrderBiasedRandomWalk(13));
+
 
         private final RandomWalkGenerator randomWalkGenerator;
         private final Semaphore semaphore;
@@ -106,7 +116,7 @@ public class RandomWalkOrganizer {
 
                     @Override
                     public DirectedSparseMultigraph<ModelObject, ModelEdge> call() throws Exception {
-                        return type.randomWalkGenerator.generateRandomWalk(CompleteGraph.instance().getGraph(), CompleteGraph.instance().getStartingNode());
+                        return type.randomWalkGenerator.generateRandomWalk(CompleteGraph.instance().getStartingNode());
                     }
                 }));
             }
@@ -172,9 +182,9 @@ public class RandomWalkOrganizer {
                 if (result.containsKey(vertex.toString())) {
                     count = result.get(vertex.toString()).doubleValue();
                 }
-//                int numberOfEdges = roomEdgeCountMapping.getValue(vertex.toString());
+//                int numberOfEdges = roomEdgeCountMapping.getProbabilityOfSequence(vertex.toString());
 
-//                result.putValue(vertex.toString(), (graph.inDegree(vertex) / numberOfEdges) + count);
+//                result.putDestinationGivenSeqProbability(vertex.toString(), (graph.inDegree(vertex) / numberOfEdges) + count);
                 result.put(vertex.toString(), (graph.inDegree(vertex) + count));
 
             }

@@ -2,7 +2,7 @@ package randomwalk;
 
 
 import edu.uci.ics.jung.graph.DirectedSparseMultigraph;
-import edu.uci.ics.jung.graph.Graph;
+import modelcomponents.CompleteGraph;
 import modelcomponents.ModelEdge;
 import modelcomponents.ModelObject;
 
@@ -21,23 +21,23 @@ import static randomwalk.RandomWalkOrganizer.random;
 class UnbiasedRandomWalk implements RandomWalkGenerator{
 
     @Override
-    public DirectedSparseMultigraph<ModelObject, ModelEdge> generateRandomWalk(Graph<ModelObject, ModelEdge> graph, ModelObject startingLocation) {
+    public DirectedSparseMultigraph<ModelObject, ModelEdge> generateRandomWalk(ModelObject startingLocation) {
 
             DirectedSparseMultigraph<ModelObject, ModelEdge> currentGraph = new DirectedSparseMultigraph<ModelObject, ModelEdge>();
-            int coverage = calculateCoverage(graph, currentGraph);
+            int coverage = calculateCoverage(currentGraph);
             int time = 0;
             ModelObject currentLocation = startingLocation;
             currentGraph.addVertex(currentLocation);
             while (coverage < 100) {
                 ArrayList<ModelObject> neighbours = new ArrayList<ModelObject>();
-                neighbours.addAll(graph.getNeighbors(currentLocation));
+                neighbours.addAll(CompleteGraph.instance().getNeighbors(currentLocation));
                 ModelObject next = neighbours.get((int) Math.floor(random.nextDouble() * neighbours.size()));
                 currentGraph.addVertex(next);
                 ModelEdge edge = new ModelEdge();
                 edge.setTime(time++);
                 currentGraph.addEdge(edge, currentLocation, next);
                 currentLocation = next;
-                coverage = calculateCoverage(graph, currentGraph);
+                coverage = calculateCoverage(currentGraph);
 
             }
 

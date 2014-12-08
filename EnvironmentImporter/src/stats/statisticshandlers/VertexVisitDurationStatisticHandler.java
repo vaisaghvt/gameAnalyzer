@@ -1,6 +1,6 @@
 package stats.statisticshandlers;
 
-import com.google.common.collect.HashMultimap;
+import com.google.common.collect.ArrayListMultimap;
 import gui.NetworkModel;
 import gui.Phase;
 import gui.StatsDialog;
@@ -37,7 +37,7 @@ public class VertexVisitDurationStatisticHandler extends StatisticsHandler<Verte
 
     }
 
-    private HashMap<String, Double> aggregateData(HashMultimap<String, Double> data, StatsDialog.AggregationType aggregationType) {
+    private HashMap<String, Double> aggregateData(ArrayListMultimap<String, Double> data, StatsDialog.AggregationType aggregationType) {
         HashMap<String, Double> result = new HashMap<String, Double>();
 
         for (String roomName : data.keySet()) {
@@ -96,7 +96,7 @@ public class VertexVisitDurationStatisticHandler extends StatisticsHandler<Verte
                 }
             } else {
 
-                HashMultimap<String, Double> resultGrouped = HashMultimap.create();
+                ArrayListMultimap<String, Double> resultGrouped = ArrayListMultimap.create();
                 for (String dataName : nameToResultMapping.keySet()) {
 
                     for (String roomName : nameToResultMapping.get(dataName).keySet()) {
